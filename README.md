@@ -40,6 +40,16 @@ gpgcheck=0' | sudo tee /etc/yum.repos.d/goreleaser.repo
 sudo yum install -y nfpm
 ```
 
+### A `.env` file
+
+```bash
+HOST=postgresql.host
+PORT=5432
+USER=txlog
+DB_NAME=txlog
+PASSWORD=txlog-password
+```
+
 ### Development commands
 
 The `Makefile` contains all the necessary commands for development. You can run

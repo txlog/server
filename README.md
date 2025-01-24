@@ -43,11 +43,12 @@ sudo yum install -y nfpm
 ### A `.env` file
 
 ```bash
-HOST=postgresql.host
-PORT=5432
-USER=txlog
-DB_NAME=txlog
-PASSWORD=txlog-password
+PGSQL_HOST=127.0.0.1
+PGSQL_PORT=5432
+PGSQL_USER=postgres
+PGSQL_DB=txlog
+PGSQL_PASSWORD=your_db_password
+PGSQL_SSLMODE=require
 ```
 
 ### Development commands

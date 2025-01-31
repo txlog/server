@@ -154,15 +154,20 @@ func PostTransaction(ctx *gin.Context, database *sql.DB) {
 	for _, item := range body.Items {
 		_, err = tx.Exec(`
     INSERT INTO transaction_items (
-      transaction_id, machine_id, action, package, repo
+      transaction_id, machine_id, action, package, version, release, epoch, arch, repo, from_repo
     ) VALUES (
-      $1, $2, $3, $4, $5
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
     )`,
 			body.TransactionID,
 			body.MachineID,
 			item.Action,
 			item.Name,
-			item.Repo)
+			item.Version,
+			item.Release,
+			item.Epoch,
+			item.Arch,
+			item.Repo,
+			item.FromRepo)
 
 		if err != nil {
 			tx.Rollback()

@@ -12,7 +12,7 @@ clean:
 	@rm -rf bin/
 
 build:
-	@GOOS="linux" GOARCH="amd64" go build -o bin/txlog-server
+	@CGO_ENABLED=0 GOOS="linux" GOARCH="amd64" go build -ldflags="-s -w" -trimpath -o bin/txlog-server
 
 rpm:
 	@nfpm pkg --packager rpm --target ./bin/

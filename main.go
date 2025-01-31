@@ -19,6 +19,10 @@ func main() {
 		})
 	})
 
+	r.GET("/v1/transaction", func(c *gin.Context) {
+		transaction.GetTransaction(c, database.Db)
+	})
+
 	r.POST("/v1/transaction", func(c *gin.Context) {
 		transaction.PostTransaction(c, database.Db)
 	})

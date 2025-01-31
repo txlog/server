@@ -12,7 +12,7 @@ import (
 )
 
 type Transaction struct {
-	TransactionID   int               `json:"transaction_id"`
+	TransactionID   string            `json:"transaction_id"`
 	MachineID       string            `json:"machine_id"`
 	Hostname        string            `json:"hostname"`
 	BeginTime       *time.Time        `json:"begin_time"`
@@ -29,12 +29,61 @@ type Transaction struct {
 }
 
 type TransactionItem struct {
-	ItemID        int    `json:"item_id"`
-	TransactionID int    `json:"transaction_id"`
-	MachineID     string `json:"machine_id"`
-	Action        string `json:"action"`
-	Package       string `json:"package"`
-	Repo          string `json:"repo"`
+	Action   string `json:"action"`
+	Name     string `json:"name"`
+	Version  string `json:"version"`
+	Release  string `json:"release"`
+	Epoch    string `json:"epoch"`
+	Arch     string `json:"arch"`
+	Repo     string `json:"repo"`
+	FromRepo string `json:"from_repo,omitempty"`
+}
+
+func GetTransaction(ctx *gin.Context, database *sql.DB) {
+	body := Transaction{}
+	data, err := ctx.GetRawData()
+	if err != nil {
+		ctx.AbortWithStatusJSON(400, "Invalid transaction data")
+		return
+	}
+	err = json.Unmarshal(data, &body)
+	if err != nil {
+		ctx.AbortWithStatusJSON(400, "Invalid JSON input")
+		fmt.Println("Invalid JSON input:", err)
+		return
+	}
+
+	rows, err := database.Query(`
+    SELECT transaction_id
+    FROM public.transactions
+    WHERE machine_id = $1
+    AND hostname = $2
+    ORDER BY transaction_id ASC`,
+		body.MachineID,
+		body.Hostname,
+	)
+	if err != nil {
+		fmt.Println(err)
+		ctx.AbortWithStatusJSON(400, "Couldn't get saved transactions for this host.")
+	} else {
+		var transactions []int
+		for rows.Next() {
+			var id int
+			if err := rows.Scan(&id); err != nil {
+				fmt.Println(err)
+				ctx.AbortWithStatusJSON(500, "Error scanning transactions")
+				return
+			}
+			transactions = append(transactions, id)
+		}
+		defer rows.Close()
+
+		if transactions == nil {
+			ctx.JSON(http.StatusOK, []int{})
+			return
+		}
+		ctx.JSON(http.StatusOK, transactions)
+	}
 }
 
 func PostTransaction(ctx *gin.Context, database *sql.DB) {
@@ -112,7 +161,7 @@ func PostTransaction(ctx *gin.Context, database *sql.DB) {
 			body.TransactionID,
 			body.MachineID,
 			item.Action,
-			item.Package,
+			item.Name,
 			item.Repo)
 
 		if err != nil {

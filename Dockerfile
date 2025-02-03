@@ -1,3 +1,3 @@
-FROM ghcr.io/almalinux/9-micro:9
+FROM gcr.io/distroless/static-debian12
 COPY bin/txlog-server /bin/txlog-server
 CMD ["/bin/txlog-server"]

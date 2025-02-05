@@ -1,11 +1,12 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	healthcheck "github.com/tavsec/gin-healthcheck"
+	"github.com/tavsec/gin-healthcheck/config"
 	"github.com/txlog/server/database"
 	"github.com/txlog/server/transaction"
+	"github.com/txlog/server/util"
 )
 
 func main() {
@@ -13,11 +14,7 @@ func main() {
 	r.SetTrustedProxies(nil)
 	database.ConnectDatabase()
 
-	r.GET("/v1/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+	healthcheck.New(r, config.DefaultConfig(), util.Checks())
 
 	r.GET("/v1/transaction", func(c *gin.Context) {
 		transaction.GetTransaction(c, database.Db)

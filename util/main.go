@@ -8,11 +8,27 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/tavsec/gin-healthcheck/checks"
+	"github.com/tavsec/gin-healthcheck/config"
 )
 
 var Db *sql.DB
 
-func Checks() []checks.Check {
+func CheckConfig() config.Config {
+	return config.Config{
+		HealthPath:  "/v1/health",
+		Method:      "GET",
+		StatusOK:    200,
+		StatusNotOK: 503,
+		FailureNotification: struct {
+			Threshold uint32
+			Chan      chan error
+		}{
+			Threshold: 1,
+		},
+	}
+}
+
+func Check() []checks.Check {
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println("Error is occurred  on .env file please check")

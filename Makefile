@@ -1,12 +1,12 @@
-.PHONY: all clean build rpm
+.PHONY: all clean build run
 
 all:
 	@echo "Usage: make [OPTION]"
 	@echo ""
 	@echo "Options:"
 	@echo "  clean      Remove all artifacts"
+	@echo "  run        Run the server code"
 	@echo "  build      Compile a binary"
-	@echo "  rpm        Create the RPM package"
 
 clean:
 	@rm -rf bin/
@@ -14,5 +14,5 @@ clean:
 build:
 	@CGO_ENABLED=0 GOOS="linux" GOARCH="amd64" go build -ldflags="-s -w" -trimpath -o bin/txlog-server
 
-rpm:
-	@nfpm pkg --packager rpm --target ./bin/
+run:
+	@go run main.go

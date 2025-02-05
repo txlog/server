@@ -14,10 +14,71 @@ This repository contains the code for the TxLog Server.
 
 ## Installation
 
+Use Docker to run this server.
+
 ```bash
-sudo dnf localinstall -y https://rpm.rda.run/rpm-rda-run-1.0-1.noarch.rpm
-sudo dnf install -y txlog-server
+docker pull ghcr.io/txlog/server:v0.1
 ```
+
+Run the server.
+
+```bash
+docker run -d -p 8080:8080 \
+  -e GIN_MODE=release \
+  -e PGSQL_HOST=postgres.example.com \
+  -e PGSQL_PORT=5432 \
+  -e PGSQL_USER=txlog \
+  -e PGSQL_DB=txlog \
+  -e PGSQL_PASSWORD=your_db_password \
+  -e PGSQL_SSLMODE=require \
+  ghcr.io/txlog/server:v0.1
+```
+
+Or use it on your Kubernetes cluster
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: txlog-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: txlog-server
+  template:
+    metadata:
+      labels:
+        app: txlog-server
+    spec:
+      containers:
+      - name: txlog-server
+        image: ghcr.io/txlog/server:v0.1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: GIN_MODE
+          value: "release"
+        - name: PGSQL_HOST
+          value: "postgres.example.com"
+        - name: PGSQL_PORT
+          value: "5432"
+        - name: PGSQL_USER
+          value: "txlog"
+        - name: PGSQL_DB
+          value: "txlog"
+        - name: PGSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: txlog-secrets
+              key: db-password
+        - name: PGSQL_SSLMODE
+          value: "require"
+```
+
+If you want to use the latest development (unstable) version, replace the
+version number `v0.1` with `main` in the Docker commands and Kubernetes
+configuration.
 
 ## Development
 
@@ -27,17 +88,6 @@ To make changes on this project, you need:
 
 ```bash
 sudo dnf install -y go
-```
-
-### nFPM
-
-```bash
-echo '[goreleaser]
-name=GoReleaser
-baseurl=https://repo.goreleaser.com/yum/
-enabled=1
-gpgcheck=0' | sudo tee /etc/yum.repos.d/goreleaser.repo
-sudo yum install -y nfpm
 ```
 
 ### A `.env` file
@@ -59,8 +109,8 @@ The `Makefile` contains all the necessary commands for development. You can run
 To create the binary and distribute
 
 * `make clean`: remove compiled binaries and packages
+* `make run`: execute the server code
 * `make build`: build a production-ready binary on `./bin` directory
-* `make rpm`: create new `.rpm` package
 
 ## Contributing
 

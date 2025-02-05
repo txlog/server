@@ -53,9 +53,21 @@ spec:
     spec:
       containers:
       - name: txlog-server
-        image: ghcr.io/txlog/server:v0.1
+        image: ghcr.rda.run/txlog/server:v0.1
         ports:
         - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /v1/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /v1/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
         env:
         - name: GIN_MODE
           value: "release"

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/tavsec/gin-healthcheck/checks"
 	"github.com/tavsec/gin-healthcheck/config"
@@ -29,11 +28,6 @@ func CheckConfig() config.Config {
 }
 
 func Check() []checks.Check {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Error is occurred  on .env file please check")
-	}
-
 	dbHostCheck := checks.NewEnvCheck("PGSQL_HOST")
 	dbPortCheck := checks.NewEnvCheck("PGSQL_PORT")
 	dbUserCheck := checks.NewEnvCheck("PGSQL_USER")

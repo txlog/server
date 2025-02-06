@@ -5,18 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 var Db *sql.DB
 
 func ConnectDatabase() {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Error is occurred  on .env file please check")
-	}
-
 	psqlSetup := fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
 		os.Getenv("PGSQL_HOST"),
@@ -29,8 +23,8 @@ func ConnectDatabase() {
 
 	db, errSql := sql.Open("postgres", psqlSetup)
 	if errSql != nil {
-		fmt.Println("There is an error while connecting to the database ", err)
-		panic(err)
+		fmt.Println("There is an error while connecting to the database ", errSql)
+		panic(errSql)
 	} else {
 		Db = db
 		fmt.Println("Successfully connected to database!")

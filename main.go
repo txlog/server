@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 	healthcheck "github.com/tavsec/gin-healthcheck"
 	"github.com/txlog/server/database"
 	"github.com/txlog/server/transaction"
@@ -9,6 +12,10 @@ import (
 )
 
 func main() {
+	if os.Getenv("GIN_MODE") == "" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
 	database.ConnectDatabase()

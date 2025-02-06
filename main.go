@@ -24,7 +24,7 @@ func main() {
 
 	r.GET("/v1/version", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"version": "0.1",
+			"version": "0.2",
 		})
 	})
 

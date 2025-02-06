@@ -17,21 +17,20 @@ This repository contains the code for the TxLog Server.
 Use Docker to run this server.
 
 ```bash
-docker pull ghcr.io/txlog/server:v0.1
+docker pull ghcr.rda.run/txlog/server:v0.1
 ```
 
 Run the server.
 
 ```bash
 docker run -d -p 8080:8080 \
-  -e GIN_MODE=release \
   -e PGSQL_HOST=postgres.example.com \
   -e PGSQL_PORT=5432 \
   -e PGSQL_USER=txlog \
   -e PGSQL_DB=txlog \
   -e PGSQL_PASSWORD=your_db_password \
   -e PGSQL_SSLMODE=require \
-  ghcr.io/txlog/server:v0.1
+  ghcr.rda.run/txlog/server:v0.1
 ```
 
 Or use it on your Kubernetes cluster
@@ -69,8 +68,6 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
         env:
-        - name: GIN_MODE
-          value: "release"
         - name: PGSQL_HOST
           value: "postgres.example.com"
         - name: PGSQL_PORT
@@ -105,6 +102,7 @@ sudo dnf install -y go
 ### A `.env` file
 
 ```bash
+GIN_MODE=debug
 PGSQL_HOST=127.0.0.1
 PGSQL_PORT=5432
 PGSQL_USER=postgres

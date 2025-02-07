@@ -14,17 +14,16 @@ import (
 	"github.com/txlog/server/util"
 )
 
-// @title			Txlog Server
-// @version		0.2
-// @description	The centralized system that stores transaction data
-//
-// @termsOfService	https://github.com/txlog
-// @contact.name	Txlog repository issues
-// @contact.url	https://github.com/txlog/server/issues
-// @license.name	MIT License
-// @license.url	https://github.com/txlog/.github/blob/main/profile/LICENSE.md
-// @host			localhost:8080
-// @schemes		http https
+//	@title			Txlog Server
+//	@version		0.2
+//	@description	The centralized system that stores transaction data
+//	@termsOfService	https://github.com/txlog
+//	@contact.name	Txlog repository issues
+//	@contact.url	https://github.com/txlog/server/issues
+//	@license.name	MIT License
+//	@license.url	https://github.com/txlog/.github/blob/main/profile/LICENSE.md
+//	@host			localhost:8080
+//	@schemes		http https
 func main() {
 	if os.Getenv("GIN_MODE") == "" {
 		gin.SetMode(gin.ReleaseMode)
@@ -50,13 +49,13 @@ func main() {
 }
 
 // getVersion Get the server version
-// @Summary		Server version
-// @Description	Get the server version
-// @Tags			version
-// @Accept			json
-// @Produce		json
-// @Success		200	{object}	interface{}
-// @Router			/v1/version [get]
+//	@Summary		Server version
+//	@Description	Get the server version
+//	@Tags			version
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	interface{}
+//	@Router			/v1/version [get]
 func getVersion(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"version": "0.2",

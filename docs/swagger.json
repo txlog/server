@@ -1,0 +1,66 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "The centralized system that stores transaction data",
+        "title": "Txlog Server",
+        "termsOfService": "https://github.com/txlog",
+        "contact": {
+            "name": "Txlog repository issues",
+            "url": "https://github.com/txlog/server/issues"
+        },
+        "license": {
+            "name": "MIT License",
+            "url": "https://github.com/txlog/.github/blob/main/profile/LICENSE.md"
+        },
+        "version": "0.2"
+    },
+    "host": "localhost:8080",
+    "paths": {
+        "/v1/transaction": {
+            "get": {
+                "description": "Get saved transactions for a host",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Get saved transactions for a host",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/v1/version": {
+            "get": {
+                "description": "Get the server version",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "version"
+                ],
+                "summary": "Server version",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    }
+                }
+            }
+        }
+    }
+}

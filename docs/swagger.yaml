@@ -1,0 +1,45 @@
+host: localhost:8080
+info:
+  contact:
+    name: Txlog repository issues
+    url: https://github.com/txlog/server/issues
+  description: The centralized system that stores transaction data
+  license:
+    name: MIT License
+    url: https://github.com/txlog/.github/blob/main/profile/LICENSE.md
+  termsOfService: https://github.com/txlog
+  title: Txlog Server
+  version: "0.2"
+paths:
+  /v1/transaction:
+    get:
+      consumes:
+      - application/json
+      description: Get saved transactions for a host
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      summary: Get saved transactions for a host
+      tags:
+      - transaction
+  /v1/version:
+    get:
+      consumes:
+      - application/json
+      description: Get the server version
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      summary: Server version
+      tags:
+      - version
+schemes:
+- http
+- https
+swagger: "2.0"

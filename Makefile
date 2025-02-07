@@ -1,4 +1,4 @@
-.PHONY: all clean build run
+.PHONY: all clean build run doc
 
 all:
 	@echo "Usage: make [OPTION]"
@@ -7,6 +7,7 @@ all:
 	@echo "  clean      Remove all artifacts"
 	@echo "  run        Run the server code"
 	@echo "  build      Compile a binary"
+	@echo "  doc        Write the swagger documentation based on method comments"
 
 clean:
 	@rm -rf bin/
@@ -16,3 +17,7 @@ build:
 
 run:
 	@go run main.go
+
+doc:
+	@swag init
+	@swag fmt

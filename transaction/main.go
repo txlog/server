@@ -39,151 +39,163 @@ type TransactionItem struct {
 	FromRepo string `json:"from_repo,omitempty"`
 }
 
-func GetTransaction(ctx *gin.Context, database *sql.DB) {
-	body := Transaction{}
-	data, err := ctx.GetRawData()
-	if err != nil {
-		ctx.AbortWithStatusJSON(400, "Invalid transaction data")
-		return
-	}
-	err = json.Unmarshal(data, &body)
-	if err != nil {
-		ctx.AbortWithStatusJSON(400, "Invalid JSON input")
-		fmt.Println("Invalid JSON input:", err)
-		return
-	}
-
-	rows, err := database.Query(`
-    SELECT transaction_id
-    FROM public.transactions
-    WHERE machine_id = $1
-    AND hostname = $2
-    ORDER BY transaction_id ASC`,
-		body.MachineID,
-		body.Hostname,
-	)
-	if err != nil {
-		fmt.Println(err)
-		ctx.AbortWithStatusJSON(400, "Couldn't get saved transactions for this host.")
-	} else {
-		var transactions []int
-		for rows.Next() {
-			var id int
-			if err := rows.Scan(&id); err != nil {
-				fmt.Println(err)
-				ctx.AbortWithStatusJSON(500, "Error scanning transactions")
-				return
-			}
-			transactions = append(transactions, id)
-		}
-		defer rows.Close()
-
-		if transactions == nil {
-			ctx.JSON(http.StatusOK, []int{})
+// GetTransaction Get the saved transactions for a host
+// @Summary		Get saved transactions for a host
+// @Description	Get saved transactions for a host
+// @Tags			transaction
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	interface{}
+// @Router			/v1/transaction [get]
+func GetTransaction(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		body := Transaction{}
+		data, err := c.GetRawData()
+		if err != nil {
+			c.AbortWithStatusJSON(400, "Invalid transaction data")
 			return
 		}
-		ctx.JSON(http.StatusOK, transactions)
+		err = json.Unmarshal(data, &body)
+		if err != nil {
+			c.AbortWithStatusJSON(400, "Invalid JSON input")
+			fmt.Println("Invalid JSON input:", err)
+			return
+		}
+
+		rows, err := database.Query(`
+      SELECT transaction_id
+      FROM public.transactions
+      WHERE machine_id = $1
+      AND hostname = $2
+      ORDER BY transaction_id ASC`,
+			body.MachineID,
+			body.Hostname,
+		)
+		if err != nil {
+			fmt.Println(err)
+			c.AbortWithStatusJSON(400, "Couldn't get saved transactions for this host.")
+		} else {
+			var transactions []int
+			for rows.Next() {
+				var id int
+				if err := rows.Scan(&id); err != nil {
+					fmt.Println(err)
+					c.AbortWithStatusJSON(500, "Error scanning transactions")
+					return
+				}
+				transactions = append(transactions, id)
+			}
+			defer rows.Close()
+
+			if transactions == nil {
+				c.JSON(http.StatusOK, []int{})
+				return
+			}
+			c.JSON(http.StatusOK, transactions)
+		}
 	}
 }
 
-func PostTransaction(ctx *gin.Context, database *sql.DB) {
-	body := Transaction{}
-	data, err := ctx.GetRawData()
-	if err != nil {
-		ctx.AbortWithStatusJSON(400, "Invalid transaction data")
-		return
-	}
-	err = json.Unmarshal(data, &body)
-	if err != nil {
-		ctx.AbortWithStatusJSON(400, "Invalid JSON input")
-		fmt.Println("Invalid JSON input:", err)
-		return
-	}
+func PostTransaction(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		body := Transaction{}
+		data, err := c.GetRawData()
+		if err != nil {
+			c.AbortWithStatusJSON(400, "Invalid transaction data")
+			return
+		}
+		err = json.Unmarshal(data, &body)
+		if err != nil {
+			c.AbortWithStatusJSON(400, "Invalid JSON input")
+			fmt.Println("Invalid JSON input:", err)
+			return
+		}
 
-	// Convert *time.Time to sql.NullTime
-	var beginTime sql.NullTime
-	if body.BeginTime != nil {
-		beginTime.Time = *body.BeginTime
-		beginTime.Valid = true
-	}
+		// Convert *time.Time to sql.NullTime
+		var beginTime sql.NullTime
+		if body.BeginTime != nil {
+			beginTime.Time = *body.BeginTime
+			beginTime.Valid = true
+		}
 
-	var endTime sql.NullTime
-	if body.EndTime != nil {
-		endTime.Time = *body.EndTime
-		endTime.Valid = true
-	}
+		var endTime sql.NullTime
+		if body.EndTime != nil {
+			endTime.Time = *body.EndTime
+			endTime.Valid = true
+		}
 
-	// Start database transaction
-	tx, err := database.Begin()
-	if err != nil {
-		fmt.Println("Error beginning transaction:", err)
-		ctx.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
-		return
-	}
+		// Start database transaction
+		tx, err := database.Begin()
+		if err != nil {
+			fmt.Println("Error beginning transaction:", err)
+			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
+			return
+		}
 
-	// Insert the rpm transaction
-	_, err = tx.Exec(`
-    INSERT INTO transactions (
-      transaction_id, machine_id, hostname, begin_time, end_time, actions, altered, "user",
-      return_code, release_version, command_line, comment, scriptlet_output
-    ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-    )`,
-		body.TransactionID,
-		body.MachineID,
-		body.Hostname,
-		beginTime,
-		endTime,
-		body.Actions,
-		body.Altered,
-		body.User,
-		body.ReturnCode,
-		body.ReleaseVersion,
-		body.CommandLine,
-		body.Comment,
-		body.ScriptletOutput)
-
-	if err != nil {
-		tx.Rollback()
-		fmt.Println("Error inserting transaction:", err)
-		ctx.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Insert rpm transaction items
-	for _, item := range body.Items {
+		// Insert the rpm transaction
 		_, err = tx.Exec(`
-    INSERT INTO transaction_items (
-      transaction_id, machine_id, action, package, version, release, epoch, arch, repo, from_repo
-    ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
-    )`,
+      INSERT INTO transactions (
+        transaction_id, machine_id, hostname, begin_time, end_time, actions, altered, "user",
+        return_code, release_version, command_line, comment, scriptlet_output
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+      )`,
 			body.TransactionID,
 			body.MachineID,
-			item.Action,
-			item.Name,
-			item.Version,
-			item.Release,
-			item.Epoch,
-			item.Arch,
-			item.Repo,
-			item.FromRepo)
+			body.Hostname,
+			beginTime,
+			endTime,
+			body.Actions,
+			body.Altered,
+			body.User,
+			body.ReturnCode,
+			body.ReleaseVersion,
+			body.CommandLine,
+			body.Comment,
+			body.ScriptletOutput)
 
 		if err != nil {
 			tx.Rollback()
-			fmt.Println("Error inserting transaction item:", err)
-			ctx.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+			fmt.Println("Error inserting transaction:", err)
+			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
 			return
 		}
-	}
 
-	// Commit the database transaction
-	if err = tx.Commit(); err != nil {
-		tx.Rollback()
-		fmt.Println("Error committing transaction:", err)
-		ctx.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
-		return
-	}
+		// Insert rpm transaction items
+		for _, item := range body.Items {
+			_, err = tx.Exec(`
+      INSERT INTO transaction_items (
+        transaction_id, machine_id, action, package, version, release, epoch, arch, repo, from_repo
+      ) VALUES (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+      )`,
+				body.TransactionID,
+				body.MachineID,
+				item.Action,
+				item.Name,
+				item.Version,
+				item.Release,
+				item.Epoch,
+				item.Arch,
+				item.Repo,
+				item.FromRepo)
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Transaction created"})
+			if err != nil {
+				tx.Rollback()
+				fmt.Println("Error inserting transaction item:", err)
+				c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+				return
+			}
+		}
+
+		// Commit the database transaction
+		if err = tx.Commit(); err != nil {
+			tx.Rollback()
+			fmt.Println("Error committing transaction:", err)
+			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Transaction created"})
+	}
 }

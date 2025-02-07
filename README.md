@@ -97,6 +97,7 @@ To make changes on this project, you need:
 
 ```bash
 sudo dnf install -y go
+go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
 ### A `.env` file
@@ -121,6 +122,10 @@ To create the binary and distribute
 * `make clean`: remove compiled binaries and packages
 * `make run`: execute the server code
 * `make build`: build a production-ready binary on `./bin` directory
+* `make doc`: write the swagger documentation based on method comments
+
+The server will run at http://localhost:8080 and the Swagger docs at
+http://localhost:8080/swagger/index.html.
 
 ## Contributing
 

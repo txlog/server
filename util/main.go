@@ -14,7 +14,7 @@ var Db *sql.DB
 
 func CheckConfig() config.Config {
 	return config.Config{
-		HealthPath:  "/v1/health",
+		HealthPath:  "/health",
 		Method:      "GET",
 		StatusOK:    200,
 		StatusNotOK: 503,

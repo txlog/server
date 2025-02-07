@@ -3,14 +3,14 @@
 <!-- markdownlint-disable MD033 -->
 <p align="center">
   <p align="center"><img width="100" height="100" src="https://raw.githubusercontent.com/txlog/.github/refs/heads/main/profile/logbook.png" alt="The Logo"></p>
-  <p align="center"><strong>Server to receive data from TxLog Agent</strong></p>
+  <p align="center"><strong>Server to receive data from Txlog Agent</strong></p>
   <p align="center">
     <a href="https://semver.org"><img src="https://img.shields.io/badge/SemVer-2.0.0-22bfda.svg" alt="SemVer Format"></a>
     <a href="https://github.com/txlog/.github/blob/main/profile/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Contributor Covenant"></a>
   </p>
 </p>
 
-This repository contains the code for the TxLog Server.
+This repository contains the code for the Txlog Server.
 
 ## Installation
 
@@ -57,13 +57,13 @@ spec:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: /v1/health
+            path: /health
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /v1/health
+            path: /health
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10

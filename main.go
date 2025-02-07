@@ -36,7 +36,7 @@ func main() {
 
 	healthcheck.New(r, util.CheckConfig(), util.Check())
 
-	// swagger middleware to serve the API docs
+	r.GET("/", func(c *gin.Context) { c.Redirect(302, "/swagger/index.html") })
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	v1 := r.Group("/v1")

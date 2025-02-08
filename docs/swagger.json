@@ -20,6 +20,52 @@
     },
     "host": "localhost:8080",
     "paths": {
+        "/v1/executions": {
+            "post": {
+                "description": "Create a new execution",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "execution"
+                ],
+                "summary": "Create a new execution",
+                "parameters": [
+                    {
+                        "description": "Execution data",
+                        "name": "Execution",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/execution.Execution"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Execution created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid JSON input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/transaction": {
             "get": {
                 "description": "Get saved transactions for a host",
@@ -37,6 +83,50 @@
                     "200": {
                         "description": "OK",
                         "schema": {}
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new transaction",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Create a new transaction",
+                "parameters": [
+                    {
+                        "description": "Transaction data",
+                        "name": "Transaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/transaction.Transaction"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Transaction created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid JSON input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 }
             }
@@ -59,6 +149,116 @@
                         "description": "OK",
                         "schema": {}
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "execution.Execution": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string"
+                },
+                "executed_at": {
+                    "type": "string"
+                },
+                "execution_id": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "machine_id": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "transactions_processed": {
+                    "type": "integer"
+                },
+                "transactions_sent": {
+                    "type": "integer"
+                }
+            }
+        },
+        "transaction.Transaction": {
+            "type": "object",
+            "properties": {
+                "actions": {
+                    "type": "string"
+                },
+                "altered": {
+                    "type": "string"
+                },
+                "begin_time": {
+                    "type": "string"
+                },
+                "command_line": {
+                    "type": "string"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/transaction.TransactionItem"
+                    }
+                },
+                "machine_id": {
+                    "type": "string"
+                },
+                "release_version": {
+                    "type": "string"
+                },
+                "return_code": {
+                    "type": "string"
+                },
+                "scriptlet_output": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "transaction.TransactionItem": {
+            "type": "object",
+            "properties": {
+                "action": {
+                    "type": "string"
+                },
+                "arch": {
+                    "type": "string"
+                },
+                "epoch": {
+                    "type": "string"
+                },
+                "from_repo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "release": {
+                    "type": "string"
+                },
+                "repo": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
                 }
             }
         }

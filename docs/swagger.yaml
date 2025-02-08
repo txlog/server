@@ -1,3 +1,75 @@
+definitions:
+  execution.Execution:
+    properties:
+      details:
+        type: string
+      executed_at:
+        type: string
+      execution_id:
+        type: string
+      hostname:
+        type: string
+      machine_id:
+        type: string
+      success:
+        type: boolean
+      transactions_processed:
+        type: integer
+      transactions_sent:
+        type: integer
+    type: object
+  transaction.Transaction:
+    properties:
+      actions:
+        type: string
+      altered:
+        type: string
+      begin_time:
+        type: string
+      command_line:
+        type: string
+      comment:
+        type: string
+      end_time:
+        type: string
+      hostname:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/transaction.TransactionItem'
+        type: array
+      machine_id:
+        type: string
+      release_version:
+        type: string
+      return_code:
+        type: string
+      scriptlet_output:
+        type: string
+      transaction_id:
+        type: string
+      user:
+        type: string
+    type: object
+  transaction.TransactionItem:
+    properties:
+      action:
+        type: string
+      arch:
+        type: string
+      epoch:
+        type: string
+      from_repo:
+        type: string
+      name:
+        type: string
+      release:
+        type: string
+      repo:
+        type: string
+      version:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -11,6 +83,36 @@ info:
   title: Txlog Server
   version: "0.2"
 paths:
+  /v1/executions:
+    post:
+      consumes:
+      - application/json
+      description: Create a new execution
+      parameters:
+      - description: Execution data
+        in: body
+        name: Execution
+        required: true
+        schema:
+          $ref: '#/definitions/execution.Execution'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Execution created
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      summary: Create a new execution
+      tags:
+      - execution
   /v1/transaction:
     get:
       consumes:
@@ -23,6 +125,35 @@ paths:
           description: OK
           schema: {}
       summary: Get saved transactions for a host
+      tags:
+      - transaction
+    post:
+      consumes:
+      - application/json
+      description: Create a new transaction
+      parameters:
+      - description: Transaction data
+        in: body
+        name: Transaction
+        required: true
+        schema:
+          $ref: '#/definitions/transaction.Transaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transaction created
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      summary: Create a new transaction
       tags:
       - transaction
   /v1/version:

@@ -96,6 +96,18 @@ func GetTransaction(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
+// PostTransaction Create a new transaction
+// @Summary		Create a new transaction
+// @Description	Create a new transaction
+// @Tags			transaction
+// @Accept			json
+// @Produce		json
+// @Param			Transaction	body		Transaction	true	"Transaction data"
+// @Success		200			{string}	string		"Transaction created"
+// @Failure		400			{string}	string		"Invalid transaction data"
+// @Failure		400			{string}	string		"Invalid JSON input"
+// @Failure		500			{string}	string		"Database error"
+// @Router			/v1/transaction [post]
 func PostTransaction(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		body := Transaction{}

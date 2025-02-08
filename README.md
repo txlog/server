@@ -17,7 +17,7 @@ This repository contains the code for the Txlog Server.
 Use Docker to run this server.
 
 ```bash
-docker pull ghcr.rda.run/txlog/server:v0.2
+docker pull ghcr.rda.run/txlog/server:v0.3
 ```
 
 Run the server.
@@ -30,7 +30,7 @@ docker run -d -p 8080:8080 \
   -e PGSQL_DB=txlog \
   -e PGSQL_PASSWORD=your_db_password \
   -e PGSQL_SSLMODE=require \
-  ghcr.rda.run/txlog/server:v0.2
+  ghcr.rda.run/txlog/server:v0.3
 ```
 
 Or use it on your Kubernetes cluster
@@ -52,7 +52,7 @@ spec:
     spec:
       containers:
       - name: txlog-server
-        image: ghcr.rda.run/txlog/server:v0.2
+        image: ghcr.rda.run/txlog/server:v0.3
         ports:
         - containerPort: 8080
         livenessProbe:
@@ -86,7 +86,7 @@ spec:
 ```
 
 If you want to use the latest development (unstable) version, replace the
-version number `v0.2` with `main` in the Docker commands and Kubernetes
+version number `v0.3` with `main` in the Docker commands and Kubernetes
 configuration.
 
 ## Development

@@ -1,7 +1,7 @@
-name: Build and Push Docker Image
+name: Build and Scan Docker Image
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "*" ]
     tags: ['v*']
   create:
     tags: ['v*']
@@ -13,6 +13,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
+      actions: read
     steps:
     - uses: actions/checkout@v4
 
@@ -37,3 +39,13 @@ jobs:
         context: .
         push: true
         tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+
+    - uses: anchore/scan-action@v6
+      id: scan
+      with:
+        image: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+        fail-build: false
+    - name: upload Anchore scan SARIF report
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.scan.outputs.sarif }}

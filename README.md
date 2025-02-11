@@ -30,6 +30,7 @@ docker run -d -p 8080:8080 \
   -e PGSQL_DB=txlog \
   -e PGSQL_PASSWORD=your_db_password \
   -e PGSQL_SSLMODE=require \
+  -e EXECUTION_RETENTION_DAYS=7 \
   cr.rda.run/txlog/server:v0.3
 ```
 
@@ -83,6 +84,8 @@ spec:
               key: db-password
         - name: PGSQL_SSLMODE
           value: "require"
+        - name: EXECUTION_RETENTION_DAYS
+          value: 7
 ```
 
 If you want to use the latest development (unstable) version, replace the
@@ -96,7 +99,12 @@ To make changes on this project, you need:
 ### Golang
 
 ```bash
-sudo dnf install -y go
+wget https://go.dev/dl/go1.24.0.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go
+sudo tar -C /usr/local -xzf go1.24.0.linux-amd64.tar.gz
+echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
+source ~/.bashrc
+
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
@@ -110,6 +118,7 @@ PGSQL_USER=postgres
 PGSQL_DB=txlog
 PGSQL_PASSWORD=your_db_password
 PGSQL_SSLMODE=require
+EXECUTION_RETENTION_DAYS=1
 ```
 
 ### Development commands

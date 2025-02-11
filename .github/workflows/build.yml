@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: Build and Scan Docker Image
 on:
   push:
     branches: [ "*" ]
@@ -13,13 +13,15 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: '1.24.0'
+        go-version: '1.22.7'
 
     - name: Compile
       run: CGO_ENABLED=0 GOOS="linux" GOARCH="amd64" go build -trimpath -buildvcs=false -ldflags "-s -w" -o bin/txlog-server

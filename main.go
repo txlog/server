@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron/v2"
 	_ "github.com/joho/godotenv/autoload"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -13,6 +15,7 @@ import (
 	"github.com/txlog/server/execution"
 	"github.com/txlog/server/transaction"
 	"github.com/txlog/server/util"
+	"golang.org/x/exp/rand"
 )
 
 // @title			Txlog Server
@@ -47,6 +50,32 @@ func main() {
 
 		v1.POST("/execution", execution.PostExecution(database.Db))
 	}
+
+	s, _ := gocron.NewScheduler()
+	defer func() { _ = s.Shutdown() }()
+
+	crontab := fmt.Sprintf("%d * * * * *", rand.Intn(59)+1)
+	_, _ = s.NewJob(
+		gocron.CronJob(
+			// Run every minute at a random second
+			crontab,
+			true,
+		),
+		gocron.NewTask(
+			func() {
+				retentionDays := os.Getenv("EXECUTION_RETENTION_DAYS")
+				if retentionDays == "" {
+					retentionDays = "7" // default to 7 days if not set
+				}
+				_, _ = database.Db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL '" + retentionDays + " day'")
+
+				fmt.Println("Housekeeping: executions older than " + retentionDays + " days are deleted.")
+			},
+		),
+	)
+
+	s.Start()
+	fmt.Println("Scheduler started: " + crontab)
 
 	r.Run()
 }

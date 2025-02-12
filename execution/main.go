@@ -34,7 +34,7 @@ type Execution struct {
 //	@Failure		400			{string}	string		"Invalid execution data"
 //	@Failure		400			{string}	string		"Invalid JSON input"
 //	@Failure		500			{string}	string		"Database error"
-//	@Router			/v1/executions [post]
+//	@Router			/v1/execution [post]
 func PostExecution(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		body := Execution{}
@@ -90,10 +90,84 @@ func PostExecution(database *sql.DB) gin.HandlerFunc {
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()
 			fmt.Println("Error committing execution:", err)
-			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
 
 		c.JSON(http.StatusOK, gin.H{"message": "Execution created"})
+	}
+}
+
+// GetExecution List executions
+//
+//	@Summary		List executions
+//	@Description	List executions
+//	@Tags			execution
+//	@Accept			json
+//	@Produce		json
+//	@Param			machine_id	query		string	false	"Machine ID"
+//	@Param			success		query		boolean	false	"Success"
+//	@Success		200			{object}	interface{}
+//	@Failure		400			{string}	string	"Invalid execution data"
+//	@Failure		400			{string}	string	"Invalid JSON input"
+//	@Failure		500			{string}	string	"Database error"
+//	@Router			/v1/execution [get]
+func GetExecution(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		machineID := c.Query("machine_id")
+		success := c.Query("success")
+
+		if machineID == "" {
+			c.AbortWithStatusJSON(400, "machine_id is required")
+			return
+		}
+
+		var rows *sql.Rows
+		var err error
+		if success != "" {
+			rows, err = database.Query(
+				`SELECT * FROM executions WHERE machine_id = $1 AND success = $2 ORDER BY executed_at DESC;`,
+				machineID, success,
+			)
+		} else {
+			rows, err = database.Query(
+				`SELECT * FROM executions WHERE machine_id = $1 ORDER BY executed_at DESC;`,
+				machineID,
+			)
+		}
+
+		if err != nil {
+			fmt.Println("Error querying executions:", err)
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		defer rows.Close()
+
+		executions := []Execution{}
+		for rows.Next() {
+			var execution Execution
+			var executedAt sql.NullTime
+			err := rows.Scan(
+				&execution.ExecutionID,
+				&execution.MachineID,
+				&execution.Hostname,
+				&executedAt,
+				&execution.Success,
+				&execution.Details,
+				&execution.TransactionsProcessed,
+				&execution.TransactionsSent,
+			)
+			if err != nil {
+				fmt.Println("Error iterating executions:", err)
+				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			if executedAt.Valid {
+				execution.ExecutedAt = &executedAt.Time
+			}
+			executions = append(executions, execution)
+		}
+
+		c.JSON(http.StatusOK, executions)
 	}
 }

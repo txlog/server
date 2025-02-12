@@ -49,6 +49,20 @@ func main() {
 		v1.POST("/transaction", transaction.PostTransaction(database.Db))
 
 		v1.POST("/execution", execution.PostExecution(database.Db))
+
+		// txlog executions \
+		//   --machine_id=e250c98c14e947ba96359223785375bb \
+		//   --success=true \
+		v1.GET("/execution", execution.GetExecution(database.Db))
+
+		// txlog transactions \
+		//   --machine_id=e250c98c14e947ba96359223785375bb \
+		//   --transaction_id=4
+
+		// txlog items \
+		//   --machine_id=e250c98c14e947ba96359223785375bb \
+		//   --transaction_id=4
+
 	}
 
 	s, _ := gocron.NewScheduler()

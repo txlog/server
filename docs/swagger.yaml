@@ -83,7 +83,37 @@ info:
   title: Txlog Server
   version: "0.4"
 paths:
-  /v1/executions:
+  /v1/execution:
+    get:
+      consumes:
+      - application/json
+      description: List executions
+      parameters:
+      - description: Machine ID
+        in: query
+        name: machine_id
+        type: string
+      - description: Success
+        in: query
+        name: success
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      summary: List executions
+      tags:
+      - execution
     post:
       consumes:
       - application/json

@@ -143,6 +143,33 @@ paths:
       summary: Create a new execution
       tags:
       - execution
+  /v1/machine_id:
+    get:
+      consumes:
+      - application/json
+      description: List machine IDs
+      parameters:
+      - description: Hostname
+        in: query
+        name: hostname
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      summary: List machine IDs
+      tags:
+      - machine_id
   /v1/transaction:
     get:
       consumes:

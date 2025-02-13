@@ -143,6 +143,52 @@ paths:
       summary: Create a new execution
       tags:
       - execution
+  /v1/item:
+    get:
+      consumes:
+      - application/json
+      description: Get saved items for a transaction
+      parameters:
+      - description: Machine ID
+        in: query
+        name: machine_id
+        type: string
+      - description: Transaction ID
+        in: query
+        name: transaction_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      summary: Get saved items for a transaction
+      tags:
+      - item
+  /v1/item_id:
+    get:
+      consumes:
+      - application/json
+      description: Get saved item IDs for a transaction
+      parameters:
+      - description: Machine ID
+        in: query
+        name: machine_id
+        type: string
+      - description: Transaction ID
+        in: query
+        name: transaction_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      summary: Get saved item IDs for a transaction
+      tags:
+      - item
   /v1/machine_id:
     get:
       consumes:

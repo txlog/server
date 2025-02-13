@@ -23,7 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/v1/execution": {
+        "/v1/executions": {
             "get": {
                 "description": "List executions",
                 "consumes": [
@@ -33,7 +33,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "execution"
+                    "executions"
                 ],
                 "summary": "List executions",
                 "parameters": [
@@ -78,7 +78,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "execution"
+                    "executions"
                 ],
                 "summary": "Create a new execution",
                 "parameters": [
@@ -114,7 +114,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/item": {
+        "/v1/items": {
             "get": {
                 "description": "Get saved items for a transaction",
                 "consumes": [
@@ -124,7 +124,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "item"
+                    "items"
                 ],
                 "summary": "Get saved items for a transaction",
                 "parameters": [
@@ -136,7 +136,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Transaction ID",
+                        "description": "Transaction ID. If not provided, the last transaction will be used.",
                         "name": "transaction_id",
                         "in": "query"
                     }
@@ -149,7 +149,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/item_id": {
+        "/v1/items/ids": {
             "get": {
                 "description": "Get saved item IDs for a transaction",
                 "consumes": [
@@ -159,7 +159,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "item"
+                    "items"
                 ],
                 "summary": "Get saved item IDs for a transaction",
                 "parameters": [
@@ -171,7 +171,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Transaction ID",
+                        "description": "Transaction ID. If not provided, the last transaction will be used.",
                         "name": "transaction_id",
                         "in": "query"
                     }
@@ -184,7 +184,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/machine_id": {
+        "/v1/machines/ids": {
             "get": {
                 "description": "List machine IDs",
                 "consumes": [
@@ -194,7 +194,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "machine_id"
+                    "machines"
                 ],
                 "summary": "List machine IDs",
                 "parameters": [
@@ -225,7 +225,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/transaction": {
+        "/v1/transactions": {
             "get": {
                 "description": "Get saved transactions for a host",
                 "consumes": [
@@ -235,7 +235,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "transaction"
+                    "transactions"
                 ],
                 "summary": "Get saved transactions for a host",
                 "parameters": [
@@ -262,7 +262,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "transaction"
+                    "transactions"
                 ],
                 "summary": "Create a new transaction",
                 "parameters": [
@@ -298,7 +298,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/transaction_id": {
+        "/v1/transactions/ids": {
             "get": {
                 "description": "Get saved transactions IDs for a host",
                 "consumes": [
@@ -308,7 +308,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "transaction"
+                    "transactions"
                 ],
                 "summary": "Get saved transactions IDs for a host",
                 "responses": {

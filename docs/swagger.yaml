@@ -83,7 +83,7 @@ info:
   title: Txlog Server
   version: "0.4"
 paths:
-  /v1/execution:
+  /v1/executions:
     get:
       consumes:
       - application/json
@@ -113,7 +113,7 @@ paths:
             type: string
       summary: List executions
       tags:
-      - execution
+      - executions
     post:
       consumes:
       - application/json
@@ -142,8 +142,8 @@ paths:
             type: string
       summary: Create a new execution
       tags:
-      - execution
-  /v1/item:
+      - executions
+  /v1/items:
     get:
       consumes:
       - application/json
@@ -153,7 +153,8 @@ paths:
         in: query
         name: machine_id
         type: string
-      - description: Transaction ID
+      - description: Transaction ID. If not provided, the last transaction will be
+          used.
         in: query
         name: transaction_id
         type: string
@@ -165,8 +166,8 @@ paths:
           schema: {}
       summary: Get saved items for a transaction
       tags:
-      - item
-  /v1/item_id:
+      - items
+  /v1/items/ids:
     get:
       consumes:
       - application/json
@@ -176,7 +177,8 @@ paths:
         in: query
         name: machine_id
         type: string
-      - description: Transaction ID
+      - description: Transaction ID. If not provided, the last transaction will be
+          used.
         in: query
         name: transaction_id
         type: string
@@ -188,8 +190,8 @@ paths:
           schema: {}
       summary: Get saved item IDs for a transaction
       tags:
-      - item
-  /v1/machine_id:
+      - items
+  /v1/machines/ids:
     get:
       consumes:
       - application/json
@@ -215,8 +217,8 @@ paths:
             type: string
       summary: List machine IDs
       tags:
-      - machine_id
-  /v1/transaction:
+      - machines
+  /v1/transactions:
     get:
       consumes:
       - application/json
@@ -234,7 +236,7 @@ paths:
           schema: {}
       summary: Get saved transactions for a host
       tags:
-      - transaction
+      - transactions
     post:
       consumes:
       - application/json
@@ -263,8 +265,8 @@ paths:
             type: string
       summary: Create a new transaction
       tags:
-      - transaction
-  /v1/transaction_id:
+      - transactions
+  /v1/transactions/ids:
     get:
       consumes:
       - application/json
@@ -277,7 +279,7 @@ paths:
           schema: {}
       summary: Get saved transactions IDs for a host
       tags:
-      - transaction
+      - transactions
   /v1/version:
     get:
       consumes:

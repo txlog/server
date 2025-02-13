@@ -156,25 +156,6 @@ const docTemplate = `{
             }
         },
         "/v1/transaction": {
-            "get": {
-                "description": "Get saved transactions for a host",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "transaction"
-                ],
-                "summary": "Get saved transactions for a host",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {}
-                    }
-                }
-            },
             "post": {
                 "description": "Create a new transaction",
                 "consumes": [
@@ -216,6 +197,27 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    }
+                }
+            }
+        },
+        "/v1/transaction_id": {
+            "get": {
+                "description": "Get saved transactions IDs for a host",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Get saved transactions IDs for a host",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
                     }
                 }
             }

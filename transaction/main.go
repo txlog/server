@@ -39,15 +39,15 @@ type TransactionItem struct {
 	FromRepo string `json:"from_repo,omitempty"`
 }
 
-// GetTransaction Get the saved transactions for a host
-// @Summary		Get saved transactions for a host
-// @Description	Get saved transactions for a host
+// GetTransactionIDs Get the saved transactions IDs for a host
+// @Summary		Get saved transactions IDs for a host
+// @Description	Get saved transactions IDs for a host
 // @Tags			transaction
 // @Accept			json
 // @Produce		json
 // @Success		200	{object}	interface{}
-// @Router			/v1/transaction [get]
-func GetTransaction(database *sql.DB) gin.HandlerFunc {
+// @Router			/v1/transaction_id [get]
+func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		body := Transaction{}
 		data, err := c.GetRawData()

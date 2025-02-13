@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron/v2"
@@ -13,6 +14,7 @@ import (
 	"github.com/txlog/server/database"
 	_ "github.com/txlog/server/docs"
 	"github.com/txlog/server/execution"
+	"github.com/txlog/server/machineID"
 	"github.com/txlog/server/transaction"
 	"github.com/txlog/server/util"
 	"golang.org/x/exp/rand"
@@ -50,6 +52,10 @@ func main() {
 
 		v1.POST("/execution", execution.PostExecution(database.Db))
 
+		// txlog machine_id \
+		//   --hostname=G15.example.com
+		v1.GET("/machine_id", machineID.GetMachineID(database.Db))
+
 		// txlog executions \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
 		//   --success=true \
@@ -68,6 +74,7 @@ func main() {
 	s, _ := gocron.NewScheduler()
 	defer func() { _ = s.Shutdown() }()
 
+	rand.Seed(uint64(time.Now().UnixNano()))
 	crontab := fmt.Sprintf("%d * * * * *", rand.Intn(59)+1)
 	_, _ = s.NewJob(
 		gocron.CronJob(

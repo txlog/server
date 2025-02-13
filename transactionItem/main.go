@@ -42,15 +42,15 @@ type TransactionItem struct {
 //
 //	@Summary		Get saved item IDs for a transaction
 //	@Description	Get saved item IDs for a transaction
-//	@Tags			item
+//	@Tags			items
 //	@Accept			json
 //	@Produce		json
 //
 //	@Param			machine_id		query		string	false	"Machine ID"
-//	@Param			transaction_id	query		string	false	"Transaction ID"
+//	@Param			transaction_id	query		string	false	"Transaction ID. If not provided, the last transaction will be used."
 //
 //	@Success		200				{object}	interface{}
-//	@Router			/v1/item_id [get]
+//	@Router			/v1/items/ids [get]
 func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		machineID := c.Query("machine_id")
@@ -62,8 +62,17 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if transactionID == "" {
-			c.AbortWithStatusJSON(400, "transaction_id is required")
-			return
+			// If no transaction_id provided, get the latest one
+			row := database.QueryRow(`
+        SELECT transaction_id
+        FROM public.transaction_items
+        WHERE machine_id = $1
+        ORDER BY transaction_id DESC
+        LIMIT 1`, machineID)
+			if err := row.Scan(&transactionID); err != nil {
+				c.AbortWithStatusJSON(400, "No transactions found for this machine")
+				return
+			}
 		}
 
 		rows, err := database.Query(`
@@ -104,13 +113,13 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 //
 //	@Summary		Get saved items for a transaction
 //	@Description	Get saved items for a transaction
-//	@Tags			item
+//	@Tags			items
 //	@Accept			json
 //	@Produce		json
 //	@Param			machine_id		query		string	false	"Machine ID"
-//	@Param			transaction_id	query		string	false	"Transaction ID"
+//	@Param			transaction_id	query		string	false	"Transaction ID. If not provided, the last transaction will be used."
 //	@Success		200				{object}	interface{}
-//	@Router			/v1/item [get]
+//	@Router			/v1/items [get]
 func GetItems(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		machineID := c.Query("machine_id")
@@ -122,8 +131,17 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if transactionID == "" {
-			c.AbortWithStatusJSON(400, "transaction_id is required")
-			return
+			// If no transaction_id provided, get the latest one
+			row := database.QueryRow(`
+        SELECT transaction_id
+        FROM public.transaction_items
+        WHERE machine_id = $1
+        ORDER BY transaction_id DESC
+        LIMIT 1`, machineID)
+			if err := row.Scan(&transactionID); err != nil {
+				c.AbortWithStatusJSON(400, "No transactions found for this machine")
+				return
+			}
 		}
 
 		var transaction Transaction

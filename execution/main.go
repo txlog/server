@@ -26,7 +26,7 @@ type Execution struct {
 //
 //	@Summary		Create a new execution
 //	@Description	Create a new execution
-//	@Tags			execution
+//	@Tags			executions
 //	@Accept			json
 //	@Produce		json
 //	@Param			Execution	body		Execution	true	"Execution data"
@@ -34,7 +34,7 @@ type Execution struct {
 //	@Failure		400			{string}	string		"Invalid execution data"
 //	@Failure		400			{string}	string		"Invalid JSON input"
 //	@Failure		500			{string}	string		"Database error"
-//	@Router			/v1/execution [post]
+//	@Router			/v1/executions [post]
 func PostExecution(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		body := Execution{}
@@ -102,7 +102,7 @@ func PostExecution(database *sql.DB) gin.HandlerFunc {
 //
 //	@Summary		List executions
 //	@Description	List executions
-//	@Tags			execution
+//	@Tags			executions
 //	@Accept			json
 //	@Produce		json
 //	@Param			machine_id	query		string	false	"Machine ID"
@@ -111,7 +111,7 @@ func PostExecution(database *sql.DB) gin.HandlerFunc {
 //	@Failure		400			{string}	string	"Invalid execution data"
 //	@Failure		400			{string}	string	"Invalid JSON input"
 //	@Failure		500			{string}	string	"Database error"
-//	@Router			/v1/execution [get]
+//	@Router			/v1/executions [get]
 func GetExecution(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		machineID := c.Query("machine_id")

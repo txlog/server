@@ -51,28 +51,28 @@ func main() {
 		v1.GET("/version", getVersion)
 
 		// txlog build
-		v1.GET("/transaction_id", transaction.GetTransactionIDs(database.Db))
-		v1.POST("/transaction", transaction.PostTransaction(database.Db))
-		v1.POST("/execution", execution.PostExecution(database.Db))
+		v1.GET("/transactions/ids", transaction.GetTransactionIDs(database.Db))
+		v1.POST("/transactions", transaction.PostTransaction(database.Db))
+		v1.POST("/executions", execution.PostExecution(database.Db))
 
 		// txlog machine_id \
 		//   --hostname=G15.example.com
-		v1.GET("/machine_id", machineID.GetMachineID(database.Db))
+		v1.GET("/machines/id", machineID.GetMachineID(database.Db))
 
 		// txlog executions \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
 		//   --success=true \
-		v1.GET("/execution", execution.GetExecution(database.Db))
+		v1.GET("/executions", execution.GetExecution(database.Db))
 
 		// txlog transactions \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
-		v1.GET("/transaction", transaction.GetTransactions(database.Db))
+		v1.GET("/transactions", transaction.GetTransactions(database.Db))
 
 		// txlog items \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
 		//   --transaction_id=4
-		v1.GET("/item_id", transactionItem.GetItemIDs(database.Db))
-		v1.GET("/item", transactionItem.GetItems(database.Db))
+		v1.GET("/items/ids", transactionItem.GetItemIDs(database.Db))
+		v1.GET("/items", transactionItem.GetItems(database.Db))
 	}
 
 	s, _ := gocron.NewScheduler()

@@ -43,11 +43,11 @@ type TransactionItem struct {
 //
 //	@Summary		Get saved transactions IDs for a host
 //	@Description	Get saved transactions IDs for a host
-//	@Tags			transaction
+//	@Tags			transactions
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	interface{}
-//	@Router			/v1/transaction_id [get]
+//	@Router			/v1/transactions/ids [get]
 func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		body := Transaction{}
@@ -101,12 +101,12 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 //
 //	@Summary		Get saved transactions for a host
 //	@Description	Get saved transactions for a host
-//	@Tags			transaction
+//	@Tags			transactions
 //	@Accept			json
 //	@Produce		json
 //	@Param			machine_id	query		string	false	"Machine ID"
 //	@Success		200			{object}	interface{}
-//	@Router			/v1/transaction [get]
+//	@Router			/v1/transactions [get]
 func GetTransactions(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		machineID := c.Query("machine_id")
@@ -177,7 +177,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 //
 //	@Summary		Create a new transaction
 //	@Description	Create a new transaction
-//	@Tags			transaction
+//	@Tags			transactions
 //	@Accept			json
 //	@Produce		json
 //	@Param			Transaction	body		Transaction	true	"Transaction data"
@@ -185,7 +185,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 //	@Failure		400			{string}	string		"Invalid transaction data"
 //	@Failure		400			{string}	string		"Invalid JSON input"
 //	@Failure		500			{string}	string		"Database error"
-//	@Router			/v1/transaction [post]
+//	@Router			/v1/transactions [post]
 func PostTransaction(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		body := Transaction{}

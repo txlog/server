@@ -20,7 +20,7 @@ type MachineID struct {
 //
 //	@Summary		List machine IDs
 //	@Description	List machine IDs
-//	@Tags			machine_id
+//	@Tags			machines
 //	@Accept			json
 //	@Produce		json
 //	@Param			hostname	query		string	false	"Hostname"
@@ -28,7 +28,7 @@ type MachineID struct {
 //	@Failure		400			{string}	string	"Invalid execution data"
 //	@Failure		400			{string}	string	"Invalid JSON input"
 //	@Failure		500			{string}	string	"Database error"
-//	@Router			/v1/machine_id [get]
+//	@Router			/v1/machines/ids [get]
 func GetMachineID(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		hostname := c.Query("hostname")

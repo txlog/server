@@ -65,6 +65,7 @@ func main() {
 
 		// txlog transactions \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
+		v1.GET("/transaction", transaction.GetTransactions(database.Db))
 
 		// txlog items \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \

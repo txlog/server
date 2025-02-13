@@ -13,7 +13,7 @@ import (
 
 type Transaction struct {
 	TransactionID   string            `json:"transaction_id"`
-	MachineID       string            `json:"machine_id"`
+	MachineID       string            `json:"machine_id,omitempty"`
 	Hostname        string            `json:"hostname"`
 	BeginTime       *time.Time        `json:"begin_time"`
 	EndTime         *time.Time        `json:"end_time"`
@@ -25,7 +25,7 @@ type Transaction struct {
 	CommandLine     string            `json:"command_line"`
 	Comment         string            `json:"comment"`
 	ScriptletOutput string            `json:"scriptlet_output"`
-	Items           []TransactionItem `json:"items"`
+	Items           []TransactionItem `json:"items,omitempty"`
 }
 
 type TransactionItem struct {
@@ -40,13 +40,14 @@ type TransactionItem struct {
 }
 
 // GetTransactionIDs Get the saved transactions IDs for a host
-// @Summary		Get saved transactions IDs for a host
-// @Description	Get saved transactions IDs for a host
-// @Tags			transaction
-// @Accept			json
-// @Produce		json
-// @Success		200	{object}	interface{}
-// @Router			/v1/transaction_id [get]
+//
+//	@Summary		Get saved transactions IDs for a host
+//	@Description	Get saved transactions IDs for a host
+//	@Tags			transaction
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	interface{}
+//	@Router			/v1/transaction_id [get]
 func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		body := Transaction{}
@@ -73,14 +74,14 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 		)
 		if err != nil {
 			fmt.Println(err)
-			c.AbortWithStatusJSON(400, "Couldn't get saved transactions for this host.")
+			c.AbortWithStatusJSON(400, "Couldn't get saved transaction_ids for this host.")
 		} else {
 			var transactions []int
 			for rows.Next() {
 				var id int
 				if err := rows.Scan(&id); err != nil {
 					fmt.Println(err)
-					c.AbortWithStatusJSON(500, "Error scanning transactions")
+					c.AbortWithStatusJSON(500, "Error scanning transaction_ids")
 					return
 				}
 				transactions = append(transactions, id)
@@ -96,18 +97,95 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
+// GetTransactions Get the saved transactions for a host
+//
+//	@Summary		Get saved transactions for a host
+//	@Description	Get saved transactions for a host
+//	@Tags			transaction
+//	@Accept			json
+//	@Produce		json
+//	@Param			machine_id	query		string	false	"Machine ID"
+//	@Success		200			{object}	interface{}
+//	@Router			/v1/transaction [get]
+func GetTransactions(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		machineID := c.Query("machine_id")
+
+		if machineID == "" {
+			c.AbortWithStatusJSON(400, "machine_id is required")
+			return
+		}
+
+		var rows *sql.Rows
+		var err error
+
+		rows, err = database.Query(`
+      SELECT transaction_id, hostname, begin_time, end_time, actions, altered, "user", return_code,
+           release_version, command_line, comment, scriptlet_output
+      FROM public.transactions
+      WHERE machine_id = $1
+      ORDER BY transaction_id DESC`,
+			machineID,
+		)
+
+		if err != nil {
+			fmt.Println("Error querying transactions:", err)
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		defer rows.Close()
+
+		transactions := []Transaction{}
+		for rows.Next() {
+			var transaction Transaction
+			var beginTime sql.NullTime
+			var endTime sql.NullTime
+			err := rows.Scan(
+				&transaction.TransactionID,
+				&transaction.Hostname,
+				&beginTime,
+				&endTime,
+				&transaction.Actions,
+				&transaction.Altered,
+				&transaction.User,
+				&transaction.ReturnCode,
+				&transaction.ReleaseVersion,
+				&transaction.CommandLine,
+				&transaction.Comment,
+				&transaction.ScriptletOutput,
+			)
+
+			if err != nil {
+				fmt.Println("Error iterating transactions:", err)
+				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			if beginTime.Valid {
+				transaction.BeginTime = &beginTime.Time
+			}
+			if endTime.Valid {
+				transaction.EndTime = &endTime.Time
+			}
+			transactions = append(transactions, transaction)
+		}
+
+		c.JSON(http.StatusOK, transactions)
+	}
+}
+
 // PostTransaction Create a new transaction
-// @Summary		Create a new transaction
-// @Description	Create a new transaction
-// @Tags			transaction
-// @Accept			json
-// @Produce		json
-// @Param			Transaction	body		Transaction	true	"Transaction data"
-// @Success		200			{string}	string		"Transaction created"
-// @Failure		400			{string}	string		"Invalid transaction data"
-// @Failure		400			{string}	string		"Invalid JSON input"
-// @Failure		500			{string}	string		"Database error"
-// @Router			/v1/transaction [post]
+//
+//	@Summary		Create a new transaction
+//	@Description	Create a new transaction
+//	@Tags			transaction
+//	@Accept			json
+//	@Produce		json
+//	@Param			Transaction	body		Transaction	true	"Transaction data"
+//	@Success		200			{string}	string		"Transaction created"
+//	@Failure		400			{string}	string		"Invalid transaction data"
+//	@Failure		400			{string}	string		"Invalid JSON input"
+//	@Failure		500			{string}	string		"Database error"
+//	@Router			/v1/transaction [post]
 func PostTransaction(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		body := Transaction{}

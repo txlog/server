@@ -171,6 +171,24 @@ paths:
       tags:
       - machine_id
   /v1/transaction:
+    get:
+      consumes:
+      - application/json
+      description: Get saved transactions for a host
+      parameters:
+      - description: Machine ID
+        in: query
+        name: machine_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      summary: Get saved transactions for a host
+      tags:
+      - transaction
     post:
       consumes:
       - application/json

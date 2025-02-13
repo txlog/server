@@ -156,6 +156,33 @@ const docTemplate = `{
             }
         },
         "/v1/transaction": {
+            "get": {
+                "description": "Get saved transactions for a host",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transaction"
+                ],
+                "summary": "Get saved transactions for a host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Machine ID",
+                        "name": "machine_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    }
+                }
+            },
             "post": {
                 "description": "Create a new transaction",
                 "consumes": [

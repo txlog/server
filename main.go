@@ -16,6 +16,7 @@ import (
 	"github.com/txlog/server/execution"
 	"github.com/txlog/server/machineID"
 	"github.com/txlog/server/transaction"
+	"github.com/txlog/server/transactionItem"
 	"github.com/txlog/server/util"
 	"golang.org/x/exp/rand"
 )
@@ -70,7 +71,8 @@ func main() {
 		// txlog items \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
 		//   --transaction_id=4
-
+		v1.GET("/item_id", transactionItem.GetItemIDs(database.Db))
+		v1.GET("/item", transactionItem.GetItems(database.Db))
 	}
 
 	s, _ := gocron.NewScheduler()

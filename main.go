@@ -46,10 +46,12 @@ func main() {
 
 	v1 := r.Group("/v1")
 	{
+		// txlog version
 		v1.GET("/version", getVersion)
-		v1.GET("/transaction", transaction.GetTransaction(database.Db))
-		v1.POST("/transaction", transaction.PostTransaction(database.Db))
 
+		// txlog build
+		v1.GET("/transaction_id", transaction.GetTransactionIDs(database.Db))
+		v1.POST("/transaction", transaction.PostTransaction(database.Db))
 		v1.POST("/execution", execution.PostExecution(database.Db))
 
 		// txlog machine_id \
@@ -63,7 +65,6 @@ func main() {
 
 		// txlog transactions \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
-		//   --transaction_id=4
 
 		// txlog items \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \

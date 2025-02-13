@@ -22,7 +22,7 @@ import (
 )
 
 // @title			Txlog Server
-// @version		0.4
+// @version		1.0
 // @description	The centralized system that stores transaction data
 // @termsOfService	https://github.com/txlog
 // @contact.name	Txlog repository issues
@@ -116,6 +116,6 @@ func main() {
 //	@Router			/v1/version [get]
 func getVersion(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
-		"version": "0.4",
+		"version": "1.0",
 	})
 }

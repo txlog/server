@@ -61,7 +61,7 @@ func main() {
 
 		// txlog machine_id \
 		//   --hostname=G15.example.com
-		v1.GET("/machines/id", machineID.GetMachineID(database.Db))
+		v1.GET("/machines/ids", machineID.GetMachineID(database.Db))
 
 		// txlog executions \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \

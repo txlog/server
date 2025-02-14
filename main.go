@@ -43,7 +43,11 @@ func main() {
 	healthcheck.New(r, util.CheckConfig(), util.Check())
 
 	r.GET("/", func(c *gin.Context) { c.Redirect(302, "/swagger/index.html") })
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(
+		swaggerfiles.Handler,
+		ginSwagger.DocExpansion("none"),
+		ginSwagger.DefaultModelsExpandDepth(-1),
+	))
 
 	v1 := r.Group("/v1")
 	{

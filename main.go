@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -96,7 +97,9 @@ func main() {
 				if retentionDays == "" {
 					retentionDays = "7" // default to 7 days if not set
 				}
-				_, _ = database.Db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL '" + retentionDays + " day'")
+				if regexp.MustCompile(`^[0-9]+$`).MatchString(retentionDays) {
+					_, _ = database.Db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL '" + retentionDays + " day'")
+				}
 
 				fmt.Println("Housekeeping: executions older than " + retentionDays + " days are deleted.")
 			},

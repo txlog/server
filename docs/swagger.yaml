@@ -81,7 +81,7 @@ info:
     url: https://github.com/txlog/.github/blob/main/profile/LICENSE.md
   termsOfService: https://github.com/txlog
   title: Txlog Server
-  version: "1.1"
+  version: 1.1.1
 paths:
   /v1/executions:
     get:

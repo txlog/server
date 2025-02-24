@@ -26,7 +26,7 @@ This repository contains the code for the Txlog Server.
 Use Docker to run this server.
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.1
+docker pull cr.rda.run/txlog/server:main
 ```
 
 Run the server.
@@ -40,7 +40,7 @@ docker run -d -p 8080:8080 \
   -e PGSQL_PASSWORD=your_db_password \
   -e PGSQL_SSLMODE=require \
   -e EXECUTION_RETENTION_DAYS=7 \
-  cr.rda.run/txlog/server:v1.1
+  cr.rda.run/txlog/server:main
 ```
 
 Or use it on your Kubernetes cluster
@@ -62,7 +62,7 @@ spec:
     spec:
       containers:
       - name: txlog-server
-        image: cr.rda.run/txlog/server:v1.1
+        image: cr.rda.run/txlog/server:main
         ports:
         - containerPort: 8080
         livenessProbe:
@@ -97,9 +97,8 @@ spec:
           value: 7
 ```
 
-If you want to use the latest development (unstable) version, replace the
-version number `v1.1` with `main` in the Docker commands and Kubernetes
-configuration.
+If you want to use a production (stable) version, replace `main` by the version
+number (e.g. `v1.0`) in the Docker commands and Kubernetes configuration.
 
 ## Development
 
@@ -137,13 +136,13 @@ The `Makefile` contains all the necessary commands for development. You can run
 
 To create the binary and distribute
 
-* `make clean`: remove compiled binaries and packages
-* `make run`: execute the server code
-* `make build`: build a production-ready binary on `./bin` directory
-* `make doc`: write the swagger documentation based on method comments
+- `make clean`: remove compiled binaries and packages
+- `make run`: execute the server code
+- `make build`: build a production-ready binary on `./bin` directory
+- `make doc`: write the swagger documentation based on method comments
 
-The server will run at http://localhost:8080 and the Swagger docs at
-http://localhost:8080/swagger/index.html.
+The server will run at <http://localhost:8080> and the Swagger docs at
+<http://localhost:8080/swagger/index.html>.
 
 ## Contributing
 

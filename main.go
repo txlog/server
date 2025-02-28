@@ -1,7 +1,11 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"html/template"
+	"io/fs"
+	"net/http"
 	"os"
 	"regexp"
 	"time"
@@ -21,6 +25,12 @@ import (
 	"github.com/txlog/server/util"
 	"golang.org/x/exp/rand"
 )
+
+//go:embed assets
+var staticFiles embed.FS
+
+//go:embed templates/*
+var templateFS embed.FS
 
 // @title			Txlog Server
 // @version		1.1.1
@@ -43,7 +53,26 @@ func main() {
 
 	healthcheck.New(r, util.CheckConfig(), util.Check())
 
-	r.GET("/", func(c *gin.Context) { c.Redirect(302, "/swagger/index.html") })
+	tmpl := template.Must(template.ParseFS(templateFS, "templates/*.html"))
+	r.SetHTMLTemplate(tmpl)
+
+	fsys, _ := fs.Sub(staticFiles, "assets")
+	r.StaticFS("/assets", http.FS(fsys))
+
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", gin.H{
+			"Context": c,
+			"title":   "Assets",
+		})
+	})
+
+	r.GET("/settings", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "settings.html", gin.H{
+			"Context": c,
+			"title":   "Server Settings",
+		})
+	})
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
 		ginSwagger.DocExpansion("none"),

@@ -113,10 +113,10 @@ func main() {
 	defer func() { _ = s.Shutdown() }()
 
 	rand.Seed(uint64(time.Now().UnixNano()))
-	crontab := fmt.Sprintf("%d * * * * *", rand.Intn(59)+1)
+	// Run every two hours at a random minute/second
+	crontab := fmt.Sprintf("%d %d */2 * * *", rand.Intn(59), rand.Intn(59))
 	_, _ = s.NewJob(
 		gocron.CronJob(
-			// Run every minute at a random second
 			crontab,
 			true,
 		),

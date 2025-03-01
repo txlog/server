@@ -100,6 +100,10 @@ spec:
 If you want to use a production (stable) version, replace `main` by the version
 number (e.g. `v1.0`) in the Docker commands and Kubernetes configuration.
 
+## 🪴 Project Activity
+
+![Alt](https://repobeats.axiom.co/api/embed/e7072dd27ed7e95ffffdca0b6b8b1b9b8a9687ed.svg "Repobeats analytics image")
+
 ## Development
 
 To make changes on this project, you need:

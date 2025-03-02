@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -66,6 +67,19 @@ func main() {
 
 	healthcheck.New(r, util.CheckConfig(), util.Check())
 
+	r.NoRoute(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/v1") {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "API Resource not found",
+			})
+		} else {
+			c.HTML(http.StatusNotFound, "404.html", gin.H{
+				"Context": c,
+				"title":   "Not Found",
+			})
+		}
+	})
+
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"Context": c,
@@ -84,6 +98,13 @@ func main() {
 			"pgsqlPassword":          util.MaskString(os.Getenv("PGSQL_PASSWORD")),
 			"pgsqlSslmode":           os.Getenv("PGSQL_SSLMODE"),
 			"executionRetentionDays": os.Getenv("EXECUTION_RETENTION_DAYS"),
+		})
+	})
+
+	r.GET("/license", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "license.html", gin.H{
+			"Context": c,
+			"title":   "License",
 		})
 	})
 

@@ -39,8 +39,6 @@ func ConnectDatabase() {
 		fmt.Println("Successfully connected to database")
 	}
 
-	defer db.Close()
-
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		log.Fatalf("Failed to create database driver: %v", err)

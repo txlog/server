@@ -9,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	healthcheck "github.com/tavsec/gin-healthcheck"
 	"github.com/txlog/server/controllers"
 	"github.com/txlog/server/database"
@@ -27,7 +29,7 @@ var staticFiles embed.FS
 var templateFS embed.FS
 
 // @title			Txlog Server
-// @version		@version
+// @version		v1
 // @description	The centralized system that stores transaction data
 // @termsOfService	https://github.com/txlog
 // @contact.name	Txlog repository issues
@@ -65,7 +67,11 @@ func main() {
 	r.GET("/", controllers.GetRootIndex(database.Db))
 	r.GET("/settings", controllers.GetSettingsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
-	r.GET("/swagger/*any", controllers.GetSwaggerIndex())
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(
+		swaggerfiles.Handler,
+		ginSwagger.DocExpansion("none"),
+		ginSwagger.DefaultModelsExpandDepth(-1),
+	))
 
 	v1 := r.Group("/v1")
 	{

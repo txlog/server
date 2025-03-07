@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Txlog: Internal Server Error</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0/dist/css/tabler.min.css">
+</head>
+<body class="border-top-wide border-primary">
+  <div class="page page-center">
+    <div class="container-tight py-4">
+      <div class="empty">
+        <div class="empty-header">500</div>
+        <p class="empty-title">Oops… You just found an error page</p>
+        <p class="empty-subtitle text-secondary">We are sorry but our server encountered an internal error</p>
+        <div class="empty-action">
+          <a href="/" class="btn btn-primary btn-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+              <path d="M5 12l14 0"></path>
+              <path d="M5 12l6 6"></path>
+              <path d="M5 12l6 -6"></path>
+            </svg>
+            Take me home
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-xl">
+      <div class="row row-cards">
+        <div class="col-md-12">
+          <div class="card">
+            <div class="card-body">
+              <h4>Reported error</h4>
+              <div>
+                <pre><code>{{ .error }}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

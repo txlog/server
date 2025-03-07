@@ -16,7 +16,7 @@
             "name": "MIT License",
             "url": "https://github.com/txlog/.github/blob/main/profile/LICENSE.md"
         },
-        "version": "1.1.1"
+        "version": "@version"
     },
     "host": "localhost:8080",
     "paths": {
@@ -85,7 +85,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/execution.Execution"
+                            "$ref": "#/definitions/models.Execution"
                         }
                     }
                 ],
@@ -269,7 +269,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transaction.Transaction"
+                            "$ref": "#/definitions/models.Transaction"
                         }
                     }
                 ],
@@ -315,31 +315,10 @@
                     }
                 }
             }
-        },
-        "/v1/version": {
-            "get": {
-                "description": "Get the server version",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "version"
-                ],
-                "summary": "Server version",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {}
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "execution.Execution": {
+        "models.Execution": {
             "type": "object",
             "properties": {
                 "details": {
@@ -368,7 +347,7 @@
                 }
             }
         },
-        "transaction.Transaction": {
+        "models.Transaction": {
             "type": "object",
             "properties": {
                 "actions": {
@@ -395,7 +374,7 @@
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/transaction.TransactionItem"
+                        "$ref": "#/definitions/models.TransactionItem"
                     }
                 },
                 "machine_id": {
@@ -418,7 +397,7 @@
                 }
             }
         },
-        "transaction.TransactionItem": {
+        "models.TransactionItem": {
             "type": "object",
             "properties": {
                 "action": {

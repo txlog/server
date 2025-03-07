@@ -1,5 +1,5 @@
 definitions:
-  execution.Execution:
+  models.Execution:
     properties:
       details:
         type: string
@@ -18,7 +18,7 @@ definitions:
       transactions_sent:
         type: integer
     type: object
-  transaction.Transaction:
+  models.Transaction:
     properties:
       actions:
         type: string
@@ -36,7 +36,7 @@ definitions:
         type: string
       items:
         items:
-          $ref: '#/definitions/transaction.TransactionItem'
+          $ref: '#/definitions/models.TransactionItem'
         type: array
       machine_id:
         type: string
@@ -51,7 +51,7 @@ definitions:
       user:
         type: string
     type: object
-  transaction.TransactionItem:
+  models.TransactionItem:
     properties:
       action:
         type: string
@@ -81,7 +81,7 @@ info:
     url: https://github.com/txlog/.github/blob/main/profile/LICENSE.md
   termsOfService: https://github.com/txlog
   title: Txlog Server
-  version: 1.1.1
+  version: '@version'
 paths:
   /v1/executions:
     get:
@@ -124,7 +124,7 @@ paths:
         name: Execution
         required: true
         schema:
-          $ref: '#/definitions/execution.Execution'
+          $ref: '#/definitions/models.Execution'
       produces:
       - application/json
       responses:
@@ -247,7 +247,7 @@ paths:
         name: Transaction
         required: true
         schema:
-          $ref: '#/definitions/transaction.Transaction'
+          $ref: '#/definitions/models.Transaction'
       produces:
       - application/json
       responses:
@@ -280,20 +280,6 @@ paths:
       summary: Get saved transactions IDs for a host
       tags:
       - transactions
-  /v1/version:
-    get:
-      consumes:
-      - application/json
-      description: Get the server version
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema: {}
-      summary: Server version
-      tags:
-      - version
 schemes:
 - http
 - https

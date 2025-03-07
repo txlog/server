@@ -1,43 +1,32 @@
-package execution
+package controllers
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/txlog/server/models"
 )
 
-type Execution struct {
-	ExecutionID           string     `json:"execution_id,omitempty"`
-	MachineID             string     `json:"machine_id"`
-	Hostname              string     `json:"hostname"`
-	ExecutedAt            *time.Time `json:"executed_at"`
-	Success               bool       `json:"success"`
-	Details               string     `json:"details,omitempty"`
-	TransactionsProcessed int        `json:"transactions_processed,omitempty"`
-	TransactionsSent      int        `json:"transactions_sent,omitempty"`
-}
-
-// PostExecution Create a new execution
+// PostExecutions Create a new execution
 //
 //	@Summary		Create a new execution
 //	@Description	Create a new execution
 //	@Tags			executions
 //	@Accept			json
 //	@Produce		json
-//	@Param			Execution	body		Execution	true	"Execution data"
-//	@Success		200			{string}	string		"Execution created"
-//	@Failure		400			{string}	string		"Invalid execution data"
-//	@Failure		400			{string}	string		"Invalid JSON input"
-//	@Failure		500			{string}	string		"Database error"
+//	@Param			Execution	body		models.Execution	true	"Execution data"
+//	@Success		200			{string}	string				"Execution created"
+//	@Failure		400			{string}	string				"Invalid execution data"
+//	@Failure		400			{string}	string				"Invalid JSON input"
+//	@Failure		500			{string}	string				"Database error"
 //	@Router			/v1/executions [post]
-func PostExecution(database *sql.DB) gin.HandlerFunc {
+func PostExecutions(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		body := Execution{}
+		body := models.Execution{}
 		data, err := c.GetRawData()
 		if err != nil {
 			c.AbortWithStatusJSON(400, "Invalid execution data")
@@ -98,7 +87,7 @@ func PostExecution(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// GetExecution List executions
+// GetExecutions List executions
 //
 //	@Summary		List executions
 //	@Description	List executions
@@ -112,7 +101,7 @@ func PostExecution(database *sql.DB) gin.HandlerFunc {
 //	@Failure		400			{string}	string	"Invalid JSON input"
 //	@Failure		500			{string}	string	"Database error"
 //	@Router			/v1/executions [get]
-func GetExecution(database *sql.DB) gin.HandlerFunc {
+func GetExecutions(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		machineID := c.Query("machine_id")
 		success := c.Query("success")
@@ -143,9 +132,9 @@ func GetExecution(database *sql.DB) gin.HandlerFunc {
 		}
 		defer rows.Close()
 
-		executions := []Execution{}
+		executions := []models.Execution{}
 		for rows.Next() {
-			var execution Execution
+			var execution models.Execution
 			var executedAt sql.NullTime
 			err := rows.Scan(
 				&execution.ExecutionID,

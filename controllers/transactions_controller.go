@@ -1,43 +1,16 @@
-package transaction
+package controllers
 
 import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
+
+	"github.com/txlog/server/models"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
-
-type Transaction struct {
-	TransactionID   string            `json:"transaction_id"`
-	MachineID       string            `json:"machine_id,omitempty"`
-	Hostname        string            `json:"hostname"`
-	BeginTime       *time.Time        `json:"begin_time"`
-	EndTime         *time.Time        `json:"end_time"`
-	Actions         string            `json:"actions"`
-	Altered         string            `json:"altered"`
-	User            string            `json:"user"`
-	ReturnCode      string            `json:"return_code"`
-	ReleaseVersion  string            `json:"release_version"`
-	CommandLine     string            `json:"command_line"`
-	Comment         string            `json:"comment"`
-	ScriptletOutput string            `json:"scriptlet_output"`
-	Items           []TransactionItem `json:"items,omitempty"`
-}
-
-type TransactionItem struct {
-	Action   string `json:"action"`
-	Name     string `json:"name"`
-	Version  string `json:"version"`
-	Release  string `json:"release"`
-	Epoch    string `json:"epoch"`
-	Arch     string `json:"arch"`
-	Repo     string `json:"repo"`
-	FromRepo string `json:"from_repo,omitempty"`
-}
 
 // GetTransactionIDs Get the saved transactions IDs for a host
 //
@@ -50,7 +23,7 @@ type TransactionItem struct {
 //	@Router			/v1/transactions/ids [get]
 func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		body := Transaction{}
+		body := models.Transaction{}
 		data, err := c.GetRawData()
 		if err != nil {
 			c.AbortWithStatusJSON(400, "Invalid transaction data")
@@ -135,9 +108,9 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 		}
 		defer rows.Close()
 
-		transactions := []Transaction{}
+		transactions := []models.Transaction{}
 		for rows.Next() {
-			var transaction Transaction
+			var transaction models.Transaction
 			var beginTime sql.NullTime
 			var endTime sql.NullTime
 			err := rows.Scan(
@@ -173,22 +146,22 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// PostTransaction Create a new transaction
+// PostTransactions Create a new transaction
 //
 //	@Summary		Create a new transaction
 //	@Description	Create a new transaction
 //	@Tags			transactions
 //	@Accept			json
 //	@Produce		json
-//	@Param			Transaction	body		Transaction	true	"Transaction data"
-//	@Success		200			{string}	string		"Transaction created"
-//	@Failure		400			{string}	string		"Invalid transaction data"
-//	@Failure		400			{string}	string		"Invalid JSON input"
-//	@Failure		500			{string}	string		"Database error"
+//	@Param			Transaction	body		models.Transaction	true	"Transaction data"
+//	@Success		200			{string}	string				"Transaction created"
+//	@Failure		400			{string}	string				"Invalid transaction data"
+//	@Failure		400			{string}	string				"Invalid JSON input"
+//	@Failure		500			{string}	string				"Database error"
 //	@Router			/v1/transactions [post]
-func PostTransaction(database *sql.DB) gin.HandlerFunc {
+func PostTransactions(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		body := Transaction{}
+		body := models.Transaction{}
 		data, err := c.GetRawData()
 		if err != nil {
 			c.AbortWithStatusJSON(400, "Invalid transaction data")

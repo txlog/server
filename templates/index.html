@@ -1,0 +1,216 @@
+{{ template "header.html" . }}
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="subheader">Servers</div>
+              <div class="ms-auto lh-1 text-secondary">
+                Last 30 days
+              </div>
+            </div>
+            <div class="h1 mb-3">350</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="subheader">Executions</div>
+              <div class="ms-auto lh-1 text-secondary">
+                Last 30 days
+              </div>
+            </div>
+            <div class="d-flex align-items-baseline">
+              <div class="h1 mb-0 me-2">632</div>
+              <div class="me-auto">
+                <span class="text-green d-inline-flex align-items-center lh-1">
+                  8%
+                  <!-- Download SVG icon from http://tabler.io/icons/icon/trending-up -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon ms-1 icon-2">
+                    <path d="M3 17l6 -6l4 4l8 -8"></path>
+                    <path d="M14 7l7 0l0 7"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="subheader">Installed packages</div>
+              <div class="ms-auto lh-1 text-secondary">
+                Last 30 days
+              </div>
+            </div>
+            <div class="d-flex align-items-baseline">
+              <div class="h1 mb-3 me-2">1.355</div>
+              <div class="me-auto">
+                <span class="text-yellow d-inline-flex align-items-center lh-1">
+                  0%
+                  <!-- Download SVG icon from http://tabler.io/icons/icon/minus -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon ms-1 icon-2">
+                    <path d="M5 12l14 0"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="subheader">Upgraded Packages</div>
+              <div class="ms-auto lh-1 text-secondary">
+                Last 30 days
+              </div>
+            </div>
+            <div class="d-flex align-items-baseline">
+              <div class="h1 mb-3 me-2">656</div>
+              <div class="me-auto">
+                <span class="text-green d-inline-flex align-items-center lh-1">
+                  4%
+                  <!-- Download SVG icon from http://tabler.io/icons/icon/trending-up -->
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon ms-1 icon-2">
+                    <path d="M3 17l6 -6l4 4l8 -8"></path>
+                    <path d="M14 7l7 0l0 7"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Last Executions</h3>
+          </div>
+          <div class="card-body border-bottom py-3">
+            <div class="d-flex">
+              <div class="text-secondary">
+                Show
+                <div class="mx-2 d-inline-block">
+                  <input type="text" class="form-control form-control-sm" value="100" size="3"
+                    aria-label="Invoices count">
+                </div>
+                entries
+              </div>
+              <div class="ms-auto text-secondary">
+                Search:
+                <div class="ms-2 d-inline-block">
+                  <input type="text" class="form-control form-control-sm" aria-label="Search invoice">
+                </div>
+              </div>
+            </div>
+          </div>
+          {{ if eq (len .executions) 0 }}
+          <div class="empty">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <circle cx="12" cy="12" r="9" />
+                <line x1="9" y1="10" x2="9.01" y2="10" />
+                <line x1="15" y1="10" x2="15.01" y2="10" />
+                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
+              </svg>
+            </div>
+            <p class="empty-title">No executions found</p>
+            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
+          </div>
+          {{ else }}
+          <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap datatable">
+              <thead>
+                <tr>
+                  <th class="w-1">ID
+                    <!-- Download SVG icon from http://tabler.io/icons/icon/chevron-up -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="icon icon-sm icon-thick icon-2">
+                      <path d="M6 15l6 -6l6 6"></path>
+                    </svg>
+                  </th>
+                  <th>Hostname</th>
+                  <th>Execution Time</th>
+                  <th>Transactions Processed</th>
+                  <th>Transactions Sent</th>
+                  <th>Status</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ with .executions }}
+                  {{ range . }}
+                    <tr>
+                      <td><span class="text-secondary">#{{ .ExecutionID }}</span></td>
+                      <td><a href="/executions/{{ .ExecutionID }}" class="text-reset" tabindex="-1">{{ .Hostname }}</a></td>
+                      <td>{{ .ExecutedAt }}</td>
+                      <td>{{ .TransactionsProcessed }}</td>
+                      <td>{{ .TransactionsSent }}</td>
+                      <td>
+                        <span class="badge {{ if eq .Success true }}bg-success{{ else }}bg-danger{{ end }} me-1"></span>
+                        {{ if eq .Success true }}Success{{ else }}Fail{{ end }}
+                      </td>
+                      <td>{{ .Details }}</td>
+                    </tr>
+                  {{ end }}
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">Showing <span>1</span> to <span>{{ len .executions }}</span> of <span>{{ len .executions }}</span> entries</p>
+            <!--
+            <ul class="pagination m-0 ms-auto">
+              <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-1">
+                    <path d="M15 6l-6 6l6 6"></path>
+                  </svg>
+                  prev
+                </a>
+              </li>
+              <li class="page-item"><a class="page-link" href="#">1</a></li>
+              <li class="page-item active"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item"><a class="page-link" href="#">4</a></li>
+              <li class="page-item"><a class="page-link" href="#">5</a></li>
+              <li class="page-item">
+                <a class="page-link" href="#">
+                  next
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-1">
+                    <path d="M9 6l6 6l-6 6"></path>
+                  </svg>
+                </a>
+              </li>
+            </ul>
+            -->
+          </div>
+          {{ end }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ template "footer.html" . }}

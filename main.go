@@ -69,6 +69,7 @@ func main() {
 	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
+		ginSwagger.PersistAuthorization(true),
 		ginSwagger.DocExpansion("none"),
 		ginSwagger.DefaultModelsExpandDepth(-1),
 	))

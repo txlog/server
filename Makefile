@@ -19,5 +19,5 @@ run:
 	@go run main.go
 
 doc:
-	@swag init
+	@swag init --outputTypes go
 	@swag fmt

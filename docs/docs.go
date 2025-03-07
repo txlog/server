@@ -88,7 +88,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/execution.Execution"
+                            "$ref": "#/definitions/models.Execution"
                         }
                     }
                 ],
@@ -272,7 +272,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/transaction.Transaction"
+                            "$ref": "#/definitions/models.Transaction"
                         }
                     }
                 ],
@@ -318,31 +318,10 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/v1/version": {
-            "get": {
-                "description": "Get the server version",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "version"
-                ],
-                "summary": "Server version",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {}
-                    }
-                }
-            }
         }
     },
     "definitions": {
-        "execution.Execution": {
+        "models.Execution": {
             "type": "object",
             "properties": {
                 "details": {
@@ -371,7 +350,7 @@ const docTemplate = `{
                 }
             }
         },
-        "transaction.Transaction": {
+        "models.Transaction": {
             "type": "object",
             "properties": {
                 "actions": {
@@ -398,7 +377,7 @@ const docTemplate = `{
                 "items": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/transaction.TransactionItem"
+                        "$ref": "#/definitions/models.TransactionItem"
                     }
                 },
                 "machine_id": {
@@ -421,7 +400,7 @@ const docTemplate = `{
                 }
             }
         },
-        "transaction.TransactionItem": {
+        "models.TransactionItem": {
             "type": "object",
             "properties": {
                 "action": {
@@ -455,7 +434,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.1.1",
+	Version:          "@version",
 	Host:             "localhost:8080",
 	BasePath:         "",
 	Schemes:          []string{"http", "https"},

@@ -131,6 +131,7 @@ PGSQL_DB=txlog
 PGSQL_PASSWORD=your_db_password
 PGSQL_SSLMODE=require
 EXECUTION_RETENTION_DAYS=1
+INSTANCE=Development environment
 ```
 
 ### Development commands

@@ -48,6 +48,7 @@ func main() {
 
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
+	r.Use(EnvironmentVariablesMiddleware())
 
 	r.SetFuncMap(template.FuncMap{
 		"iterate": func(start, count int) []int {
@@ -125,4 +126,16 @@ func main() {
 	}
 
 	r.Run()
+}
+
+func EnvironmentVariablesMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		envVars := map[string]string{
+			"INSTANCE": os.Getenv("INSTANCE"),
+		}
+
+		c.Set("env", envVars)
+
+		c.Next()
+	}
 }

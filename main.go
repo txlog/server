@@ -50,7 +50,7 @@ func main() {
 	r.SetTrustedProxies(nil)
 	r.Use(EnvironmentVariablesMiddleware())
 
-	r.SetFuncMap(template.FuncMap{
+	funcMap := template.FuncMap{
 		"iterate": func(start, count int) []int {
 			var items []int
 			for i := start; i <= count; i++ {
@@ -68,15 +68,17 @@ func main() {
 				return b
 			}
 		},
-	})
+	}
 
 	if os.Getenv("GIN_MODE") == "" {
+		r.SetFuncMap(funcMap)
 		tmpl := template.Must(template.ParseFS(templateFS, "templates/*.html"))
 		r.SetHTMLTemplate(tmpl)
 
 		fsys, _ := fs.Sub(staticFiles, "assets")
 		r.StaticFS("/assets", http.FS(fsys))
 	} else {
+		r.SetFuncMap(funcMap)
 		r.LoadHTMLGlob("templates/*.html")
 		r.Static("/assets", "./assets")
 	}

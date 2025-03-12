@@ -49,6 +49,26 @@ func main() {
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
 
+	r.SetFuncMap(template.FuncMap{
+		"iterate": func(start, count int) []int {
+			var items []int
+			for i := start; i <= count; i++ {
+				items = append(items, i)
+			}
+			return items
+		},
+		"add": func(a, b int) int {
+			return a + b
+		},
+		"min": func(a, b int) int {
+			if a < b {
+				return a
+			} else {
+				return b
+			}
+		},
+	})
+
 	if os.Getenv("GIN_MODE") == "" {
 		tmpl := template.Must(template.ParseFS(templateFS, "templates/*.html"))
 		r.SetHTMLTemplate(tmpl)

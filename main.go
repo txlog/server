@@ -71,8 +71,7 @@ func main() {
 	}
 
 	if os.Getenv("GIN_MODE") == "" {
-		r.SetFuncMap(funcMap)
-		tmpl := template.Must(template.ParseFS(templateFS, "templates/*.html"))
+		tmpl := template.Must(template.New("any").Funcs(funcMap).ParseFS(templateFS, "templates/*.html"))
 		r.SetHTMLTemplate(tmpl)
 
 		fsys, _ := fs.Sub(staticFiles, "assets")

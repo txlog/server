@@ -40,4 +40,4 @@ CREATE TABLE "executions" (
   "details" text,
   "transactions_processed" integer,
   "transactions_sent" integer
-)
+);

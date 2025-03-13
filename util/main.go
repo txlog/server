@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"database/sql"
 	"fmt"
 	"os"
@@ -56,4 +57,15 @@ func Check() []checks.Check {
 		dbPasswordCheck,
 		dbSslModeCheck,
 	}
+}
+
+// MaskString takes a string input and returns a new string of the same length
+// where each character is replaced with an asterisk (*).
+// This is useful for masking sensitive information in logs or output.
+func MaskString(theString string) string {
+	var buf bytes.Buffer
+	for range theString {
+		buf.WriteRune('*')
+	}
+	return buf.String()
 }

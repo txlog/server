@@ -1,4 +1,4 @@
-package machineID
+package controllers
 
 import (
 	"database/sql"
@@ -16,7 +16,7 @@ type MachineID struct {
 	BeginTime *time.Time `json:"begin_time"`
 }
 
-// GetMachineID List the machine_id of the given hostname
+// GetMachineIDs List the machine_id of the given hostname
 //
 //	@Summary		List machine IDs
 //	@Description	List machine IDs
@@ -29,7 +29,7 @@ type MachineID struct {
 //	@Failure		400			{string}	string	"Invalid JSON input"
 //	@Failure		500			{string}	string	"Database error"
 //	@Router			/v1/machines/ids [get]
-func GetMachineID(database *sql.DB) gin.HandlerFunc {
+func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		hostname := c.Query("hostname")
 

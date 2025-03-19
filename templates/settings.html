@@ -4,19 +4,11 @@
   <div class="container-xl">
     <div class="card">
       <div class="row g-0">
-        <div class="col-12 col-md-3 border-end">
-          <div class="card-body">
-            <div class="list-group list-group-transparent">
-              <a href="/settings"
-                class="list-group-item list-group-item-action d-flex align-items-center active">Environment Variables</a>
-            </div>
-          </div>
-        </div>
-        <div class="col-12 col-md-9 d-flex flex-column">
+        <div class="col-12 col-md-12 d-flex flex-column">
           <div class="card-body">
             <div class="alert alert-info" role="alert">
                 <strong>Environment Variables</strong> are used to configure the
-                application. These values are loaded when the application
+                server. These values are loaded when the server
                 starts. <a href="https://txlog.rda.run/docs/server"
                 target="_blank">View the documentation</a> for more information
                 on each variable and how to change them.
@@ -64,13 +56,32 @@
 
           </div>
           <div class="card-body">
-            <h3 class="card-title mt-4">Execution Log</h3>
-            <div class="mb-3 row">
-              <label class="col-3 col-form-label">Retention time (days)</label>
-              <div class="col">
-                <input type="text" class="form-control" disabled="" value="{{ .executionRetentionDays }}">
+            <h3 class="card-title mt-4">Housekeeping</h3>
+            <div class="row g-2">
+              <div class="col-md">
+                <div class="form-label">Schedule Expression</div>
+                <input type="text" class="form-control" disabled="" value="{{ .cronRetentionExpression }}">
                 <small class="form-hint">
-                  Execution logs older than this value will be automatically deleted.
+                  The cron expression used to schedule the housekeeping job.
+                </small>
+              </div>
+              <div class="col-md">
+                <div class="form-label">Retention time</div>
+                <input type="text" class="form-control" disabled="" value="{{ .cronRetentionDays }}">
+                <small class="form-hint">
+                  Execution logs older than this value (in days) will be automatically deleted.
+                </small>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title mt-4">Statistics</h3>
+            <div class="row g-2">
+              <div class="col-md">
+                <div class="form-label">Schedule Expression</div>
+                <input type="text" class="form-control" disabled="" value="{{ .cronStatisticsExpression }}">
+                <small class="form-hint">
+                  The cron expression used to schedule the statistics job.
                 </small>
               </div>
             </div>

@@ -33,13 +33,16 @@ Run the server.
 
 ```bash
 docker run -d -p 8080:8080 \
+  -e INSTANCE=Datacenter 001 \
   -e PGSQL_HOST=postgres.example.com \
   -e PGSQL_PORT=5432 \
   -e PGSQL_USER=txlog \
   -e PGSQL_DB=txlog \
   -e PGSQL_PASSWORD=your_db_password \
   -e PGSQL_SSLMODE=require \
-  -e EXECUTION_RETENTION_DAYS=7 \
+  -e CRON_RETENTION_DAYS=7 \
+  -e CRON_RETENTION_EXPRESSION=0 2 * * * \
+  -e CRON_STATS_EXPRESSION=0 * * * * \
   cr.rda.run/txlog/server:main
 ```
 
@@ -78,6 +81,8 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
         env:
+        - name: INSTANCE
+          value: "Datacenter 001"
         - name: PGSQL_HOST
           value: "postgres.example.com"
         - name: PGSQL_PORT
@@ -93,8 +98,12 @@ spec:
               key: db-password
         - name: PGSQL_SSLMODE
           value: "require"
-        - name: EXECUTION_RETENTION_DAYS
+        - name: CRON_RETENTION_DAYS
           value: 7
+        - name: CRON_RETENTION_EXPRESSION
+          value: 0 2 * * *
+        - name: CRON_STATS_EXPRESSION
+          value: 0 * * * *
 ```
 
 If you want to use a production (stable) version, replace `main` by the version
@@ -123,6 +132,7 @@ go install github.com/swaggo/swag/cmd/swag@latest
 ### A `.env` file
 
 ```bash
+INSTANCE=Development environment
 GIN_MODE=debug
 PGSQL_HOST=127.0.0.1
 PGSQL_PORT=5432
@@ -130,8 +140,9 @@ PGSQL_USER=postgres
 PGSQL_DB=txlog
 PGSQL_PASSWORD=your_db_password
 PGSQL_SSLMODE=require
-EXECUTION_RETENTION_DAYS=1
-INSTANCE=Development environment
+CRON_RETENTION_DAYS=1
+CRON_RETENTION_EXPRESSION=0 2 * * *
+CRON_STATS_EXPRESSION=0 * * * *
 ```
 
 ### Development commands

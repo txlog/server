@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "continue.continue",
         "golang.go",
         "davidanson.vscode-markdownlint",
         "stkb.rewrap",

@@ -34,6 +34,7 @@ Run the server.
 ```bash
 docker run -d -p 8080:8080 \
   -e INSTANCE=Datacenter 001 \
+  -e LOG_LEVEL=INFO \
   -e PGSQL_HOST=postgres.example.com \
   -e PGSQL_PORT=5432 \
   -e PGSQL_USER=txlog \
@@ -83,6 +84,8 @@ spec:
         env:
         - name: INSTANCE
           value: "Datacenter 001"
+        - name: LOG_LEVEL
+          value: "INFO"
         - name: PGSQL_HOST
           value: "postgres.example.com"
         - name: PGSQL_PORT
@@ -133,6 +136,7 @@ go install github.com/swaggo/swag/cmd/swag@latest
 
 ```bash
 INSTANCE=Development environment
+LOG_LEVEL=DEBUG
 GIN_MODE=debug
 PGSQL_HOST=127.0.0.1
 PGSQL_PORT=5432

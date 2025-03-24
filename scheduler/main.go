@@ -1,136 +1,176 @@
 package scheduler
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
 	"os"
 	"regexp"
 
-	"github.com/go-co-op/gocron/v2"
+	"github.com/mileusna/crontab"
 	"github.com/txlog/server/database"
+	logger "github.com/txlog/server/logger"
 )
 
-// StartScheduler initializes and starts a cron scheduler for database
-// maintenance tasks. It configures a job to delete execution records older than
-// a specified number of days, defined by the CRON_RETENTION_DAYS environment
-// variable. If the variable is not set or is invalid, it defaults to 7 days.
-// The cron expression for the job is read from the CRON_RETENTION_EXPRESSION
-// environment variable. The scheduler runs until the application shuts down, at
-// which point it is gracefully stopped.
+// StartScheduler initializes and starts the scheduler system with two periodic
+// jobs:
+// - A housekeeping job that runs according to CRON_RETENTION_EXPRESSION
+// environment variable
+// - A statistics job that runs according to CRON_STATS_EXPRESSION environment
+// variable
+// The scheduler uses crontab for job scheduling and execution.
 func StartScheduler() {
-	s, _ := gocron.NewScheduler()
-	defer func() { _ = s.Shutdown() }()
+	ctab := crontab.New()
+	ctab.MustAddJob(os.Getenv("CRON_RETENTION_EXPRESSION"), housekeepingJob)
+	ctab.MustAddJob(os.Getenv("CRON_STATS_EXPRESSION"), statsJob)
 
-	_, _ = s.NewJob(
-		gocron.CronJob(os.Getenv("CRON_RETENTION_EXPRESSION"), false),
-		gocron.NewTask(
-			func() {
-				retentionDays := os.Getenv("CRON_RETENTION_DAYS")
-				if retentionDays == "" {
-					retentionDays = "7" // default to 7 days if not set
-				}
-				if regexp.MustCompile(`^[0-9]+$`).MatchString(retentionDays) {
-					_, _ = database.Db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL '" + retentionDays + " day'")
-				}
-
-				fmt.Println("Housekeeping: executions older than " + retentionDays + " days are deleted.")
-			},
-		),
-	)
-
-	s.Start()
+	logger.Info("Scheduler: started.")
 }
 
-// executeWithLock attempts to acquire a lock for the given task name and, if
-// successful, executes the task. It uses a mutex to prevent concurrent
-// execution of the same task across multiple instances. If the lock cannot be
-// acquired, it logs that the task is already running. After acquiring the lock,
-// it defers the release of the lock to ensure it's always released when the
-// function exits. It simulates a task execution with a 5-second sleep.
+// statsJob executes a periodic task to collect and store system statistics.
+// It manages concurrent access using a lock mechanism and performs the following:
+//
+// 1. Collects server counts for the current 30-day period and previous 30-day period
+// 2. Calculates percentage change between periods
+// 3. Stores results in the statistics table
+//
+// The function uses a "stats" lock to prevent concurrent execution across multiple instances.
+// If another instance is already running this job, it will exit early.
+//
+// The function handles database operations and logs any errors that occur during execution.
+// Results are stored in the statistics table with the key "servers-30-days".
+func statsJob() {
+	logger.Info("Statistics: executing task...")
+
+	lockName := "stats"
+
+	locked, err := acquireLock(lockName)
+	if err != nil {
+		logger.Error("Error acquiring lock: " + err.Error())
+		return
+	}
+
+	if !locked {
+		logger.Info("Another instance is running this job.")
+		return
+	}
+
+	defer releaseLock(lockName)
+
+	// servers-30-days: 350
+	var thisMonth, previousMonth int
+	err = database.Db.QueryRow(`
+	        WITH last30days AS (
+	          SELECT DISTINCT machine_id
+	          FROM executions
+	          WHERE executed_at >= NOW() - INTERVAL '30 days'
+	        ),
+
+	        last60days AS (
+	          SELECT DISTINCT machine_id
+	          FROM executions
+	          WHERE executed_at >= NOW() - INTERVAL '60 days' AND executed_at < NOW() - INTERVAL '30 days'
+	        )
+
+	        SELECT
+	          (SELECT COUNT(*) FROM last30days) AS this_month,
+	          (SELECT COUNT(*) FROM last60days) AS previous_month;
+	      `).Scan(&thisMonth, &previousMonth)
+
+	if err != nil {
+		logger.Error("Error querying statistics: " + err.Error())
+		return
+	}
+
+	var percentage float64
+	if previousMonth > 0 {
+		percentage = float64(thisMonth-previousMonth) / float64(previousMonth) * 100
+	}
+
+	_, err = database.Db.Exec(`
+	        INSERT INTO statistics (name, value, percentage, updated_at)
+	        VALUES ($1, $2, $3, NOW())
+	        ON CONFLICT (name) DO UPDATE
+	        SET value = $2, percentage = $3, updated_at = NOW()`,
+		"servers-30-days", thisMonth, percentage)
+
+	if err != nil {
+		logger.Error("Error inserting statistics: " + err.Error())
+		return
+	}
+
+	// executions-30-days: 632 8%
+	// installed-packages-30-days: 1.355 0%
+	// upgraded-packages-30-days: 656 4%
+
+	logger.Info("Statistics updated.")
+}
+
+// housekeepingJob performs database cleanup by deleting old execution records.
+// It uses a distributed lock mechanism to ensure only one instance runs at a time.
+// The retention period is configured via CRON_RETENTION_DAYS environment variable
+// (defaults to 7 days if not set). Records older than the retention period are
+// deleted from the executions table. The function logs its progress and any errors
+// encountered during the process.
+func housekeepingJob() {
+	logger.Info("Housekeeping: executing task...")
+
+	lockName := "retention-days"
+
+	locked, err := acquireLock(lockName)
+	if err != nil {
+		logger.Error("Error acquiring lock: " + err.Error())
+		return
+	}
+
+	if !locked {
+		logger.Info("Another instance is running this job.")
+		return
+	}
+
+	defer releaseLock(lockName)
+
+	retentionDays := os.Getenv("CRON_RETENTION_DAYS")
+	if retentionDays == "" {
+		retentionDays = "7" // default to 7 days if not set
+	}
+	if regexp.MustCompile(`^[0-9]+$`).MatchString(retentionDays) {
+		_, _ = database.Db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL $1 day", retentionDays)
+	}
+
+	logger.Info("Housekeeping: executions older than " + retentionDays + " days are deleted.")
+}
+
+// acquireLock attempts to obtain a lock for a given job name in the cron_lock table.
+// It uses a PostgreSQL INSERT with ON CONFLICT DO NOTHING to ensure atomic locking.
 //
 // Parameters:
-//   - taskName: A string representing the name of the task to execute. This name is used as the
-//     key for the mutex.
+//   - lockName: The name of the job to lock
 //
-// Example:
-//
-//	executeHousekeeping("my_important_task")
-func executeHousekeeping(taskName string) {
-	if acquireLock(taskName) {
-		defer releaseLock(taskName)
-		log.Printf("Executando tarefa: %s", taskName)
-
-		retentionDays := os.Getenv("CRON_RETENTION_DAYS")
-		if retentionDays == "" {
-			retentionDays = "7" // default to 7 days if not set
-		}
-		if regexp.MustCompile(`^[0-9]+$`).MatchString(retentionDays) {
-			_, _ = database.Db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL '" + retentionDays + " day'")
-		}
-
-		fmt.Println("Housekeeping: executions older than " + retentionDays + " days are deleted.")
-
-		log.Printf("Tarefa %s concluída", taskName)
-	} else {
-		log.Printf("Tarefa %s já em execução em outra instância", taskName)
+// Returns:
+//   - bool: true if the lock was acquired, false if it already exists
+//   - error: An error object if the database operation fails
+func acquireLock(lockName string) (bool, error) {
+	res, err := database.Db.Exec(`INSERT INTO cron_lock (job_name, locked_at) VALUES ($1, NOW()) ON CONFLICT (job_name) DO NOTHING`, lockName)
+	if err != nil {
+		return false, err
 	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	return rowsAffected > 0, nil
 }
 
-// acquireLock attempts to acquire a lock for a given task name. It starts a
-// database transaction, checks if a lock entry exists for the task, creates one
-// if it doesn't, and attempts to update the lock status to 'locked'. It returns
-// true if the lock was successfully acquired, and false otherwise. If any error
-// occurs during the process, it logs the error and rolls back the transaction.
-func acquireLock(taskName string) bool {
-	tx, err := database.Db.Begin()
-	if err != nil {
-		log.Printf("Falha ao iniciar transação: %v", err)
-		return false
-	}
-	defer tx.Rollback()
-
-	var locked bool
-	err = tx.QueryRow(`SELECT locked FROM cron_locks WHERE task_name = $1`, taskName).Scan(&locked)
-	if err != nil && err != sql.ErrNoRows {
-		log.Printf("Falha ao verificar lock: %v", err)
-		return false
-	}
-
-	if err == sql.ErrNoRows {
-		_, err = tx.Exec(`INSERT INTO cron_locks (task_name, locked) VALUES ($1, FALSE)`, taskName)
-		if err != nil {
-			log.Printf("Falha ao criar registro de lock: %v", err)
-			return false
-		}
-		locked = false
-	}
-
-	if locked {
-		return false
-	}
-
-	_, err = tx.Exec(`UPDATE cron_locks SET locked = TRUE, locked_at = NOW() WHERE task_name = $1`, taskName)
-	if err != nil {
-		log.Printf("Falha ao adquirir lock: %v", err)
-		return false
-	}
-
-	if err := tx.Commit(); err != nil {
-		log.Printf("Falha ao commitar transação: %v", err)
-		return false
-	}
-
-	return true
-}
-
-// releaseLock releases a lock in the database for a given task name. It updates
-// the cron_locks table, setting the locked column to FALSE and locked_at to
-// NULL for the specified task. If an error occurs during the database
-// operation, it logs the error.
-func releaseLock(taskName string) {
-	_, err := database.Db.Exec(`UPDATE cron_locks SET locked = FALSE, locked_at = NULL WHERE task_name = $1`, taskName)
-	if err != nil {
-		log.Printf("Falha ao liberar lock: %v", err)
-	}
+// releaseLock removes a lock entry from the cron_lock table for a given job name.
+// It helps in cleaning up the lock after a job has completed or when releasing a lock is necessary.
+//
+// Parameters:
+//   - lockName: string representing the name of the job whose lock needs to be released
+//
+// Returns:
+//   - error: returns any error that occurred during the lock release operation,
+//     nil if successful
+func releaseLock(lockName string) error {
+	_, err := database.Db.Exec(`DELETE FROM cron_lock WHERE job_name = $1`, lockName)
+	return err
 }

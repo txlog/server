@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -12,6 +11,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/lib/pq"
+	logger "github.com/txlog/server/logger"
 )
 
 var Db *sql.DB
@@ -19,6 +19,27 @@ var Db *sql.DB
 //go:embed migrations/*
 var migrationsFS embed.FS
 
+// ConnectDatabase establishes a connection to the PostgreSQL database using environment
+// variables for configuration. It performs the following steps:
+//
+// 1. Creates a database connection string using environment variables:
+//   - PGSQL_HOST: Database host
+//   - PGSQL_PORT: Database port
+//   - PGSQL_USER: Database user
+//   - PGSQL_DB: Database name
+//   - PGSQL_PASSWORD: Database password
+//   - PGSQL_SSLMODE: SSL mode for connection
+//
+// 2. Establishes connection to the database
+//
+// 3. Sets up database migrations:
+//   - Creates a postgres driver instance
+//   - Initializes migration source from embedded filesystem
+//   - Applies pending migrations
+//
+// The function will panic if it fails to establish the database connection.
+// It logs information about successful connection and migration application,
+// as well as any errors that occur during the migration process.
 func ConnectDatabase() {
 	psqlSetup := fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
@@ -32,31 +53,31 @@ func ConnectDatabase() {
 
 	db, errSql := sql.Open("postgres", psqlSetup)
 	if errSql != nil {
-		fmt.Println("There is an error while connecting to the database ", errSql)
+		logger.Error("There is an error while connecting to the database: " + errSql.Error())
 		panic(errSql)
 	} else {
 		Db = db
-		fmt.Println("Successfully connected to database")
+		logger.Info("Database: connection established.")
 	}
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		log.Fatalf("Failed to create database driver: %v", err)
+		logger.Error("Failed to create database driver: " + err.Error())
 	}
 
 	source, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
-		log.Fatalf("Failed to create migration source: %v", err)
+		logger.Error("Failed to create migration source: " + err.Error())
 	}
 
 	m, err := migrate.NewWithInstance("iofs", source, "postgres", driver)
 	if err != nil {
-		log.Fatalf("Failed to create migration instance: %v", err)
+		logger.Error("Failed to create migration instance: " + err.Error())
 	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Failed to apply migrations: %v", err)
+		logger.Error("Failed to apply migrations: " + err.Error())
 	}
 
-	fmt.Println("Migrations applied successfully")
+	logger.Info("Migrations: applied.")
 }

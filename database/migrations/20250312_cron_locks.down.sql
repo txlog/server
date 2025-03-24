@@ -1,1 +1,1 @@
-DROP TABLE cron_locks;
+DROP TABLE cron_lock;

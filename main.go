@@ -15,12 +15,13 @@ import (
 	"github.com/txlog/server/controllers"
 	"github.com/txlog/server/database"
 	_ "github.com/txlog/server/docs"
+	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/scheduler"
 	"github.com/txlog/server/util"
 )
 
 // version of the application
-var version = "1.1.1"
+var version = "1.2.0"
 
 //go:embed assets
 var staticFiles embed.FS
@@ -39,6 +40,8 @@ var templateFS embed.FS
 // @host			localhost:8080
 // @schemes		http https
 func main() {
+	logger.InitLogger()
+
 	if os.Getenv("GIN_MODE") == "" {
 		gin.SetMode(gin.ReleaseMode)
 	}

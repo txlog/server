@@ -57,9 +57,9 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 
 		_, err = tx.Exec(`
       INSERT INTO executions (
-        machine_id, hostname, executed_at, success, details, transactions_processed, transactions_sent
+        machine_id, hostname, executed_at, success, details, transactions_processed, transactions_sent, agent_version, os
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
       )`,
 			body.MachineID,
 			body.Hostname,
@@ -67,7 +67,9 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			body.Success,
 			body.Details,
 			body.TransactionsProcessed,
-			body.TransactionsSent)
+			body.TransactionsSent,
+			body.AgentVersion,
+			body.OS)
 
 		if err != nil {
 			tx.Rollback()
@@ -137,6 +139,8 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 		for rows.Next() {
 			var execution models.Execution
 			var executedAt sql.NullTime
+			var agentVersion sql.NullString
+			var os sql.NullString
 			err := rows.Scan(
 				&execution.ExecutionID,
 				&execution.MachineID,
@@ -146,7 +150,11 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 				&execution.Details,
 				&execution.TransactionsProcessed,
 				&execution.TransactionsSent,
+				&agentVersion,
+				&os,
 			)
+			execution.AgentVersion = agentVersion.String
+			execution.OS = os.String
 			if err != nil {
 				logger.Error("Error iterating executions:" + err.Error())
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})

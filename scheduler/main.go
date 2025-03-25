@@ -56,12 +56,8 @@ func statsJob() {
 
 	statistics.CountServers()
 	statistics.CountExecutions()
-
-	// installed-packages-30-days: 1.355 0%
-	// statistics.CountInstalledPackages()
-
-	// upgraded-packages-30-days: 656 4%
-	// statistics.CountUpgradedPackages()
+	statistics.CountInstalledPackages()
+	statistics.CountUpgradedPackages()
 
 	logger.Info("Statistics updated.")
 }

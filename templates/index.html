@@ -12,7 +12,15 @@
                 Last 30 days
               </div>
             </div>
-            <div class="h1 mb-3">350</div>
+            <div class="d-flex align-items-baseline">
+              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "servers-30-days" }}{{ .Value }}{{ end }}{{ end }}</div>
+              <div class="me-auto">
+                <span class="{{ range .statistics }}{{ if eq .Name "servers-30-days" }}{{ if gt .Percentage 0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }} d-inline-flex align-items-center lh-1">
+                  {{ range .statistics }}{{ if eq .Name "servers-30-days" }}{{ .Percentage }}{{ end }}{{ end }}%
+                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name "servers-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"></i>
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -26,17 +34,11 @@
               </div>
             </div>
             <div class="d-flex align-items-baseline">
-              <div class="h1 mb-0 me-2">632</div>
+              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ .Value }}{{ end }}{{ end }}</div>
               <div class="me-auto">
-                <span class="text-green d-inline-flex align-items-center lh-1">
-                  8%
-                  <!-- Download SVG icon from http://tabler.io/icons/icon/trending-up -->
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon ms-1 icon-2">
-                    <path d="M3 17l6 -6l4 4l8 -8"></path>
-                    <path d="M14 7l7 0l0 7"></path>
-                  </svg>
+                <span class="{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }} d-inline-flex align-items-center lh-1">
+                  {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ .Percentage }}{{ end }}{{ end }}%
+                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"></i>
                 </span>
               </div>
             </div>
@@ -53,15 +55,11 @@
               </div>
             </div>
             <div class="d-flex align-items-baseline">
-              <div class="h1 mb-3 me-2">1.355</div>
+              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ .Value }}{{ end }}{{ end }}</div>
               <div class="me-auto">
-                <span class="text-yellow d-inline-flex align-items-center lh-1">
-                  0%
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon ms-1 icon-2">
-                    <path d="M5 12l14 0"></path>
-                  </svg>
+                <span class="{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }} d-inline-flex align-items-center lh-1">
+                  {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ .Percentage }}{{ end }}{{ end }}%
+                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"></i>
                 </span>
               </div>
             </div>
@@ -78,17 +76,11 @@
               </div>
             </div>
             <div class="d-flex align-items-baseline">
-              <div class="h1 mb-3 me-2">656</div>
+              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ .Value }}{{ end }}{{ end }}</div>
               <div class="me-auto">
-                <span class="text-green d-inline-flex align-items-center lh-1">
-                  4%
-                  <!-- Download SVG icon from http://tabler.io/icons/icon/trending-up -->
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon ms-1 icon-2">
-                    <path d="M3 17l6 -6l4 4l8 -8"></path>
-                    <path d="M14 7l7 0l0 7"></path>
-                  </svg>
+                <span class="{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }} d-inline-flex align-items-center lh-1">
+                  {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ .Percentage }}{{ end }}{{ end }}%
+                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"></i>
                 </span>
               </div>
             </div>

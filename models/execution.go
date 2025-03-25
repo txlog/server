@@ -11,4 +11,6 @@ type Execution struct {
 	Details               string     `json:"details,omitempty"`
 	TransactionsProcessed int        `json:"transactions_processed,omitempty"`
 	TransactionsSent      int        `json:"transactions_sent,omitempty"`
+	AgentVersion          string     `json:"agent_version,omitempty"`
+	OS                    string     `json:"os,omitempty"`
 }

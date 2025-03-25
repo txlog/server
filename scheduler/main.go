@@ -7,14 +7,16 @@ import (
 	"github.com/mileusna/crontab"
 	"github.com/txlog/server/database"
 	logger "github.com/txlog/server/logger"
+	"github.com/txlog/server/statistics"
 )
 
 // StartScheduler initializes and starts the scheduler system with two periodic
 // jobs:
-// - A housekeeping job that runs according to CRON_RETENTION_EXPRESSION
-// environment variable
-// - A statistics job that runs according to CRON_STATS_EXPRESSION environment
-// variable
+//   - A housekeeping job that runs according to CRON_RETENTION_EXPRESSION
+//     environment variable
+//   - A statistics job that runs according to CRON_STATS_EXPRESSION environment
+//     variable
+//
 // The scheduler uses crontab for job scheduling and execution.
 func StartScheduler() {
 	ctab := crontab.New()
@@ -24,18 +26,16 @@ func StartScheduler() {
 	logger.Info("Scheduler: started.")
 }
 
-// statsJob executes a periodic task to collect and store system statistics.
-// It manages concurrent access using a lock mechanism and performs the following:
+// statsJob executes statistical tasks for the system while ensuring only one instance
+// runs at a time using a distributed lock mechanism.
 //
-// 1. Collects server counts for the current 30-day period and previous 30-day period
-// 2. Calculates percentage change between periods
-// 3. Stores results in the statistics table
+// The function performs the following operations:
+// 1. Attempts to acquire a lock named "stats"
+// 2. If lock acquisition fails or another instance is running, exits early
+// 3. Counts servers for the last 30 days
+// 4. Automatically releases the lock when the function completes
 //
-// The function uses a "stats" lock to prevent concurrent execution across multiple instances.
-// If another instance is already running this job, it will exit early.
-//
-// The function handles database operations and logs any errors that occur during execution.
-// Results are stored in the statistics table with the key "servers-30-days".
+// Note: Some statistical operations are currently commented out in the implementation.
 func statsJob() {
 	logger.Info("Statistics: executing task...")
 
@@ -54,51 +54,14 @@ func statsJob() {
 
 	defer releaseLock(lockName)
 
-	// servers-30-days: 350
-	var thisMonth, previousMonth int
-	err = database.Db.QueryRow(`
-	        WITH last30days AS (
-	          SELECT DISTINCT machine_id
-	          FROM executions
-	          WHERE executed_at >= NOW() - INTERVAL '30 days'
-	        ),
+	statistics.CountServers()
+	statistics.CountExecutions()
 
-	        last60days AS (
-	          SELECT DISTINCT machine_id
-	          FROM executions
-	          WHERE executed_at >= NOW() - INTERVAL '60 days' AND executed_at < NOW() - INTERVAL '30 days'
-	        )
-
-	        SELECT
-	          (SELECT COUNT(*) FROM last30days) AS this_month,
-	          (SELECT COUNT(*) FROM last60days) AS previous_month;
-	      `).Scan(&thisMonth, &previousMonth)
-
-	if err != nil {
-		logger.Error("Error querying statistics: " + err.Error())
-		return
-	}
-
-	var percentage float64
-	if previousMonth > 0 {
-		percentage = float64(thisMonth-previousMonth) / float64(previousMonth) * 100
-	}
-
-	_, err = database.Db.Exec(`
-	        INSERT INTO statistics (name, value, percentage, updated_at)
-	        VALUES ($1, $2, $3, NOW())
-	        ON CONFLICT (name) DO UPDATE
-	        SET value = $2, percentage = $3, updated_at = NOW()`,
-		"servers-30-days", thisMonth, percentage)
-
-	if err != nil {
-		logger.Error("Error inserting statistics: " + err.Error())
-		return
-	}
-
-	// executions-30-days: 632 8%
 	// installed-packages-30-days: 1.355 0%
+	// statistics.CountInstalledPackages()
+
 	// upgraded-packages-30-days: 656 4%
+	// statistics.CountUpgradedPackages()
 
 	logger.Info("Statistics updated.")
 }

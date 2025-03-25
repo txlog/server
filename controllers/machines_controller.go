@@ -2,12 +2,12 @@ package controllers
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	logger "github.com/txlog/server/logger"
 )
 
 type MachineID struct {
@@ -54,7 +54,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			fmt.Println("Error querying machine_id:", err)
+			logger.Error("Error querying machine_id: " + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
@@ -70,7 +70,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 				&beginTime,
 			)
 			if err != nil {
-				fmt.Println("Error iterating machine_id:", err)
+				logger.Error("Error iterating machine_id: " + err.Error())
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 				return
 			}

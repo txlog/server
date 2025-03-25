@@ -3,13 +3,13 @@ package controllers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/txlog/server/models"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	logger "github.com/txlog/server/logger"
 )
 
 // GetTransactionIDs Get the saved transactions IDs for a host
@@ -32,7 +32,7 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 		err = json.Unmarshal(data, &body)
 		if err != nil {
 			c.AbortWithStatusJSON(400, "Invalid JSON input")
-			fmt.Println("Invalid JSON input:", err)
+			logger.Error("Invalid JSON input: " + err.Error())
 			return
 		}
 
@@ -46,14 +46,14 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 			body.Hostname,
 		)
 		if err != nil {
-			fmt.Println(err)
+			logger.Error("Couldn't get saved transaction_ids for this host: " + err.Error())
 			c.AbortWithStatusJSON(400, "Couldn't get saved transaction_ids for this host.")
 		} else {
 			var transactions []int
 			for rows.Next() {
 				var id int
 				if err := rows.Scan(&id); err != nil {
-					fmt.Println(err)
+					logger.Error("Error scanning transaction_ids: " + err.Error())
 					c.AbortWithStatusJSON(500, "Error scanning transaction_ids")
 					return
 				}
@@ -102,7 +102,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			fmt.Println("Error querying transactions:", err)
+			logger.Error("Error querying transactions: " + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
@@ -129,7 +129,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 			)
 
 			if err != nil {
-				fmt.Println("Error iterating transactions:", err)
+				logger.Error("Error iterating transactions: " + err.Error())
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 				return
 			}
@@ -170,7 +170,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		err = json.Unmarshal(data, &body)
 		if err != nil {
 			c.AbortWithStatusJSON(400, "Invalid JSON input")
-			fmt.Println("Invalid JSON input:", err)
+			logger.Error("Invalid JSON input: " + err.Error())
 			return
 		}
 
@@ -190,7 +190,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		// Start database transaction
 		tx, err := database.Begin()
 		if err != nil {
-			fmt.Println("Error beginning transaction:", err)
+			logger.Error("Error beginning transaction: " + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
 			return
 		}
@@ -219,7 +219,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			tx.Rollback()
-			fmt.Println("Error inserting transaction:", err)
+			logger.Error("Error inserting transaction: " + err.Error())
 			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
 			return
 		}
@@ -245,7 +245,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 
 			if err != nil {
 				tx.Rollback()
-				fmt.Println("Error inserting transaction item:", err)
+				logger.Error("Error inserting transaction item: " + err.Error())
 				c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
 				return
 			}
@@ -254,7 +254,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		// Commit the database transaction
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()
-			fmt.Println("Error committing transaction:", err)
+			logger.Error("Error committing transaction: " + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
 			return
 		}

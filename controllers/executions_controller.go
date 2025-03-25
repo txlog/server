@@ -3,12 +3,12 @@ package controllers
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 )
 
@@ -36,7 +36,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		err = json.Unmarshal(data, &body)
 		if err != nil {
 			c.AbortWithStatusJSON(400, "Invalid JSON input")
-			fmt.Println("Invalid JSON input:", err)
+			logger.Error("Invalid JSON input:" + err.Error())
 			return
 		}
 
@@ -50,7 +50,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		// Start database transaction
 		tx, err := database.Begin()
 		if err != nil {
-			fmt.Println("Error beginning transaction:", err)
+			logger.Error("Error beginning transaction:" + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
 			return
 		}
@@ -71,7 +71,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			tx.Rollback()
-			fmt.Println("Error inserting execution:", err)
+			logger.Error("Error inserting execution:" + err.Error())
 			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
 			return
 		}
@@ -79,7 +79,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		// Commit the database transaction
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()
-			fmt.Println("Error committing execution:", err)
+			logger.Error("Error committing execution:" + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
@@ -127,7 +127,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if err != nil {
-			fmt.Println("Error querying executions:", err)
+			logger.Error("Error querying executions:" + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
@@ -148,7 +148,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 				&execution.TransactionsSent,
 			)
 			if err != nil {
-				fmt.Println("Error iterating executions:", err)
+				logger.Error("Error iterating executions:" + err.Error())
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 				return
 			}
@@ -181,7 +181,7 @@ func GetExecutionsIndex(database *sql.DB) gin.HandlerFunc {
 		var total int
 		err = database.QueryRow("SELECT COUNT(*) FROM executions").Scan(&total)
 		if err != nil {
-			fmt.Println("Error counting executions:", err)
+			logger.Error("Error counting executions:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -206,7 +206,7 @@ func GetExecutionsIndex(database *sql.DB) gin.HandlerFunc {
     `, limit, offset)
 
 		if err != nil {
-			fmt.Println("Error listing executions:", err)
+			logger.Error("Error listing executions:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -229,7 +229,7 @@ func GetExecutionsIndex(database *sql.DB) gin.HandlerFunc {
 				&execution.TransactionsSent,
 			)
 			if err != nil {
-				fmt.Println("Error iterating machine_id:", err)
+				logger.Error("Error iterating machine_id:" + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 					"error": err.Error(),
 				})

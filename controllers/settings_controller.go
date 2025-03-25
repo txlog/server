@@ -8,6 +8,19 @@ import (
 	"github.com/txlog/server/util"
 )
 
+// GetSettingsIndex handles requests to the settings page by rendering the settings.html template
+// with environment variables related to PostgreSQL configuration and cron job settings.
+//
+// The function populates the template with:
+// - PostgreSQL connection details (host, port, user, database name, password [masked], SSL mode)
+// - Retention policy settings (days and cron expression)
+// - Statistics generation cron expression
+//
+// Parameters:
+//   - ctx: A gin.Context pointer containing the HTTP request context
+//
+// Returns:
+//   - Renders the settings.html template with HTTP 200 OK status
 func GetSettingsIndex(ctx *gin.Context) {
 	ctx.HTML(http.StatusOK, "settings.html", gin.H{
 		"Context":                  ctx,

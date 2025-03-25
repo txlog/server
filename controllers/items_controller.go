@@ -2,13 +2,13 @@ package controllers
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 
 	"github.com/txlog/server/models"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	logger "github.com/txlog/server/logger"
 )
 
 // GetItemIDs Get the saved item IDs for a transaction
@@ -58,14 +58,14 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 			transactionID,
 		)
 		if err != nil {
-			fmt.Println(err)
+			logger.Error("Couldn't get saved item_ids for this transaction: " + err.Error())
 			c.AbortWithStatusJSON(400, "Couldn't get saved item_ids for this transaction.")
 		} else {
 			var items []int
 			for rows.Next() {
 				var id int
 				if err := rows.Scan(&id); err != nil {
-					fmt.Println(err)
+					logger.Error("Error scanning transaction_ids: " + err.Error())
 					c.AbortWithStatusJSON(500, "Error scanning transaction_ids")
 					return
 				}
@@ -145,7 +145,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			fmt.Println("Error querying transaction:", err)
+			logger.Error("Error querying transaction: " + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
@@ -170,7 +170,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			)
 
 			if err != nil {
-				fmt.Println("Error reading transaction:", err)
+				logger.Error("Error reading transaction: " + err.Error())
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 				return
 			}
@@ -206,7 +206,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			fmt.Println("Error querying items:", err)
+			logger.Error("Error querying items: " + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
@@ -226,7 +226,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			)
 
 			if err != nil {
-				fmt.Println("Error reading transaction:", err)
+				logger.Error("Error reading transaction: " + err.Error())
 				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 				return
 			}

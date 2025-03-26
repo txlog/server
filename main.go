@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -54,6 +56,66 @@ func main() {
 	r.Use(EnvironmentVariablesMiddleware())
 
 	funcMap := template.FuncMap{
+		"formatPercentage": func(porcentagem float64) string {
+			s := strconv.FormatFloat(porcentagem, 'f', 2, 64)
+			s = strings.ReplaceAll(s, ".", ",")
+
+			parts := strings.Split(s, ",")
+			integerPart := parts[0]
+			decimalPart := parts[1]
+
+			isNegative := strings.HasPrefix(integerPart, "-")
+			if isNegative {
+				integerPart = integerPart[1:]
+			}
+
+			n := len(integerPart)
+			if n <= 3 {
+				if isNegative {
+					return "-" + integerPart + "," + decimalPart
+				}
+				return integerPart + "," + decimalPart
+			}
+
+			var result string
+			for i := 0; i < n; i++ {
+				if (n-i)%3 == 0 && i != 0 {
+					result += "."
+				}
+				result += string(integerPart[i])
+			}
+			if isNegative {
+				return "-" + result + "," + decimalPart
+			}
+			return result + "," + decimalPart
+		},
+		"formatInteger": func(num int) string {
+			s := strconv.Itoa(num)
+			isNegative := strings.HasPrefix(s, "-")
+			if isNegative {
+				s = s[1:]
+			}
+
+			n := len(s)
+			if n <= 3 {
+				if isNegative {
+					return "-" + s
+				}
+				return s
+			}
+
+			var result string
+			for i := 0; i < n; i++ {
+				if (n-i)%3 == 0 && i != 0 {
+					result += "."
+				}
+				result += string(s[i])
+			}
+			if isNegative {
+				return "-" + result
+			}
+			return result
+		},
 		"iterate": func(start, count int) []int {
 			var items []int
 			for i := start; i <= count; i++ {

@@ -34,7 +34,7 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 		var rows *sql.Rows
 		var err error
 
-		limit := 10
+		limit := 100
 		page := 1
 
 		if pageStr := c.DefaultQuery("page", "1"); pageStr != "" {

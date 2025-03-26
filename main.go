@@ -71,6 +71,7 @@ func main() {
 				return b
 			}
 		},
+		"version": func() string { return version },
 	}
 
 	if os.Getenv("GIN_MODE") == "" {

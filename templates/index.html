@@ -143,22 +143,22 @@
                   <th>Execution Time</th>
                   <th>Transactions Processed</th>
                   <th>Transactions Sent</th>
-                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
                 {{ with .executions }}
                   {{ range . }}
                     <tr>
-                      <td><span class="text-secondary">#{{ .ExecutionID }}</span></td>
-                      <td data-bs-toggle="tooltip" data-bs-placement="right" title="{{ .MachineID }}"><a href="/executions/{{ .ExecutionID }}" class="text-reset" tabindex="-1">{{ .Hostname }}</a></td>
+                      <td><a href="/executions/{{ .ExecutionID }}">
+                        <span class="badge bg-default text-default-fg">
+                          <span class="badge {{ if eq .Success true }}bg-success{{ else }}bg-danger{{ end }} me-1"></span>
+                          {{ .ExecutionID }}
+                        </span>
+                      </a></td>
+                      <td><a href="/machines/{{ .MachineID }}"><kbd>{{ .Hostname }}</kbd></a></td>
                       <td>{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</td>
                       <td>{{ .TransactionsProcessed }}</td>
                       <td>{{ .TransactionsSent }}</td>
-                      <td {{ if eq .Success false }}data-bs-toggle="tooltip" data-bs-placement="left" title="{{ .Details }}"{{ end }}>
-                        <span class="badge {{ if eq .Success true }}bg-success{{ else }}bg-danger{{ end }} me-1"></span>
-                        {{ if eq .Success true }}Success{{ else }}Fail{{ end }}
-                      </td>
                     </tr>
                   {{ end }}
                 {{ end }}

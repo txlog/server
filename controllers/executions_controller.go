@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -170,94 +169,56 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
-func GetExecutionsIndex(database *sql.DB) gin.HandlerFunc {
+func GetExecutionID(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var rows *sql.Rows
-		var err error
-
-		limit := 10
-		page := 1
-
-		if pageStr := c.DefaultQuery("page", "1"); pageStr != "" {
-			if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-				page = p
-			}
-		}
-		offset := (page - 1) * limit
-
-		// First, get total count
-		var total int
-		err = database.QueryRow("SELECT COUNT(*) FROM executions").Scan(&total)
-		if err != nil {
-			logger.Error("Error counting executions:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
+		var execution models.Execution
+		if err := c.ShouldBindUri(&execution); err != nil {
+			c.JSON(400, gin.H{"msg": err.Error()})
 			return
 		}
 
-		totalPages := (total + limit - 1) / limit
-
-		rows, err = database.Query(`
-      SELECT
-        id,
-        machine_id,
-        hostname,
-        executed_at,
-        success,
-        details,
-        transactions_processed,
-        transactions_sent
+		row := database.QueryRow(`
+      SELECT id, machine_id, hostname, executed_at, success,
+        details, transactions_processed, transactions_sent,
+        agent_version, os
       FROM executions
-      ORDER BY executed_at DESC
-      LIMIT $1 OFFSET $2
-    `, limit, offset)
+      WHERE id = $1`,
+			execution.ExecutionID)
 
+		var executedAt sql.NullTime
+		var agentVersion sql.NullString
+		var os sql.NullString
+		execution = models.Execution{}
+		err := row.Scan(
+			&execution.ExecutionID,
+			&execution.MachineID,
+			&execution.Hostname,
+			&executedAt,
+			&execution.Success,
+			&execution.Details,
+			&execution.TransactionsProcessed,
+			&execution.TransactionsSent,
+			&agentVersion,
+			&os,
+		)
 		if err != nil {
-			logger.Error("Error listing executions:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
+			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		defer rows.Close()
-
-		executions := []models.Execution{}
-		for rows.Next() {
-			var execution models.Execution
-			var executedAt sql.NullTime
-			err := rows.Scan(
-				&execution.ExecutionID,
-				&execution.MachineID,
-				&execution.Hostname,
-				&execution.ExecutedAt,
-				&execution.Success,
-				&execution.Details,
-				&execution.TransactionsProcessed,
-				&execution.TransactionsSent,
-			)
-			if err != nil {
-				logger.Error("Error iterating machine_id:" + err.Error())
-				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-			if executedAt.Valid {
-				execution.ExecutedAt = &executedAt.Time
-			}
-			executions = append(executions, execution)
+		if executedAt.Valid {
+			execution.ExecutedAt = &executedAt.Time
+		}
+		if agentVersion.Valid {
+			execution.AgentVersion = agentVersion.String
+		}
+		if os.Valid {
+			execution.OS = os.String
 		}
 
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"Context":      c,
-			"title":        "Assets",
-			"executions":   executions,
-			"page":         page,
-			"totalPages":   totalPages,
-			"totalRecords": total,
-			"limit":        limit,
-			"offset":       offset,
+		c.HTML(http.StatusOK, "execution_id.html", gin.H{
+			"Context":   c,
+			"title":     "Execution",
+			"execution": execution,
 		})
 	}
 }

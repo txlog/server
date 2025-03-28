@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Execution struct {
-	ExecutionID           string     `json:"execution_id,omitempty"`
+	ExecutionID           string     `json:"execution_id,omitempty" uri:"execution_id" binding:"required"`
 	MachineID             string     `json:"machine_id"`
 	Hostname              string     `json:"hostname"`
 	ExecutedAt            *time.Time `json:"executed_at"`

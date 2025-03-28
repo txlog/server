@@ -1,0 +1,64 @@
+{{ template "header.html" . }}
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Execution #{{ .execution.ExecutionID }}</h3>
+      </div>
+      <div class="card-body">
+        <div class="datagrid">
+          <div class="datagrid-item">
+            <div class="datagrid-title">Hostname</div>
+            <div class="datagrid-content">{{ .execution.Hostname }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Machine ID</div>
+            <div class="datagrid-content"><kbd>{{ .execution.MachineID }}</kbd></div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Executed at</div>
+            <div class="datagrid-content">
+              {{ if .execution.ExecutedAt }}{{ .execution.ExecutedAt }}{{ else }}–{{ end }}
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Execution status</div>
+            <div class="datagrid-content">
+              {{ if eq .execution.Success true }}<span class="status status-green"> Success </span>{{ else }}<span class="status status-red"> Fail </span>{{ end }}
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Agent version</div>
+            <div class="datagrid-content">
+              {{ if .execution.AgentVersion }}<kbd>{{ .execution.AgentVersion }}</kbd>{{ else }}–{{ end }}
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">OS version</div>
+            <div class="datagrid-content">
+              {{ if .execution.OS }}
+                <div class="d-flex align-items-center">
+                  <span class="avatar avatar-xs me-2 rounded" style="background-image: url(/assets/almalinux.png)"></span>
+                  {{ .execution.OS }}
+                </div>
+              {{ else }}–{{ end }}
+            </div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">&nbsp;</div>
+            <div class="datagrid-content">&nbsp;</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">{{ if eq .execution.Success false }}Execution log{{ else }}&nbsp;{{ end }}</div>
+            <div class="datagrid-content">
+              {{ if eq .execution.Success false }}<pre>{{ .execution.Details }}</pre>{{ else }}&nbsp;{{ end }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ template "footer.html" . }}

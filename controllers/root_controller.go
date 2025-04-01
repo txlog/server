@@ -55,9 +55,14 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		if total > 1000 {
+			total = 1000
+		}
+
 		totalPages := (total + limit - 1) / limit
 
 		rows, err = database.Query(`
+    WITH recent_executions AS (
       SELECT
         id,
         machine_id,
@@ -69,8 +74,13 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
         transactions_sent
       FROM executions
       ORDER BY executed_at DESC
-      LIMIT $1 OFFSET $2
-    `, limit, offset)
+      LIMIT 1000
+    )
+    SELECT *
+    FROM recent_executions
+    ORDER BY executed_at DESC
+    LIMIT $1 OFFSET $2
+  `, limit, offset)
 
 		if err != nil {
 			logger.Error("Error listing executions:" + err.Error())

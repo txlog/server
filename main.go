@@ -154,7 +154,7 @@ func main() {
 
 	r.GET("/", controllers.GetRootIndex(database.Db))
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
-	// r.GET("/machines/:id", controllers.GetMachineID(database.Db))
+	r.GET("/machines/:machine_id", controllers.GetMachineID(database.Db))
 	r.GET("/settings", controllers.GetSettingsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(

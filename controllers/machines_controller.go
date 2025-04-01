@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	logger "github.com/txlog/server/logger"
+	"github.com/txlog/server/models"
 )
 
 type MachineID struct {
@@ -81,5 +82,101 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, machines)
+	}
+}
+
+func GetMachineID(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		machineID := c.Param("machine_id")
+		if machineID == "" {
+			c.HTML(http.StatusBadRequest, "500.html", gin.H{
+				"error": "machine_id is required",
+			})
+			return
+		}
+
+		// Last 10 executions with transactions sent
+		// All machines with this hostname
+
+		row := database.QueryRow(`
+        SELECT hostname FROM executions WHERE machine_id = $1
+    `, machineID)
+
+		var hostname string
+		if err := row.Scan(&hostname); err != nil {
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		if hostname == "" {
+			c.HTML(http.StatusNotFound, "404.html", gin.H{
+				"error": "Asset ID not found",
+			})
+			return
+		}
+
+		rows, err := database.Query(`
+      SELECT id, machine_id, hostname, executed_at, success,
+        details, transactions_processed, transactions_sent,
+        agent_version, os
+      FROM executions
+      WHERE machine_id = $1
+      AND transactions_sent > 0
+      ORDER BY executed_at DESC
+      LIMIT 10`,
+			machineID)
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		defer rows.Close()
+
+		var executions []models.Execution
+		for rows.Next() {
+			var executedAt sql.NullTime
+			var agentVersion sql.NullString
+			var os sql.NullString
+			var exec models.Execution
+			err := rows.Scan(
+				&exec.ExecutionID,
+				&exec.MachineID,
+				&exec.Hostname,
+				&executedAt,
+				&exec.Success,
+				&exec.Details,
+				&exec.TransactionsProcessed,
+				&exec.TransactionsSent,
+				&agentVersion,
+				&os,
+			)
+			if err != nil {
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			if executedAt.Valid {
+				exec.ExecutedAt = &executedAt.Time
+			}
+			if agentVersion.Valid {
+				exec.AgentVersion = agentVersion.String
+			}
+			if os.Valid {
+				exec.OS = os.String
+			}
+			executions = append(executions, exec)
+		}
+
+		c.HTML(http.StatusOK, "machine_id.html", gin.H{
+			"Context":    c,
+			"title":      "Assets",
+			"hostname":   hostname,
+			"machine_id": machineID,
+			"executions": executions,
+		})
 	}
 }

@@ -157,6 +157,7 @@ func main() {
 	r.GET("/machines/:machine_id", controllers.GetMachineID(database.Db))
 	r.GET("/settings", controllers.GetSettingsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
+	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
 		ginSwagger.PersistAuthorization(true),

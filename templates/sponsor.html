@@ -1,0 +1,37 @@
+{{ template "header.html" . }}
+<!-- Page header -->
+<div class="page-header d-print-none text-white">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <!-- Page pre-title -->
+        <h2 class="page-title">
+          {{ .title }}
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-cards">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <iframe
+              id='kofiframe'
+              src='https://ko-fi.com/rdeavila/?hidefeed=true&widget=true&embed=true&preview=true' \
+              style='border:none;width:100%;background:#ffffff;'
+              height='712'
+              title='rdeavila'>
+            </iframe>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{{ template "footer.html" . }}

@@ -171,12 +171,68 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			executions = append(executions, exec)
 		}
 
+		rows, err = database.Query(`
+      SELECT e.machine_id, e.hostname, e.executed_at, e.agent_version, e.os
+      FROM executions e
+      INNER JOIN (
+        SELECT machine_id, MAX(executed_at) as max_executed_at
+        FROM executions
+        WHERE hostname = $1
+        AND machine_id != $2
+        GROUP BY machine_id
+      ) latest ON e.machine_id = latest.machine_id
+        AND e.executed_at = latest.max_executed_at
+      WHERE e.hostname = $1
+      AND e.machine_id != $2
+      AND e.success is true
+      ORDER BY e.executed_at DESC;`,
+			hostname, machineID)
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		defer rows.Close()
+
+		var otherAssets []models.Execution
+		for rows.Next() {
+			var executedAt sql.NullTime
+			var agentVersion sql.NullString
+			var os sql.NullString
+			var exec models.Execution
+			err := rows.Scan(
+				&exec.MachineID,
+				&exec.Hostname,
+				&executedAt,
+				&agentVersion,
+				&os,
+			)
+			if err != nil {
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			if executedAt.Valid {
+				exec.ExecutedAt = &executedAt.Time
+			}
+			if agentVersion.Valid {
+				exec.AgentVersion = agentVersion.String
+			}
+			if os.Valid {
+				exec.OS = os.String
+			}
+			otherAssets = append(otherAssets, exec)
+		}
+
 		c.HTML(http.StatusOK, "machine_id.html", gin.H{
-			"Context":    c,
-			"title":      "Assets",
-			"hostname":   hostname,
-			"machine_id": machineID,
-			"executions": executions,
+			"Context":      c,
+			"title":        "Assets",
+			"hostname":     hostname,
+			"machine_id":   machineID,
+			"executions":   executions,
+			"other_assets": otherAssets,
 		})
 	}
 }

@@ -99,6 +99,12 @@ const docTemplate = `{
                             "type": "string"
                         }
                     },
+                    "202": {
+                        "description": "Execution not created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     "400": {
                         "description": "Invalid JSON input",
                         "schema": {
@@ -323,7 +329,13 @@ const docTemplate = `{
     "definitions": {
         "models.Execution": {
             "type": "object",
+            "required": [
+                "execution_id"
+            ],
             "properties": {
+                "agent_version": {
+                    "type": "string"
+                },
                 "details": {
                     "type": "string"
                 },
@@ -337,6 +349,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "machine_id": {
+                    "type": "string"
+                },
+                "os": {
                     "type": "string"
                 },
                 "success": {

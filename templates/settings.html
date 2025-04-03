@@ -79,8 +79,6 @@
                 <input type="text" class="form-control" disabled="" value="{{ .pgsqlSslmode }}">
               </div>
             </div>
-
-
           </div>
           <div class="card-body">
             <h3 class="card-title mt-4">Housekeeping</h3>
@@ -97,6 +95,19 @@
                 <input type="text" class="form-control" disabled="" value="{{ .cronRetentionDays }}">
                 <small class="form-hint">
                   Execution logs older than this value (in days) will be automatically deleted.
+                </small>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title mt-4">Transactions</h3>
+            <div class="row g-2">
+              <div class="col-md">
+                <div class="form-label">Ignore empty transactions?</div>
+                <input type="text" class="form-control" disabled="" value="{{ if eq .ignoreEmptyTransaction "true" }}true{{ else }}false{{ end }}">
+                <small class="form-hint">
+                  If set to true, empty transactions will be ignored and not
+                  stored in the database.
                 </small>
               </div>
             </div>

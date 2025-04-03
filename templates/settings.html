@@ -100,13 +100,13 @@
             </div>
           </div>
           <div class="card-body">
-            <h3 class="card-title mt-4">Transactions</h3>
+            <h3 class="card-title mt-4">Executions</h3>
             <div class="row g-2">
               <div class="col-md">
-                <div class="form-label">Ignore empty transactions?</div>
-                <input type="text" class="form-control" disabled="" value="{{ if eq .ignoreEmptyTransaction "true" }}true{{ else }}false{{ end }}">
+                <div class="form-label">Ignore empty executions?</div>
+                <input type="text" class="form-control" disabled="" value="{{ if eq .ignoreEmptyExecution "true" }}true{{ else }}false{{ end }}">
                 <small class="form-hint">
-                  If set to true, empty transactions will be ignored and not
+                  If set to true, empty executions will be ignored and not
                   stored in the database.
                 </small>
               </div>

@@ -34,6 +34,6 @@ func GetSettingsIndex(ctx *gin.Context) {
 		"cronRetentionDays":        os.Getenv("CRON_RETENTION_DAYS"),
 		"cronRetentionExpression":  os.Getenv("CRON_RETENTION_EXPRESSION"),
 		"cronStatisticsExpression": os.Getenv("CRON_STATS_EXPRESSION"),
-		"ignoreEmptyTransaction":   os.Getenv("IGNORE_EMPTY_TRANSACTION"),
+		"ignoreEmptyExecution":     os.Getenv("IGNORE_EMPTY_EXECUTION"),
 	})
 }

@@ -48,8 +48,8 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			executedAt.Valid = true
 		}
 
-		if body.TransactionsSent == 0 && os.Getenv("IGNORE_EMPTY_TRANSACTION") == "true" {
-			c.JSON(http.StatusAccepted, gin.H{"message": "No transactions to process"})
+		if body.TransactionsSent == 0 && os.Getenv("IGNORE_EMPTY_EXECUTION") == "true" {
+			c.JSON(http.StatusAccepted, gin.H{"message": "Execution will be ignored: no transactions sent"})
 			return
 		}
 

@@ -44,7 +44,7 @@ docker run -d -p 8080:8080 \
   -e CRON_RETENTION_DAYS=7 \
   -e CRON_RETENTION_EXPRESSION=0 2 * * * \
   -e CRON_STATS_EXPRESSION=0 * * * * \
-  -e IGNORE_EMPTY_TRANSACTION=true \
+  -e IGNORE_EMPTY_EXECUTION=true \
   cr.rda.run/txlog/server:main
 ```
 
@@ -108,7 +108,7 @@ spec:
           value: 0 2 * * *
         - name: CRON_STATS_EXPRESSION
           value: 0 * * * *
-        - name: IGNORE_EMPTY_TRANSACTION
+        - name: IGNORE_EMPTY_EXECUTION
           value: true
 ```
 
@@ -150,7 +150,7 @@ PGSQL_SSLMODE=require
 CRON_RETENTION_DAYS=1
 CRON_RETENTION_EXPRESSION=0 2 * * *
 CRON_STATS_EXPRESSION=0 * * * *
-IGNORE_EMPTY_TRANSACTION=true
+IGNORE_EMPTY_EXECUTION=true
 ```
 
 ### Development commands

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -20,6 +21,7 @@ import (
 //	@Produce		json
 //	@Param			Execution	body		models.Execution	true	"Execution data"
 //	@Success		200			{string}	string				"Execution created"
+//	@Success		202			{string}	string				"Execution not created"
 //	@Failure		400			{string}	string				"Invalid execution data"
 //	@Failure		400			{string}	string				"Invalid JSON input"
 //	@Failure		500			{string}	string				"Database error"
@@ -44,6 +46,11 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		if body.ExecutedAt != nil {
 			executedAt.Time = *body.ExecutedAt
 			executedAt.Valid = true
+		}
+
+		if body.TransactionsSent == 0 && os.Getenv("IGNORE_EMPTY_TRANSACTION") == "true" {
+			c.JSON(http.StatusAccepted, gin.H{"message": "No transactions to process"})
+			return
 		}
 
 		// Start database transaction

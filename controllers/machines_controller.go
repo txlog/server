@@ -172,6 +172,50 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 		}
 
 		rows, err = database.Query(`
+      SELECT
+        transaction_id,
+        begin_time,
+        actions,
+        altered,
+        "user",
+        command_line
+      FROM public.transactions
+      WHERE machine_id = $1
+      ORDER BY transaction_id DESC`,
+			machineID)
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		defer rows.Close()
+
+		var transactions []models.Transaction
+		for rows.Next() {
+			var beginTime sql.NullTime
+			var transaction models.Transaction
+			err := rows.Scan(
+				&transaction.TransactionID,
+				&beginTime,
+				&transaction.Actions,
+				&transaction.Altered,
+				&transaction.User,
+				&transaction.CommandLine,
+			)
+			if err != nil {
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			if beginTime.Valid {
+				transaction.BeginTime = &beginTime.Time
+			}
+			transactions = append(transactions, transaction)
+		}
+
+		rows, err = database.Query(`
       SELECT e.machine_id, e.hostname, e.executed_at, e.agent_version, e.os
       FROM executions e
       INNER JOIN (
@@ -231,6 +275,7 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			"title":        "Assets",
 			"hostname":     hostname,
 			"machine_id":   machineID,
+			"transactions": transactions,
 			"executions":   executions,
 			"other_assets": otherAssets,
 		})

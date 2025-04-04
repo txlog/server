@@ -99,6 +99,81 @@
       <div class="col-12">
         <div class="card">
           <div class="card-header">
+            <h3 class="card-title">Transactions</h3>
+          </div>
+          {{ if eq (len .transactions) 0 }}
+          <div class="empty">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <circle cx="12" cy="12" r="9" />
+                <line x1="9" y1="10" x2="9.01" y2="10" />
+                <line x1="15" y1="10" x2="15.01" y2="10" />
+                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
+              </svg>
+            </div>
+            <p class="empty-title">No transactions found for this asset</p>
+            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
+          </div>
+          {{ else }}
+          <div class="table-responsive">
+            <table class="table card-table table-vcenter text-nowrap datatable table-striped">
+              <thead>
+                <tr>
+                  <th class="w-1">ID
+                    <i class="ti ti-chevron-up"></i>
+                  </th>
+                  <th>Execution Time</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Packages Altered</th>
+                  <th>Command</th>
+                  <th>&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ with .transactions }}
+                  {{ range . }}
+                    <tr>
+                      <td><kbd>{{ .TransactionID }}</kbd></td>
+                      <td>{{ .BeginTime.Format "02/01/2006 15:04:05 MST" }}</td>
+                      <td>{{ .User }}</td>
+                      <td>
+                          {{ if eq .Actions "Install" }}
+                            <span class="badge bg-default text-default-fg">
+                              <i class="ti ti-plus text-green me-1"></i>
+                              {{ .Actions }}
+                            </span>
+                          {{ else if eq .Actions "Upgrade" }}
+                            <span class="badge bg-default text-default-fg">
+                              <i class="ti ti-chevrons-up text-blue me-1"></i>
+                              {{ .Actions }}
+                            </span>
+                          {{ else }}
+                          <span class="badge bg-default text-default-fg">
+                            <i class="ti ti-minus text-red me-1"></i>
+                            {{ .Actions }}
+                          </span>
+                          {{ end }}
+                        </span>
+                      </td>
+                      <td>{{ .Altered }}</td>
+                      <td class="text-truncate" style="max-width: 300px;" title="{{ .CommandLine }}">{{ .CommandLine }}</td>
+                      <td>
+                        <a href="#" onclick="showModal({{ .TransactionID }})">Details</a>
+                      </td>
+                    </tr>
+                  {{ end }}
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
             <h3 class="card-title">Last 100 executions <span class="card-subtitle">with transactions</span></h3>
           </div>
           {{ if eq (len .executions) 0 }}
@@ -211,4 +286,110 @@
   </div>
 </div>
 
+<script>
+  function showModal(transactionId) {
+    // document.getElementById('modal-scrollable').addEventListener('show.bs.modal', function () {
+    // });
+
+  fetch(`/v1/items?machine_id={{ .machine_id }}&transaction_id=${transactionId}`)
+    .then(response => response.json())
+    .then(data => {
+      const result = data;
+      document.getElementById('modal-begin-time').textContent = result.begin_time;
+      document.getElementById('modal-end-time').textContent = result.end_time;
+      document.getElementById('modal-user').textContent = result.user;
+      document.getElementById('modal-return-code').textContent = result.return_code;
+      document.getElementById('modal-release-version').textContent = result.release_version;
+      document.getElementById('modal-command').textContent = result.command_line;
+      document.getElementById('modal-actions').textContent = result.actions;
+      document.getElementById('modal-altered').textContent = result.altered;
+      const tableBody = document.getElementById('modal-table-body');
+      tableBody.innerHTML = ''; // Clear previous rows
+      result.items.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.action}</td>
+          <td>${item.name}</td>
+          <td>${item.version}</td>
+          <td>${item.release}</td>
+          <td>${item.repo}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    })
+    .catch(error => console.error('Error:', error));
+
+    document.getElementById('modal-title').textContent = "Details of transaction #" + transactionId;
+
+    var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
+      keyboard: true,
+      backdrop: 'static'
+    });
+    myModal.show();
+
+  }
+</script>
+<div class="modal modal-blur fade" id="modal-scrollable" tabindex="-1" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-title">
+          <div class="placeholder placeholder-xs col-11"></div>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          <b>Begin Time:</b> <span id="modal-begin-time">...</span>
+        </p>
+        <p>
+          <b>End Time:</b> <span id="modal-end-time">...</span>
+        </p>
+        <p>
+          <b>User:</b> <span id="modal-user">...</span>
+        </p>
+        <p>
+          <b>Return Code:</b> <span id="modal-return-code">...</span>
+        </p>
+        <p>
+          <b>Release Version:</b> <span id="modal-release-version">...</span>
+        </p>
+        <p>
+          <b>Command Line:</b> <code id="modal-command">...</code>
+        </p>
+        <p>
+          <b>Actions:</b> <span id="modal-actions">...</span>
+        </p>
+        <p>
+          <b>Packages altered:</b> <span id="modal-altered">...</span>
+        </p>
+        <table class="table table-vcenter table-striped">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Name</th>
+              <th>Version</th>
+              <th>Release</th>
+              <th>Repo</th>
+            </tr>
+          </thead>
+          <tbody id="modal-table-body">
+            <tr>
+              <td>Maryjo Lebarree</td>
+              <td class="text-secondary">Civil Engineer, Product Management</td>
+              <td class="text-secondary"><a href="#" class="text-reset">mlebarree5@unc.edu</a></td>
+              <td class="text-secondary">User</td>
+              <td>
+                <a href="#">Edit</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 {{ template "footer.html" . }}

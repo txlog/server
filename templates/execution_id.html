@@ -64,9 +64,7 @@
             <div class="datagrid-content">
               {{ if .execution.OS }}
                 <div class="d-flex align-items-center">
-                  <span class="avatar avatar-xs me-2 rounded">
-                    <i class="ti ti-brand-redhat"></i>
-                  </span>
+                  <span class="avatar avatar-xs me-2 rounded" style="background-image: url(/assets/brand-almalinux.svg)"></span>
                   {{ .execution.OS }}
                 </div>
               {{ else }}–{{ end }}

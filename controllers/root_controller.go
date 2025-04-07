@@ -62,23 +62,23 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 		totalPages := (total + limit - 1) / limit
 
 		rows, err = database.Query(`
-    WITH recent_executions AS (
-      SELECT
-        id,
-        machine_id,
+    SELECT
         hostname,
         executed_at,
-        success,
-        details,
-        transactions_processed,
-        transactions_sent
-      FROM executions
-      ORDER BY executed_at DESC
-      LIMIT 1000
-    )
-    SELECT *
-    FROM recent_executions
-    ORDER BY executed_at DESC
+        machine_id
+    FROM (
+        SELECT
+            hostname,
+            executed_at,
+            machine_id,
+            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+        FROM
+            executions
+    ) sub
+    WHERE
+        sub.rn = 1
+    ORDER BY
+        hostname
     LIMIT $1 OFFSET $2
   `, limit, offset)
 
@@ -96,14 +96,9 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 			var execution models.Execution
 			var executedAt sql.NullTime
 			err := rows.Scan(
-				&execution.ExecutionID,
-				&execution.MachineID,
 				&execution.Hostname,
 				&execution.ExecutedAt,
-				&execution.Success,
-				&execution.Details,
-				&execution.TransactionsProcessed,
-				&execution.TransactionsSent,
+				&execution.MachineID,
 			)
 			if err != nil {
 				logger.Error("Error iterating machine_id:" + err.Error())

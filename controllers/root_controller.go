@@ -91,14 +91,14 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 		}
 		defer rows.Close()
 
-		executions := []models.Execution{}
+		assets := []models.Execution{}
 		for rows.Next() {
-			var execution models.Execution
+			var asset models.Execution
 			var executedAt sql.NullTime
 			err := rows.Scan(
-				&execution.Hostname,
-				&execution.ExecutedAt,
-				&execution.MachineID,
+				&asset.Hostname,
+				&asset.ExecutedAt,
+				&asset.MachineID,
 			)
 			if err != nil {
 				logger.Error("Error iterating machine_id:" + err.Error())
@@ -108,9 +108,9 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 				return
 			}
 			if executedAt.Valid {
-				execution.ExecutedAt = &executedAt.Time
+				asset.ExecutedAt = &executedAt.Time
 			}
-			executions = append(executions, execution)
+			assets = append(assets, asset)
 		}
 
 		rows, err = database.Query(`
@@ -157,7 +157,7 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"Context":      c,
 			"title":        "Assets",
-			"executions":   executions,
+			"assets":       assets,
 			"page":         page,
 			"totalPages":   totalPages,
 			"totalRecords": total,

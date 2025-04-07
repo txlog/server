@@ -1,26 +1,12 @@
 {{ template "header.html" . }}
-<!-- Page header -->
 <div class="page-header d-print-none text-white">
   <div class="container-xl">
     <div class="row g-2 align-items-center">
       <div class="col">
-        <!-- Page pre-title -->
         <h2 class="page-title">
           {{ .title }}
         </h2>
       </div>
-      <!-- Page title actions -->
-      <!--
-      <div class="col-auto ms-auto d-print-none">
-        <div class="btn-list">
-          <span class="d-none d-sm-inline">
-            <a href="#" class="btn btn-primary btn-5 ">
-              New view
-            </a>
-          </span>
-        </div>
-      </div>
-      -->
     </div>
   </div>
 </div>
@@ -32,7 +18,7 @@
         <div class="card">
           <div class="card-body">
             <div class="d-flex align-items-center">
-              <div class="subheader">Servers</div>
+              <div class="subheader">Registered assets</div>
               <div class="ms-auto lh-1 text-secondary">
                 Last 30 days
               </div>
@@ -115,28 +101,17 @@
       <div class="col-12">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Last 1.000 Executions</h3>
-          </div>
-          <!--
-          <div class="card-body border-bottom py-3">
-            <div class="d-flex">
-              <div class="text-secondary">
-                Show
-                <div class="mx-2 d-inline-block">
-                  <input type="text" class="form-control form-control-sm" value="100" size="3"
-                    aria-label="Invoices count">
-                </div>
-                entries
-              </div>
+            <h3 class="card-title">All registered assets</h3>
+            <div class="card-actions">
               <div class="ms-auto text-secondary">
                 Search:
                 <div class="ms-2 d-inline-block">
-                  <input type="text" class="form-control form-control-sm" aria-label="Search invoice">
+                  <input type="text" class="form-control form-control-sm" aria-label="Search invoice" disabled>
                 </div>
               </div>
             </div>
           </div>
-        -->
+
           {{ if eq (len .executions) 0 }}
           <div class="empty">
             <div class="empty-icon">
@@ -148,43 +123,54 @@
                 <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
               </svg>
             </div>
-            <p class="empty-title">No executions found</p>
+            <p class="empty-title">No assets found</p>
             <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
           </div>
           {{ else }}
           <div class="table-responsive">
-            <table class="table card-table table-vcenter text-nowrap datatable table-striped">
+            <table class="table table-vcenter table-mobile-md card-table">
               <thead>
                 <tr>
-                  <th class="w-1">Execution ID
+                  <th>Hostname
                     <i class="ti ti-chevron-up"></i>
                   </th>
-                  <th>Hostname</th>
-                  <th>Execution Time</th>
-                  <th>Transactions Processed</th>
-                  <th>Transactions Sent</th>
+                  <th>Last Seen</th>
+                  <th class="w-1"></th>
                 </tr>
               </thead>
               <tbody>
                 {{ with .executions }}
                   {{ range . }}
                     <tr>
-                      <td><a href="/executions/{{ .ExecutionID }}">
-                        <span class="badge bg-default text-default-fg">
-                          <span class="badge {{ if eq .Success true }}bg-success{{ else }}bg-danger{{ end }} me-1"></span>
-                          {{ .ExecutionID }}
-                        </span>
-                      </a></td>
-                      <td><a href="/machines/{{ .MachineID }}"><kbd>{{ .Hostname }}</kbd></a></td>
-                      <td>{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</td>
-                      <td>{{ .TransactionsProcessed }}</td>
-                      <td>{{ .TransactionsSent }}</td>
+                      <td data-label="Name">
+                        <div class="d-flex py-1 align-items-center">
+                          <span class="avatar avatar-2 me-2"><i class="ti ti-brand-redhat"></i></span>
+                          <div class="flex-fill">
+                            <div class="font-weight-medium">{{ .Hostname }}</div>
+                            <div class="text-secondary">{{ .MachineID }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td data-label="Title">
+                        <div class="text-secondary">{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</div>
+                      </td>
+                      <td>
+                        <div class="btn-list flex-nowrap">
+                          <div class="dropdown">
+                            <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-end">
+                              <a class="dropdown-item" href="/machines/{{ .MachineID }}"> Show Asset Details </a>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
                     </tr>
                   {{ end }}
                 {{ end }}
               </tbody>
             </table>
           </div>
+
           <div class="card-footer d-flex align-items-center">
             <p class="m-0 text-secondary">Showing <span>{{ add $.offset 1 }}</span> to <span>{{ min (add $.offset $.limit) $.totalRecords }}</span> of <span>{{ .totalRecords }}</span> entries</p>
             <ul class="pagination m-0 ms-auto">

@@ -34,6 +34,8 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 		var rows *sql.Rows
 		var err error
 
+		search := c.Query("search")
+
 		limit := 100
 		page := 1
 
@@ -172,6 +174,7 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 			"limit":        limit,
 			"offset":       offset,
 			"statistics":   statistics,
+			"search":       search,
 		})
 	}
 }

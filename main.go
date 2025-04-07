@@ -23,7 +23,7 @@ import (
 )
 
 // version of the application
-var version = "1.4.0"
+var version = "1.5.0-preview"
 
 //go:embed assets
 var staticFiles embed.FS

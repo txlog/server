@@ -141,7 +141,7 @@
                       <td>{{ .Altered }}</td>
                       <td class="text-truncate" style="max-width: 300px;" title="{{ .CommandLine }}">{{ .CommandLine }}</td>
                       <td>
-                        <a href="#" onclick="showModal({{ .TransactionID }})">Details</a>
+                        <a href="#" onclick="showModal('{{ .TransactionID }}')">Details</a>
                       </td>
                     </tr>
                   {{ end }}

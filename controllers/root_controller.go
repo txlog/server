@@ -44,19 +44,27 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 		}
 		offset := (page - 1) * limit
 
-		// First, get total count
+		// First, get total asset count
 		var total int
-		err = database.QueryRow("SELECT COUNT(*) FROM executions").Scan(&total)
+		err = database.QueryRow(`
+      SELECT
+        count(hostname)
+      FROM (
+        SELECT
+          hostname,
+          ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+        FROM
+          executions
+      ) sub
+      WHERE
+          sub.rn = 1
+    `).Scan(&total)
 		if err != nil {
 			logger.Error("Error counting executions:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
 			return
-		}
-
-		if total > 1000 {
-			total = 1000
 		}
 
 		totalPages := (total + limit - 1) / limit

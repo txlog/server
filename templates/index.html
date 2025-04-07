@@ -106,7 +106,9 @@
               <div class="ms-auto text-secondary">
                 Search:
                 <div class="ms-2 d-inline-block">
-                  <input type="text" class="form-control form-control-sm" aria-label="Search invoice">
+                    <input type="text" class="form-control form-control-sm" aria-label="Search assets"
+                         placeholder="Hostname or Asset ID" value="{{ .search }}"
+                         id="search" name="search" onkeydown="handleSearch(event)">
                 </div>
               </div>
             </div>
@@ -209,4 +211,15 @@
   </div>
 </div>
 
+<script>
+  function handleSearch(event) {
+    if (event.key === 'Enter') {
+      const searchValue = event.target.value;
+      const hasQueryParams = window.location.search.includes('?');
+      const url = new URL(window.location.href);
+      url.searchParams.set('search', searchValue);
+      window.location.href = url.toString();
+    }
+  }
+</script>
 {{ template "footer.html" . }}

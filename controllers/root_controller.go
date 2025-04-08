@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
+	"github.com/txlog/server/util"
 )
 
 // GetRootIndex returns a Gin handler function that serves the root index page.
@@ -48,19 +49,42 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 
 		// First, get total asset count
 		var total int
-		err = database.QueryRow(`
-      SELECT
-        count(hostname)
-      FROM (
+		var query string
+
+		if search != "" {
+			query = `
         SELECT
-          hostname,
-          ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-        FROM
-          executions
-      ) sub
-      WHERE
+          count(hostname)
+        FROM (
+          SELECT
+            hostname,
+            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+          FROM
+            executions
+          WHERE
+            hostname ILIKE $1
+        ) sub
+        WHERE
           sub.rn = 1
-    `).Scan(&total)
+      `
+			err = database.QueryRow(query, util.FormatSearchTerm(search)).Scan(&total)
+		} else {
+			query = `
+        SELECT
+          count(hostname)
+        FROM (
+          SELECT
+            hostname,
+            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+          FROM
+            executions
+        ) sub
+        WHERE
+          sub.rn = 1
+      `
+			err = database.QueryRow(query).Scan(&total)
+		}
+
 		if err != nil {
 			logger.Error("Error counting executions:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
@@ -71,26 +95,53 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 
 		totalPages := (total + limit - 1) / limit
 
-		rows, err = database.Query(`
-    SELECT
-        hostname,
-        executed_at,
-        machine_id
-    FROM (
+		if search != "" {
+			query = `
         SELECT
             hostname,
             executed_at,
-            machine_id,
-            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-        FROM
-            executions
-    ) sub
-    WHERE
-        sub.rn = 1
-    ORDER BY
-        hostname
-    LIMIT $1 OFFSET $2
-  `, limit, offset)
+            machine_id
+        FROM (
+            SELECT
+                hostname,
+                executed_at,
+                machine_id,
+                ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+            FROM
+                executions
+          WHERE
+            hostname ILIKE $3
+        ) sub
+        WHERE
+            sub.rn = 1
+        ORDER BY
+            hostname
+        LIMIT $1 OFFSET $2
+      `
+			rows, err = database.Query(query, limit, offset, util.FormatSearchTerm(search))
+		} else {
+			query = `
+        SELECT
+            hostname,
+            executed_at,
+            machine_id
+        FROM (
+            SELECT
+                hostname,
+                executed_at,
+                machine_id,
+                ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+            FROM
+                executions
+        ) sub
+        WHERE
+            sub.rn = 1
+        ORDER BY
+            hostname
+        LIMIT $1 OFFSET $2
+      `
+			rows, err = database.Query(query, limit, offset)
+		}
 
 		if err != nil {
 			logger.Error("Error listing executions:" + err.Error())

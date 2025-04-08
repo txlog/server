@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq"
 	"github.com/tavsec/gin-healthcheck/checks"
@@ -92,4 +93,20 @@ func MaskString(theString string) string {
 		buf.WriteRune('*')
 	}
 	return buf.String()
+}
+
+// FormatSearchTerm prepares a search string for SQL LIKE queries by:
+// 1. Adding '%' wildcards at the beginning and end of the search term
+// 2. Converting any '*' characters to '%' wildcards
+//
+// Parameters:
+//   - search: The original search string to be formatted
+//
+// Returns:
+//
+//	A formatted string ready for use in SQL LIKE clauses with proper wildcards
+func FormatSearchTerm(search string) string {
+	search = "%" + search + "%"
+	search = strings.ReplaceAll(search, "*", "%")
+	return search
 }

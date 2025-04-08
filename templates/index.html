@@ -101,7 +101,7 @@
       <div class="col-12">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">All registered assets</h3>
+            <h3 class="card-title">{{ if .search }}Search for "{{ .search }}" assets{{ else }}All registered assets{{ end }}</h3>
             <div class="card-actions">
               <div class="ms-auto text-secondary">
                 Search:
@@ -125,7 +125,7 @@
                 <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
               </svg>
             </div>
-            <p class="empty-title">No assets found</p>
+            <p class="empty-title">No assets found{{ if .search }} containing "{{ .search }}"{{ end }}</p>
             <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
           </div>
           {{ else }}

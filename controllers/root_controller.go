@@ -37,6 +37,11 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 
 		search := c.Query("search")
 
+		searchType := "hostname"
+		if len(search) == 32 && !util.ContainsSpecialCharacters(search) {
+			searchType = "machine_id"
+		}
+
 		limit := 100
 		page := 1
 
@@ -62,7 +67,7 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
           FROM
             executions
           WHERE
-            hostname ILIKE $1
+            ` + searchType + ` ILIKE $1
         ) sub
         WHERE
           sub.rn = 1
@@ -110,7 +115,7 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
             FROM
                 executions
           WHERE
-            hostname ILIKE $3
+            ` + searchType + ` ILIKE $3
         ) sub
         WHERE
             sub.rn = 1

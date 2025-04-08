@@ -23,7 +23,7 @@ import (
 )
 
 // version of the application
-var version = "1.5.0"
+var version = "1.6.0-preview"
 
 //go:embed assets
 var staticFiles embed.FS
@@ -154,9 +154,10 @@ func main() {
 
 	r.GET("/", controllers.GetRootIndex(database.Db))
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
+	r.GET("/insights", controllers.GetInsightsIndex)
+	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/machines/:machine_id", controllers.GetMachineID(database.Db))
 	r.GET("/settings", controllers.GetSettingsIndex)
-	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,

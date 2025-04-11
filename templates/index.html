@@ -98,112 +98,73 @@
           </div>
         </div>
       </div>
-      <div class="col-12">
+      <div class="col-6">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">{{ if .search }}Search assets containig <kbd>{{ .search }}</kbd>{{ else }}All registered assets{{ end }}</h3>
-            <div class="card-actions">
-              <div class="ms-auto text-secondary">
-                Search:
-                <div class="ms-2 d-inline-block">
-                    <input type="text" class="form-control form-control-sm" aria-label="Search assets"
-                         placeholder="Hostname or Asset ID" value="{{ .search }}"
-                         id="search" name="search" onkeydown="handleSearch(event)">
-                </div>
-              </div>
-            </div>
+            <h3 class="card-title">OS distribution</h3>
           </div>
-
-          {{ if eq (len .assets) 0 }}
-          <div class="empty">
-            <div class="empty-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <circle cx="12" cy="12" r="9" />
-                <line x1="9" y1="10" x2="9.01" y2="10" />
-                <line x1="15" y1="10" x2="15.01" y2="10" />
-                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
-              </svg>
+          {{ if eq (len .assetsByOS) 0 }}
+            <div class="empty">
+              <div class="empty-img"></div>
+              <p class="empty-title">No assets found</p>
+              <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
             </div>
-            <p class="empty-title">No assets found{{ if .search }} containing <kbd>{{ .search }}</kbd>{{ end }}</p>
-            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
-          </div>
           {{ else }}
-          <div class="table-responsive">
-            <table class="table table-vcenter table-mobile-md card-table">
-              <thead>
-                <tr>
-                  <th>Hostname
-                    <i class="ti ti-chevron-up"></i>
-                  </th>
-                  <th>Last Seen</th>
-                  <th class="w-1"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .assets }}
-                  {{ range . }}
-                    <tr>
-                      <td data-label="Name">
-                        <div class="d-flex py-1 align-items-center">
-                          <span class="avatar avatar-2 me-2" style="background-image: url(/assets/brand-almalinux.svg)"></span>
-                          <div class="flex-fill">
-                            <div class="font-weight-medium">{{ .Hostname }}</div>
-                            <div class="text-secondary">{{ .MachineID }}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td data-label="Title">
-                        <div class="text-secondary">{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</div>
-                      </td>
-                      <td>
-                        <div class="btn-list flex-nowrap">
-                          <div class="dropdown">
-                            <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-end">
-                              <a class="dropdown-item" href="/machines/{{ .MachineID }}"> Details </a>
-                              <!-- <a class="dropdown-item" href="/machines/{{ .MachineID }}"> Assets sharing this hostname </a> -->
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+            <div class="card-table table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>OS name</th>
+                    <th>Assets</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{ with .assetsByOS }}
+                    {{ range . }}
+                      <tr>
+                        <td>{{ if eq .OS "" }}Undefined OS{{ else }}{{ .OS }}{{ end }}</td>
+                        <td>{{ .NumMachines }}</td>
+                      </tr>
+                    {{ end }}
                   {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
+          {{ end }}
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Agent distribution</h3>
           </div>
-
-          <div class="card-footer d-flex align-items-center">
-            <p class="m-0 text-secondary">Showing <span>{{ add $.offset 1 }}</span> to <span>{{ min (add $.offset $.limit) $.totalRecords }}</span> of <span>{{ .totalRecords }}</span> entries</p>
-            <ul class="pagination m-0 ms-auto">
-              <li class="page-item {{ if eq $.page 1 }}disabled{{ end }}">
-                <a class="page-link" href="?page={{ .page | add -1 }}" tabindex="-1" aria-disabled="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-1">
-                    <path d="M15 6l-6 6l6 6"></path>
-                  </svg>
-                  prev
-                </a>
-              </li>
-              {{ range $i := iterate 1 .totalPages }}
-              <li class="page-item{{ if eq $.page $i }} active{{ end }}">
-                <a class="page-link" href="?page={{ $i }}">{{ $i }}</a>
-              </li>
-              {{ end }}
-              <li class="page-item {{ if eq $.page $.totalPages }}disabled{{ end }}">
-                <a class="page-link" href="?page={{ .page | add 1 }}" aria-disabled="true">
-                  next
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-1">
-                    <path d="M9 6l6 6l-6 6"></path>
-                  </svg>
-                </a>
-              </li>
-            </ul>
-          </div>
+          {{ if eq (len .assetsByAgentVersion) 0 }}
+            <div class="empty">
+              <div class="empty-img"></div>
+              <p class="empty-title">No assets found</p>
+              <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
+            </div>
+          {{ else }}
+            <div class="card-table table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Agent version</th>
+                    <th>Assets</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{ with .assetsByAgentVersion }}
+                    {{ range . }}
+                      <tr>
+                        <td>{{ if eq .AgentVersion "" }}Undefined Agent Version{{ else }}{{ .AgentVersion }}{{ end }}</td>
+                        <td>{{ .NumMachines }}</td>
+                      </tr>
+                    {{ end }}
+                  {{ end }}
+                </tbody>
+              </table>
+            </div>
           {{ end }}
         </div>
       </div>
@@ -211,15 +172,4 @@
   </div>
 </div>
 
-<script>
-  function handleSearch(event) {
-    if (event.key === 'Enter') {
-      const searchValue = event.target.value;
-      const hasQueryParams = window.location.search.includes('?');
-      const url = new URL(window.location.href);
-      url.searchParams.set('search', searchValue);
-      window.location.href = url.toString();
-    }
-  }
-</script>
 {{ template "footer.html" . }}

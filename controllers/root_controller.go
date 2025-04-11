@@ -3,12 +3,10 @@ package controllers
 import (
 	"database/sql"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
-	"github.com/txlog/server/util"
 )
 
 // GetRootIndex returns a Gin handler function that serves the root index page.
@@ -34,150 +32,6 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var rows *sql.Rows
 		var err error
-
-		search := c.Query("search")
-
-		searchType := "hostname"
-		if len(search) == 32 && !util.ContainsSpecialCharacters(search) {
-			searchType = "machine_id"
-		}
-
-		limit := 100
-		page := 1
-
-		if pageStr := c.DefaultQuery("page", "1"); pageStr != "" {
-			if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
-				page = p
-			}
-		}
-		offset := (page - 1) * limit
-
-		// First, get total asset count
-		var total int
-		var query string
-
-		if search != "" {
-			query = `
-        SELECT
-          count(hostname)
-        FROM (
-          SELECT
-            hostname,
-            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-          FROM
-            executions
-          WHERE
-            ` + searchType + ` ILIKE $1
-        ) sub
-        WHERE
-          sub.rn = 1
-      `
-			err = database.QueryRow(query, util.FormatSearchTerm(search)).Scan(&total)
-		} else {
-			query = `
-        SELECT
-          count(hostname)
-        FROM (
-          SELECT
-            hostname,
-            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-          FROM
-            executions
-        ) sub
-        WHERE
-          sub.rn = 1
-      `
-			err = database.QueryRow(query).Scan(&total)
-		}
-
-		if err != nil {
-			logger.Error("Error counting executions:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-
-		totalPages := (total + limit - 1) / limit
-
-		if search != "" {
-			query = `
-        SELECT
-            hostname,
-            executed_at,
-            machine_id
-        FROM (
-            SELECT
-                hostname,
-                executed_at,
-                machine_id,
-                ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-            FROM
-                executions
-          WHERE
-            ` + searchType + ` ILIKE $3
-        ) sub
-        WHERE
-            sub.rn = 1
-        ORDER BY
-            hostname
-        LIMIT $1 OFFSET $2
-      `
-			rows, err = database.Query(query, limit, offset, util.FormatSearchTerm(search))
-		} else {
-			query = `
-        SELECT
-            hostname,
-            executed_at,
-            machine_id
-        FROM (
-            SELECT
-                hostname,
-                executed_at,
-                machine_id,
-                ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-            FROM
-                executions
-        ) sub
-        WHERE
-            sub.rn = 1
-        ORDER BY
-            hostname
-        LIMIT $1 OFFSET $2
-      `
-			rows, err = database.Query(query, limit, offset)
-		}
-
-		if err != nil {
-			logger.Error("Error listing executions:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		defer rows.Close()
-
-		assets := []models.Execution{}
-		for rows.Next() {
-			var asset models.Execution
-			var executedAt sql.NullTime
-			err := rows.Scan(
-				&asset.Hostname,
-				&asset.ExecutedAt,
-				&asset.MachineID,
-			)
-			if err != nil {
-				logger.Error("Error iterating machine_id:" + err.Error())
-				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-			if executedAt.Valid {
-				asset.ExecutedAt = &executedAt.Time
-			}
-			assets = append(assets, asset)
-		}
 
 		rows, err = database.Query(`
       SELECT
@@ -220,17 +74,107 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 			statistics = append(statistics, statistic)
 		}
 
+		// Get OS statistics
+		rows, err = database.Query(`
+      SELECT
+        os,
+        COUNT(DISTINCT machine_id) AS num_machines
+      FROM (
+        SELECT
+          os,
+          machine_id,
+          hostname,
+          ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+        FROM
+          executions
+      ) sub
+      WHERE
+        sub.rn = 1
+      GROUP BY
+        os
+      ORDER BY
+        num_machines DESC;`)
+
+		if err != nil {
+			logger.Error("Error getting OS statistics:" + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		defer rows.Close()
+
+		type OSStats struct {
+			OS          string
+			NumMachines int
+		}
+
+		assetsByOS := []OSStats{}
+		for rows.Next() {
+			var stat OSStats
+			if err := rows.Scan(&stat.OS, &stat.NumMachines); err != nil {
+				logger.Error("Error scanning OS statistics:" + err.Error())
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			assetsByOS = append(assetsByOS, stat)
+		}
+
+		// Get Agent statistics
+		rows, err = database.Query(`
+      SELECT
+        agent_version,
+        COUNT(DISTINCT machine_id) AS num_machines
+      FROM (
+        SELECT
+          agent_version,
+          machine_id,
+          hostname,
+          ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+        FROM
+          executions
+      ) sub
+      WHERE
+        sub.rn = 1
+      GROUP BY
+        agent_version
+      ORDER BY
+        num_machines DESC;`)
+
+		if err != nil {
+			logger.Error("Error getting Agent statistics:" + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		defer rows.Close()
+
+		type AgentStats struct {
+			AgentVersion string
+			NumMachines  int
+		}
+
+		assetsByAgentVersion := []AgentStats{}
+		for rows.Next() {
+			var stat AgentStats
+			if err := rows.Scan(&stat.AgentVersion, &stat.NumMachines); err != nil {
+				logger.Error("Error scanning Agent statistics:" + err.Error())
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			assetsByAgentVersion = append(assetsByAgentVersion, stat)
+		}
 		c.HTML(http.StatusOK, "index.html", gin.H{
-			"Context":      c,
-			"title":        "Assets",
-			"assets":       assets,
-			"page":         page,
-			"totalPages":   totalPages,
-			"totalRecords": total,
-			"limit":        limit,
-			"offset":       offset,
-			"statistics":   statistics,
-			"search":       search,
+			"Context":              c,
+			"title":                "Transaction Overview",
+			"statistics":           statistics,
+			"assetsByOS":           assetsByOS,
+			"assetsByAgentVersion": assetsByAgentVersion,
 		})
 	}
 }

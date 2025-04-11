@@ -25,20 +25,20 @@
         <li class="nav-item {{ if eq .Context.Request.URL.Path "/" }}active{{ end }}">
           <a class="nav-link" href="/">
             <span class="nav-link-icon">
+              <i class="ti ti-chart-infographic"></i>
+            </span>
+            <span class="nav-link-title">
+              Home
+            </span>
+          </a>
+        </li>
+        <li class="nav-item {{ if eq .Context.Request.URL.Path "/assets" }}active{{ end }}">
+          <a class="nav-link" href="/assets">
+            <span class="nav-link-icon">
               <i class="ti ti-cpu"></i>
             </span>
             <span class="nav-link-title">
               Assets
-            </span>
-          </a>
-        </li>
-        <li class="nav-item {{ if eq .Context.Request.URL.Path "/insights" }}active{{ end }}">
-          <a class="nav-link" href="/insights">
-            <span class="nav-link-icon">
-              <i class="ti ti-chart-infographic"></i>
-            </span>
-            <span class="nav-link-title">
-              Insights
             </span>
           </a>
         </li>

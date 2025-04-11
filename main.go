@@ -153,6 +153,7 @@ func main() {
 	r.NoRoute(controllers.Get404)
 
 	r.GET("/", controllers.GetRootIndex(database.Db))
+	r.GET("/assets", controllers.GetAssetsIndex(database.Db))
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)

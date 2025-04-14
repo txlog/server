@@ -139,7 +139,11 @@
                         </span>
                       </td>
                       <td>{{ .Altered }}</td>
-                      <td class="text-truncate" style="max-width: 300px;" title="{{ .CommandLine }}">{{ .CommandLine }}</td>
+                      {{ if .CommandLine }}
+                        <td class="text-truncate" style="max-width: 300px;" title="{{ .CommandLine }}">{{ .CommandLine }}</td>
+                      {{ else }}
+                        <td class="text-truncate text-secondary" style="max-width: 300px;" >No command recorded</td>
+                      {{ end }}
                       <td>
                         <a href="#" onclick="showModal('{{ .TransactionID }}')">Details</a>
                       </td>
@@ -269,45 +273,47 @@
 
 <script>
   function showModal(transactionId) {
-    // document.getElementById('modal-scrollable').addEventListener('show.bs.modal', function () {
-    // });
+    fetch(`/v1/items?machine_id={{ .machine_id }}&transaction_id=${transactionId}`)
+      .then(response => response.json())
+      .then(data => {
+        const result = data;
+        document.getElementById('modal-begin-time').textContent = result.begin_time;
+        document.getElementById('modal-end-time').textContent = result.end_time;
+        document.getElementById('modal-user').textContent = result.user;
+        document.getElementById('modal-return-code').textContent = result.return_code;
+        document.getElementById('modal-release-version').textContent = result.release_version;
+        document.getElementById('modal-command').textContent = result.command_line || "No command recorded";
+        document.getElementById('modal-actions').textContent = result.actions;
+        document.getElementById('modal-altered').textContent = result.altered;
+        // if result.items is empty, show a message
+        if (result.items && result.items.length != 0) {
+          const tableBody = document.getElementById('modal-table-body');
+          tableBody.innerHTML = ''; // Clear previous rows
+          result.items.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${item.action}</td>
+              <td>${item.name}</td>
+              <td>${item.version}</td>
+              <td>${item.release}</td>
+              <td>${item.repo}</td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          const tableBody = document.getElementById('modal-table-body');
+          tableBody.innerHTML = '<tr><td colspan="5">No items recorded.</td></tr>';
+        }
+      })
+      .catch(error => console.error('Error:', error));
 
-  fetch(`/v1/items?machine_id={{ .machine_id }}&transaction_id=${transactionId}`)
-    .then(response => response.json())
-    .then(data => {
-      const result = data;
-      document.getElementById('modal-begin-time').textContent = result.begin_time;
-      document.getElementById('modal-end-time').textContent = result.end_time;
-      document.getElementById('modal-user').textContent = result.user;
-      document.getElementById('modal-return-code').textContent = result.return_code;
-      document.getElementById('modal-release-version').textContent = result.release_version;
-      document.getElementById('modal-command').textContent = result.command_line;
-      document.getElementById('modal-actions').textContent = result.actions;
-      document.getElementById('modal-altered').textContent = result.altered;
-      const tableBody = document.getElementById('modal-table-body');
-      tableBody.innerHTML = ''; // Clear previous rows
-      result.items.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.action}</td>
-          <td>${item.name}</td>
-          <td>${item.version}</td>
-          <td>${item.release}</td>
-          <td>${item.repo}</td>
-        `;
-        tableBody.appendChild(row);
+      document.getElementById('modal-title').textContent = "Details of transaction #" + transactionId;
+
+      var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
+        keyboard: true,
+        backdrop: 'static'
       });
-    })
-    .catch(error => console.error('Error:', error));
-
-    document.getElementById('modal-title').textContent = "Details of transaction #" + transactionId;
-
-    var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
-      keyboard: true,
-      backdrop: 'static'
-    });
-    myModal.show();
-
+      myModal.show();
   }
 </script>
 <div class="modal modal-blur fade" id="modal-scrollable" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -356,12 +362,10 @@
           </thead>
           <tbody id="modal-table-body">
             <tr>
-              <td>Maryjo Lebarree</td>
-              <td class="text-secondary">Civil Engineer, Product Management</td>
-              <td class="text-secondary"><a href="#" class="text-reset">mlebarree5@unc.edu</a></td>
-              <td class="text-secondary">User</td>
-              <td>
-                <a href="#">Edit</a>
+              <td colspan="5">
+                <div class="progress progress-sm">
+                  <div class="progress-bar progress-bar-indeterminate"></div>
+                </div>
               </td>
             </tr>
           </tbody>

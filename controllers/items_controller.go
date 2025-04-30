@@ -71,7 +71,11 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 				}
 				items = append(items, id)
 			}
-			defer rows.Close()
+			defer func() {
+				if err := rows.Close(); err != nil {
+					logger.Error("Error closing rows: " + err.Error())
+				}
+			}()
 
 			if items == nil {
 				c.JSON(http.StatusOK, []int{})
@@ -149,7 +153,11 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		defer rows.Close()
+		defer func() {
+			if err := rows.Close(); err != nil {
+				logger.Error("Error closing rows: " + err.Error())
+			}
+		}()
 
 		if rows.Next() {
 			var beginTime sql.NullTime
@@ -210,7 +218,11 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		defer rows.Close()
+		defer func() {
+			if err := rows.Close(); err != nil {
+				logger.Error("Error closing rows: " + err.Error())
+			}
+		}()
 
 		for rows.Next() {
 			var transactionItem models.TransactionItem

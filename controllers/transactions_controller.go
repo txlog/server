@@ -246,7 +246,9 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 				item.FromRepo)
 
 			if err != nil {
-				tx.Rollback()
+				if rbErr := tx.Rollback(); rbErr != nil {
+					logger.Error("Error rolling back transaction: " + rbErr.Error())
+				}
 				logger.Error("Error inserting transaction item: " + err.Error())
 				c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
 				return
@@ -255,7 +257,9 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 
 		// Commit the database transaction
 		if err = tx.Commit(); err != nil {
-			tx.Rollback()
+			if rbErr := tx.Rollback(); rbErr != nil {
+				logger.Error("Error rolling back transaction: " + rbErr.Error())
+			}
 			logger.Error("Error committing transaction: " + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
 			return

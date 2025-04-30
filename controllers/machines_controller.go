@@ -71,13 +71,13 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 		} else {
 			rows, err = database.Query(query + " ORDER BY hostname")
 		}
+		defer rows.Close()
 
 		if err != nil {
 			logger.Error("Error querying assets: " + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		defer rows.Close()
 
 		machines := []MachineID{}
 		for rows.Next() {

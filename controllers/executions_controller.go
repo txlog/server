@@ -78,7 +78,9 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			body.OS)
 
 		if err != nil {
-			tx.Rollback()
+			if rbErr := tx.Rollback(); rbErr != nil {
+				logger.Error("Error rolling back transaction:" + rbErr.Error())
+			}
 			logger.Error("Error inserting execution:" + err.Error())
 			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
 			return
@@ -86,7 +88,9 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 
 		// Commit the database transaction
 		if err = tx.Commit(); err != nil {
-			tx.Rollback()
+			if rbErr := tx.Rollback(); rbErr != nil {
+				logger.Error("Error rolling back transaction:" + rbErr.Error())
+			}
 			logger.Error("Error committing execution:" + err.Error())
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
@@ -139,7 +143,11 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		defer rows.Close()
+		defer func() {
+			if err := rows.Close(); err != nil {
+				logger.Error("Error closing rows: " + err.Error())
+			}
+		}()
 
 		executions := []models.Execution{}
 		for rows.Next() {

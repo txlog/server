@@ -218,7 +218,9 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			body.ScriptletOutput)
 
 		if err != nil {
-			tx.Rollback()
+			if rbErr := tx.Rollback(); rbErr != nil {
+				logger.Error("Error rolling back transaction:" + rbErr.Error())
+			}
 			logger.Error("Error inserting transaction: " + err.Error())
 			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
 			return

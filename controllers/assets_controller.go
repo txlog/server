@@ -155,7 +155,11 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			})
 			return
 		}
-		defer rows.Close()
+		defer func() {
+			if err := rows.Close(); err != nil {
+				logger.Error("Error closing rows: " + err.Error())
+			}
+		}()
 
 		assets := []models.Execution{}
 		for rows.Next() {
@@ -194,7 +198,11 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			})
 			return
 		}
-		defer rows.Close()
+		defer func() {
+			if err := rows.Close(); err != nil {
+				logger.Error("Error closing rows: " + err.Error())
+			}
+		}()
 
 		statistics := []models.Statistic{}
 

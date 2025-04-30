@@ -52,7 +52,11 @@ func statsJob() {
 		return
 	}
 
-	defer releaseLock(lockName)
+	defer func() {
+		if err := releaseLock(lockName); err != nil {
+			logger.Error("Failed to release lock: " + err.Error())
+		}
+	}()
 
 	statistics.CountServers()
 	statistics.CountExecutions()
@@ -84,7 +88,11 @@ func housekeepingJob() {
 		return
 	}
 
-	defer releaseLock(lockName)
+	defer func() {
+		if err := releaseLock(lockName); err != nil {
+			logger.Error("Failed to release lock: " + err.Error())
+		}
+	}()
 
 	retentionDays := os.Getenv("CRON_RETENTION_DAYS")
 	if retentionDays == "" {

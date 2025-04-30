@@ -52,7 +52,9 @@ func main() {
 	scheduler.StartScheduler()
 
 	r := gin.Default()
-	r.SetTrustedProxies(nil)
+	if err := r.SetTrustedProxies(nil); err != nil {
+		logger.Error("Failed to set trusted proxies: " + err.Error())
+	}
 	r.Use(EnvironmentVariablesMiddleware())
 
 	funcMap := template.FuncMap{
@@ -148,7 +150,9 @@ func main() {
 		r.Static("/assets", "./assets")
 	}
 
-	healthcheck.New(r, util.CheckConfig(), util.Check())
+	if err := healthcheck.New(r, util.CheckConfig(), util.Check()); err != nil {
+		logger.Error("Failed to initialize healthcheck: " + err.Error())
+	}
 
 	r.NoRoute(controllers.Get404)
 
@@ -198,7 +202,9 @@ func main() {
 		v1.GET("/items", controllers.GetItems(database.Db))
 	}
 
-	r.Run()
+	if err := r.Run(); err != nil {
+		logger.Error(err.Error())
+	}
 }
 
 func EnvironmentVariablesMiddleware() gin.HandlerFunc {

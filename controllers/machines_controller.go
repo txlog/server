@@ -68,10 +68,11 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 
 		if len(params) > 0 {
 			rows, err = database.Query(query+" ORDER BY hostname", params...)
+			defer rows.Close()
 		} else {
 			rows, err = database.Query(query + " ORDER BY hostname")
+			defer rows.Close()
 		}
-		defer rows.Close()
 
 		if err != nil {
 			logger.Error("Error querying assets: " + err.Error())

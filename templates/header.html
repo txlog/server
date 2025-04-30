@@ -7,15 +7,18 @@
   <link rel="icon" href="/assets/favicon.ico">
   <link rel="shortcut icon" href="/assets/favicon.ico">
   <title>Txlog Server</title>
-  <link rel="preload" href="https://rsms.me/inter/inter.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript>
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-  </noscript>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="preload" href="https://rsms.me/inter/inter.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.1.1/dist/css/tabler.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
   <style>
     :root {
-      --tblr-font-sans-serif: 'Inter';
+      font-family: "Inter Var", sans-serif;
+      font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+      --tblr-font-sans-serif: "Inter Var", Inter, -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+    @supports (font-variation-settings: normal) {
+      :root { font-family: InterVariable, sans-serif; }
     }
   </style>
 </head>

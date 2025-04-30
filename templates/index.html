@@ -123,7 +123,11 @@
                     {{ range . }}
                       <tr>
                         <td>{{ if eq .OS "" }}Undefined OS{{ else }}{{ .OS }}{{ end }}</td>
-                        <td>{{ .NumMachines }}</td>
+                        <td class="text-nowrap">
+                          <a href="#" class="text-secondary" onclick="showOSModal('{{ .OS }}')">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                            {{ .NumMachines }}</a>
+                        </td>
                       </tr>
                     {{ end }}
                   {{ end }}
@@ -158,7 +162,11 @@
                     {{ range . }}
                       <tr>
                         <td>{{ if eq .AgentVersion "" }}Undefined Agent Version{{ else }}{{ .AgentVersion }}{{ end }}</td>
-                        <td>{{ .NumMachines }}</td>
+                        <td class="text-nowrap">
+                          <a href="#" class="text-secondary" onclick="showAgentModal('{{ .AgentVersion }}')">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                            {{ .NumMachines }}</a>
+                        </td>
                       </tr>
                     {{ end }}
                   {{ end }}
@@ -172,4 +180,117 @@
   </div>
 </div>
 
+
+<script>
+  function showAgentModal(agentVersion) {
+    if (agentVersion == "") {
+      agentVersion = "with undefined version";
+    }
+
+    fetch(`/v1/machines?agent_version=${agentVersion}`)
+      .then(response => response.json())
+      .then(data => {
+        const result = data;
+
+        if (result && result.length != 0) {
+          const tableBody = document.getElementById('modal-table-body');
+          tableBody.innerHTML = ''; // Clear previous rows
+          result.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${item.hostname}</td>
+              <td class="text-end">
+                <a href="/machines/${item.machine_id}" class="btn btn-1"> Details </a>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          const tableBody = document.getElementById('modal-table-body');
+          tableBody.innerHTML = '<tr><td colspan="2">No assets found using this agent version.</td></tr>';
+        }
+      })
+      .catch(error => console.error('Error:', error));
+
+      document.getElementById('modal-title').textContent = "Assets using Agent " + agentVersion;
+
+      var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
+        keyboard: true,
+        backdrop: 'static'
+      });
+      myModal.show();
+  }
+
+  function showOSModal(os) {
+    if (os == "") {
+      os = "Undefined OS";
+    }
+
+    fetch(`/v1/machines?os=${os}`)
+      .then(response => response.json())
+      .then(data => {
+        const result = data;
+        if (result && result.length != 0) {
+          const tableBody = document.getElementById('modal-table-body');
+          tableBody.innerHTML = ''; // Clear previous rows
+          result.forEach(item => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${item.hostname}</td>
+              <td class="text-end">
+                <a href="/machines/${item.machine_id}" class="btn btn-1"> Details </a>
+              </td>
+            `;
+            tableBody.appendChild(row);
+          });
+        } else {
+          const tableBody = document.getElementById('modal-table-body');
+          tableBody.innerHTML = '<tr><td colspan="2">No assets found using this operating system.</td></tr>';
+        }
+      })
+      .catch(error => console.error('Error:', error));
+
+      document.getElementById('modal-title').textContent = "Assets using " + os;
+
+      var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
+        keyboard: true,
+        backdrop: 'static'
+      });
+      myModal.show();
+  }
+</script>
+<div class="modal modal-blur fade" id="modal-scrollable" tabindex="-1" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-title">
+          <div class="placeholder placeholder-xs col-11"></div>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-vcenter table-striped">
+          <thead>
+            <tr>
+              <th>Hostname</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody id="modal-table-body">
+            <tr>
+              <td colspan="2">
+                <div class="progress progress-sm">
+                  <div class="progress-bar progress-bar-indeterminate"></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 {{ template "footer.html" . }}

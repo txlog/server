@@ -3,6 +3,7 @@ package controllers
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,86 @@ type MachineID struct {
 	Hostname  string     `json:"hostname"`
 	MachineID string     `json:"machine_id"`
 	BeginTime *time.Time `json:"begin_time"`
+}
+
+func GetMachines(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		os := c.Query("os")
+		agentVersion := c.Query("agent_version")
+
+		var rows *sql.Rows
+		var err error
+
+		query := `
+    SELECT
+      hostname,
+      machine_id
+    FROM (
+      SELECT
+        hostname,
+        agent_version,
+        os,
+        machine_id,
+        ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+      FROM
+        executions
+    ) sub
+    WHERE
+      sub.rn = 1`
+
+		var params []interface{}
+		var paramCount int
+
+		if os != "" {
+			logger.Debug("os: " + os)
+			if os == "Undefined OS" {
+				os = ""
+			}
+			paramCount++
+			query += ` AND os = $` + strconv.Itoa(paramCount)
+			params = append(params, os)
+		}
+
+		if agentVersion != "" {
+			logger.Debug("agent_version: " + agentVersion)
+			if agentVersion == "with undefined version" {
+				agentVersion = ""
+			}
+			paramCount++
+			query += ` AND agent_version = $` + strconv.Itoa(paramCount)
+			params = append(params, agentVersion)
+		}
+
+		if len(params) > 0 {
+			rows, err = database.Query(query+" ORDER BY hostname", params...)
+		} else {
+			rows, err = database.Query(query + " ORDER BY hostname")
+		}
+
+		if err != nil {
+			logger.Error("Error querying assets: " + err.Error())
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		defer rows.Close()
+
+		machines := []MachineID{}
+		for rows.Next() {
+			var machine MachineID
+			err := rows.Scan(
+				&machine.Hostname,
+				&machine.MachineID,
+			)
+			if err != nil {
+				logger.Error("Error iterating assets: " + err.Error())
+				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			machines = append(machines, machine)
+		}
+
+		c.JSON(http.StatusOK, machines)
+	}
 }
 
 // GetMachineIDs List the machine_id of the given hostname

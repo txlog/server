@@ -106,7 +106,7 @@
                   </th>
                   <th>Execution Time</th>
                   <th>User</th>
-                  <th>Action</th>
+                  <th>Actions</th>
                   <th>Packages Altered</th>
                   <th>Command</th>
                   <th>&nbsp;</th>
@@ -116,27 +116,33 @@
                 {{ with .transactions }}
                   {{ range . }}
                     <tr>
-                      <td><kbd>{{ .TransactionID }}</kbd></td>
+                      <td><kbd data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ .Actions }}">{{ .TransactionID }}</kbd></td>
                       <td>{{ .BeginTime.Format "02/01/2006 15:04:05 MST" }}</td>
-                      <td>{{ .User }}</td>
+                      <td>{{ dnfUser .User }}</td>
                       <td>
-                          {{ if eq .Actions "Install" }}
-                            <span class="badge bg-default text-default-fg">
-                              <i class="ti ti-plus text-green me-1"></i>
-                              {{ .Actions }}
-                            </span>
-                          {{ else if eq .Actions "Upgrade" }}
-                            <span class="badge bg-default text-default-fg">
-                              <i class="ti ti-chevrons-up text-blue me-1"></i>
-                              {{ .Actions }}
-                            </span>
-                          {{ else }}
-                          <span class="badge bg-default text-default-fg">
-                            <i class="ti ti-minus text-red me-1"></i>
-                            {{ .Actions }}
+                        <div class="avatar-list">
+                          <span class="avatar avatar-xs{{ if hasAction .Actions "Install" }} bg-green text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Install">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
                           </span>
-                          {{ end }}
-                        </span>
+                          <span class="avatar avatar-xs{{ if hasAction .Actions "Upgrade" }} bg-green text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Upgrade">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-badge-up"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 11v6l-5 -4l-5 4v-6l5 -4z" /></svg>
+                          </span>
+                          <span class="avatar avatar-xs{{ if hasAction .Actions "Reinstall" }} bg-yellow text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reinstall">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-rotate-clockwise"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4.05 11a8 8 0 1 1 .5 4m-.5 5v-5h5" /></svg>
+                          </span>
+                          <span class="avatar avatar-xs{{ if hasAction .Actions "Downgrade" }} bg-red text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Downgrade">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-badge-down"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 13v-6l-5 4l-5 -4v6l5 4z" /></svg>
+                          </span>
+                          <span class="avatar avatar-xs{{ if hasAction .Actions "Removed" }} bg-red text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Removed">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-minus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /></svg>
+                          </span>
+                          <span class="avatar avatar-xs{{ if hasAction .Actions "Obsolete" }} bg-purple text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Obsolete">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-circle-dashed-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8.56 3.69a9 9 0 0 0 -2.92 1.95" /><path d="M3.69 8.56a9 9 0 0 0 -.69 3.44" /><path d="M3.69 15.44a9 9 0 0 0 1.95 2.92" /><path d="M8.56 20.31a9 9 0 0 0 3.44 .69" /><path d="M15.44 20.31a9 9 0 0 0 2.92 -1.95" /><path d="M20.31 15.44a9 9 0 0 0 .69 -3.44" /><path d="M20.31 8.56a9 9 0 0 0 -1.95 -2.92" /><path d="M15.44 3.69a9 9 0 0 0 -3.44 -.69" /><path d="M9 12l2 2l4 -4" /></svg>
+                          </span>
+                          <span class="avatar avatar-xs{{ if hasAction .Actions "Reason Change" }} bg-purple text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reason Change">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-replace"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 3m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M15 15m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3" /><path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3" /></svg>
+                          </span>
+                        </div>
                       </td>
                       <td>{{ .Altered }}</td>
                       {{ if .CommandLine }}

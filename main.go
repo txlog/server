@@ -134,6 +134,70 @@ func main() {
 			}
 		},
 		"version": func() string { return version },
+		"dnfUser": func(user string) string {
+			// user can be a string like "rodrigo avila <rodrigo.avila>". But we need to return only what's between < and >.
+			// If user is empty, return "Unknown"
+			if user == "" {
+				return "Unknown"
+			}
+			if strings.Contains(user, "<") && strings.Contains(user, ">") {
+				start := strings.Index(user, "<")
+				end := strings.Index(user, ">")
+				if start != -1 && end != -1 {
+					return user[start+1 : end]
+				}
+			}
+			// If user is not in the format "rodrigo avila <rodrigo.avila>", return the user
+			// as is.
+			return user
+		},
+		"hasAction": func(actions, action string) bool {
+			// actions can be a comma-separated list of characters, e.g.
+			// "I,D,O,U,E,R,C"; or a word like "Install", "Upgrade", etc. if actions
+			// is a word, we need to compare it with the action. if actions is a list,
+			// we need to check if the action is in the list.
+			// From https://dnf.readthedocs.io/en/latest/command_ref.html#history-command
+			actionsList := strings.Split(actions, ",")
+			for _, a := range actionsList {
+				a = strings.TrimSpace(a)
+				switch a {
+				case "I":
+					if action == "Install" {
+						return true
+					}
+				case "D":
+					if action == "Downgrade" {
+						return true
+					}
+				case "O":
+					if action == "Obsolete" {
+						return true
+					}
+				case "U":
+					if action == "Upgrade" {
+						return true
+					}
+				case "E":
+					if action == "Removed" {
+						return true
+					}
+				case "R":
+					if action == "Reinstall" {
+						return true
+					}
+				case "C":
+					if action == "Reason Change" {
+						return true
+					}
+				default:
+					if a == action {
+						return true
+					}
+				}
+			}
+
+			return false
+		},
 	}
 
 	if os.Getenv("GIN_MODE") == "" {

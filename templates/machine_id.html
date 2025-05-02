@@ -109,7 +109,7 @@
                   <th>Actions</th>
                   <th>Packages Altered</th>
                   <th>Command</th>
-                  <th>&nbsp;</th>
+                  <th class="w-1">&nbsp;</th>
                 </tr>
               </thead>
               <tbody>
@@ -193,22 +193,26 @@
                   <th>Execution Time</th>
                   <th>Transactions Processed</th>
                   <th>Transactions Sent</th>
+                  <th class="w-1">&nbsp;</th>
                 </tr>
               </thead>
               <tbody>
                 {{ with .executions }}
                   {{ range . }}
                     <tr>
-                      <td><a href="/executions/{{ .ExecutionID }}">
+                      <td>
                         <span class="badge bg-default text-default-fg">
                           <span class="badge {{ if eq .Success true }}bg-success{{ else }}bg-danger{{ end }} me-1"></span>
                           {{ .ExecutionID }}
                         </span>
-                      </a></td>
+                      </td>
                       <td><kbd>{{ .Hostname }}</kbd></td>
                       <td>{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</td>
                       <td>{{ .TransactionsProcessed }}</td>
                       <td>{{ .TransactionsSent }}</td>
+                      <td>
+                        <a href="/executions/{{ .ExecutionID }}">Details</a>
+                      </td>
                     </tr>
                   {{ end }}
                 {{ end }}
@@ -226,14 +230,7 @@
           {{ if eq (len .other_assets) 0 }}
           <div class="empty">
             <div class="empty-icon">
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"
-              viewBox="0 0 24 24"  fill="none"  stroke="currentColor"
-              stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline
-              icon-tabler-mood-wink"><path stroke="none" d="M0 0h24v24H0z"
-              fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"
-              /><path d="M15 10h.01" /><path d="M9.5 15a3.5 3.5 0 0 0 5 0"
-              /><path d="M8.5 8.5l1.5 1.5l-1.5 1.5" /></svg>
+              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24" viewBox="0 0 24 24"  fill="none"  stroke="currentColor" stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-mood-wink"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M15 10h.01" /><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/><path d="M8.5 8.5l1.5 1.5l-1.5 1.5" /></svg>
             </div>
             <p class="empty-title">Great! No other assets are sharing this hostname.</p>
           </div>

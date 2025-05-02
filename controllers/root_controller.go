@@ -195,7 +195,7 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
       )
       SELECT
           hostname,
-          num_distinct_machine_ids
+          num_distinct_machine_ids as num_machines
       FROM
           HostnameStats
       WHERE

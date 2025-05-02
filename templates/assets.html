@@ -53,7 +53,7 @@
                     <i class="ti ti-chevron-up"></i>
                   </th>
                   <th>Last Seen</th>
-                  <th class="w-1"></th>
+                  <th class="w-1">&nbsp;</th>
                 </tr>
               </thead>
               <tbody>
@@ -73,15 +73,7 @@
                         <div class="text-secondary">{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</div>
                       </td>
                       <td>
-                        <div class="btn-list flex-nowrap">
-                          <div class="dropdown">
-                            <button class="btn dropdown-toggle align-text-top" data-bs-toggle="dropdown">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-end">
-                              <a class="dropdown-item" href="/machines/{{ .MachineID }}"> Details </a>
-                              <!-- <a class="dropdown-item" href="/machines/{{ .MachineID }}"> Assets sharing this hostname </a> -->
-                            </div>
-                          </div>
-                        </div>
+                        <a href="/machines/{{ .MachineID }}">Details</a>
                       </td>
                     </tr>
                   {{ end }}

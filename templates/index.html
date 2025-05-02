@@ -176,6 +176,96 @@
           {{ end }}
         </div>
       </div>
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Replaced assets</h3>
+          </div>
+          {{ if eq (len .assetsByAgentVersion) 0 }}
+            <div class="empty">
+              <div class="empty-img"></div>
+              <p class="empty-title">No replaced assets</p>
+              <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
+            </div>
+          {{ else }}
+            <div class="card-table table-responsive">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <td>Last week</td>
+                    <td class="text-nowrap">
+                      <a href="#" class="text-secondary" onclick="showReplacedAssetsModal('last-week')">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                        0</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Last month</td>
+                    <td class="text-nowrap">
+                      <a href="#" class="text-secondary" onclick="showReplacedAssetsModal('last-week')">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                        0</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>All time</td>
+                    <td class="text-nowrap">
+                      <a href="#" class="text-secondary" onclick="showReplacedAssetsModal('last-week')">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                        0</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          {{ end }}
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Most upgraded packages</h3>
+          </div>
+          {{ if eq (len .assetsByAgentVersion) 0 }}
+            <div class="empty">
+              <div class="empty-img"></div>
+              <p class="empty-title">No packages to list</p>
+              <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
+            </div>
+          {{ else }}
+            <div class="card-table table-responsive">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <td>Last week</td>
+                    <td class="text-nowrap">
+                      <a href="#" class="text-secondary" onclick="showReplacedAssetsModal('last-week')">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                        0</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Last month</td>
+                    <td class="text-nowrap">
+                      <a href="#" class="text-secondary" onclick="showReplacedAssetsModal('last-week')">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                        0</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>All time</td>
+                    <td class="text-nowrap">
+                      <a href="#" class="text-secondary" onclick="showReplacedAssetsModal('last-week')">
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                        0</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          {{ end }}
+        </div>
+      </div>
     </div>
   </div>
 </div>

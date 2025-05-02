@@ -179,12 +179,13 @@
       <div class="col-6">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">Replaced assets</h3>
+            <h3 class="card-title">Replaced assets <span class="card-subtitle">last 30 days</span></h3>
           </div>
           {{ if eq (len .duplicatedAssets) 0 }}
             <div class="empty">
               <div class="empty-img"></div>
-              <p class="empty-title">No replaced assets found</p>
+              <p class="empty-title">No replaced assets</p>
+              <p class="empty-subtitle text-secondary">in the last 30 days.</p>
             </div>
           {{ else }}
             <div class="card-table table-responsive">
@@ -192,7 +193,7 @@
                 <thead>
                   <tr>
                     <th>Hostname</th>
-                    <th>Assets</th>
+                    <th class="w-1">&nbsp;</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -200,10 +201,8 @@
                     {{ range . }}
                       <tr>
                         <td>{{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}</td>
-                        <td class="text-nowrap">
-                          <a href="#" class="text-secondary" onclick="showOSModal('{{ .OS }}')">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
-                            {{ .NumMachines }}</a>
+                        <td>
+                          <a href="#" onclick="showModal('{{ .TransactionID }}')">Details</a>
                         </td>
                       </tr>
                     {{ end }}

@@ -9,7 +9,7 @@
   <title>Txlog Server</title>
   <link rel="preconnect" href="https://rsms.me/">
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.1.1/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.2.0/dist/css/tabler.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
   <style>
     :root {
@@ -19,6 +19,15 @@
     }
     @supports (font-variation-settings: normal) {
       :root { font-family: InterVariable, sans-serif; }
+    }
+    @media (min-width: 992px) {
+      :host,
+      :root {
+        margin-left: 0;
+      }
+    }
+    body {
+      overflow-y: scroll;
     }
   </style>
 </head>

@@ -169,12 +169,75 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 			}
 			assetsByAgentVersion = append(assetsByAgentVersion, stat)
 		}
+
+		// Assets with duplicated machine_id
+		rows, err = database.Query(`
+      WITH RankedExecutions AS (
+          SELECT
+              hostname,
+              machine_id,
+              executed_at,
+              ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+          FROM
+              public.executions
+          WHERE
+              success = true
+      ),
+      HostnameStats AS (
+          SELECT
+              hostname,
+              COUNT(DISTINCT machine_id) AS num_distinct_machine_ids,
+              MAX(CASE WHEN rn = 2 THEN executed_at ELSE NULL END) AS second_latest_execution_date
+          FROM
+              RankedExecutions
+          GROUP BY
+              hostname
+      )
+      SELECT
+          hostname,
+          num_distinct_machine_ids
+      FROM
+          HostnameStats
+      WHERE
+          num_distinct_machine_ids > 1
+          AND second_latest_execution_date >= CURRENT_DATE - INTERVAL '30 day'
+      ORDER BY
+          num_distinct_machine_ids;`)
+
+		if err != nil {
+			logger.Error("Error getting duplicated assets:" + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		defer rows.Close()
+
+		type DuplicatedAsset struct {
+			Hostname    string
+			NumMachines int
+		}
+
+		duplicatedAssets := []DuplicatedAsset{}
+		for rows.Next() {
+			var asset DuplicatedAsset
+			if err := rows.Scan(&asset.Hostname, &asset.NumMachines); err != nil {
+				logger.Error("Error scanning duplicated assets:" + err.Error())
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			duplicatedAssets = append(duplicatedAssets, asset)
+		}
+
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"Context":              c,
 			"title":                "Transaction Overview",
 			"statistics":           statistics,
 			"assetsByOS":           assetsByOS,
 			"assetsByAgentVersion": assetsByAgentVersion,
+			"duplicatedAssets":     duplicatedAssets,
 		})
 	}
 }

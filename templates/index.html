@@ -193,7 +193,7 @@
                 <thead>
                   <tr>
                     <th>Hostname</th>
-                    <th class="w-1">&nbsp;</th>
+                    <th>Assets</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -201,8 +201,10 @@
                     {{ range . }}
                       <tr>
                         <td>{{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}</td>
-                        <td>
-                          <a href="/assets?search={{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}">Details</a>
+                        <td class="text-nowrap">
+                          <a href="/assets?search={{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}" class="text-secondary">
+                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
+                            {{ .NumMachines }}</a>
                         </td>
                       </tr>
                     {{ end }}
@@ -240,10 +242,8 @@
                       <tr>
                         <td><kbd>{{ .Package }}</kbd></td>
                         <td>{{ .TotalUpdates }}</td>
-                        <td class="text-nowrap">
-                          <a href="#" class="text-secondary" onclick="showUpdatedPackagesModal('{{ .Package }}')">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
-                            {{ .DistinctHostsUpdated }}</a>
+                        <td class="text-nowrap text-secondary">
+                          {{ .DistinctHostsUpdated }}
                         </td>
                       </tr>
                     {{ end }}
@@ -277,7 +277,7 @@
             row.innerHTML = `
               <td>${item.hostname}</td>
               <td class="text-end">
-                <a href="/machines/${item.machine_id}" class="btn btn-1"> Details </a>
+                <a href="/machines/${item.machine_id}">Details</a>
               </td>
             `;
             tableBody.appendChild(row);
@@ -315,7 +315,7 @@
             row.innerHTML = `
               <td>${item.hostname}</td>
               <td class="text-end">
-                <a href="/machines/${item.machine_id}" class="btn btn-1"> Details </a>
+                <a href="/machines/${item.machine_id}">Details</a>
               </td>
             `;
             tableBody.appendChild(row);

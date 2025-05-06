@@ -9,77 +9,106 @@
   </div>
   <div class="offcanvas-body">
     <div class="card-body">
-      <h3 class="card-title mt-4">Database Server</h3>
-      <div class="mb-3 row">
-        <label class="col-3 col-form-label">Hostname</label>
-        <div class="col">
-          <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.pgsqlHost }}">
+      <div class="row row-cards">
+        <div class="row-12">
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th>Database Server</th>
+                    <th>&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Hostname</td>
+                    <td>{{ .Context.Keys.env.pgsqlHost }}</td>
+                  </tr>
+                  <tr>
+                    <td>Port</td>
+                    <td>{{ .Context.Keys.env.pgsqlPort }}</td>
+                  </tr>
+                  <tr>
+                    <td>Name</td>
+                    <td>{{ .Context.Keys.env.pgsqlDb }}</td>
+                  </tr>
+                  <tr>
+                    <td>Username</td>
+                    <td>{{ .Context.Keys.env.pgsqlUser }}</td>
+                  </tr>
+                  <tr>
+                    <td>Password</td>
+                    <td>{{ .Context.Keys.env.pgsqlPassword }}</td>
+                  </tr>
+                  <tr>
+                    <td>SSL Mode</td>
+                    <td>{{ .Context.Keys.env.pgsqlSslmode }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="mb-3 row">
-        <label class="col-3 col-form-label">Port</label>
-        <div class="col">
-          <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.pgsqlPort }}">
+        <div class="row-12">
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th>Housekeeping</th>
+                    <th>&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The cron expression used to schedule the housekeeping job.">Schedule Expression</td>
+                    <td>{{ .Context.Keys.env.cronRetentionExpression }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="mb-3 row">
-        <label class="col-3 col-form-label">Name</label>
-        <div class="col">
-          <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.pgsqlDb }}">
+        <div class="row-12">
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th>Executions</th>
+                    <th>&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="If set to true, empty executions will be ignored and not stored in the database.">Ignore empty executions?</td>
+                    <td>{{ if eq .Context.Keys.env.ignoreEmptyExecution "true" }}true{{ else }}false{{ end }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="mb-3 row">
-        <label class="col-3 col-form-label">Username</label>
-        <div class="col">
-          <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.pgsqlUser }}">
-        </div>
-      </div>
-      <div class="mb-3 row">
-        <label class="col-3 col-form-label">Password</label>
-        <div class="col">
-          <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.pgsqlPassword }}">
-        </div>
-      </div>
-      <div class="mb-3 row">
-        <label class="col-3 col-form-label">SSL Mode</label>
-        <div class="col">
-          <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.pgsqlSslmode }}">
-        </div>
-      </div>
-      <h3 class="card-title mt-4">Housekeeping</h3>
-      <div class="mb-3 row">
-        <div class="form-label">Schedule Expression</div>
-        <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.cronRetentionExpression }}">
-        <small class="form-hint">
-          The cron expression used to schedule the housekeeping job.
-        </small>
-      </div>
-      <div class="mb-3 row">
-        <div class="form-label">Schedule Expression</div>
-        <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.cronRetentionExpression }}">
-        <small class="form-hint">
-          The cron expression used to schedule the housekeeping job.
-        </small>
-      </div>
-      <h3 class="card-title mt-4">Executions</h3>
-      <div class="row g-2">
-        <div class="col-md">
-          <div class="form-label">Ignore empty executions?</div>
-          <input type="text" class="form-control" disabled="" value="{{ if eq .Context.Keys.env.ignoreEmptyExecution "true" }}true{{ else }}false{{ end }}">
-          <small class="form-hint">
-            If set to true, empty executions will be ignored and not
-            stored in the database.
-          </small>
-        </div>
-      </div>
-      <h3 class="card-title mt-4">Statistics</h3>
-      <div class="row g-2">
-        <div class="col-md">
-          <div class="form-label">Schedule Expression</div>
-          <input type="text" class="form-control" disabled="" value="{{ .Context.Keys.env.cronStatisticsExpression }}">
-          <small class="form-hint">
-            The cron expression used to schedule the statistics job.
-          </small>
+        <div class="row-12">
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-vcenter card-table">
+                <thead>
+                  <tr>
+                    <th>Statistics</th>
+                    <th>&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="The cron expression used to schedule the statistics job.">Schedule Expression</td>
+                    <td>{{ .Context.Keys.env.cronStatisticsExpression }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </div>

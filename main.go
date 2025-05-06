@@ -222,7 +222,6 @@ func main() {
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/machines/:machine_id", controllers.GetMachineID(database.Db))
-	r.GET("/settings", controllers.GetSettingsIndex)
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
@@ -268,7 +267,17 @@ func main() {
 func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		envVars := map[string]string{
-			"INSTANCE": os.Getenv("INSTANCE"),
+			"instance":                 os.Getenv("INSTANCE"),
+			"pgsqlHost":                os.Getenv("PGSQL_HOST"),
+			"pgsqlPort":                os.Getenv("PGSQL_PORT"),
+			"pgsqlUser":                os.Getenv("PGSQL_USER"),
+			"pgsqlDb":                  os.Getenv("PGSQL_DB"),
+			"pgsqlPassword":            util.MaskString(os.Getenv("PGSQL_PASSWORD")),
+			"pgsqlSslmode":             os.Getenv("PGSQL_SSLMODE"),
+			"cronRetentionDays":        os.Getenv("CRON_RETENTION_DAYS"),
+			"cronRetentionExpression":  os.Getenv("CRON_RETENTION_EXPRESSION"),
+			"cronStatisticsExpression": os.Getenv("CRON_STATS_EXPRESSION"),
+			"ignoreEmptyExecution":     os.Getenv("IGNORE_EMPTY_EXECUTION"),
 		}
 
 		c.Set("env", envVars)

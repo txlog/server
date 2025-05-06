@@ -1,8 +1,11 @@
 package scheduler
 
 import (
+	"io"
+	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/mileusna/crontab"
 	"github.com/txlog/server/database"
@@ -22,8 +25,29 @@ func StartScheduler() {
 	ctab := crontab.New()
 	ctab.MustAddJob(os.Getenv("CRON_RETENTION_EXPRESSION"), housekeepingJob)
 	ctab.MustAddJob(os.Getenv("CRON_STATS_EXPRESSION"), statsJob)
+	ctab.MustAddJob("0 * * * *", latestVersionJob)
 
+	latestVersionJob() // Run for the first time
 	logger.Info("Scheduler: started.")
+}
+
+func latestVersionJob() {
+	resp, err := http.Get("https://txlog.rda.run/docs/server/version")
+	if err != nil {
+		logger.Error("Error fetching latest version: " + err.Error())
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		logger.Error("Error reading response body: " + err.Error())
+		return
+	}
+
+	version := strings.TrimSpace(string(body))
+	os.Setenv("LATEST_VERSION", version)
+	logger.Info("Latest version updated: " + version)
 }
 
 // statsJob executes statistical tasks for the system while ensuring only one instance

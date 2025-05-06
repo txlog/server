@@ -278,6 +278,7 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 			"cronRetentionExpression":  os.Getenv("CRON_RETENTION_EXPRESSION"),
 			"cronStatisticsExpression": os.Getenv("CRON_STATS_EXPRESSION"),
 			"ignoreEmptyExecution":     os.Getenv("IGNORE_EMPTY_EXECUTION"),
+			"latestVersion":            os.Getenv("LATEST_VERSION"),
 		}
 
 		c.Set("env", envVars)

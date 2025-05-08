@@ -32,7 +32,7 @@ func StartScheduler() {
 }
 
 func latestVersionJob() {
-	resp, err := http.Get("https://txlog.rda.run/docs/server/version")
+	resp, err := http.Get("https://txlog.rda.run/server/version")
 	if err != nil {
 		logger.Error("Error fetching latest version: " + err.Error())
 		return

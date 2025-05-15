@@ -48,6 +48,20 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			executedAt.Valid = true
 		}
 
+		// Convert *bool to sql.NullBool
+		var needsRestarting sql.NullBool
+		if body.NeedsRestarting != nil {
+			needsRestarting.Bool = *body.NeedsRestarting
+			needsRestarting.Valid = true
+		}
+
+		// Convert *string to sql.NullString
+		var restartingReason sql.NullString
+		if body.RestartingReason != nil {
+			restartingReason.String = *body.RestartingReason
+			restartingReason.Valid = true
+		}
+
 		if body.TransactionsSent == 0 && os.Getenv("IGNORE_EMPTY_EXECUTION") == "true" {
 			c.JSON(http.StatusAccepted, gin.H{"message": "Execution will be ignored: no transactions sent"})
 			return
@@ -63,9 +77,9 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 
 		_, err = tx.Exec(`
       INSERT INTO executions (
-        machine_id, hostname, executed_at, success, details, transactions_processed, transactions_sent, agent_version, os
+        machine_id, hostname, executed_at, success, details, transactions_processed, transactions_sent, agent_version, os, needs_restarting, restarting_reason
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
       )`,
 			body.MachineID,
 			body.Hostname,
@@ -75,7 +89,10 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			body.TransactionsProcessed,
 			body.TransactionsSent,
 			body.AgentVersion,
-			body.OS)
+			body.OS,
+			needsRestarting,
+			restartingReason,
+		)
 
 		if err != nil {
 			tx.Rollback()

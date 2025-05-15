@@ -13,4 +13,6 @@ type Execution struct {
 	TransactionsSent      int        `json:"transactions_sent,omitempty"`
 	AgentVersion          string     `json:"agent_version,omitempty"`
 	OS                    string     `json:"os,omitempty"`
+	NeedsRestarting       *bool      `json:"needs_restarting,omitempty"`
+	RestartingReason      *string    `json:"restarting_reason,omitempty"`
 }

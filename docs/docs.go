@@ -351,7 +351,13 @@ const docTemplate = `{
                 "machine_id": {
                     "type": "string"
                 },
+                "needs_restarting": {
+                    "type": "boolean"
+                },
                 "os": {
+                    "type": "string"
+                },
+                "restarting_reason": {
                     "type": "string"
                 },
                 "success": {

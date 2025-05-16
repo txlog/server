@@ -77,7 +77,9 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 
 		_, err = tx.Exec(`
       INSERT INTO executions (
-        machine_id, hostname, executed_at, success, details, transactions_processed, transactions_sent, agent_version, os, needs_restarting, restarting_reason
+        machine_id, hostname, executed_at, success, details,
+        transactions_processed, transactions_sent, agent_version, os, needs_restarting,
+        restarting_reason
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
       )`,
@@ -141,12 +143,20 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 		var err error
 		if success != "" {
 			rows, err = database.Query(
-				`SELECT * FROM executions WHERE machine_id = $1 AND success = $2 ORDER BY executed_at DESC;`,
+				`SELECT
+          id, machine_id, hostname, executed_at, success,
+          details, transactions_processed, transactions_sent,
+          agent_version, os
+        FROM executions WHERE machine_id = $1 AND success = $2 ORDER BY executed_at DESC;`,
 				machineID, success,
 			)
 		} else {
 			rows, err = database.Query(
-				`SELECT * FROM executions WHERE machine_id = $1 ORDER BY executed_at DESC;`,
+				`SELECT
+          id, machine_id, hostname, executed_at, success,
+          details, transactions_processed, transactions_sent,
+          agent_version, os
+        FROM executions WHERE machine_id = $1 ORDER BY executed_at DESC;`,
 				machineID,
 			)
 		}

@@ -6,8 +6,6 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -20,10 +18,8 @@ import (
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/scheduler"
 	"github.com/txlog/server/util"
+	"github.com/txlog/server/version"
 )
-
-// version of the application
-var version = "1.8.1"
 
 //go:embed images
 var staticFiles embed.FS
@@ -56,180 +52,16 @@ func main() {
 	r.Use(EnvironmentVariablesMiddleware())
 
 	funcMap := template.FuncMap{
-		"text2html": func(s string) template.HTML {
-			s = strings.ReplaceAll(s, "\n", "<br>")
-			s = strings.ReplaceAll(s, " ", "&nbsp;")
-			return template.HTML(s)
-		},
-		"formatPercentage": func(porcentagem float64) string {
-			s := strconv.FormatFloat(porcentagem, 'f', 2, 64)
-			s = strings.ReplaceAll(s, ".", ",")
-
-			parts := strings.Split(s, ",")
-			integerPart := parts[0]
-			decimalPart := parts[1]
-
-			isNegative := strings.HasPrefix(integerPart, "-")
-			if isNegative {
-				integerPart = integerPart[1:]
-			}
-
-			n := len(integerPart)
-			if n <= 3 {
-				if isNegative {
-					return "-" + integerPart + "," + decimalPart
-				}
-				return integerPart + "," + decimalPart
-			}
-
-			var result string
-			for i := 0; i < n; i++ {
-				if (n-i)%3 == 0 && i != 0 {
-					result += "."
-				}
-				result += string(integerPart[i])
-			}
-			if isNegative {
-				return "-" + result + "," + decimalPart
-			}
-			return result + "," + decimalPart
-		},
-		"formatInteger": func(num int) string {
-			s := strconv.Itoa(num)
-			isNegative := strings.HasPrefix(s, "-")
-			if isNegative {
-				s = s[1:]
-			}
-
-			n := len(s)
-			if n <= 3 {
-				if isNegative {
-					return "-" + s
-				}
-				return s
-			}
-
-			var result string
-			for i := 0; i < n; i++ {
-				if (n-i)%3 == 0 && i != 0 {
-					result += "."
-				}
-				result += string(s[i])
-			}
-			if isNegative {
-				return "-" + result
-			}
-			return result
-		},
-		"iterate": func(start, count int) []int {
-			var items []int
-			for i := start; i <= count; i++ {
-				items = append(items, i)
-			}
-			return items
-		},
-		"add": func(a, b int) int {
-			return a + b
-		},
-		"min": func(a, b int) int {
-			if a < b {
-				return a
-			} else {
-				return b
-			}
-		},
-		"version": func() string { return version },
-		"dnfUser": func(user string) string {
-			// user can be a string like "rodrigo avila <rodrigo.avila>". But we need to return only what's between < and >.
-			// If user is empty, return "Unknown"
-			if user == "" {
-				return "Unknown"
-			}
-			if strings.Contains(user, "<") && strings.Contains(user, ">") {
-				start := strings.Index(user, "<")
-				end := strings.Index(user, ">")
-				if start != -1 && end != -1 {
-					return user[start+1 : end]
-				}
-			}
-			// If user is not in the format "rodrigo avila <rodrigo.avila>", return the user
-			// as is.
-			return user
-		},
-		"brand": func(brand string) string {
-			if strings.Contains(strings.ToLower(brand), "almalinux") {
-				return "brand-almalinux.svg"
-			}
-
-			if strings.Contains(strings.ToLower(brand), "centos") {
-				return "brand-centos.svg"
-			}
-
-			if strings.Contains(strings.ToLower(brand), "fedora") {
-				return "brand-fedora.svg"
-			}
-
-			if strings.Contains(strings.ToLower(brand), "oracle") {
-				return "brand-oracle.svg"
-			}
-
-			if strings.Contains(strings.ToLower(brand), "red hat") {
-				return "brand-redhat.svg"
-			}
-
-			if strings.Contains(strings.ToLower(brand), "rocky") {
-				return "brand-rocky.svg"
-			}
-
-			return "brand-linux.svg"
-		},
-		"hasAction": func(actions, action string) bool {
-			// actions can be a comma-separated list of characters, e.g.
-			// "I,D,O,U,E,R,C"; or a word like "Install", "Upgrade", etc. if actions
-			// is a word, we need to compare it with the action. if actions is a list,
-			// we need to check if the action is in the list.
-			// From https://dnf.readthedocs.io/en/latest/command_ref.html#history-command
-			actionsList := strings.Split(actions, ",")
-			for _, a := range actionsList {
-				a = strings.TrimSpace(a)
-				switch a {
-				case "I":
-					if action == "Install" {
-						return true
-					}
-				case "D":
-					if action == "Downgrade" {
-						return true
-					}
-				case "O":
-					if action == "Obsolete" {
-						return true
-					}
-				case "U":
-					if action == "Upgrade" {
-						return true
-					}
-				case "E":
-					if action == "Removed" {
-						return true
-					}
-				case "R":
-					if action == "Reinstall" {
-						return true
-					}
-				case "C":
-					if action == "Reason Change" {
-						return true
-					}
-				default:
-					if a == action {
-						return true
-					}
-				}
-			}
-
-			return false
-		},
+		"text2html":        util.Text2HTML,
+		"formatPercentage": util.FormatPercentage,
+		"formatInteger":    util.FormatInteger,
+		"iterate":          util.Iterate,
+		"add":              util.Add,
+		"min":              util.Min,
+		"version":          util.Version,
+		"dnfUser":          util.DnfUser,
+		"brand":            util.Brand,
+		"hasAction":        util.HasAction,
 	}
 
 	if os.Getenv("GIN_MODE") == "" {
@@ -265,7 +97,7 @@ func main() {
 	v1 := r.Group("/v1")
 	{
 		// txlog version
-		v1.GET("/version", controllers.GetVersions(version))
+		v1.GET("/version", controllers.GetVersions(version.SemVer))
 
 		// txlog build
 		v1.GET("/transactions/ids", controllers.GetTransactionIDs(database.Db))

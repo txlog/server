@@ -103,17 +103,21 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		if search != "" {
 			query = `
         SELECT
-            hostname,
-            executed_at,
-            machine_id
+          execution_id,
+          hostname,
+          executed_at,
+          machine_id,
+          needs_restarting
         FROM (
-            SELECT
-                hostname,
-                executed_at,
-                machine_id,
-                ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-            FROM
-                executions
+          SELECT
+          id as execution_id,
+              hostname,
+              executed_at,
+              machine_id,
+              needs_restarting,
+              ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+          FROM
+              executions
           WHERE
             ` + searchType + ` ILIKE $3
         ) sub
@@ -127,22 +131,28 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		} else {
 			query = `
         SELECT
-            hostname,
-            executed_at,
-            machine_id
+          execution_id,
+          hostname,
+          executed_at,
+          machine_id,
+          os,
+          needs_restarting
         FROM (
-            SELECT
-                hostname,
-                executed_at,
-                machine_id,
-                ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-            FROM
-                executions
+          SELECT
+            id as execution_id,
+              hostname,
+              executed_at,
+              machine_id,
+              os,
+              needs_restarting,
+              ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+          FROM
+              executions
         ) sub
         WHERE
-            sub.rn = 1
+          sub.rn = 1
         ORDER BY
-            hostname
+          hostname
         LIMIT $1 OFFSET $2
       `
 			rows, err = database.Query(query, limit, offset)
@@ -162,9 +172,12 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			var asset models.Execution
 			var executedAt sql.NullTime
 			err := rows.Scan(
+				&asset.ExecutionID,
 				&asset.Hostname,
 				&asset.ExecutedAt,
 				&asset.MachineID,
+				&asset.OS,
+				&asset.NeedsRestarting,
 			)
 			if err != nil {
 				logger.Error("Error iterating machine_id:" + err.Error())

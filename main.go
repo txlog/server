@@ -173,7 +173,7 @@ func main() {
 				return "brand-oracle.svg"
 			}
 
-			if strings.Contains(strings.ToLower(brand), "redhat") {
+			if strings.Contains(strings.ToLower(brand), "red hat") {
 				return "brand-redhat.svg"
 			}
 

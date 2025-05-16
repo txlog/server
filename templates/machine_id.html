@@ -9,18 +9,22 @@
           {{ .hostname }}
         </h2>
       </div>
-      <!-- Page title actions -->
-      <!--
-      <div class="col-auto ms-auto d-print-none">
-        <div class="btn-list">
-          <span class="d-none d-sm-inline">
-            <a href="#" class="btn btn-primary btn-5 ">
-              New view
-            </a>
-          </span>
+      {{ if .needs_restarting }}
+      <div class="col-auto ms-auto">
+        <div class="alert alert-warning">
+          <div class="alert-icon">
+            <!-- Download SVG icon from http://tabler.io/icons/icon/alert-triangle -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+              <path d="M12 9v4"></path>
+              <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+              <path d="M12 16h.01"></path>
+            </svg>
+          </div>
+          This asset must be restarted to apply the latest security updates.
+          <a href="#" class="alert-action" onclick="showReason()">Why?</a>
         </div>
       </div>
-      -->
+      {{ end }}
     </div>
   </div>
 </div>
@@ -34,7 +38,7 @@
             <div class="row align-items-center">
               <div class="col-auto">
                 <span class="text-black avatar">
-                  <i class="ti ti-id"></i>
+                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-id-badge-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 12h3v4h-3z" /><path d="M10 6h-6a1 1 0 0 0 -1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1h-6" /><path d="M10 3m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M14 16h2" /><path d="M14 12h4" /></svg>
                 </span>
               </div>
               <div class="col">
@@ -50,7 +54,7 @@
           <div class="card-body">
             <div class="row align-items-center">
               <div class="col-auto">
-                <span class="text-black avatar" style="background-image: url(/assets/brand-almalinux.svg)"></span>
+                <span class="text-black avatar" style="background-image: url(/images/{{ with index .executions 0 }}{{ brand .OS }}{{ end }})"></span>
               </div>
               <div class="col">
                 <div class="font-weight-medium">{{ with index .executions 0 }}{{ .OS }}{{ end }}</div>
@@ -66,7 +70,7 @@
             <div class="row align-items-center">
               <div class="col-auto">
                 <span class="text-black avatar">
-                  <i class="ti ti-pencil-code"></i>
+                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-git-merge"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M7 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M7 8l0 8" /><path d="M7 8a4 4 0 0 0 4 4h4" /></svg>
                 </span>
               </div>
               <div class="col">
@@ -252,7 +256,7 @@
                 {{ with .other_assets }}
                   {{ range . }}
                     <tr>
-                      <td><a href="/machines/{{ .MachineID }}"><kbd>{{ .MachineID }}</kbd></a></td>
+                      <td><a href="/assets/{{ .MachineID }}"><kbd>{{ .MachineID }}</kbd></a></td>
                       <td><kbd>{{ .Hostname }}</kbd></td>
                       <td>{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</td>
                       <td>{{ .AgentVersion }}</td>
@@ -275,6 +279,14 @@
 </div>
 
 <script>
+  function showReason() {
+    var myModal = new bootstrap.Modal(document.getElementById('modal-reason'), {
+      keyboard: true,
+      backdrop: 'static'
+    });
+    myModal.show();
+  }
+
   function showModal(transactionId) {
     fetch(`/v1/items?machine_id={{ .machine_id }}&transaction_id=${transactionId}`)
       .then(response => response.json())
@@ -373,6 +385,26 @@
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal modal-blur fade" id="modal-reason" tabindex="-1" style="display: none;" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modal-title">
+          Reason to restart the asset
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          {{ .restarting_reason | text2html }}
+        </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>

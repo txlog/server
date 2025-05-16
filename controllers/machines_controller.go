@@ -351,14 +351,45 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			otherAssets = append(otherAssets, exec)
 		}
 
+		// query if this asset must be restarted
+		var needsRestarting sql.NullBool
+		var restartingReason sql.NullString
+		err = database.QueryRow(`
+      SELECT needs_restarting, restarting_reason
+      FROM executions
+      WHERE machine_id = $1
+      ORDER BY executed_at DESC
+      LIMIT 1
+      `, machineID).Scan(&needsRestarting, &restartingReason)
+		if err != nil && err != sql.ErrNoRows {
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		// Prepare the boolean value for the template
+		var displayNeedsRestarting bool
+		if needsRestarting.Valid {
+			displayNeedsRestarting = needsRestarting.Bool
+		} else {
+			// If needsRestarting.Valid is false (NULL in database),
+			// displayNeedsRestarting will be false.
+			// This ensures that {{ if .needs_restarting }} will only be true
+			// if needs_restarting is TRUE in the database.
+			displayNeedsRestarting = false
+		}
+
 		c.HTML(http.StatusOK, "machine_id.html", gin.H{
-			"Context":      c,
-			"title":        "Assets",
-			"hostname":     hostname,
-			"machine_id":   machineID,
-			"transactions": transactions,
-			"executions":   executions,
-			"other_assets": otherAssets,
+			"Context":           c,
+			"title":             "Assets",
+			"hostname":          hostname,
+			"machine_id":        machineID,
+			"transactions":      transactions,
+			"executions":        executions,
+			"other_assets":      otherAssets,
+			"needs_restarting":  displayNeedsRestarting,
+			"restarting_reason": restartingReason.String,
 		})
 	}
 }

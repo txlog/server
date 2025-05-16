@@ -25,7 +25,7 @@ import (
 // version of the application
 var version = "1.7.4"
 
-//go:embed assets
+//go:embed images
 var staticFiles embed.FS
 
 //go:embed templates/*
@@ -56,6 +56,11 @@ func main() {
 	r.Use(EnvironmentVariablesMiddleware())
 
 	funcMap := template.FuncMap{
+		"text2html": func(s string) template.HTML {
+			s = strings.ReplaceAll(s, "\n", "<br>")
+			s = strings.ReplaceAll(s, " ", "&nbsp;")
+			return template.HTML(s)
+		},
 		"formatPercentage": func(porcentagem float64) string {
 			s := strconv.FormatFloat(porcentagem, 'f', 2, 64)
 			s = strings.ReplaceAll(s, ".", ",")
@@ -151,6 +156,33 @@ func main() {
 			// as is.
 			return user
 		},
+		"brand": func(brand string) string {
+			if strings.Contains(strings.ToLower(brand), "almalinux") {
+				return "brand-almalinux.svg"
+			}
+
+			if strings.Contains(strings.ToLower(brand), "centos") {
+				return "brand-centos.svg"
+			}
+
+			if strings.Contains(strings.ToLower(brand), "fedora") {
+				return "brand-fedora.svg"
+			}
+
+			if strings.Contains(strings.ToLower(brand), "oracle") {
+				return "brand-oracle.svg"
+			}
+
+			if strings.Contains(strings.ToLower(brand), "redhat") {
+				return "brand-redhat.svg"
+			}
+
+			if strings.Contains(strings.ToLower(brand), "rocky") {
+				return "brand-rocky.svg"
+			}
+
+			return "brand-linux.svg"
+		},
 		"hasAction": func(actions, action string) bool {
 			// actions can be a comma-separated list of characters, e.g.
 			// "I,D,O,U,E,R,C"; or a word like "Install", "Upgrade", etc. if actions
@@ -204,12 +236,12 @@ func main() {
 		tmpl := template.Must(template.New("any").Funcs(funcMap).ParseFS(templateFS, "templates/*.html"))
 		r.SetHTMLTemplate(tmpl)
 
-		fsys, _ := fs.Sub(staticFiles, "assets")
-		r.StaticFS("/assets", http.FS(fsys))
+		fsys, _ := fs.Sub(staticFiles, "images")
+		r.StaticFS("/images", http.FS(fsys))
 	} else {
 		r.SetFuncMap(funcMap)
 		r.LoadHTMLGlob("templates/*.html")
-		r.Static("/assets", "./assets")
+		r.Static("/images", "./images")
 	}
 
 	healthcheck.New(r, util.CheckConfig(), util.Check())
@@ -221,7 +253,7 @@ func main() {
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
-	r.GET("/machines/:machine_id", controllers.GetMachineID(database.Db))
+	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,

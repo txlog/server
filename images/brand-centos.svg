@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   aria-label="CentOS"
+   role="img"
+   viewBox="0 0 24 24"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="brand-centos.svg"
+   width="24"
+   height="24"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs5" />
+  <sodipodi:namedview
+     id="namedview5"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="35.664698"
+     inkscape:cx="14.187699"
+     inkscape:cy="12.57546"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5" />
+  <rect
+     width="24"
+     height="24"
+     rx="0.70312506%"
+     fill="#ffffff"
+     id="rect1"
+     x="1.0269563e-15"
+     y="1.0269563e-15"
+     style="stroke:none;stroke-width:0.0468751" />
+  <g
+     id="g"
+     transform="matrix(0.04725057,0,0,0.04725057,-0.09614606,-0.09614606)"
+     style="fill:#1a1a1a">
+    <rect
+       x="118"
+       y="118"
+       fill="#9ccd2a"
+       width="124"
+       height="124"
+       id="rect2"
+       style="fill:#1a1a1a" />
+    <rect
+       x="270"
+       y="118"
+       fill="#932279"
+       width="124"
+       height="124"
+       id="rect3"
+       style="fill:#1a1a1a" />
+    <rect
+       x="270"
+       y="270"
+       fill="#efa724"
+       width="124"
+       height="124"
+       id="rect4"
+       style="fill:#1a1a1a" />
+    <rect
+       x="118"
+       y="270"
+       fill="#262577"
+       width="124"
+       height="124"
+       id="rect5"
+       style="fill:#1a1a1a" />
+  </g>
+  <use
+     xlink:href="#g"
+     transform="rotate(-135,12.000001,12.000001)"
+     id="use5"
+     x="0"
+     y="0" />
+  <path
+     fill="none"
+     stroke="#ffffff"
+     stroke-width="0.425255"
+     d="M 11.054988,12 6.9441889,16.15805 2.7861387,12 6.9441889,7.8419497 Z m 0.283504,-0.661508 H 5.4794212 V 5.4794212 h 5.8590708 z m 0,1.323016 v 5.85907 H 5.4794212 v -5.85907 z M 12,11.054988 7.8419497,6.9441889 12,2.7861387 16.15805,6.9441889 Z m 0,1.890023 -4.1580503,4.1108 L 12,21.213861 l 4.15805,-4.15805 z m 0.661508,-1.606519 V 5.4794212 h 5.85907 v 5.8590708 z m 0,1.323016 h 5.85907 v 5.85907 h -5.85907 z M 12.945011,12 17.055811,16.15805 21.213861,12 17.055811,7.8419497 Z"
+     id="path5" />
+</svg>

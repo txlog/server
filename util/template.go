@@ -11,8 +11,6 @@ import (
 // Text2HTML converts a plain text string to HTML by replacing newlines with <br> tags
 // and spaces with non-breaking space entities (&nbsp;).
 // The function is useful for preserving text formatting when displaying in HTML context.
-// WARNING: This function returns template.HTML which bypasses HTML escaping.
-// Only use this function with trusted input to avoid XSS vulnerabilities.
 //
 // Parameters:
 //   - s: The input string to convert
@@ -20,6 +18,7 @@ import (
 // Returns:
 //   - template.HTML: The converted HTML-safe string
 func Text2HTML(s string) template.HTML {
+	s = template.HTMLEscapeString(s)
 	s = strings.ReplaceAll(s, "\n", "<br>")
 	s = strings.ReplaceAll(s, " ", "&nbsp;")
 	return template.HTML(s)

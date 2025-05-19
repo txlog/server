@@ -111,15 +111,15 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
           needs_restarting
         FROM (
           SELECT
-          id as execution_id,
-              hostname,
-              executed_at,
-              machine_id,
-              os,
-              needs_restarting,
-              ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+            id as execution_id,
+            hostname,
+            executed_at,
+            machine_id,
+            os,
+            needs_restarting,
+            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
           FROM
-              executions
+            executions
           WHERE
             ` + searchType + ` ILIKE $3
         ) sub
@@ -142,14 +142,14 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
         FROM (
           SELECT
             id as execution_id,
-              hostname,
-              executed_at,
-              machine_id,
-              os,
-              needs_restarting,
-              ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
+            hostname,
+            executed_at,
+            machine_id,
+            os,
+            needs_restarting,
+            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
           FROM
-              executions
+            executions
         ) sub
         WHERE
           sub.rn = 1
@@ -182,8 +182,6 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				&asset.NeedsRestarting,
 			)
 			if err != nil {
-				logger.Error("=========================")
-
 				logger.Error("Error iterating machine_id:" + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 					"error": err.Error(),

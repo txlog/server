@@ -125,6 +125,38 @@ func main() {
 		v1.GET("/items", controllers.GetItems(database.Db))
 	}
 
+	v2 := r.Group("/v2")
+	{
+		// txlog version
+		v2.GET("/version", controllers.GetVersions(version.SemVer))
+
+		// txlog build
+		v2.GET("/transactions/ids", controllers.GetTransactionIDs(database.Db))
+		v2.POST("/transactions", controllers.PostTransactions(database.Db))
+		v2.POST("/executions", controllers.PostExecutions(database.Db))
+
+		// txlog machine_id \
+		//   --hostname=G15.example.com
+		v2.GET("/assets/ids", controllers.GetMachineIDs(database.Db))
+		v2.GET("/assets", controllers.GetMachines(database.Db))
+		v2.GET("/assets/requiring-restart", controllers.GetMachines(database.Db))
+
+		// txlog executions \
+		//   --machine_id=e250c98c14e947ba96359223785375bb \
+		//   --success=true \
+		v2.GET("/executions", controllers.GetExecutions(database.Db))
+
+		// txlog transactions \
+		//   --machine_id=e250c98c14e947ba96359223785375bb
+		v2.GET("/transactions", controllers.GetTransactions(database.Db))
+
+		// txlog items \
+		//   --machine_id=e250c98c14e947ba96359223785375bb \
+		//   --transaction_id=4
+		v2.GET("/items/ids", controllers.GetItemIDs(database.Db))
+		v2.GET("/items", controllers.GetItems(database.Db))
+	}
+
 	r.Run()
 }
 

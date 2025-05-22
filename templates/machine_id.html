@@ -11,7 +11,7 @@
       </div>
       {{ if .needs_restarting }}
       <div class="col-auto ms-auto">
-        <div class="alert alert-warning">
+        <div class="alert alert-important alert-warning alert-dismissible" role="alert">
           <div class="alert-icon">
             <!-- Download SVG icon from http://tabler.io/icons/icon/alert-triangle -->
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
@@ -20,8 +20,12 @@
               <path d="M12 16h.01"></path>
             </svg>
           </div>
-          This asset must be restarted to apply the latest security updates.
-          <a href="#" class="alert-action" onclick="showReason()">Why?</a>
+          <div>
+            <div class="alert-description">
+              This asset must be restarted to apply the latest security updates.
+              <span class="form-help"><a href="#" onclick="showReason()">?</a></span>
+            </div>
+          </div>
         </div>
       </div>
       {{ end }}

@@ -294,7 +294,7 @@ func getDuplicatedAssets(database *sql.DB) ([]DuplicatedAsset, error) {
     num_distinct_machine_ids > 1
     AND second_latest_execution_date >= CURRENT_DATE - INTERVAL '30 day'
   ORDER BY
-    num_distinct_machine_ids;`)
+    num_distinct_machine_ids DESC;`)
 
 	if err != nil {
 		return nil, err

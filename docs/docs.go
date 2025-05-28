@@ -190,6 +190,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/machines": {
+            "get": {
+                "description": "List machine IDs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "machines"
+                ],
+                "summary": "List machine IDs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Operating System",
+                        "name": "os",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Agent Version",
+                        "name": "agent_version",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "Invalid JSON input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/machines/ids": {
             "get": {
                 "description": "List machine IDs",
@@ -317,6 +364,27 @@ const docTemplate = `{
                     "transactions"
                 ],
                 "summary": "Get saved transactions IDs for a host",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    }
+                }
+            }
+        },
+        "/v1/version": {
+            "get": {
+                "description": "Get server version",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "version"
+                ],
+                "summary": "Get server version",
                 "responses": {
                     "200": {
                         "description": "OK",

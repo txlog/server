@@ -13,6 +13,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	healthcheck "github.com/tavsec/gin-healthcheck"
 	"github.com/txlog/server/controllers"
+	v1 "github.com/txlog/server/controllers/api/v1"
 	"github.com/txlog/server/database"
 	_ "github.com/txlog/server/docs"
 	logger "github.com/txlog/server/logger"
@@ -94,67 +95,35 @@ func main() {
 		ginSwagger.DefaultModelsExpandDepth(-1),
 	))
 
-	v1 := r.Group("/v1")
+	v1Group := r.Group("/v1")
 	{
 		// txlog version
-		v1.GET("/version", controllers.GetVersions(version.SemVer))
+		v1Group.GET("/version", v1.GetVersions(version.SemVer))
 
 		// txlog build
-		v1.GET("/transactions/ids", controllers.GetTransactionIDs(database.Db))
-		v1.POST("/transactions", controllers.PostTransactions(database.Db))
-		v1.POST("/executions", controllers.PostExecutions(database.Db))
+		v1Group.GET("/transactions/ids", v1.GetTransactionIDs(database.Db))
+		v1Group.POST("/transactions", v1.PostTransactions(database.Db))
+		v1Group.POST("/executions", v1.PostExecutions(database.Db))
 
 		// txlog machine_id \
 		//   --hostname=G15.example.com
-		v1.GET("/machines/ids", controllers.GetMachineIDs(database.Db))
-		v1.GET("/machines", controllers.GetMachines(database.Db))
+		v1Group.GET("/machines/ids", v1.GetMachineIDs(database.Db))
+		v1Group.GET("/machines", v1.GetMachines(database.Db))
 
 		// txlog executions \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
 		//   --success=true \
-		v1.GET("/executions", controllers.GetExecutions(database.Db))
+		v1Group.GET("/executions", v1.GetExecutions(database.Db))
 
 		// txlog transactions \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
-		v1.GET("/transactions", controllers.GetTransactions(database.Db))
+		v1Group.GET("/transactions", v1.GetTransactions(database.Db))
 
 		// txlog items \
 		//   --machine_id=e250c98c14e947ba96359223785375bb \
 		//   --transaction_id=4
-		v1.GET("/items/ids", controllers.GetItemIDs(database.Db))
-		v1.GET("/items", controllers.GetItems(database.Db))
-	}
-
-	v2 := r.Group("/v2")
-	{
-		// txlog version
-		v2.GET("/version", controllers.GetVersions(version.SemVer))
-
-		// txlog build
-		v2.GET("/transactions/ids", controllers.GetTransactionIDs(database.Db))
-		v2.POST("/transactions", controllers.PostTransactions(database.Db))
-		v2.POST("/executions", controllers.PostExecutions(database.Db))
-
-		// txlog machine_id \
-		//   --hostname=G15.example.com
-		v2.GET("/assets/ids", controllers.GetMachineIDs(database.Db))
-		v2.GET("/assets", controllers.GetMachines(database.Db))
-		v2.GET("/assets/requiring-restart", controllers.GetMachines(database.Db))
-
-		// txlog executions \
-		//   --machine_id=e250c98c14e947ba96359223785375bb \
-		//   --success=true \
-		v2.GET("/executions", controllers.GetExecutions(database.Db))
-
-		// txlog transactions \
-		//   --machine_id=e250c98c14e947ba96359223785375bb
-		v2.GET("/transactions", controllers.GetTransactions(database.Db))
-
-		// txlog items \
-		//   --machine_id=e250c98c14e947ba96359223785375bb \
-		//   --transaction_id=4
-		v2.GET("/items/ids", controllers.GetItemIDs(database.Db))
-		v2.GET("/items", controllers.GetItems(database.Db))
+		v1Group.GET("/items/ids", v1.GetItemIDs(database.Db))
+		v1Group.GET("/items", v1.GetItems(database.Db))
 	}
 
 	r.Run()

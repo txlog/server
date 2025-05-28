@@ -20,11 +20,27 @@
             <h3 class="card-title">{{ if .search }}Assets containig <kbd>{{ .search }}</kbd>{{ else }}Registered assets{{ end }}</h3>
             <div class="card-actions">
               <div class="ms-auto text-secondary">
-                Search:
-                <div class="ms-2 d-inline-block">
-                    <input type="text" class="form-control form-control-sm" aria-label="Search assets"
-                         placeholder="Hostname or Asset ID" value="{{ .search }}"
-                         id="search" name="search" onkeydown="handleSearch(event)">
+                <div class="row g-2">
+                  <div class="col">
+                    <input type="text" class="form-control" autocomplete="off" aria-label="Search assets" placeholder="Search by hostname or id" value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)">
+                  </div>
+                  <div class="col-auto">
+                    <label class="form-selectgroup-item" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="Show only assets that need to be restarted">
+                      <input type="checkbox" name="name" value="sun" class="form-selectgroup-input">
+                      <span class="form-selectgroup-label"><!-- Download SVG icon from http://tabler.io/icons/icon/rotate -->
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-rotate"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19.95 11a8 8 0 1 0 -.5 4m.5 5v-5h-5" /></svg>
+                      </span>
+                    </label>
+                  </div>
+                  <div class="col-auto">
+                    <a href="#" class="btn btn-2 btn-icon" aria-label="Button">
+                      <!-- Download SVG icon from http://tabler.io/icons/icon/search -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                        <path d="M21 21l-6 -6"></path>
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

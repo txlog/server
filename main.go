@@ -13,7 +13,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	healthcheck "github.com/tavsec/gin-healthcheck"
 	"github.com/txlog/server/controllers"
-	v1 "github.com/txlog/server/controllers/api/v1"
+	v1API "github.com/txlog/server/controllers/api/v1"
 	"github.com/txlog/server/database"
 	_ "github.com/txlog/server/docs"
 	logger "github.com/txlog/server/logger"
@@ -98,32 +98,23 @@ func main() {
 	v1Group := r.Group("/v1")
 	{
 		// txlog version
-		v1Group.GET("/version", v1.GetVersions(version.SemVer))
+		v1Group.GET("/version", v1API.GetVersions(version.SemVer))
 
 		// txlog build
-		v1Group.GET("/transactions/ids", v1.GetTransactionIDs(database.Db))
-		v1Group.POST("/transactions", v1.PostTransactions(database.Db))
-		v1Group.POST("/executions", v1.PostExecutions(database.Db))
+		v1Group.GET("/transactions/ids", v1API.GetTransactionIDs(database.Db))
+		v1Group.POST("/transactions", v1API.PostTransactions(database.Db))
+		v1Group.POST("/executions", v1API.PostExecutions(database.Db))
 
-		// txlog machine_id \
-		//   --hostname=G15.example.com
-		v1Group.GET("/machines/ids", v1.GetMachineIDs(database.Db))
-		v1Group.GET("/machines", v1.GetMachines(database.Db))
+		// Assets requiring restart
+		v1Group.GET("/assets/requiring-restart", v1API.GetAssetsRequiringRestart(database.Db))
 
-		// txlog executions \
-		//   --machine_id=e250c98c14e947ba96359223785375bb \
-		//   --success=true \
-		v1Group.GET("/executions", v1.GetExecutions(database.Db))
-
-		// txlog transactions \
-		//   --machine_id=e250c98c14e947ba96359223785375bb \
-		v1Group.GET("/transactions", v1.GetTransactions(database.Db))
-
-		// txlog items \
-		//   --machine_id=e250c98c14e947ba96359223785375bb \
-		//   --transaction_id=4
-		v1Group.GET("/items/ids", v1.GetItemIDs(database.Db))
-		v1Group.GET("/items", v1.GetItems(database.Db))
+		// Endpoints for agent pre-v1.6.0
+		v1Group.GET("/machines/ids", v1API.GetMachineIDs(database.Db))
+		v1Group.GET("/machines", v1API.GetMachines(database.Db))
+		v1Group.GET("/executions", v1API.GetExecutions(database.Db))
+		v1Group.GET("/transactions", v1API.GetTransactions(database.Db))
+		v1Group.GET("/items/ids", v1API.GetItemIDs(database.Db))
+		v1Group.GET("/items", v1API.GetItems(database.Db))
 	}
 
 	r.Run()

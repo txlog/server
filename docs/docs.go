@@ -23,6 +23,39 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/assets/requiring-restart": {
+            "get": {
+                "description": "This endpoint retrieves assets that have the latest execution data indicating a restart is required.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "assets"
+                ],
+                "summary": "List assets requiring restart",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {}
+                    },
+                    "400": {
+                        "description": "Invalid JSON input",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Database error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/executions": {
             "get": {
                 "description": "List executions",
@@ -200,7 +233,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "machines"
+                    "assets"
                 ],
                 "summary": "List machine IDs",
                 "parameters": [
@@ -247,7 +280,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "machines"
+                    "assets"
                 ],
                 "summary": "List machine IDs",
                 "parameters": [

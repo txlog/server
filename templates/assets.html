@@ -17,7 +17,13 @@
       <div class="col-12">
         <div class="card">
           <div class="card-header">
-            <h3 class="card-title">{{ if .search }}Assets containig <kbd>{{ .search }}</kbd>{{ else }}Registered assets{{ end }}</h3>
+            <h3 class="card-title">
+                {{ if .search }}
+                Assets {{ if eq .restart "true" }}that need to be restarted {{ end }}containing <kbd>{{ .search }}</kbd>
+              {{ else }}
+                Registered assets {{ if eq .restart "true" }}that need to be restarted{{ end }}
+              {{ end }}
+            </h3>
             <div class="card-actions">
               <div class="ms-auto text-secondary">
                 <div class="row g-2">

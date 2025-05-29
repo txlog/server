@@ -36,6 +36,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		var err error
 
 		search := c.Query("search")
+		restart := c.Query("restart")
 
 		searchType := "hostname"
 		if len(search) == 32 && !util.ContainsSpecialCharacters(search) {
@@ -57,6 +58,12 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		var query string
 
 		if search != "" {
+			restartQuery := ""
+
+			if restart == "true" {
+				restartQuery = ` AND needs_restarting IS TRUE`
+			}
+
 			query = `
         SELECT
           count(hostname)
@@ -68,12 +75,19 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
             executions
           WHERE
             ` + searchType + ` ILIKE $1
+            ` + restartQuery + `
         ) sub
         WHERE
           sub.rn = 1
       `
 			err = database.QueryRow(query, util.FormatSearchTerm(search)).Scan(&total)
 		} else {
+			restartQuery := ""
+
+			if restart == "true" {
+				restartQuery = ` WHERE needs_restarting IS TRUE`
+			}
+
 			query = `
         SELECT
           count(hostname)
@@ -83,10 +97,12 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
             ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
           FROM
             executions
+          ` + restartQuery + `
         ) sub
         WHERE
           sub.rn = 1
       `
+			logger.Info(query)
 			err = database.QueryRow(query).Scan(&total)
 		}
 
@@ -101,6 +117,12 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		totalPages := (total + limit - 1) / limit
 
 		if search != "" {
+			restartQuery := ""
+
+			if restart == "true" {
+				restartQuery = ` AND needs_restarting IS TRUE`
+			}
+
 			query = `
         SELECT
           execution_id,
@@ -122,6 +144,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
             executions
           WHERE
             ` + searchType + ` ILIKE $3
+            ` + restartQuery + `
         ) sub
         WHERE
             sub.rn = 1
@@ -131,6 +154,12 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
       `
 			rows, err = database.Query(query, limit, offset, util.FormatSearchTerm(search))
 		} else {
+			restartQuery := ""
+
+			if restart == "true" {
+				restartQuery = ` WHERE needs_restarting IS TRUE`
+			}
+
 			query = `
         SELECT
           execution_id,
@@ -150,6 +179,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
             ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
           FROM
             executions
+          ` + restartQuery + `
         ) sub
         WHERE
           sub.rn = 1
@@ -246,6 +276,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			"offset":       offset,
 			"statistics":   statistics,
 			"search":       search,
+			"restart":      restart,
 		})
 	}
 }

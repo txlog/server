@@ -14,7 +14,7 @@ import (
 type MachineID struct {
 	Hostname  string     `json:"hostname"`
 	MachineID string     `json:"machine_id"`
-	BeginTime *time.Time `json:"begin_time"`
+	BeginTime *time.Time `json:"begin_time,omitempty"`
 }
 
 // GetMachines queries the database for unique machines based on hostname,
@@ -22,7 +22,7 @@ type MachineID struct {
 //
 //	@Summary		List machine IDs
 //	@Description	List machine IDs
-//	@Tags			machines
+//	@Tags			assets
 //	@Accept			json
 //	@Produce		json
 //	@Param			os				query		string	false	"Operating System"
@@ -112,11 +112,78 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
+// GetAssetsRequiringRestart queries the database for assets that require a restart
+//
+//	@Summary		List assets requiring restart
+//	@Description	This endpoint retrieves assets that have the latest execution data indicating a restart is required.
+//	@Tags			assets
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	interface{}
+//	@Failure		400	{string}	string	"Invalid execution data"
+//	@Failure		400	{string}	string	"Invalid JSON input"
+//	@Failure		500	{string}	string	"Database error"
+//	@Router			/v1/assets/requiring-restart [get]
+func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var rows *sql.Rows
+		var err error
+
+		query := `
+      SELECT
+        e.hostname,
+        e.machine_id
+      FROM executions AS e
+      WHERE
+        e.needs_restarting IS TRUE AND e.id IN (
+          SELECT DISTINCT ON (
+            e2.hostname
+          )
+          e2.id
+          FROM
+            executions AS e2
+          WHERE
+            e2.hostname = e.hostname
+          ORDER BY
+            e2.hostname,
+            e2.executed_at DESC
+        )
+      ORDER BY
+        e.hostname ASC;`
+
+		rows, err = database.Query(query)
+
+		if err != nil {
+			logger.Error("Error querying assets that require a restart: " + err.Error())
+			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		defer rows.Close()
+
+		machines := []MachineID{}
+		for rows.Next() {
+			var machine MachineID
+			err := rows.Scan(
+				&machine.Hostname,
+				&machine.MachineID,
+			)
+			if err != nil {
+				logger.Error("Error iterating assets: " + err.Error())
+				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			machines = append(machines, machine)
+		}
+
+		c.JSON(http.StatusOK, machines)
+	}
+}
+
 // GetMachineIDs List the machine_id of the given hostname
 //
 //	@Summary		List machine IDs
 //	@Description	List machine IDs
-//	@Tags			machines
+//	@Tags			assets
 //	@Accept			json
 //	@Produce		json
 //	@Param			hostname	query		string	false	"Hostname"

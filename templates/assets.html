@@ -26,9 +26,10 @@
                   </div>
                   <div class="col-auto">
                     <label class="form-selectgroup-item" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="Show only assets that need to be restarted">
-                      <input type="checkbox" name="name" value="sun" class="form-selectgroup-input">
-                      <span class="form-selectgroup-label"><!-- Download SVG icon from http://tabler.io/icons/icon/rotate -->
-                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-rotate"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19.95 11a8 8 0 1 0 -.5 4m.5 5v-5h-5" /></svg>
+                      <input type="checkbox" id="restart" name="restart" value="true" class="form-selectgroup-input"{{ if eq .restart "true" }} checked{{ end }}>
+                      <span class="form-selectgroup-label">
+                        <!-- Download SVG icon from http://tabler.io/icons/icon/refresh-alert -->
+                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-refresh-alert"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /><path d="M12 9l0 3" /><path d="M12 15l.01 0" /></svg>
                       </span>
                     </label>
                   </div>
@@ -143,9 +144,11 @@
 <script>
   function search() {
     const searchValue = document.getElementById('search').value;
+    const restartValue = document.getElementById('restart').checked;
     const hasQueryParams = window.location.search.includes('?');
     const url = new URL(window.location.href);
     url.searchParams.set('search', searchValue);
+    url.searchParams.set('restart', restartValue);
     window.location.href = url.toString();
   }
 

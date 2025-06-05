@@ -130,26 +130,24 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 		var err error
 
 		query := `
-      SELECT
-        e.hostname,
-        e.machine_id
-      FROM executions AS e
-      WHERE
-        e.needs_restarting IS TRUE AND e.id IN (
-          SELECT DISTINCT ON (
-            e2.hostname
-          )
-          e2.id
+      WITH RankedExecutions AS (
+          SELECT
+              hostname,
+              machine_id,
+              needs_restarting,
+              ROW_NUMBER() OVER (PARTITION BY hostname ORDER BY executed_at DESC) as rn
           FROM
-            executions AS e2
-          WHERE
-            e2.hostname = e.hostname
-          ORDER BY
-            e2.hostname,
-            e2.executed_at DESC
-        )
+              public.executions
+      )
+      SELECT
+          hostname,
+          machine_id
+      FROM
+          RankedExecutions
+      WHERE
+          rn = 1 AND needs_restarting IS TRUE
       ORDER BY
-        e.hostname ASC;`
+          hostname ASC;`
 
 		rows, err = database.Query(query)
 

@@ -1,0 +1,132 @@
+{{ template "header.html" . }}
+<div class="page-header d-print-none text-white">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">
+          {{ .title }}
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex">
+                <h3 class="card-title">Package Progression by Week</h3>
+            </div>
+            <div class="row">
+              <div class="col">
+                <div id="chart-active-users-2" class="position-relative" style="min-height: 288px;"></div>
+              </div>
+              <div class="col-md-auto">
+                <div class="divide-y divide-y-fill">
+                  <div class="px-3">
+                    <div class="text-secondary"><span class="status-dot" style="background-color: #F44336;"></span> Installed</div>
+                    <div class="h2">11,425</div>
+                  </div>
+                  <div class="px-3">
+                    <div class="text-secondary"><span class="status-dot" style="background-color: #066fd1;"></span> Upgraded</div>
+                    <div class="h2">6,458</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        window.ApexCharts &&
+          new ApexCharts(document.getElementById("chart-active-users-2"), {
+            chart: {
+              type: "line",
+              fontFamily: "inherit",
+              height: 288,
+              parentHeightOffset: 0,
+              toolbar: {
+                show: false,
+              },
+              animations: {
+                enabled: false,
+              },
+            },
+            stroke: {
+              width: 2,
+              lineCap: "round",
+              curve: "smooth",
+            },
+            series: [
+              {
+                name: "Installed",
+                data: [
+                  8127, 8296, 8322, 8389, 8411, 8502, 8868, 8977, 9273, 9325, 9345, 9430,
+                ],
+              },
+              {
+                name: "Upgraded",
+                data: [
+                  4922, 4973, 5155, 5267, 5566, 5689, 5692, 5758, 5773, 5799, 5960, 6000,
+                ],
+              },
+            ],
+            tooltip: {
+              theme: "dark",
+            },
+            grid: {
+              padding: {
+                top: -20,
+                right: 0,
+                left: -4,
+                bottom: -4,
+              },
+              strokeDashArray: 4,
+            },
+            xaxis: {
+              labels: {
+                padding: 0,
+              },
+              tooltip: {
+                enabled: false,
+              },
+              type: "string",
+            },
+            yaxis: {
+              labels: {
+                padding: 4,
+              },
+            },
+            labels: [
+              "24/03/25-30/03/25",
+              "31/03/25-06/04/25",
+              "07/04/25-13/04/25",
+              "14/04/25-20/04/25",
+              "21/04/25-27/04/25",
+              "28/04/25-04/05/25",
+              "05/05/25-11/05/25",
+              "12/05/25-18/05/25",
+              "19/05/25-25/05/25",
+              "26/05/25-01/06/25",
+              "02/06/25-08/06/25",
+              "09/06/25-15/06/25",
+            ],
+            colors: [
+              '#F44336', '#066fd1'
+            ],
+            legend: {
+              show: false,
+            },
+          }).render();
+      });
+    </script>
+    {{ template "settings.html" . }}
+  </div>
+</div>
+
+{{ template "footer.html" . }}

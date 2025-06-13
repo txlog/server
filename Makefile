@@ -28,7 +28,7 @@ build:
 
 .PHONY: run
 run:
-	@go run main.go
+	@air
 
 .PHONY: doc
 doc:

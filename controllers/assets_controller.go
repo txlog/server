@@ -102,7 +102,6 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
         WHERE
           sub.rn = 1
       `
-			logger.Info(query)
 			err = database.QueryRow(query).Scan(&total)
 		}
 

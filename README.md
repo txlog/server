@@ -138,6 +138,12 @@ rm go1.24.2.linux-amd64.tar.gz
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
+### Air
+
+```bash
+curl https://i.jpillora.com/air-verse/air@latest! | bash
+```
+
 ### A `.env` file
 
 ```bash

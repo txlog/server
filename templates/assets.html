@@ -86,7 +86,7 @@
                       <td data-label="Name">
                         <div class="d-flex py-1 align-items-center">
                           <span class="avatar avatar-2 me-2" style="background-image: url(/images/{{ brand .OS }})">
-                            {{ if .NeedsRestarting }}
+                            {{ if derefBool .NeedsRestarting }}
                               <span class="badge badge-dot bg-yellow badge-notification badge-blink" title="Asset must be restarted"></span>
                             {{ end }}
                           </span>

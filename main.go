@@ -53,16 +53,17 @@ func main() {
 	r.Use(EnvironmentVariablesMiddleware())
 
 	funcMap := template.FuncMap{
-		"text2html":        util.Text2HTML,
-		"formatPercentage": util.FormatPercentage,
-		"formatInteger":    util.FormatInteger,
-		"iterate":          util.Iterate,
 		"add":              util.Add,
-		"min":              util.Min,
-		"version":          util.Version,
-		"dnfUser":          util.DnfUser,
 		"brand":            util.Brand,
+		"derefBool":        util.DerefBool,
+		"dnfUser":          util.DnfUser,
+		"formatInteger":    util.FormatInteger,
+		"formatPercentage": util.FormatPercentage,
 		"hasAction":        util.HasAction,
+		"iterate":          util.Iterate,
+		"min":              util.Min,
+		"text2html":        util.Text2HTML,
+		"version":          util.Version,
 	}
 
 	if os.Getenv("GIN_MODE") == "" {

@@ -308,3 +308,18 @@ func HasAction(actions, action string) bool {
 
 	return false
 }
+
+// DerefBool safely dereferences a bool pointer and returns its value.
+// If the pointer is nil, it returns false as a default value.
+//
+// Parameters:
+//   - p: A pointer to a boolean value
+//
+// Returns:
+//   - bool: The dereferenced value if p is not nil, false otherwise
+func DerefBool(p *bool) bool {
+	if p == nil {
+		return false
+	}
+	return *p
+}

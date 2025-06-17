@@ -1,3 +1,4 @@
 /bin/
 .env
 tmp/main
+tmp/build-errors.log

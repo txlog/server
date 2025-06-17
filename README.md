@@ -128,12 +128,12 @@ To make changes on this project, you need:
 ### Golang
 
 ```bash
-wget https://go.dev/dl/go1.24.2.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.24.4.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.24.2.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.24.4.linux-amd64.tar.gz
 echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 source ~/.bashrc
-rm go1.24.2.linux-amd64.tar.gz
+rm go1.24.4.linux-amd64.tar.gz
 
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
@@ -141,7 +141,7 @@ go install github.com/swaggo/swag/cmd/swag@latest
 ### Air
 
 ```bash
-curl https://i.jpillora.com/air-verse/air@latest! | bash
+curl https://install.rda.run/air-verse/air@latest! | bash
 ```
 
 ### A `.env` file

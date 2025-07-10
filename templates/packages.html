@@ -18,7 +18,7 @@
         <div class="card">
           <div class="card-body">
             <div class="d-flex">
-                <h3 class="card-title">Package Progression by Week</h3>
+                <h3 class="card-title">Package Progression by Week <span class="card-subtitle">last 3 months</span></h3>
             </div>
             <div class="row">
               <div class="col">
@@ -28,11 +28,23 @@
                 <div class="divide-y divide-y-fill">
                   <div class="px-3">
                     <div class="text-secondary"><span class="status-dot" style="background-color: #F44336;"></span> Installed</div>
-                    <div class="h2">11,425</div>
+                    <div class="h2">
+                      {{ $total := 0 }}
+                      {{ range .graphData }}
+                      {{ $total = add $total .Install }}
+                      {{ end }}
+                      {{ formatInteger $total }}
+                    </div>
                   </div>
                   <div class="px-3">
                     <div class="text-secondary"><span class="status-dot" style="background-color: #066fd1;"></span> Upgraded</div>
-                    <div class="h2">6,458</div>
+                    <div class="h2">
+                      {{ $total := 0 }}
+                      {{ range .graphData }}
+                      {{ $total = add $total .Upgraded }}
+                      {{ end }}
+                      {{ formatInteger $total }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -40,6 +52,33 @@
           </div>
         </div>
       </div>
+
+      <div class="col-lg-12">
+        <div class="card">
+
+            <div class="card-table table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Week</th>
+                    <th>Installed packages</th>
+                    <th>Upgraded packages</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{ range .graphData }}
+                    <tr>
+                      <td>{{ .Week.Format "02/01/2006" }}</td>
+                      <td class="text-nowrap">{{ formatInteger .Install }}</td>
+                      <td class="text-nowrap">{{ formatInteger .Upgraded }}</td>
+                    </tr>
+                  {{ end }}
+                </tbody>
+              </table>
+            </div>
+        </div>
+      </div>
+
     </div>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -65,15 +104,11 @@
             series: [
               {
                 name: "Installed",
-                data: [
-                  8127, 8296, 8322, 8389, 8411, 8502, 8868, 8977, 9273, 9325, 9345, 9430,
-                ],
+                data: [{{ range .graphData }}{{ .Install }},{{ end }}],
               },
               {
                 name: "Upgraded",
-                data: [
-                  4922, 4973, 5155, 5267, 5566, 5689, 5692, 5758, 5773, 5799, 5960, 6000,
-                ],
+                data: [{{ range .graphData }}{{ .Upgraded }},{{ end }}],
               },
             ],
             tooltip: {
@@ -103,18 +138,9 @@
               },
             },
             labels: [
-              "24/03/25-30/03/25",
-              "31/03/25-06/04/25",
-              "07/04/25-13/04/25",
-              "14/04/25-20/04/25",
-              "21/04/25-27/04/25",
-              "28/04/25-04/05/25",
-              "05/05/25-11/05/25",
-              "12/05/25-18/05/25",
-              "19/05/25-25/05/25",
-              "26/05/25-01/06/25",
-              "02/06/25-08/06/25",
-              "09/06/25-15/06/25",
+              {{ range .graphData }}
+                "{{ .Week.Format "02/01/2006" }}",
+              {{ end }}
             ],
             colors: [
               '#F44336', '#066fd1'

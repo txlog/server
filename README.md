@@ -134,8 +134,12 @@ sudo tar -C /usr/local -xzf go1.24.4.linux-amd64.tar.gz
 echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 source ~/.bashrc
 rm go1.24.4.linux-amd64.tar.gz
+```
 
-go install github.com/swaggo/swag/cmd/swag@latest
+### Swaggo
+
+```bash
+curl https://install.rda.run/swaggo/swag@latest! | bash
 ```
 
 ### Air

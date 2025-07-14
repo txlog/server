@@ -44,7 +44,7 @@ func getGraphData(database *sql.DB) ([]models.PackageProgression, error) {
       week
     ORDER BY
       week DESC
-    LIMIT 12;`)
+    LIMIT 15;`)
 
 	if err != nil {
 		return nil, err

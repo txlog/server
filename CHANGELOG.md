@@ -341,29 +341,22 @@ docker pull cr.rda.run/txlog/server:v1.4.0
 
 ## [1.3.2] - 2025-04-03
 
+### Added
+
+- Added `GetMachineID` function to handle machine details requests.
+- Introduced a new `GetSponsorIndex` function for sponsor page requests.
+- Added new templates: `execution_id.html`, `machine_id.html`, `sponsor.html`.
+
 ### Changed
 
-- **Major Changes**
-  - Added `GetMachineID` function to handle machine details requests.
-  - Introduced a new `GetSponsorIndex` function for sponsor page requests.
-  - Refactored routes to include new endpoints for executions and machines.
-  - Improved query handling and limited total executions displayed to 1000.
+- Refactored routes to include new endpoints for executions and machines.
+- Improved query handling and limited total executions displayed to 1000.
+- Updated existing templates with new styles and improved layouts.
+- Updated `ExecutionID` struct field to include URI binding.
 
-- **Template Changes**
-  - Added new templates: `execution_id.html`, `machine_id.html`, `sponsor.html`.
-  - Updated existing templates with new styles and improved layouts.
+### Deprecated
 
-- **Minor Changes**
-  - Removed unnecessary import of `strconv` in `executions_controller.go`.
-  - Updated `ExecutionID` struct field to include URI binding.
-
-## Docker image
-
-```bash
-docker pull cr.rda.run/txlog/server:v1.3.2
-```
-
-**Full Changelog**: <https://github.com/txlog/server/compare/v1.3.1...v1.3.2>
+- Removed unnecessary import of `strconv` in `executions_controller.go`.
 
 ## [1.3.1] - 2025-03-26
 
@@ -372,99 +365,61 @@ docker pull cr.rda.run/txlog/server:v1.3.2
 - Increased Pagination Limit: The default pagination limit in
   `root_controller.go` was increased from 10 to 100, allowing for more items to
   be displayed per page.
-- Template Functions: Added new template functions in `main.go`:
+
+### Added
+
+- New template functions in `main.go`:
   - `formatPercentage`: Formats a float percentage to a string with comma as the
     decimal separator.
   - `formatInteger`: Formats an integer to a string with thousands separators.
-- Footer Links: Updated the footer link in `footer.html` to point to the
-  specific version tag in the repository.
-- Statistics Formatting: Modified `index.html` to use the new `formatInteger`
-  and `formatPercentage` functions for displaying statistics values.
-- Tooltip for Execution Details: Added tooltip functionality for execution
-  details in `index.html`, showing details only when status is a failure,
-  improving the user interface.
+- Tooltip functionality for execution details in `index.html`, showing details
+  only when status is a failure, improving the user interface.
 
-## Docker image
+### Updated
 
-```bash
-docker pull cr.rda.run/txlog/server:v1.3.1
-```
-
-**Full Changelog**: <https://github.com/txlog/server/compare/v1.3.0...v1.3.1>
+- Footer link in `footer.html` to point to the specific version tag in the
+  repository.
+- Modified `index.html` to use the new `formatInteger` and `formatPercentage`
+  functions for displaying statistics values.
 
 ## [1.3.0] - 2025-03-25
 
-### Changed
+### Added
 
-- Add Agent Version and OS Fields to Executions by @rdeavila in
-  <https://github.com/txlog/server/pull/21>
-
-## Docker image
-
-```bash
-docker pull cr.rda.run/txlog/server:v1.3.0
-```
-
-**Full Changelog**: <https://github.com/txlog/server/compare/v1.2.0...v1.3.0>
+- Add Agent Version and OS Fields to Executions
 
 ## [1.2.0] - 2025-03-25
 
 ### Changed
 
-- Bump github.com/go-co-op/gocron/v2 from 2.15.0 to 2.16.0 by @dependabot in
-  <https://github.com/txlog/server/pull/12>
-- Bump github.com/tavsec/gin-healthcheck from 1.7.4 to 1.7.5 by @dependabot in
-  <https://github.com/txlog/server/pull/14>
-- Bump github.com/go-co-op/gocron/v2 from 2.16.0 to 2.16.1 by @dependabot in
-  <https://github.com/txlog/server/pull/15>
-- [Aikido AI] Fix for 3rd party Github Actions should be pinned by
-  @aikido-autofix in <https://github.com/txlog/server/pull/18>
-- Add interface by @rdeavila in <https://github.com/txlog/server/pull/13>
-- Add statistics by @rdeavila in <https://github.com/txlog/server/pull/20>
+- Bump `github.com/go-co-op/gocron/v2` from 2.15.0 to 2.16.0
+- Bump `github.com/tavsec/gin-healthcheck` from 1.7.4 to 1.7.5
+- Bump `github.com/go-co-op/gocron/v2` from 2.16.0 to 2.16.1
 
-## Docker image
+### Fixed
 
-```bash
-docker pull cr.rda.run/txlog/server:v1.2.0
-```
+- Fix for 3rd party Github Actions should be pinned
 
-**Full Changelog**: <https://github.com/txlog/server/compare/v1.1.1...v1.2.0>
+### Added
+
+- Add interface
+- Add statistics
 
 ## [1.1.1] - 2025-02-24
 
+### Fixed
+
+- Fix for Potential SQL injection via string-based query concatenation
+
 ### Changed
 
-- Fix for Potential SQL injection via string-based query concatenation by
-  @aikido-autofix in <https://github.com/txlog/server/pull/10>
-- Bump github.com/tavsec/gin-healthcheck from 1.7.3 to 1.7.4 by @dependabot in
-  <https://github.com/txlog/server/pull/11>
-
-## New Contributors
-
-- @aikido-autofix made their first contribution in
-  <https://github.com/txlog/server/pull/10>
-
-## Docker image
-
-```bash
-docker pull cr.rda.run/txlog/server:v1.1.1
-```
-
-**Full Changelog**: <https://github.com/txlog/server/compare/v1.1...v1.1.1>
+- Bump `github.com/tavsec/gin-healthcheck` from 1.7.3 to 1.7.4
 
 ## [1.1] - 2025-02-14
 
-### Changed
+### Fixed
 
 - Fix typo on `macine_id` endpoint
-
-## Docker image
-
-```bash
-docker pull cr.rda.run/txlog/server:v1.1
-```
-
-**Full Changelog**: <https://github.com/txlog/server/compare/v1.0...v1.1>
 
 ## [1.0] - 2025-02-13
 
@@ -472,62 +427,38 @@ docker pull cr.rda.run/txlog/server:v1.1
 
 - Changed base base image to Scratch
 - Refactored API endpoints
+- Refactor endpoints and documentation to use plural nouns for consistency
+
+### Added
+
 - Added endpoint to retrieve executions by machine ID and success status
 - Added endpoint to retrieve machine IDs by hostname
 - Added endpoint to retrieve saved transactions for a host by machine ID
 - Added endpoints to retrieve saved items and item IDs for a transaction
-- Refactor endpoints and documentation to use plural nouns for consistency
-
-## Docker image
-
-```bash
-docker pull cr.rda.run/txlog/server:v1.0
-```
-
-**Full Changelog**: <https://github.com/txlog/server/compare/v0.4...v1.0>
 
 ## [0.4] - 2025-02-11
 
-- [Add scheduled housekeeping job to delete old
-  executions](https://github.com/txlog/server/commit/864ce48e7dd44003d3846282cb2bfb47fdbc97d2)
-- [Bump Go version to
-  1.24.0](https://github.com/txlog/server/commit/289c492f7f32aae70de7befb82cc001d8786357e)
+### Added
 
-## Docker image
+- Add scheduled housekeeping job to delete old executions
 
-```bash
-docker pull cr.rda.run/txlog/server:v0.4
-```
+### Changed
 
-**Full Changelog**: <https://github.com/txlog/server/compare/v0.3...v0.4>
+- Bump Go version to 1.24.0
 
 ## [0.3] - 2025-02-08
 
+### Added
+
 - Add Swagger documentation
 - Add execution endpoint for creating new executions
-
-## Docker image
-
-```bash
-docker pull cr.rda.run/txlog/server:v0.3
-```
-
-**Full Changelog**: <https://github.com/txlog/server/compare/v0.2...v0.3>
 
 ## [0.2] - 2025-02-06
 
 ### Changed
 
-- Bump github.com/tavsec/gin-healthcheck from 1.7.2 to 1.7.3 by @dependabot in
-  <https://github.com/txlog/server/pull/7>
-- [Refactor environment variable
-  loading](https://github.com/txlog/server/commit/2952563ddf8c1258099b9d8e5718dcbb862fc431).
-  Fixes <https://github.com/txlog/server/issues/6>
+- Bump `github.com/tavsec/gin-healthcheck` from 1.7.2 to 1.7.3
 
-## Docker image
+### Fixed
 
-```bash
-docker pull cr.rda.run/txlog/server:v0.2
-```
-
-**Full Changelog**: <https://github.com/txlog/server/compare/v0.1...v0.2>
+- Refactor environment variable loading

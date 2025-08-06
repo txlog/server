@@ -6,6 +6,7 @@
   <p align="center"><strong>Server to receive data from Txlog Agent</strong></p>
   <p align="center">
     <a href="https://semver.org"><img src="https://img.shields.io/badge/SemVer-2.0.0-22bfda.svg" alt="SemVer Format"></a>
+    <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-Keep_a_Changelog_v1.1.0-E05735" alt="Keep a Changelog"></a>
     <a href="https://github.com/txlog/.github/blob/main/profile/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" alt="Contributor Covenant"></a>
     <a href="https://newreleases.io/github/txlog/server"><img src="https://newreleases.io/badge.svg" alt="NewReleases"></a>
     <a href="https://deepwiki.com/txlog/server"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>

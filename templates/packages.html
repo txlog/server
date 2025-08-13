@@ -19,9 +19,9 @@
           <div class="card-header">
             <h3 class="card-title">
               {{ if .search }}
-                Packages containing <kbd>{{ .search }}</kbd>
+                Registered packages containing <kbd>{{ .search }}</kbd>
               {{ else }}
-                Registered packages {{ if eq .restart "true" }}that need to be restarted{{ end }}
+                Registered packages
               {{ end }}
             </h3>
             <div class="card-actions">
@@ -44,7 +44,7 @@
             </div>
           </div>
 
-          {{ if eq (len .assets) 0 }}
+          {{ if eq (len .packageNames) 0 }}
           <div class="empty">
             <div class="empty-icon">
               <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -55,7 +55,7 @@
                 <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
               </svg>
             </div>
-            <p class="empty-title">No assets found{{ if .search }} containing <kbd>{{ .search }}</kbd>{{ end }}</p>
+            <p class="empty-title">No packages found{{ if .search }} containing <kbd>{{ .search }}</kbd>{{ end }}</p>
             <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
           </div>
           {{ else }}
@@ -63,35 +63,38 @@
             <table class="table table-vcenter table-mobile-md card-table">
               <thead>
                 <tr>
-                  <th>Hostname
+                  <th>Name
                     <i class="ti ti-chevron-up"></i>
                   </th>
-                  <th>Last Seen</th>
+                  <th>Version-Release-Arch</th>
+                  <th>Assets</th>
+                  <th>Repo</th>
                   <th class="w-1">&nbsp;</th>
                 </tr>
               </thead>
               <tbody>
-                {{ with .assets }}
+                {{ with .packageNames }}
                   {{ range . }}
                     <tr>
-                      <td data-label="Name">
-                        <div class="d-flex py-1 align-items-center">
-                          <span class="avatar avatar-2 me-2" style="background-image: url(/images/{{ brand .OS }})">
-                            {{ if derefBool .NeedsRestarting }}
-                              <span class="badge badge-dot bg-yellow badge-notification badge-blink" title="Asset must be restarted"></span>
-                            {{ end }}
-                          </span>
-                          <div class="flex-fill">
-                            <div class="font-weight-medium">{{ .Hostname }}</div>
-                            <div class="text-secondary">{{ .MachineID }}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td data-label="Title">
-                        <div class="text-secondary">{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</div>
+                      <td>
+                        <div class="font-weight-medium">{{ .Package }}</div>
                       </td>
                       <td>
-                        <a href="/assets/{{ .MachineID }}">Details</a>
+                        <div class="col text-truncate">
+                          <span class="font-weight-medium"><strong>{{ .Version }}-{{ .Release }}</strong></span><span class="text-secondary">-{{ .Arch }}</span>
+                          {{ if ne .TotalVersions 0 }}
+                            <span class="text-secondary"> <small>(and {{ .TotalVersions }} more)</small></span>
+                          {{ end }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="text-secondary">{{ .MachineCount }}</div>
+                      </td>
+                      <td>
+                        <div class="text-secondary">{{ .Repo }}</div>
+                      </td>
+                      <td>
+                        <a href="/packages/{{ .Package }}">Details</a>
                       </td>
                     </tr>
                   {{ end }}

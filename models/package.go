@@ -17,3 +17,11 @@ type PackageListing struct {
 	TotalVersions int    `json:"total_versions"`
 	MachineCount  int    `json:"machine_count"`
 }
+
+type Package struct {
+	Name    string `json:"name" uri:"name" binding:"required"`
+	Version string `json:"version"`
+	Release string `json:"release"`
+	Arch    string `json:"arch"`
+	Repo    string `json:"repo"`
+}

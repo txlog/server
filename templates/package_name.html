@@ -1,0 +1,80 @@
+{{ template "header.html" . }}
+<!-- Page header -->
+<div class="page-header d-print-none text-white">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">Package Details</div>
+        <h2 class="page-title">
+          {{ .name }}
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards">
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Version Timeline</h3>
+          </div>
+          <div class="card-body">
+
+
+
+<ul class="timeline">
+	<li class="timeline-event">
+		<div class="timeline-event-icon bg-x-lt"><!-- Download SVG icon from http://tabler.io/icons/icon/brand-x -->
+	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M4 4l11.733 16h4.267l-11.733 -16z" /><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772" /></svg></div>
+		<div class="card timeline-event-card">
+			<div class="card-body">
+				<div class="text-secondary float-end">10 hrs ago</div>
+				<h4>+1150 Followers</h4>
+				<p class="text-secondary">You’re getting more and more followers, keep it up!</p>
+			</div>
+		</div>
+	</li>
+	<li class="timeline-event">
+		<div class="timeline-event-icon"><!-- Download SVG icon from http://tabler.io/icons/icon/briefcase -->
+	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M12 12l0 .01" /><path d="M3 13a20 20 0 0 0 18 0" /></svg></div>
+		<div class="card timeline-event-card">
+			<div class="card-body">
+				<div class="text-secondary float-end">2 hrs ago</div>
+				<h4>+3 New Products were added!</h4>
+				<p class="text-secondary">Congratulations!</p>
+			</div>
+		</div>
+	</li>
+	<li class="timeline-event">
+		<div class="timeline-event-icon"><!-- Download SVG icon from http://tabler.io/icons/icon/check -->
+	<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1"><path d="M5 12l5 5l10 -10" /></svg></div>
+		<div class="card timeline-event-card">
+			<div class="card-body">
+				<div class="text-secondary float-end">1 day ago</div>
+				<h4>Database backup completed!</h4>
+				<p class="text-secondary">Download the <a href="#">latest backup</a>.</p>
+			</div>
+		</div>
+	</li>
+</ul>
+
+
+
+          </div>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Last 100 executions <span class="card-subtitle">with packages</span></h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{ template "settings.html" . }}
+  </div>
+</div>
+{{ template "footer.html" . }}

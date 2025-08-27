@@ -298,3 +298,66 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
 		})
 	}
 }
+
+func GetPackageByName(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var pkg models.Package
+		if err := c.ShouldBindUri(&pkg); err != nil {
+			c.JSON(400, gin.H{"msg": err.Error()})
+			return
+		}
+
+		query := `
+      SELECT DISTINCT
+          package,
+          version,
+          release,
+          arch,
+          repo
+      FROM
+          public.transaction_items
+      WHERE
+          package = $1
+      ORDER BY
+          version DESC,
+          release DESC;
+    `
+		rows, err := database.Query(query, pkg.Name)
+
+		if err != nil {
+			logger.Error("Error listing packages:" + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		defer rows.Close()
+
+		packageNames := []models.PackageListing{}
+		for rows.Next() {
+			var packageName models.PackageListing
+			err := rows.Scan(
+				&packageName.Package,
+				&packageName.Version,
+				&packageName.Release,
+				&packageName.Arch,
+				&packageName.Repo,
+			)
+			if err != nil {
+				logger.Error("Error iterating packages:" + err.Error())
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+			packageNames = append(packageNames, packageName)
+		}
+
+		c.HTML(http.StatusOK, "package_name.html", gin.H{
+			"Context":  c,
+			"title":    "Packages",
+			"packages": packageNames,
+			"name":     pkg.Name,
+		})
+	}
+}

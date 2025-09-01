@@ -85,6 +85,8 @@ func main() {
 	r.GET("/", controllers.GetRootIndex(database.Db))
 	r.GET("/assets", controllers.GetAssetsIndex(database.Db))
 	r.GET("/packages", controllers.GetPackagesIndex(database.Db))
+	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
+	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)

@@ -89,6 +89,7 @@ func main() {
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
+	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,

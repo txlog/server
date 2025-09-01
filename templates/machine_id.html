@@ -284,10 +284,9 @@
             <h3 class="card-title">Danger Zone</h3>
           </div>
           <div class="card-body">
-            <p>Need to remove asset data for this hostname? <strong>Caution: This is a irreversible action.</strong></p>
             <div>
               <button type="button" class="btn btn-danger-lt btn-4 w-100" data-bs-toggle="modal" data-bs-target="#modal-delete">
-                Delete asset data for this hostname...
+                Delete all asset data...
               </button>
             </div>
           </div>
@@ -457,8 +456,12 @@
         </svg>
         <h3>Are you sure?</h3>
         <div class="text-secondary">
-          Do you really want to remove all data for this asset? What you'll done cannot be undone.
+            Do you really want to remove all data for this asset ID? <strong>What you do cannot be undone.</strong>
         </div>
+        <div class="text-secondary">
+            &nbsp;
+        </div>
+        <code>{{ .machine_id }}</code>
       </div>
       <div class="modal-footer">
         <div class="w-100">
@@ -467,7 +470,7 @@
               <a href="#" class="btn w-100" data-bs-dismiss="modal"> Cancel </a>
             </div>
             <div class="col">
-              <a href="#" class="btn btn-danger w-100" data-bs-dismiss="modal"> Delete all asset data </a>
+              <button class="btn btn-danger w-100" onclick="deleteAsset('{{ .machine_id }}')">Delete all asset data</button>
             </div>
           </div>
         </div>
@@ -475,4 +478,21 @@
     </div>
   </div>
 </div>
+<script>
+function deleteAsset(assetId) {
+fetch(`/assets/${assetId}`, { method: 'DELETE' })
+  .then(response => {
+    if (response.redirected) {
+      alert(`Asset ${assetId} deleted successfully.`);
+      window.location.href = response.url;
+    } else if (response.ok) {
+      alert(`Asset ${assetId} deleted successfully.`);
+      window.location.href = "/assets";
+    } else {
+      alert('Failed to delete asset.');
+    }
+  })
+  .catch(() => alert('Failed to delete asset.'));
+}
+</script>
 {{ template "footer.html" . }}

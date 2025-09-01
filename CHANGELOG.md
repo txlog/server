@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!--
+
+## [Unreleased]
+
 `Added` for new features.
 `Changed` for changes in existing functionality.
 `Deprecated` for soon-to-be removed features.
@@ -16,13 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
-## [Unreleased]
+## [1.11.0] - 2025-09-01
 
 ### Changed
 
 - Switch base image from `alpine` to `scratch` in `Dockerfile`
-- Added `txlog` user on docker image
-- Bumps github.com/swaggo/swag from 1.16.5 to 1.16.6.
+- Bumps github.com/swaggo/swag from 1.16.5 to 1.16.6
+- Bumps github.com/golang-migrate/migrate/v4 from 4.18.3 to 4.19.0
+
+### Added
+
+- Asset data deletion
+- `txlog` user on docker image
 
 ## [1.10.2] - 2025-07-17
 

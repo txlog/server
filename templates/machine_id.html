@@ -278,6 +278,20 @@
           </div>
         </div>
       </div>
+      <div class="col-md-12">
+        <div class="card bg-danger-lt">
+          <div class="card-header">
+            <h3 class="card-title">Danger Zone</h3>
+          </div>
+          <div class="card-body">
+            <div>
+              <button type="button" class="btn btn-danger-lt btn-4 w-100" data-bs-toggle="modal" data-bs-target="#modal-delete">
+                Delete all asset data...
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     {{ template "settings.html" . }}
   </div>
@@ -415,4 +429,70 @@
     </div>
   </div>
 </div>
+
+<div class="modal modal-blur fade" id="modal-delete" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-content">
+      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div class="modal-status bg-danger"></div>
+      <div class="modal-body text-center py-4">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="icon mb-2 text-danger icon-lg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path d="M12 9v2m0 4v.01" />
+          <path
+            d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
+          />
+        </svg>
+        <h3>Are you sure?</h3>
+        <div class="text-secondary">
+            Do you really want to remove all data for this asset ID? <strong>What you do cannot be undone.</strong>
+        </div>
+        <div class="text-secondary">
+            &nbsp;
+        </div>
+        <code>{{ .machine_id }}</code>
+      </div>
+      <div class="modal-footer">
+        <div class="w-100">
+          <div class="row">
+            <div class="col">
+              <a href="#" class="btn w-100" data-bs-dismiss="modal"> Cancel </a>
+            </div>
+            <div class="col">
+              <button class="btn btn-danger w-100" onclick="deleteAsset('{{ .machine_id }}')">Delete all asset data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function deleteAsset(assetId) {
+fetch(`/assets/${assetId}`, { method: 'DELETE' })
+  .then(response => {
+    if (response.redirected) {
+      alert(`Asset ${assetId} deleted successfully.`);
+      window.location.href = response.url;
+    } else if (response.ok) {
+      alert(`Asset ${assetId} deleted successfully.`);
+      window.location.href = "/assets";
+    } else {
+      alert('Failed to delete asset.');
+    }
+  })
+  .catch(() => alert('Failed to delete asset.'));
+}
+</script>
 {{ template "footer.html" . }}

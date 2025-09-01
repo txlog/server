@@ -91,6 +91,8 @@ func main() {
 	r.GET("/package-progression", controllers.GetPackagesByWeekIndex(database.Db))
 	r.GET("/packages", controllers.GetPackagesIndex(database.Db))
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
+	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
+	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,

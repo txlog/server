@@ -22,7 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Switch base image from `alpine` to `scratch` in `Dockerfile`
 - Added `txlog` user on docker image
-- Bumps github.com/swaggo/swag from 1.16.5 to 1.16.6.
+- Bumps github.com/swaggo/swag from 1.16.5 to 1.16.6
+- Bumps github.com/golang-migrate/migrate/v4 from 4.18.3 to 4.19.0
+- Add asset data deletion
 
 ## [1.10.2] - 2025-07-17
 

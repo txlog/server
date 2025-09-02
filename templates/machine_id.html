@@ -159,7 +159,7 @@
                         <td class="text-truncate text-secondary" style="max-width: 300px;" >No command recorded</td>
                       {{ end }}
                       <td>
-                        <a href="#" onclick="showModal('{{ .TransactionID }}')">Details</a>
+                        <a class="btn align-text-top" href="#" onclick="showModal('{{ .TransactionID }}')">Details</a>
                       </td>
                     </tr>
                   {{ end }}
@@ -219,7 +219,7 @@
                       <td>{{ .TransactionsProcessed }}</td>
                       <td>{{ .TransactionsSent }}</td>
                       <td>
-                        <a href="/executions/{{ .ExecutionID }}">Details</a>
+                        <a class="btn align-text-top" href="/executions/{{ .ExecutionID }}">Details</a>
                       </td>
                     </tr>
                   {{ end }}

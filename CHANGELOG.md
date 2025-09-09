@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.11.1] - 2025-09-09
+
+### Fixed
+
+- Fix version badge display logic to handle version format mismatches
+
 ## [1.11.0] - 2025-09-01
 
 ### Changed

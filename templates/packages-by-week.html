@@ -1,0 +1,158 @@
+{{ template "header.html" . }}
+<div class="page-header d-print-none text-white">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <h2 class="page-title">
+          {{ .title }}
+        </h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex">
+                <h3 class="card-title">Package Progression by Week <span class="card-subtitle">last 3 months</span></h3>
+            </div>
+            <div class="row">
+              <div class="col">
+                <div id="chart-active-users-2" class="position-relative" style="min-height: 288px;"></div>
+              </div>
+              <div class="col-md-auto">
+                <div class="divide-y divide-y-fill">
+                  <div class="px-3">
+                    <div class="text-secondary"><span class="status-dot" style="background-color: #F44336;"></span> Installed</div>
+                    <div class="h2">
+                      {{ $total := 0 }}
+                      {{ range .graphData }}
+                      {{ $total = add $total .Install }}
+                      {{ end }}
+                      {{ formatInteger $total }}
+                    </div>
+                  </div>
+                  <div class="px-3">
+                    <div class="text-secondary"><span class="status-dot" style="background-color: #066fd1;"></span> Upgraded</div>
+                    <div class="h2">
+                      {{ $total := 0 }}
+                      {{ range .graphData }}
+                      {{ $total = add $total .Upgraded }}
+                      {{ end }}
+                      {{ formatInteger $total }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-12">
+        <div class="card">
+
+            <div class="card-table table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Week</th>
+                    <th>Installed packages</th>
+                    <th>Upgraded packages</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{ range .graphData }}
+                    <tr>
+                      <td>{{ .Week.Format "02/01/2006" }}</td>
+                      <td class="text-nowrap">{{ formatInteger .Install }}</td>
+                      <td class="text-nowrap">{{ formatInteger .Upgraded }}</td>
+                    </tr>
+                  {{ end }}
+                </tbody>
+              </table>
+            </div>
+        </div>
+      </div>
+
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        window.ApexCharts &&
+          new ApexCharts(document.getElementById("chart-active-users-2"), {
+            chart: {
+              type: "line",
+              fontFamily: "inherit",
+              height: 288,
+              parentHeightOffset: 0,
+              toolbar: {
+                show: false,
+              },
+              animations: {
+                enabled: false,
+              },
+            },
+            stroke: {
+              width: 2,
+              lineCap: "round",
+              curve: "smooth",
+            },
+            series: [
+              {
+                name: "Installed",
+                data: [{{ range .graphData }}{{ .Install }},{{ end }}],
+              },
+              {
+                name: "Upgraded",
+                data: [{{ range .graphData }}{{ .Upgraded }},{{ end }}],
+              },
+            ],
+            tooltip: {
+              theme: "dark",
+            },
+            grid: {
+              padding: {
+                top: -20,
+                right: 0,
+                left: -4,
+                bottom: -4,
+              },
+              strokeDashArray: 4,
+            },
+            xaxis: {
+              labels: {
+                padding: 0,
+              },
+              tooltip: {
+                enabled: false,
+              },
+              type: "string",
+            },
+            yaxis: {
+              labels: {
+                padding: 4,
+              },
+            },
+            labels: [
+              {{ range .graphData }}
+                "{{ .Week.Format "02/01/2006" }}",
+              {{ end }}
+            ],
+            colors: [
+              '#F44336', '#066fd1'
+            ],
+            legend: {
+              show: false,
+            },
+          }).render();
+      });
+    </script>
+    {{ template "settings.html" . }}
+  </div>
+</div>
+
+{{ template "footer.html" . }}

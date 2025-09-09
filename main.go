@@ -60,13 +60,10 @@ func main() {
 		"formatInteger":    util.FormatInteger,
 		"formatPercentage": util.FormatPercentage,
 		"hasAction":        util.HasAction,
-		"hasPrefix":        util.HasPrefix,
 		"iterate":          util.Iterate,
 		"min":              util.Min,
 		"text2html":        util.Text2HTML,
-		"trimPrefix":       util.TrimPrefix,
 		"version":          util.Version,
-		"versionsEqual":    util.VersionsEqual,
 	}
 
 	if os.Getenv("GIN_MODE") == "" {
@@ -88,11 +85,18 @@ func main() {
 	r.GET("/", controllers.GetRootIndex(database.Db))
 	r.GET("/assets", controllers.GetAssetsIndex(database.Db))
 	r.GET("/packages", controllers.GetPackagesIndex(database.Db))
+	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
+	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
+	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
+	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
 	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
+	r.GET("/package-progression", controllers.GetPackagesByWeekIndex(database.Db))
+	r.GET("/packages", controllers.GetPackagesIndex(database.Db))
+	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
@@ -100,6 +104,9 @@ func main() {
 		ginSwagger.DocExpansion("none"),
 		ginSwagger.DefaultModelsExpandDepth(-1),
 	))
+
+	r.GET("/package-progression", controllers.GetPackagesByWeekIndex(database.Db))
+	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 
 	v1Group := r.Group("/v1")
 	{

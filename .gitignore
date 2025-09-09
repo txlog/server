@@ -2,3 +2,4 @@
 .env
 tmp/main
 tmp/build-errors.log
+server

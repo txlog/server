@@ -283,9 +283,10 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 // DeleteMachineID returns a Gin handler function that deletes all records
 // associated with a given machine ID from the database. It performs the
 // following steps within a transaction:
-//   1. Deletes transaction items related to transactions with the specified machine ID.
-//   2. Deletes transactions with the specified machine ID.
-//   3. Deletes executions with the specified machine ID.
+//  1. Deletes transaction items related to transactions with the specified machine ID.
+//  2. Deletes transactions with the specified machine ID.
+//  3. Deletes executions with the specified machine ID.
+//
 // If any step fails, the transaction is rolled back and an error page is
 // rendered. On success, the user is redirected to the assets page. The machine
 // ID is expected as a URL parameter named "machine_id".
@@ -299,55 +300,55 @@ func DeleteMachineID(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-    tx, err := database.Begin()
-    if err != nil {
-      c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-        "error": "Failed to start transaction: " + err.Error(),
-      })
-      return
-    }
-    defer func() {
-      if p := recover(); p != nil {
-        tx.Rollback()
-        panic(p)
-      }
-    }()
+		tx, err := database.Begin()
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": "Failed to start transaction: " + err.Error(),
+			})
+			return
+		}
+		defer func() {
+			if p := recover(); p != nil {
+				tx.Rollback()
+				panic(p)
+			}
+		}()
 
-    _, err = tx.Exec(`DELETE FROM transaction_items WHERE transaction_id IN (SELECT transaction_id FROM transactions WHERE machine_id = $1)`, machineID)
-    if err != nil {
-      tx.Rollback()
-      c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-        "error": "Failed to delete transaction_items: " + err.Error(),
-      })
-      return
-    }
+		_, err = tx.Exec(`DELETE FROM transaction_items WHERE transaction_id IN (SELECT transaction_id FROM transactions WHERE machine_id = $1)`, machineID)
+		if err != nil {
+			tx.Rollback()
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": "Failed to delete transaction_items: " + err.Error(),
+			})
+			return
+		}
 
-    _, err = tx.Exec(`DELETE FROM transactions WHERE machine_id = $1`, machineID)
-    if err != nil {
-      tx.Rollback()
-      c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-        "error": "Failed to delete transactions: " + err.Error(),
-      })
-      return
-    }
+		_, err = tx.Exec(`DELETE FROM transactions WHERE machine_id = $1`, machineID)
+		if err != nil {
+			tx.Rollback()
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": "Failed to delete transactions: " + err.Error(),
+			})
+			return
+		}
 
-    _, err = tx.Exec(`DELETE FROM executions WHERE machine_id = $1`, machineID)
-    if err != nil {
-      tx.Rollback()
-      c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-        "error": "Failed to delete executions: " + err.Error(),
-      })
-      return
-    }
+		_, err = tx.Exec(`DELETE FROM executions WHERE machine_id = $1`, machineID)
+		if err != nil {
+			tx.Rollback()
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": "Failed to delete executions: " + err.Error(),
+			})
+			return
+		}
 
-    if err := tx.Commit(); err != nil {
-      c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-        "error": "Failed to commit transaction: " + err.Error(),
-      })
-      return
-    }
+		if err := tx.Commit(); err != nil {
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": "Failed to commit transaction: " + err.Error(),
+			})
+			return
+		}
 
-    c.Redirect(http.StatusSeeOther, "/assets")
+		c.Redirect(http.StatusSeeOther, "/assets")
 
 	}
 }

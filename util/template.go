@@ -364,6 +364,6 @@ func VersionsEqual(version1, version2 string) bool {
 	// Normalize both versions by removing "v" prefix if present
 	normalized1 := strings.TrimPrefix(version1, "v")
 	normalized2 := strings.TrimPrefix(version2, "v")
-	
+
 	return normalized1 == normalized2
 }

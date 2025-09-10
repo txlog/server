@@ -452,3 +452,87 @@ func TestHasAction(t *testing.T) {
 		})
 	}
 }
+
+func TestVersionsEqual(t *testing.T) {
+	tests := []struct {
+		name     string
+		version1 string
+		version2 string
+		expected bool
+	}{
+		{
+			name:     "same versions without prefix",
+			version1: "1.11.0",
+			version2: "1.11.0",
+			expected: true,
+		},
+		{
+			name:     "same versions, first with v prefix",
+			version1: "v1.11.0",
+			version2: "1.11.0",
+			expected: true,
+		},
+		{
+			name:     "same versions, second with v prefix",
+			version1: "1.11.0",
+			version2: "v1.11.0",
+			expected: true,
+		},
+		{
+			name:     "same versions both with v prefix",
+			version1: "v1.11.0",
+			version2: "v1.11.0",
+			expected: true,
+		},
+		{
+			name:     "different versions without prefix",
+			version1: "1.11.0",
+			version2: "1.12.0",
+			expected: false,
+		},
+		{
+			name:     "different versions, first with v prefix",
+			version1: "v1.11.0",
+			version2: "1.12.0",
+			expected: false,
+		},
+		{
+			name:     "different versions, second with v prefix",
+			version1: "1.11.0",
+			version2: "v1.12.0",
+			expected: false,
+		},
+		{
+			name:     "different versions both with v prefix",
+			version1: "v1.11.0",
+			version2: "v1.12.0",
+			expected: false,
+		},
+		{
+			name:     "empty first version",
+			version1: "",
+			version2: "1.11.0",
+			expected: false,
+		},
+		{
+			name:     "empty second version",
+			version1: "1.11.0",
+			version2: "",
+			expected: false,
+		},
+		{
+			name:     "both versions empty",
+			version1: "",
+			version2: "",
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := VersionsEqual(tt.version1, tt.version2); got != tt.expected {
+				t.Errorf("VersionsEqual() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}

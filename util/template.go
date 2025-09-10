@@ -323,3 +323,47 @@ func DerefBool(p *bool) bool {
 	}
 	return *p
 }
+
+// HasPrefix checks if a string starts with a given prefix.
+// This function is designed to be used in Go templates.
+//
+// Parameters:
+//   - s: The string to check
+//   - prefix: The prefix to look for
+//
+// Returns:
+//   - bool: True if s starts with prefix, false otherwise
+func HasPrefix(s, prefix string) bool {
+	return strings.HasPrefix(s, prefix)
+}
+
+// TrimPrefix removes a prefix from a string if it exists.
+// This function is designed to be used in Go templates.
+//
+// Parameters:
+//   - s: The string to trim
+//   - prefix: The prefix to remove
+//
+// Returns:
+//   - string: The string with the prefix removed, or the original string if it doesn't start with the prefix
+func TrimPrefix(s, prefix string) string {
+	return strings.TrimPrefix(s, prefix)
+}
+
+// VersionsEqual compares two version strings, normalizing them by removing "v" prefix if present.
+// This function is designed to handle version comparison in templates where one version might
+// have a "v" prefix and the other might not.
+//
+// Parameters:
+//   - version1: First version string to compare
+//   - version2: Second version string to compare
+//
+// Returns:
+//   - bool: True if the normalized versions are equal, false otherwise
+func VersionsEqual(version1, version2 string) bool {
+	// Normalize both versions by removing "v" prefix if present
+	normalized1 := strings.TrimPrefix(version1, "v")
+	normalized2 := strings.TrimPrefix(version2, "v")
+
+	return normalized1 == normalized2
+}

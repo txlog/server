@@ -60,10 +60,13 @@ func main() {
 		"formatInteger":    util.FormatInteger,
 		"formatPercentage": util.FormatPercentage,
 		"hasAction":        util.HasAction,
+		"hasPrefix":        util.HasPrefix,
 		"iterate":          util.Iterate,
 		"min":              util.Min,
 		"text2html":        util.Text2HTML,
+		"trimPrefix":       util.TrimPrefix,
 		"version":          util.Version,
+		"versionsEqual":    util.VersionsEqual,
 	}
 
 	if os.Getenv("GIN_MODE") == "" {

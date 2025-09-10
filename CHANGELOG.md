@@ -19,6 +19,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- Package listing and package history
+
+### Changed
+
+- `Details` button on asset and package listing
+
 ## [1.11.1] - 2025-09-09
 
 ### Fixed

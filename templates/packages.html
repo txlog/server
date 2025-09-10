@@ -14,145 +14,146 @@
 <div class="page-body">
   <div class="container-xl">
     <div class="row row-deck row-cards">
-      <div class="col-lg-12">
+      <div class="col-12">
         <div class="card">
-          <div class="card-body">
-            <div class="d-flex">
-                <h3 class="card-title">Package Progression by Week <span class="card-subtitle">last 3 months</span></h3>
-            </div>
-            <div class="row">
-              <div class="col">
-                <div id="chart-active-users-2" class="position-relative" style="min-height: 288px;"></div>
-              </div>
-              <div class="col-md-auto">
-                <div class="divide-y divide-y-fill">
-                  <div class="px-3">
-                    <div class="text-secondary"><span class="status-dot" style="background-color: #F44336;"></span> Installed</div>
-                    <div class="h2">
-                      {{ $total := 0 }}
-                      {{ range .graphData }}
-                      {{ $total = add $total .Install }}
-                      {{ end }}
-                      {{ formatInteger $total }}
-                    </div>
+          <div class="card-header">
+            <h3 class="card-title">
+              {{ if .search }}
+                Registered packages containing <kbd>{{ .search }}</kbd>
+              {{ else }}
+                Registered packages
+              {{ end }}
+            </h3>
+            <div class="card-actions">
+              <div class="ms-auto text-secondary">
+                <div class="row g-2">
+                  <div class="col">
+                    <input type="text" class="form-control" autocomplete="off" aria-label="Search packages" placeholder="Search by package name" value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)">
                   </div>
-                  <div class="px-3">
-                    <div class="text-secondary"><span class="status-dot" style="background-color: #066fd1;"></span> Upgraded</div>
-                    <div class="h2">
-                      {{ $total := 0 }}
-                      {{ range .graphData }}
-                      {{ $total = add $total .Upgraded }}
-                      {{ end }}
-                      {{ formatInteger $total }}
-                    </div>
+                  <div class="col-auto">
+                    <a href="javascript:search();" class="btn btn-2 btn-icon" aria-label="Button">
+                      <!-- Download SVG icon from http://tabler.io/icons/icon/search -->
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
+                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+                        <path d="M21 21l-6 -6"></path>
+                      </svg>
+                    </a>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="col-lg-12">
-        <div class="card">
-
-            <div class="card-table table-responsive">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Week</th>
-                    <th>Installed packages</th>
-                    <th>Upgraded packages</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{ range .graphData }}
+          {{ if eq (len .packageNames) 0 }}
+          <div class="empty">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <circle cx="12" cy="12" r="9" />
+                <line x1="9" y1="10" x2="9.01" y2="10" />
+                <line x1="15" y1="10" x2="15.01" y2="10" />
+                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
+              </svg>
+            </div>
+            <p class="empty-title">No packages found{{ if .search }} containing <kbd>{{ .search }}</kbd>{{ end }}</p>
+            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
+          </div>
+          {{ else }}
+          <div class="table-responsive">
+            <table class="table table-vcenter table-mobile-md card-table">
+              <thead>
+                <tr>
+                  <th>Name
+                    <i class="ti ti-chevron-up"></i>
+                  </th>
+                  <th>Version-Release-Arch</th>
+                  <th>Assets</th>
+                  <th>Repo</th>
+                  <th class="w-1">&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ with .packageNames }}
+                  {{ range . }}
                     <tr>
-                      <td>{{ .Week.Format "02/01/2006" }}</td>
-                      <td class="text-nowrap">{{ formatInteger .Install }}</td>
-                      <td class="text-nowrap">{{ formatInteger .Upgraded }}</td>
+                      <td>
+                        <div class="font-weight-medium">{{ .Package }}</div>
+                      </td>
+                      <td>
+                        <div class="col text-truncate">
+                          <span class="font-weight-medium"><strong>{{ .Version }}-{{ .Release }}</strong></span><span class="text-secondary">-{{ .Arch }}</span>
+                          {{ if ne .TotalVersions 0 }}
+                            <span class="text-secondary"> <small>(and {{ .TotalVersions }} more)</small></span>
+                          {{ end }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="text-secondary">{{ .MachineCount }}</div>
+                      </td>
+                      <td>
+                        <div class="text-secondary">{{ .Repo }}</div>
+                      </td>
+                      <td>
+                        <a class="btn align-text-top" href="/packages/{{ .Package }}">Details</a>
+                      </td>
                     </tr>
                   {{ end }}
-                </tbody>
-              </table>
-            </div>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card-footer d-flex align-items-center">
+            <p class="m-0 text-secondary">Showing <span>{{ add $.offset 1 }}</span> to <span>{{ min (add $.offset $.limit) $.totalRecords }}</span> of <span>{{ .totalRecords }}</span> entries</p>
+            <ul class="pagination m-0 ms-auto">
+              <li class="page-item {{ if eq $.page 1 }}disabled{{ end }}">
+                <a class="page-link" href="?page={{ .page | add -1 }}" tabindex="-1" aria-disabled="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-1">
+                    <path d="M15 6l-6 6l6 6"></path>
+                  </svg>
+                  prev
+                </a>
+              </li>
+              {{ range $i := iterate 1 .totalPages }}
+              <li class="page-item{{ if eq $.page $i }} active{{ end }}">
+                <a class="page-link" href="?page={{ $i }}">{{ $i }}</a>
+              </li>
+              {{ end }}
+              <li class="page-item {{ if eq $.page $.totalPages }}disabled{{ end }}">
+                <a class="page-link" href="?page={{ .page | add 1 }}" aria-disabled="true">
+                  next
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-1">
+                    <path d="M9 6l6 6l-6 6"></path>
+                  </svg>
+                </a>
+              </li>
+            </ul>
+          </div>
+          {{ end }}
         </div>
       </div>
-
     </div>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.ApexCharts &&
-          new ApexCharts(document.getElementById("chart-active-users-2"), {
-            chart: {
-              type: "line",
-              fontFamily: "inherit",
-              height: 288,
-              parentHeightOffset: 0,
-              toolbar: {
-                show: false,
-              },
-              animations: {
-                enabled: false,
-              },
-            },
-            stroke: {
-              width: 2,
-              lineCap: "round",
-              curve: "smooth",
-            },
-            series: [
-              {
-                name: "Installed",
-                data: [{{ range .graphData }}{{ .Install }},{{ end }}],
-              },
-              {
-                name: "Upgraded",
-                data: [{{ range .graphData }}{{ .Upgraded }},{{ end }}],
-              },
-            ],
-            tooltip: {
-              theme: "dark",
-            },
-            grid: {
-              padding: {
-                top: -20,
-                right: 0,
-                left: -4,
-                bottom: -4,
-              },
-              strokeDashArray: 4,
-            },
-            xaxis: {
-              labels: {
-                padding: 0,
-              },
-              tooltip: {
-                enabled: false,
-              },
-              type: "string",
-            },
-            yaxis: {
-              labels: {
-                padding: 4,
-              },
-            },
-            labels: [
-              {{ range .graphData }}
-                "{{ .Week.Format "02/01/2006" }}",
-              {{ end }}
-            ],
-            colors: [
-              '#F44336', '#066fd1'
-            ],
-            legend: {
-              show: false,
-            },
-          }).render();
-      });
-    </script>
     {{ template "settings.html" . }}
   </div>
 </div>
 
+<script>
+  function search() {
+    const searchValue = document.getElementById('search').value;
+    const hasQueryParams = window.location.search.includes('?');
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', searchValue);
+    window.location.href = url.toString();
+  }
+
+  function handleSearch(event) {
+    if (event.key === 'Enter') {
+      search();
+    }
+  }
+</script>
 {{ template "footer.html" . }}

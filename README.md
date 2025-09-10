@@ -140,13 +140,13 @@ rm go1.24.4.linux-amd64.tar.gz
 ### Swaggo
 
 ```bash
-curl https://install.rda.run/swaggo/swag@latest! | bash
+curl -fsSL https://install.rda.run/swaggo/swag@latest! | bash
 ```
 
 ### Air
 
 ```bash
-curl https://install.rda.run/air-verse/air@latest! | bash
+curl -fsSL https://install.rda.run/air-verse/air@latest! | bash
 ```
 
 ### A `.env` file

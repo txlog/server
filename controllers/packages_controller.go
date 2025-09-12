@@ -308,19 +308,29 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
 		}
 
 		query := `
-      SELECT DISTINCT
-          package,
-          version,
-          release,
-          arch,
-          repo
+      SELECT
+        ti.package,
+        ti.version,
+        ti.release,
+        ti.arch,
+        ti.repo,
+        MAX(t.end_time) AS last_seen
       FROM
-          public.transaction_items
+        public.transaction_items AS ti
+      JOIN
+        public.transactions AS t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
       WHERE
-          package = $1
+        ti.package = $1
+      AND ti.repo != '@System'
+      GROUP BY
+        ti.package,
+        ti.version,
+        ti.release,
+        ti.arch,
+        ti.repo
       ORDER BY
-          version DESC,
-          release DESC;
+        version DESC,
+        release DESC;
     `
 		rows, err := database.Query(query, pkg.Name)
 
@@ -342,6 +352,7 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
 				&packageName.Release,
 				&packageName.Arch,
 				&packageName.Repo,
+				&packageName.LastSeen,
 			)
 			if err != nil {
 				logger.Error("Error iterating packages:" + err.Error())
@@ -353,11 +364,82 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
 			packageNames = append(packageNames, packageName)
 		}
 
+		if len(packageNames) == 0 {
+			c.HTML(http.StatusNotFound, "404.html", gin.H{
+				"title": "Not Found",
+			})
+			return
+		}
+
 		c.HTML(http.StatusOK, "package_name.html", gin.H{
 			"Context":  c,
 			"title":    "Packages",
 			"packages": packageNames,
+			"archList": extractUniqueArchitectures(packageNames),
+			"repoList": extractUniqueRepositories(packageNames),
 			"name":     pkg.Name,
 		})
 	}
+}
+
+// extractUniqueArchitectures takes a slice of PackageListing models and returns
+// a slice containing all unique architecture strings found in the input packages.
+// Duplicate architectures are automatically filtered out using a map-based approach.
+//
+// Parameters:
+//   - packageNames: slice of models.PackageListing containing package information
+//
+// Returns:
+//   - []string: slice of unique architecture strings (e.g., "amd64", "arm64", "i386")
+//
+// Example:
+//
+//	packages := []models.PackageListing{
+//	  {Arch: "amd64"}, {Arch: "arm64"}, {Arch: "amd64"},
+//	}
+//	archs := extractUniqueArchitectures(packages) // Returns: ["amd64", "arm64"]
+func extractUniqueArchitectures(packageNames []models.PackageListing) []string {
+	// Create a map to track unique architectures
+	archMap := make(map[string]bool)
+	for _, pkg := range packageNames {
+		archMap[pkg.Arch] = true
+	}
+
+	// Convert map keys to slice
+	var archList []string
+	for arch := range archMap {
+		archList = append(archList, arch)
+	}
+	return archList
+}
+
+// extractUniqueRepositories takes a slice of PackageListing models and returns
+// a slice containing all unique repository strings found in the input packages.
+// Duplicate repositories are automatically filtered out using a map-based approach.
+//
+// Parameters:
+//   - packageNames: slice of models.PackageListing containing package information
+//
+// Returns:
+//   - []string: slice of unique repository strings (e.g., "fedora", "updates", "rpmfusion")
+//
+// Example:
+//
+//	packages := []models.PackageListing{
+//	  {Repo: "fedora"}, {Repo: "updates"}, {Repo: "fedora"},
+//	}
+//	repos := extractUniqueRepositories(packages) // Returns: ["fedora", "updates"]
+func extractUniqueRepositories(packageNames []models.PackageListing) []string {
+	// Create a map to track unique repositories
+	repoMap := make(map[string]bool)
+	for _, pkg := range packageNames {
+		repoMap[pkg.Repo] = true
+	}
+
+	// Convert map keys to slice
+	var repoList []string
+	for repo := range repoMap {
+		repoList = append(repoList, repo)
+	}
+	return repoList
 }

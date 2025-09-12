@@ -4,9 +4,8 @@
   <div class="container-xl">
     <div class="row g-2 align-items-center">
       <div class="col">
-        <div class="page-pretitle">Package Details</div>
         <h2 class="page-title">
-          {{ .name }}
+          Package details
         </h2>
       </div>
       <div class="col-auto ms-auto d-print-none">
@@ -23,13 +22,134 @@
 <div class="page-body">
   <div class="container-xl">
     <div class="row row-deck row-cards">
+
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">{{ .name }}</h3>
+          </div>
+          <div class="card-body">
+            <div class="datagrid">
+              <div class="datagrid-item">
+                <div class="datagrid-title">Architecture</div>
+                <div class="datagrid-content">
+                  {{ range $index, $arch := .archList }}
+                  {{- if $index }}, {{ end -}}{{ $arch }}
+                  {{- end }}
+                </div>
+              </div>
+              <div class="datagrid-item">
+                <div class="datagrid-title">Repository</div>
+                <div class="datagrid-content">
+                  {{ range $index, $repo := .repoList }}
+                  {{- if $index }}, {{ end -}}{{ $repo }}
+                  {{- end }}
+                </div>
+              </div>
+              <div class="datagrid-item">
+                <div class="datagrid-title">Last seen</div>
+                <div class="datagrid-content">
+                  {{ if .packages }}{{ (index .packages 0).LastSeen }}{{ end }}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="col-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Version timeline</h3>
+          </div>
+          <div class="card-body">
+            <ul class="timeline">
+            {{ range .packages }}
+            <li class="timeline-event">
+              <div class="timeline-event-icon">
+                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
+              </div>
+              <div class="card timeline-event-card">
+                <div class="card-body">
+                  <div class="text-secondary float-end">
+                    <a href="#">List assets
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-end icon-2"><path d="M9 6l6 6l-6 6"></path></svg>
+                    </a>
+                  </div>
+                  <h4>{{ .Version }}<span class="text-secondary">-{{ .Release }}-{{ .Arch }}</span></h4>
+                  <p class="text-secondary">
+                    <strong>Repo:</strong> {{ .Repo }}<br/>
+                    <strong>Last seen:</strong> {{ .LastSeen }}
+                  </p>
+                </div>
+              </div>
+            </li>
+            {{ end }}
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div class="col-6">
 
 
 
-        <div class="card">
+
+
+
+
+
+        <div id="table-placeholder" class="card" style="display: none;">
+          <ul class="list-group list-group-flush placeholder-glow">
+            <li class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col-7">
+                  <div class="placeholder placeholder-xs col-9"></div>
+                </div>
+                <div class="col-2 ms-auto text-end">
+                  <div class="placeholder placeholder-xs col-8"></div>
+                </div>
+              </div>
+            </li>
+            <li class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col-7">
+                  <div class="placeholder placeholder-xs col-9"></div>
+                </div>
+                <div class="col-2 ms-auto text-end">
+                  <div class="placeholder placeholder-xs col-8"></div>
+                </div>
+              </div>
+            </li>
+            <li class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col-7">
+                  <div class="placeholder placeholder-xs col-9"></div>
+                </div>
+                <div class="col-2 ms-auto text-end">
+                  <div class="placeholder placeholder-xs col-8"></div>
+                </div>
+              </div>
+            </li>
+            <li class="list-group-item">
+              <div class="row align-items-center">
+                <div class="col-7">
+                  <div class="placeholder placeholder-xs col-9"></div>
+                </div>
+                <div class="col-2 ms-auto text-end">
+                  <div class="placeholder placeholder-xs col-8"></div>
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+
+        <div id="table-assets" class="card" style="display: none;">
           <div class="card-header">
-            <h3 class="card-title">Assets where this package was found</h3>
+            <h3 class="card-title">Assets running version <kbd>1.2.3</kbd></h3>
           </div>
           <div class="table-responsive">
             <table class="table table-selectable card-table table-vcenter text-nowrap datatable">
@@ -82,33 +202,6 @@
                     <button class="btn align-text-top">Details</button>
                   </td>
                 </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-
-
-
               </tbody>
             </table>
           </div>
@@ -159,172 +252,7 @@
 
 
       </div>
-      <div class="col-6">
-        <div class="card">
-          <div class="card-body">
-            <h3 class="card-title">Version timeline</h3>
-            <div class="card-body">
-              <div class="mb-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2 text-secondary icon-2">
-                  <path d="M3 19a9 9 0 0 1 9 0a9 9 0 0 1 9 0"></path>
-                  <path d="M3 6a9 9 0 0 1 9 0a9 9 0 0 1 9 0"></path>
-                  <path d="M3 6l0 13"></path>
-                  <path d="M12 6l0 13"></path>
-                  <path d="M21 6l0 13"></path>
-                </svg>
-                Went to: <strong>University of Ljubljana</strong>
-              </div>
-              <div class="mb-2">
 
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2 text-secondary icon-2">
-                  <path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z"></path>
-                  <path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"></path>
-                  <path d="M12 12l0 .01"></path>
-                  <path d="M3 13a20 20 0 0 0 18 0"></path>
-                </svg>
-                Worked at: <strong>Devpulse</strong>
-              </div>
-              <div class="mb-2">
-
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2 text-secondary icon-2">
-                  <path d="M5 12l-2 0l9 -9l9 9l-2 0"></path>
-                  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
-                  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path>
-                </svg>
-                Lives in: <strong>Šentilj v Slov. Goricah, Slovenia</strong>
-              </div>
-              <div class="mb-2">
-
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2 text-secondary icon-2">
-                  <path d="M9 11a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"></path>
-                  <path d="M17.657 16.657l-4.243 4.243a2 2 0 0 1 -2.827 0l-4.244 -4.243a8 8 0 1 1 11.314 0z"></path>
-                </svg>
-                From: <strong><span class="flag flag-xs flag-country-si"></span> Slovenia</strong>
-              </div>
-              <div class="mb-2">
-
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2 text-secondary icon-2">
-                  <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z"></path>
-                  <path d="M16 3v4"></path>
-                  <path d="M8 3v4"></path>
-                  <path d="M4 11h16"></path>
-                  <path d="M11 15h1"></path>
-                  <path d="M12 15v3"></path>
-                </svg>
-                Birth date: <strong>13/01/1985</strong>
-              </div>
-              <div>&nbsp;</div>
-            </div>
-            <ul class="timeline">
-              <li class="timeline-event">
-                <div class="timeline-event-icon">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
-                </div>
-                <div class="card timeline-event-card">
-                  <div class="card-body">
-                    <div class="text-secondary float-end">Repo</div>
-                    <h4>Version</h4>
-                    <p class="text-secondary">Release, arch</p>
-                  </div>
-                </div>
-              </li>
-              <li class="timeline-event">
-                <div class="timeline-event-icon">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
-                </div>
-                <div class="card timeline-event-card">
-                  <div class="card-body">
-                    <div class="text-secondary float-end">2 hrs ago</div>
-                    <h4>+3 New Products were added!</h4>
-                    <p class="text-secondary">Congratulations!</p>
-                  </div>
-                </div>
-              </li>
-              <li class="timeline-event">
-                <div class="timeline-event-icon">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
-                </div>
-                <div class="card timeline-event-card">
-                  <div class="card-body">
-                    <div class="text-secondary float-end">1 day ago</div>
-                    <h4>Database backup completed!</h4>
-                    <p class="text-secondary">Download the <a href="#">latest backup</a>.</p>
-                  </div>
-                </div>
-              </li>
-              <li class="timeline-event">
-                <div class="timeline-event-icon">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
-                </div>
-                <div class="card timeline-event-card">
-                  <div class="card-body">
-                    <div class="text-secondary float-end">1 day ago</div>
-                    <h4>+290 Page Likes</h4>
-                    <p class="text-secondary">This is great, keep it up!</p>
-                  </div>
-                </div>
-              </li>
-              <li class="timeline-event">
-                <div class="timeline-event-icon">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
-                </div>
-                <div class="card timeline-event-card">
-                  <div class="card-body">
-                    <div class="text-secondary float-end">2 days ago</div>
-                    <h4>+3 Friend Requests</h4>
-                    <div class="avatar-list mt-3">
-                      <span class="avatar" style="background-image: url(...)">
-                        <span class="badge bg-success"></span></span>
-                      <span class="avatar">
-                        <span class="badge bg-success"></span>JL</span>
-                      <span class="avatar" style="background-image: url(...)">
-                        <span class="badge bg-success"></span></span>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li class="timeline-event">
-                <div class="timeline-event-icon">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
-                </div>
-                <div class="card timeline-event-card">
-                  <div class="card-body">
-                    <div class="text-secondary float-end">3 days ago</div>
-                    <h4>+2 New photos</h4>
-                    <div class="mt-3">
-                      <div class="row g-2">
-                        <div class="col-6">
-                          <div class="media media-2x1 rounded">
-                            <a class="media-content" style="background-image: url(...)"></a>
-                          </div>
-                        </div>
-                        <div class="col-6">
-                          <div class="media media-2x1 rounded">
-                            <a class="media-content" style="background-image: url(...)"></a>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li class="timeline-event">
-                <div class="timeline-event-icon">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
-                </div>
-                <div class="card timeline-event-card">
-                  <div class="card-body">
-                    <div class="text-secondary float-end">2 weeks ago</div>
-                    <h4>System updated to v2.02</h4>
-                    <p class="text-secondary">Check the complete changelog at the <a href="#">activity
-                        page</a>.</p>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
     {{ template "settings.html" . }}
   </div>

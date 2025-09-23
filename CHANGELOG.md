@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `Details` button on asset and package listing
+- bumps github.com/gin-gonic/gin from 1.10.1 to 1.11.0
 
 ## [1.11.1] - 2025-09-09
 

@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.12.1] - 2025-09-23
+
+### Fixed
+
+- Remove simulated delay in package history endpoint
+
 ## [1.12.0] - 2025-09-23
 
 ### Added

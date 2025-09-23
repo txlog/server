@@ -3,7 +3,6 @@ package v1
 import (
 	"database/sql"
 	"net/http"
-	"time"
 
 	"github.com/txlog/server/models"
 
@@ -87,9 +86,6 @@ ORDER BY
 			c.JSON(http.StatusNotFound, gin.H{"error": "No assets found using this package version"})
 			return
 		}
-
-		// Simulate a delay of 10 seconds
-		time.Sleep(10 * time.Second)
 
 		c.JSON(http.StatusOK, assets)
 	}

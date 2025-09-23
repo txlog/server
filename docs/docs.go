@@ -311,6 +311,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/packages/{name}/{version}/assets": {
+            "get": {
+                "description": "Get assets that are using a specific package version",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "packages"
+                ],
+                "summary": "Get assets that are using a specific package version",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Package name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Package version",
+                        "name": "version",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Package"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/transactions": {
             "get": {
                 "description": "Get saved transactions for a host",
@@ -472,6 +508,30 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Package": {
+            "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
+            "properties": {
+                "arch": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "release": {
+                    "type": "string"
+                },
+                "repo": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Transaction": {
             "type": "object",
             "properties": {
@@ -557,9 +617,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "v1",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "",
-	Schemes:          []string{"http", "https"},
+	Schemes:          []string{},
 	Title:            "Txlog Server",
 	Description:      "The centralized system that stores transaction data",
 	InfoInstanceName: "swagger",

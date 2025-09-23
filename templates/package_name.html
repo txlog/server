@@ -74,7 +74,7 @@
               <div class="card timeline-event-card">
                 <div class="card-body">
                   <div class="text-secondary float-end">
-                    <a href="#">List assets
+                    <a href="javascript:loadPackageAssets('{{ $.name }}', '{{ .Version }}')">List assets
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-end icon-2"><path d="M9 6l6 6l-6 6"></path></svg>
                     </a>
                   </div>
@@ -149,105 +149,94 @@
 
         <div id="table-assets" class="card" style="display: none;">
           <div class="card-header">
-            <h3 class="card-title">Assets running version <kbd>1.2.3</kbd></h3>
+            <h3 class="card-title">Assets running version <kbd id="version-display">loading...</kbd></h3>
           </div>
           <div class="table-responsive">
             <table class="table table-selectable card-table table-vcenter text-nowrap datatable">
               <thead>
-                <tr>
-                  <th class="w-1">Hostname</th>
-                  <th></th>
-                </tr>
+          <tr>
+            <th class="w-1">Hostname</th>
+            <th></th>
+          </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <a class="btn align-text-top" href="/assets/{{ .MachineID }}">Details</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>prd-sms-dc02-z1-api-rest-multiple-db-jms07</td>
-                  <td class="text-end">
-                    <button class="btn align-text-top">Details</button>
-                  </td>
-                </tr>
+              <tbody id="assets-table-body">
+          <!-- Dynamic content will be loaded here -->
               </tbody>
             </table>
           </div>
-          <div class="card-footer">
+          <div class="card-footer" id="table-footer" style="display: none;">
             <div class="row g-2 justify-content-center justify-content-sm-between">
               <div class="col-auto d-flex align-items-center">
-                <p class="m-0 text-secondary">Showing <strong>1 to 8</strong> of <strong>16 entries</strong></p>
-              </div>
-              <div class="col-auto">
-                <ul class="pagination m-0 ms-auto">
-                  <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
-                      <!-- Download SVG icon from http://tabler.io/icons/icon/chevron-left -->
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
-                        <path d="M15 6l-6 6l6 6"></path>
-                      </svg>
-                    </a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">1</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">2</a>
-                  </li>
-                  <li class="page-item active">
-                    <a class="page-link" href="#">3</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">4</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">5</a>
-                  </li>
-                  <li class="page-item">
-                    <a class="page-link" href="#">
-                      <!-- Download SVG icon from http://tabler.io/icons/icon/chevron-right -->
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-1">
-                        <path d="M9 6l6 6l-6 6"></path>
-                      </svg>
-                    </a>
-                  </li>
-                </ul>
+          <p class="m-0 text-secondary">Showing <strong id="entries-count">0</strong> entries</p>
               </div>
             </div>
           </div>
         </div>
+
+        <script>
+        async function loadPackageAssets(packageName, version) {
+          const tableCard = document.getElementById('table-assets');
+          const tableBody = document.getElementById('assets-table-body');
+          const versionDisplay = document.getElementById('version-display');
+          const tableFooter = document.getElementById('table-footer');
+          const entriesCount = document.getElementById('entries-count');
+
+          try {
+            // Show loading state
+            versionDisplay.textContent = version;
+            // Hide table and show placeholder
+            tableCard.style.display = 'none';
+            document.getElementById('table-placeholder').style.display = 'block';
+
+            tableCard.style.display = 'block';
+
+            // Fetch data from API
+            const response = await fetch(`/v1/packages/${encodeURIComponent(packageName)}/${encodeURIComponent(version)}/assets`);
+
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const assets = await response.json();
+
+            // Clear table body
+            tableBody.innerHTML = '';
+
+            if (assets && assets.length > 0) {
+              // Populate table with assets
+              assets.forEach(asset => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                  <td>${asset.hostname || 'Unknown'}</td>
+                  <td class="text-end">
+                    <a class="btn align-text-top" href="/assets/${asset.machine_id}">Details</a>
+                  </td>
+                `;
+                tableBody.appendChild(row);
+              });
+
+              // Update footer
+              entriesCount.textContent = assets.length;
+              tableFooter.style.display = 'block';
+            }
+
+            } catch (error) {
+              console.error('Error loading package assets:', error);
+
+              // Check if it's a 404 error (no assets found)
+              if (error.message.includes('404')) {
+                tableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No assets found for this version</td></tr>';
+              } else {
+                tableBody.innerHTML = '<tr><td colspan="2" class="text-center text-danger">Error loading assets data</td></tr>';
+              }
+              tableFooter.style.display = 'none';
+          }
+
+          // Hide placeholder and show table after data is loaded
+          document.getElementById('table-placeholder').style.display = 'none';
+          tableCard.style.display = 'block';
+        }
+        </script>
 
 
 

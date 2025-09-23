@@ -21,7 +21,7 @@ type PackageListing struct {
 
 type Package struct {
 	Name    string `json:"name" uri:"name" binding:"required"`
-	Version string `json:"version"`
+	Version string `json:"version" uri:"version"`
 	Release string `json:"release"`
 	Arch    string `json:"arch"`
 	Repo    string `json:"repo"`

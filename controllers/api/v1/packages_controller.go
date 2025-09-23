@@ -21,7 +21,6 @@ import (
 // @success		200		{object}	models.Package
 // @router			/v1/packages/{name}/{version}/assets [get]
 func GetAssetsUsingPackageVersion(database *sql.DB) gin.HandlerFunc {
-	time.Sleep(10 * time.Second)
 	return func(c *gin.Context) {
 		var pkg models.Package
 		if err := c.ShouldBindUri(&pkg); err != nil {
@@ -88,6 +87,9 @@ ORDER BY
 			c.JSON(http.StatusNotFound, gin.H{"error": "No assets found using this package version"})
 			return
 		}
+
+		// Simulate a delay of 10 seconds
+		time.Sleep(10 * time.Second)
 
 		c.JSON(http.StatusOK, assets)
 	}

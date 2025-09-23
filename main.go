@@ -36,8 +36,6 @@ var templateFS embed.FS
 // @contact.url	https://github.com/txlog/server/issues
 // @license.name	MIT License
 // @license.url	https://github.com/txlog/.github/blob/main/profile/LICENSE.md
-// @host			localhost:8080
-// @schemes		http https
 func main() {
 	logger.InitLogger()
 
@@ -115,6 +113,9 @@ func main() {
 
 		// Assets requiring restart
 		v1Group.GET("/assets/requiring-restart", v1API.GetAssetsRequiringRestart(database.Db))
+
+		// Package listing
+		v1Group.GET("/packages/:name/:version/assets", v1API.GetAssetsUsingPackageVersion(database.Db))
 
 		// Endpoints for agent pre-v1.6.0
 		v1Group.GET("/machines/ids", v1API.GetMachineIDs(database.Db))

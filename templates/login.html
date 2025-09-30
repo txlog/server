@@ -2,158 +2,133 @@
 <html lang="en">
 
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{{ .title }}</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-	<style>
-		.login-container {
-			min-height: 100vh;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		}
-		
-		.login-card {
-			background: white;
-			border-radius: 15px;
-			box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-			overflow: hidden;
-			max-width: 400px;
-			width: 100%;
-		}
-		
-		.login-header {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-			color: white;
-			padding: 2rem;
-			text-align: center;
-		}
-		
-		.login-body {
-			padding: 2rem;
-		}
-		
-		.btn-oidc {
-			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-			border: none;
-			color: white;
-			padding: 12px 20px;
-			font-weight: 500;
-			border-radius: 8px;
-			transition: transform 0.2s, box-shadow 0.2s;
-		}
-		
-		.btn-oidc:hover {
-			transform: translateY(-2px);
-			box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-			color: white;
-		}
-		
-		.alert {
-			border-radius: 8px;
-			border: none;
-		}
-		
-		.brand-logo {
-			width: 60px;
-			height: 60px;
-			background: white;
-			border-radius: 50%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin: 0 auto 1rem;
-			font-size: 1.5rem;
-			color: #667eea;
-		}
-	</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="/images/favicon.ico">
+  <link rel="shortcut icon" href="/images/favicon.ico">
+  <title>{{ .title }}</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" integrity="sha256-fvdQvRBUamldCxJ2etgEi9jz7F3n2u+xBn+dDao9HJo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css" integrity="sha256-eTOBhTVpfc7WrvK4GRkv/mwNaK2xmZqMa7UM6JOpgwc=" crossorigin="anonymous">
+  <style>
+    :root {
+      font-family: "Inter Var", sans-serif;
+      font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+      --tblr-font-sans-serif: "Inter Var", Inter, -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+    @supports (font-variation-settings: normal) {
+      :root { font-family: InterVariable, sans-serif; }
+    }
+    body {
+      overflow-y: scroll;
+      min-height: 100vh;
+    }
+    .page-center {
+      min-height: 100vh;
+    }
+  </style>
 </head>
 
-<body>
-	<div class="login-container">
-		<div class="login-card">
-			<div class="login-header">
-				<div class="brand-logo">
-					<i class="bi bi-database"></i>
-				</div>
-				<h3 class="mb-0">Txlog Server</h3>
-				<p class="mb-0 opacity-75">Transaction Logging System</p>
-			</div>
-			
-			<div class="login-body">
-				<h4 class="text-center mb-4">Welcome Back</h4>
-				
-				<!-- Error Messages -->
-				<div id="error-container">
-					<script>
-						const urlParams = new URLSearchParams(window.location.search);
-						const error = urlParams.get('error');
-						
-						if (error) {
-							let errorMessage = 'An error occurred during authentication.';
-							
-							switch (error) {
-								case 'auth_failed':
-									errorMessage = 'Authentication failed. Please try again.';
-									break;
-								case 'invalid_state':
-									errorMessage = 'Invalid request state. Please try again.';
-									break;
-								case 'token_exchange_failed':
-									errorMessage = 'Failed to exchange authorization code.';
-									break;
-								case 'id_token_missing':
-									errorMessage = 'ID token is missing from the response.';
-									break;
-								case 'id_token_invalid':
-									errorMessage = 'ID token verification failed.';
-									break;
-								case 'user_creation_failed':
-									errorMessage = 'Failed to create or update user account.';
-									break;
-								case 'account_disabled':
-									errorMessage = 'Your account has been disabled. Please contact an administrator.';
-									break;
-								case 'session_creation_failed':
-									errorMessage = 'Failed to create user session.';
-									break;
-							}
-							
-							document.getElementById('error-container').innerHTML = 
-								'<div class="alert alert-danger" role="alert">' +
-								'<i class="bi bi-exclamation-triangle me-2"></i>' + errorMessage +
-								'</div>';
-						}
-					</script>
-				</div>
-				
-				<p class="text-muted text-center mb-4">
-					Sign in with your OIDC provider to access the Txlog dashboard
-				</p>
-				
-				<div class="d-grid">
-					<form action="/auth/login" method="post">
-						<button type="submit" class="btn btn-oidc w-100">
-							<i class="bi bi-shield-check me-2"></i>
-							Sign in with OIDC
-						</button>
-					</form>
-				</div>
-				
-				<div class="text-center mt-4">
-					<small class="text-muted">
-						<i class="bi bi-info-circle me-1"></i>
-						Secure authentication powered by OpenID Connect
-					</small>
-				</div>
-			</div>
-		</div>
-	</div>
-	
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<body class="d-flex flex-column">
+  <div class="page page-center">
+    <div class="container container-tight py-4">
+      <div class="text-center mb-4">
+        <a href="#" class="navbar-brand navbar-brand-autodark">
+          <img src="/images/logbook.png" height="24" alt="Txlog Server">
+        </a>
+      </div>
+      <div class="card card-md">
+        <div class="card-body">
+          <h2 class="h2 text-center mb-4">Login to Txlog Server</h2>
+          
+          <!-- Error Messages -->
+          <div id="error-container">
+            <script>
+              const urlParams = new URLSearchParams(window.location.search);
+              const error = urlParams.get('error');
+              
+              if (error) {
+                let errorMessage = 'An error occurred during authentication.';
+                
+                switch (error) {
+                  case 'auth_failed':
+                    errorMessage = 'Authentication failed. Please try again.';
+                    break;
+                  case 'invalid_state':
+                    errorMessage = 'Invalid request state. Please try again.';
+                    break;
+                  case 'token_exchange_failed':
+                    errorMessage = 'Failed to exchange authorization code.';
+                    break;
+                  case 'id_token_missing':
+                    errorMessage = 'ID token is missing from the response.';
+                    break;
+                  case 'id_token_invalid':
+                    errorMessage = 'ID token verification failed.';
+                    break;
+                  case 'user_creation_failed':
+                    errorMessage = 'Failed to create or update user account.';
+                    break;
+                  case 'account_disabled':
+                    errorMessage = 'Your account has been disabled. Please contact an administrator.';
+                    break;
+                  case 'session_creation_failed':
+                    errorMessage = 'Failed to create user session.';
+                    break;
+                }
+                
+                document.getElementById('error-container').innerHTML = 
+                  '<div class="alert alert-danger" role="alert">' +
+                  '<div class="d-flex">' +
+                  '<div>' +
+                  '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>' +
+                  '</div>' +
+                  '<div>' +
+                  '<h4>Authentication Error</h4>' +
+                  '<div class="text-secondary">' + errorMessage + '</div>' +
+                  '</div>' +
+                  '</div>' +
+                  '</div>';
+              }
+            </script>
+          </div>
+          
+          <p class="text-secondary mb-4 text-center">
+            Sign in with your OIDC provider to access the Txlog dashboard and monitor your transaction logs.
+          </p>
+          
+          <div class="form-footer">
+            <form action="/auth/login" method="post">
+              <button type="submit" class="btn btn-primary w-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shield-check me-2">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M11.46 20.846a12 12 0 0 1 -2.21 -2.634c-2.5 -3.644 -2.5 -8.658 0 -12.302a3 3 0 0 1 4.5 0c2.5 3.644 2.5 8.658 0 12.302a12 12 0 0 1 -2.29 2.634" />
+                  <path d="M9 12l2 2l4 -4" />
+                </svg>
+                Sign in with OIDC
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="hr-text">Secure Authentication</div>
+      </div>
+      <div class="text-center text-secondary mt-3">
+        <small>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-1">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+            <path d="M12 9h.01" />
+            <path d="M11 12h1v4h1" />
+          </svg>
+          Secure authentication powered by OpenID Connect
+        </small>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" integrity="sha256-lel57Jim1/CW4I1iEkaHexK/J9h/ZRneeORKiQuNOIg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js" integrity="sha256-tgx2Fg6XYkV027jPEKvmrummSTtgCW/fwV3R3SvZnrk=" crossorigin="anonymous"></script>
 </body>
 
 </html>

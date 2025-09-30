@@ -165,6 +165,10 @@ CRON_RETENTION_DAYS=1
 CRON_RETENTION_EXPRESSION=0 2 * * *
 CRON_STATS_EXPRESSION=0 * * * *
 IGNORE_EMPTY_EXECUTION=true
+OIDC_ISSUER_URL=https://id.example.com
+OIDC_CLIENT_ID=your_oidc_client_id
+OIDC_CLIENT_SECRET=your_oidc_client_secret
+OIDC_REDIRECT_URL=https://txlog.example.com/auth/callback
 ```
 
 ### Development commands

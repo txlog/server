@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- OIDC support for authentication
+
 ## [1.12.1] - 2025-09-23
 
 ### Fixed

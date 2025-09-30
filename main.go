@@ -12,11 +12,13 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	healthcheck "github.com/tavsec/gin-healthcheck"
+	"github.com/txlog/server/auth"
 	"github.com/txlog/server/controllers"
 	v1API "github.com/txlog/server/controllers/api/v1"
 	"github.com/txlog/server/database"
 	_ "github.com/txlog/server/docs"
 	logger "github.com/txlog/server/logger"
+	"github.com/txlog/server/middleware"
 	"github.com/txlog/server/scheduler"
 	"github.com/txlog/server/util"
 	"github.com/txlog/server/version"
@@ -46,9 +48,25 @@ func main() {
 	database.ConnectDatabase()
 	scheduler.StartScheduler()
 
+	// Initialize OIDC service (optional)
+	var oidcService *auth.OIDCService
+	oidcService, err := auth.NewOIDCService(database.Db)
+	if err != nil {
+		logger.Error("Failed to initialize OIDC service: " + err.Error())
+		os.Exit(1)
+	}
+
+	// Log OIDC status
+	if oidcService != nil {
+		logger.Info("OIDC authentication enabled")
+	} else {
+		logger.Info("OIDC authentication disabled - running without authentication")
+	}
+
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
 	r.Use(EnvironmentVariablesMiddleware())
+	r.Use(middleware.AuthMiddleware(database.Db))
 
 	funcMap := template.FuncMap{
 		"add":              util.Add,
@@ -83,6 +101,15 @@ func main() {
 
 	r.NoRoute(controllers.Get404)
 
+	// Authentication routes (only if OIDC is configured)
+	if oidcService != nil {
+		r.GET("/login", controllers.GetLogin(oidcService))
+		r.POST("/auth/login", controllers.PostLogin(oidcService))
+		r.GET("/auth/callback", controllers.GetCallback(oidcService))
+		r.POST("/auth/logout", controllers.PostLogout(oidcService))
+	}
+
+	// Main application routes
 	r.GET("/", controllers.GetRootIndex(database.Db))
 	r.GET("/assets", controllers.GetAssetsIndex(database.Db))
 	r.GET("/packages", controllers.GetPackagesIndex(database.Db))
@@ -147,6 +174,14 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("env", envVars)
+
+		// Add user to template context if available
+		if userInterface, exists := c.Get("user"); exists {
+			c.Set("user", userInterface)
+		}
+
+		// Add OIDC status to template context
+		c.Set("oidc_enabled", auth.IsConfigured())
 
 		c.Next()
 	}

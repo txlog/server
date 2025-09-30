@@ -169,6 +169,7 @@ OIDC_ISSUER_URL=https://id.example.com
 OIDC_CLIENT_ID=your_oidc_client_id
 OIDC_CLIENT_SECRET=your_oidc_client_secret
 OIDC_REDIRECT_URL=https://txlog.example.com/auth/callback
+OIDC_SKIP_TLS_VERIFY=false
 ```
 
 ### Development commands

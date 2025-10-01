@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"context"
+	"crypto/tls"
 	"database/sql"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -84,6 +86,7 @@ func GetDebugOIDC(db *sql.DB) gin.HandlerFunc {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
+			// Test with normal TLS verification
 			client := &http.Client{Timeout: 5 * time.Second}
 			req, err := http.NewRequestWithContext(ctx, "GET", issuerURL+"/.well-known/openid-configuration", nil)
 			if err != nil {
@@ -92,10 +95,37 @@ func GetDebugOIDC(db *sql.DB) gin.HandlerFunc {
 				resp, err := client.Do(req)
 				if err != nil {
 					debug["network_test_error"] = "Failed to connect to OIDC provider: " + err.Error()
+
+					// If TLS fails, test if OIDC_SKIP_TLS_VERIFY would help
+					skipTLS := strings.ToLower(os.Getenv("OIDC_SKIP_TLS_VERIFY")) == "true"
+					debug["skip_tls_verify_enabled"] = skipTLS
+
+					if skipTLS {
+						// Test with TLS verification disabled (as used in production)
+						tlsClient := &http.Client{
+							Timeout: 5 * time.Second,
+							Transport: &http.Transport{
+								TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+							},
+						}
+						tlsReq, _ := http.NewRequestWithContext(ctx, "GET", issuerURL+"/.well-known/openid-configuration", nil)
+						tlsResp, tlsErr := tlsClient.Do(tlsReq)
+						if tlsErr != nil {
+							debug["network_test_skip_tls_error"] = "Even with TLS skip failed: " + tlsErr.Error()
+						} else {
+							tlsResp.Body.Close()
+							debug["network_test_skip_tls_success"] = true
+							debug["skip_tls_status"] = tlsResp.StatusCode
+							debug["diagnosis"] = "CA certificates missing in container - but OIDC should work with SKIP_TLS_VERIFY=true"
+						}
+					} else {
+						debug["suggestion"] = "Set OIDC_SKIP_TLS_VERIFY=true or add CA certificates to container"
+					}
 				} else {
 					resp.Body.Close()
 					debug["network_test_success"] = true
 					debug["oidc_provider_status"] = resp.StatusCode
+					debug["ca_certificates_ok"] = true
 				}
 			}
 		}

@@ -148,7 +148,7 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 			UPDATE users 
 			SET email = $2, name = $3, picture = $4, updated_at = $5, last_login_at = $6
 			WHERE sub = $1
-			RETURNING id, sub, email, name, picture, is_active, is_admin, created_at, updated_at, last_login_at
+			RETURNING id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, created_at, updated_at, last_login_at
 		`
 
 		user := &models.User{}
@@ -164,7 +164,7 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 	insertQuery := `
 		INSERT INTO users (sub, email, name, picture, is_active, is_admin, created_at, updated_at, last_login_at)
 		VALUES ($1, $2, $3, $4, true, false, $5, $5, $5)
-		RETURNING id, sub, email, name, picture, is_active, is_admin, created_at, updated_at, last_login_at
+		RETURNING id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, created_at, updated_at, last_login_at
 	`
 
 	user := &models.User{}
@@ -207,7 +207,7 @@ func (s *OIDCService) InvalidateUserSession(sessionID string) error {
 
 func (s *OIDCService) getUserBySub(sub string) (*models.User, error) {
 	query := `
-		SELECT id, sub, email, name, picture, is_active, is_admin, created_at, updated_at, last_login_at
+		SELECT id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, created_at, updated_at, last_login_at
 		FROM users WHERE sub = $1
 	`
 

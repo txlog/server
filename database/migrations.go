@@ -49,7 +49,7 @@ func GetAllAvailableMigrations() ([]models.Migration, error) {
 
 		descPart := strings.TrimSuffix(parts[1], ".up.sql")
 		description := strings.ReplaceAll(descPart, "_", " ")
-		description = strings.Title(strings.ToLower(description))
+		description = toTitle(description)
 
 		migrationMap[version] = models.Migration{
 			Version:     version,
@@ -101,4 +101,16 @@ func RunAllMigrations() error {
 	}
 
 	return nil
+}
+
+// toTitle converts a string to title case (first letter of each word capitalized)
+// This is a simple replacement for the deprecated strings.Title function
+func toTitle(s string) string {
+	words := strings.Fields(strings.ToLower(s))
+	for i, word := range words {
+		if len(word) > 0 {
+			words[i] = strings.ToUpper(word[:1]) + word[1:]
+		}
+	}
+	return strings.Join(words, " ")
 }

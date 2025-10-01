@@ -45,13 +45,43 @@ func GetDebugOIDC(db *sql.DB) gin.HandlerFunc {
 			if err := db.Ping(); err == nil {
 				debug["database_connected"] = true
 
-				// Check if users table exists and get count
-				var userCount int
-				err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&userCount)
+				// Check migrations table and current version
+				var migrationExists bool
+				err := db.QueryRow("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'schema_migrations')").Scan(&migrationExists)
 				if err == nil {
-					debug["users_count"] = userCount
-				} else {
-					debug["users_table_error"] = err.Error()
+					debug["migration_table_exists"] = migrationExists
+
+					if migrationExists {
+						// Get current migration version
+						var version int
+						var dirty bool
+						err = db.QueryRow("SELECT version, dirty FROM schema_migrations LIMIT 1").Scan(&version, &dirty)
+						if err == nil {
+							debug["current_migration_version"] = version
+							debug["migration_dirty"] = dirty
+						}
+					}
+				}
+
+				// Check if users table exists and get count
+				var userTableExists bool
+				err = db.QueryRow("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users')").Scan(&userTableExists)
+				if err == nil {
+					debug["users_table_exists"] = userTableExists
+
+					if userTableExists {
+						var userCount int
+						err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&userCount)
+						if err == nil {
+							debug["users_count"] = userCount
+						} else {
+							debug["users_table_error"] = err.Error()
+						}
+					} else {
+						debug["users_table_missing"] = true
+						debug["migration_needed"] = "Migration 20250929 not applied - users table missing"
+						debug["solution"] = "Restart application to apply pending migrations"
+					}
 				}
 			} else {
 				debug["database_error"] = err.Error()
@@ -131,6 +161,118 @@ func GetDebugOIDC(db *sql.DB) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, debug)
+	}
+}
+
+// PostDebugMigrations forces the application of user table migrations
+// This endpoint should be removed after resolving migration issues
+//
+//	@Summary		Force Apply User Migrations
+//	@Description	Forces the application of user table migrations (20250929)
+//	@Tags			debug
+//	@Produce		json
+//	@Success		200	{object}	map[string]interface{}
+//	@Failure		500	{object}	map[string]interface{}
+//	@Router			/debug/migrations [post]
+func PostDebugMigrations(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		result := map[string]interface{}{
+			"timestamp": time.Now().Format(time.RFC3339),
+		}
+
+		if db == nil {
+			result["error"] = "Database connection not available"
+			c.JSON(http.StatusInternalServerError, result)
+			return
+		}
+
+		// Check if users table already exists
+		var userTableExists bool
+		err := db.QueryRow("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users')").Scan(&userTableExists)
+		if err != nil {
+			result["error"] = "Failed to check users table: " + err.Error()
+			c.JSON(http.StatusInternalServerError, result)
+			return
+		}
+
+		if userTableExists {
+			result["message"] = "Users table already exists - no migration needed"
+			result["users_table_exists"] = true
+			c.JSON(http.StatusOK, result)
+			return
+		}
+
+		// Apply user table migration manually
+		userTableSQL := `
+-- Create users table
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    sub VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    picture VARCHAR(512),
+    is_active BOOLEAN DEFAULT true,
+    is_admin BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    last_login_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create user_sessions table
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id VARCHAR(64) PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT true
+);
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_users_sub ON users(sub);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_is_active ON user_sessions(is_active);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at);
+
+-- Insert default admin user
+INSERT INTO users (sub, email, name, is_active, is_admin) 
+VALUES ('admin', 'admin@localhost', 'Administrator', true, true)
+ON CONFLICT (sub) DO NOTHING;
+`
+
+		// Execute the migration SQL
+		_, err = db.Exec(userTableSQL)
+		if err != nil {
+			result["error"] = "Failed to apply user table migration: " + err.Error()
+			logger.Error("Manual migration failed: " + err.Error())
+			c.JSON(http.StatusInternalServerError, result)
+			return
+		}
+
+		// Verify the tables were created
+		err = db.QueryRow("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users')").Scan(&userTableExists)
+		if err != nil {
+			result["error"] = "Failed to verify users table creation: " + err.Error()
+			c.JSON(http.StatusInternalServerError, result)
+			return
+		}
+
+		var userSessionsExists bool
+		err = db.QueryRow("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'user_sessions')").Scan(&userSessionsExists)
+		if err != nil {
+			result["error"] = "Failed to verify user_sessions table creation: " + err.Error()
+			c.JSON(http.StatusInternalServerError, result)
+			return
+		}
+
+		result["success"] = true
+		result["users_table_created"] = userTableExists
+		result["user_sessions_table_created"] = userSessionsExists
+		result["message"] = "User tables migration applied successfully"
+
+		logger.Info("Manual user table migration applied successfully")
+		c.JSON(http.StatusOK, result)
 	}
 }
 

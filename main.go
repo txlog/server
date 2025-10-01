@@ -116,6 +116,7 @@ func main() {
 
 	// Debug routes (remove in production or add authentication)
 	r.GET("/debug/oidc", controllers.GetDebugOIDC(database.Db))
+	r.POST("/debug/migrations", controllers.PostDebugMigrations(database.Db))
 
 	// Admin routes (requires admin middleware)
 	adminGroup := r.Group("/admin")

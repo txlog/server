@@ -149,7 +149,7 @@ func GetCallback(oidcService *auth.OIDCService) gin.HandlerFunc {
 //	@Description	Invalidates user session and redirects to home page
 //	@Tags			auth
 //	@Produce		json
-//	@Success		302	{string}	string	"Redirect to home page"
+//	@Success		303	{string}	string	"Redirect to home page"
 //	@Router			/auth/logout [post]
 func PostLogout(oidcService *auth.OIDCService) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -163,6 +163,6 @@ func PostLogout(oidcService *auth.OIDCService) gin.HandlerFunc {
 		// Clear session cookie
 		c.SetCookie("session_id", "", -1, "/", "", false, true)
 
-		c.Redirect(http.StatusTemporaryRedirect, "/")
+		c.Redirect(http.StatusSeeOther, "/")
 	}
 }

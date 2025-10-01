@@ -146,10 +146,10 @@ func GetCallback(oidcService *auth.OIDCService) gin.HandlerFunc {
 // PostLogout logs out the user
 //
 //	@Summary		Logout user
-//	@Description	Invalidates user session and redirects to login
+//	@Description	Invalidates user session and redirects to home page
 //	@Tags			auth
 //	@Produce		json
-//	@Success		302	{string}	string	"Redirect to login"
+//	@Success		302	{string}	string	"Redirect to home page"
 //	@Router			/auth/logout [post]
 func PostLogout(oidcService *auth.OIDCService) gin.HandlerFunc {
 	return func(c *gin.Context) {

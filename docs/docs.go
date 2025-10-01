@@ -167,7 +167,7 @@ const docTemplate = `{
                 ],
                 "summary": "Logout user",
                 "responses": {
-                    "302": {
+                    "303": {
                         "description": "Redirect to home page",
                         "schema": {
                             "type": "string"

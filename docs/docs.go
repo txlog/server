@@ -158,7 +158,7 @@ const docTemplate = `{
         },
         "/auth/logout": {
             "post": {
-                "description": "Invalidates user session and redirects to login",
+                "description": "Invalidates user session and redirects to home page",
                 "produces": [
                     "application/json"
                 ],
@@ -168,7 +168,7 @@ const docTemplate = `{
                 "summary": "Logout user",
                 "responses": {
                     "302": {
-                        "description": "Redirect to login",
+                        "description": "Redirect to home page",
                         "schema": {
                             "type": "string"
                         }

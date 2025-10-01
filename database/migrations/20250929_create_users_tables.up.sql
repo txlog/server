@@ -28,8 +28,3 @@ CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
 CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_sessions_is_active ON user_sessions(is_active);
 CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at);
-
--- Insert default admin user (will be updated via OIDC on first login)
-INSERT INTO users (sub, email, name, is_active, is_admin) 
-VALUES ('admin', 'admin@localhost', 'Administrator', true, true)
-ON CONFLICT (sub) DO NOTHING;

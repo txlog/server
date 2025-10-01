@@ -63,16 +63,36 @@ func ConnectDatabase() {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		logger.Error("Failed to create database driver: " + err.Error())
+		return
 	}
 
 	source, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
 		logger.Error("Failed to create migration source: " + err.Error())
+		return
 	}
 
 	m, err := migrate.NewWithInstance("iofs", source, "postgres", driver)
 	if err != nil {
 		logger.Error("Failed to create migration instance: " + err.Error())
+		return
+	}
+
+	// Check if database is in a dirty state
+	version, dirty, err := m.Version()
+	if err != nil && err != migrate.ErrNilVersion {
+		logger.Error("Failed to get migration version: " + err.Error())
+	}
+
+	// If database is dirty, try to force to the current version and retry
+	if dirty {
+		logger.Warn(fmt.Sprintf("Database is in dirty state at version %d. Attempting to fix...", version))
+		if err := m.Force(int(version)); err != nil {
+			logger.Error("Failed to force migration version: " + err.Error())
+			logger.Error("Manual intervention required. Run: migrate force <version>")
+			return
+		}
+		logger.Info(fmt.Sprintf("Forced database to clean state at version %d", version))
 	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {

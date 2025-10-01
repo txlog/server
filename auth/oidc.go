@@ -134,10 +134,21 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 		return nil, fmt.Errorf("failed to parse ID token claims: %w", err)
 	}
 
+	// Validate required fields
+	if claims.Sub == "" {
+		return nil, fmt.Errorf("OIDC subject (sub) claim is empty")
+	}
+	if claims.Email == "" {
+		return nil, fmt.Errorf("OIDC email claim is empty")
+	}
+	if claims.Name == "" {
+		return nil, fmt.Errorf("OIDC name claim is empty")
+	}
+
 	// Check if user already exists
 	existingUser, err := s.getUserBySub(claims.Sub)
 	if err != nil && err != sql.ErrNoRows {
-		return nil, fmt.Errorf("failed to check existing user: %w", err)
+		return nil, fmt.Errorf("failed to check existing user for sub '%s': %w", claims.Sub, err)
 	}
 
 	now := time.Now()
@@ -157,7 +168,11 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 			&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 		)
 
-		return user, err
+		if err != nil {
+			return nil, fmt.Errorf("failed to update existing user (sub: %s, email: %s): %w", claims.Sub, claims.Email, err)
+		}
+
+		return user, nil
 	}
 
 	// Create new user
@@ -173,7 +188,11 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 	)
 
-	return user, err
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new user (sub: %s, email: %s): %w", claims.Sub, claims.Email, err)
+	}
+
+	return user, nil
 }
 
 // CreateUserSession creates a new user session

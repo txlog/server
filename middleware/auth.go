@@ -26,6 +26,7 @@ func AuthMiddleware(db *sql.DB) gin.HandlerFunc {
 			strings.HasPrefix(path, "/health") ||
 			strings.HasPrefix(path, "/auth/") ||
 			strings.HasPrefix(path, "/images/") ||
+			strings.HasPrefix(path, "/debug/") ||
 			path == "/login" ||
 			path == "/logout" {
 			c.Next()

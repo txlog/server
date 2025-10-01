@@ -1,14 +1,10 @@
 {{ template "header.html" . }}
-
-<div class="page-header d-print-none">
+<div class="page-header d-print-none text-white">
   <div class="container-xl">
     <div class="row g-2 align-items-center">
       <div class="col">
-        <div class="page-pretitle">
-          Administration
-        </div>
         <h2 class="page-title">
-          User Management
+          Administration
         </h2>
       </div>
     </div>
@@ -17,7 +13,35 @@
 
 <div class="page-body">
   <div class="container-xl">
+    <!-- Success Message -->
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('migration_success')) {
+        document.addEventListener('DOMContentLoaded', function() {
+          const alertDiv = document.createElement('div');
+          alertDiv.className = 'alert alert-success alert-dismissible mb-3';
+          alertDiv.innerHTML = `
+            <div class="d-flex">
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <path d="M5 12l5 5l10 -10"/>
+                </svg>
+              </div>
+              <div>
+                <h4>Success!</h4>
+                <div class="text-secondary">All pending database migrations have been applied successfully.</div>
+              </div>
+            </div>
+            <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
+          `;
+          document.querySelector('.container-xl').insertBefore(alertDiv, document.querySelector('.row'));
+        });
+      }
+    </script>
+
     <div class="row row-deck row-cards">
+      <!-- Users Management Card -->
       <div class="col-12">
         <div class="card">
           <div class="card-header">
@@ -26,7 +50,7 @@
               <span class="badge bg-blue text-white">{{ len .users }} total users</span>
             </div>
           </div>
-          
+
           <div class="table-responsive">
             <table class="table table-vcenter table-mobile-md card-table">
               <thead>
@@ -88,7 +112,7 @@
                         </svg>
                         Edit
                       </button>
-                      
+
                       {{ if .IsActive }}
                       <!-- Deactivate User Button -->
                       <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deactivateModal{{ .ID }}">
@@ -117,7 +141,7 @@
                         </div>
                         <div class="modal-body">
                           <input type="hidden" name="user_id" value="{{ .ID }}">
-                          
+
                           <div class="mb-3">
                             <label class="form-label">User Information</label>
                             <div class="form-text">
@@ -125,14 +149,14 @@
                               <strong>Email:</strong> {{ .Email }}
                             </div>
                           </div>
-                          
+
                           <div class="mb-3">
                             <label class="form-check form-switch">
                               <input class="form-check-input" type="checkbox" name="is_active" {{ if .IsActive }}checked{{ end }}>
                               <span class="form-check-label">Active User</span>
                             </label>
                           </div>
-                          
+
                           <div class="mb-3">
                             <label class="form-check form-switch">
                               <input class="form-check-input" type="checkbox" name="is_admin" {{ if .IsAdmin }}checked{{ end }}>
@@ -182,6 +206,396 @@
             </table>
           </div>
         </div>
+      </div>
+
+      <!-- Database Migrations Card -->
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Database Migrations</h3>
+            <div class="card-actions">
+              {{ if .migrations }}
+              {{ if gt (len .migrations.Pending) 0 }}
+                <span class="badge bg-orange text-white">{{ len .migrations.Pending }} pending</span>
+              {{ else }}
+                <span class="badge bg-green text-white">Up to date</span>
+              {{ end }}
+              {{ if .migrations.IsDirty }}
+                <span class="badge bg-red text-white">Dirty state</span>
+              {{ end }}
+              {{ end }}
+            </div>
+          </div>
+
+          <div class="card-body">
+            {{ if .migrations }}
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                  <span class="me-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon text-blue">
+                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                      <path d="m7 11V7a5 5 0 0 1 10 0v4"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <strong>Current Version:</strong> {{ .migrations.CurrentVersion }}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                  <span class="me-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon text-green">
+                      <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <strong>Applied:</strong> {{ len .migrations.Applied }}
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                  <span class="me-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon text-orange">
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="m9 12 2 2 4-4"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <strong>Pending:</strong> {{ len .migrations.Pending }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {{ if gt (len .migrations.Pending) 0 }}
+            <div class="alert alert-warning">
+              <div class="d-flex">
+                <div>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
+                    <path d="M12 9v4" />
+                    <path d="M12 17h.01" />
+                  </svg>
+                </div>
+                <div>
+                  <h4>Pending Migrations</h4>
+                  <div class="text-secondary">
+                    There are {{ len .migrations.Pending }} pending migrations that need to be applied to the database.
+                    Click the button below to run all pending migrations.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#migrationsModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                  <path d="M5 12l5 5l10 -10"/>
+                </svg>
+                Run All Migrations ({{ len .migrations.Pending }})
+              </button>
+            </div>
+            {{ else }}
+            <div class="alert alert-success">
+              <div class="d-flex">
+                <div>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M5 12l5 5l10 -10"/>
+                  </svg>
+                </div>
+                <div>
+                  <h4>Database Up to Date</h4>
+                  <div class="text-secondary">All migrations have been applied successfully. The database is current.</div>
+                </div>
+              </div>
+            </div>
+            {{ end }}
+            {{ else }}
+            <div class="alert alert-info">
+              <div class="text-secondary">Unable to load migration status.</div>
+            </div>
+            {{ end }}
+          </div>
+
+          <!-- Migration Details -->
+          {{ if .migrations }}
+          <div class="table-responsive">
+            <table class="table table-vcenter card-table">
+              <thead>
+                <tr>
+                  <th>Version</th>
+                  <th>Description</th>
+                  <th>Status</th>
+                  <th>Filename</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ range .migrations.Applied }}
+                <tr>
+                  <td><code>{{ .Version }}</code></td>
+                  <td>{{ .Description }}</td>
+                  <td><span class="badge bg-success">Applied</span></td>
+                  <td class="text-muted">{{ .Filename }}</td>
+                </tr>
+                {{ end }}
+                {{ range .migrations.Pending }}
+                <tr>
+                  <td><code>{{ .Version }}</code></td>
+                  <td>{{ .Description }}</td>
+                  <td><span class="badge bg-orange">Pending</span></td>
+                  <td class="text-muted">{{ .Filename }}</td>
+                </tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">System Users</h3>
+            <div class="card-actions">
+              <span class="badge bg-blue text-white">{{ len .users }} total users</span>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-vcenter table-mobile-md card-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th>Role</th>
+                  <th>Last Login</th>
+                  <th>Created</th>
+                  <th class="w-1">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ range .users }}
+                <tr>
+                  <td data-label="User">
+                    <div class="d-flex py-1 align-items-center">
+                      <span class="avatar me-2" style="background-image: url({{ .Picture }})"></span>
+                      <div class="flex-fill">
+                        <div class="font-weight-medium">{{ .Name }}</div>
+                        <div class="text-muted">ID: {{ .ID }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td data-label="Email">
+                    <div>{{ .Email }}</div>
+                  </td>
+                  <td data-label="Status">
+                    {{ if .IsActive }}
+                      <span class="badge bg-success me-1"></span> Active
+                    {{ else }}
+                      <span class="badge bg-danger me-1"></span> Inactive
+                    {{ end }}
+                  </td>
+                  <td data-label="Role">
+                    {{ if .IsAdmin }}
+                      <span class="badge bg-purple text-white">Administrator</span>
+                    {{ else }}
+                      <span class="badge bg-secondary text-white">User</span>
+                    {{ end }}
+                  </td>
+                  <td data-label="Last Login">
+                    <div>{{ .LastLoginAt.Format "Jan 2, 2006" }}</div>
+                    <div class="text-muted">{{ .LastLoginAt.Format "15:04" }}</div>
+                  </td>
+                  <td data-label="Created">
+                    <div>{{ .CreatedAt.Format "Jan 2, 2006" }}</div>
+                  </td>
+                  <td>
+                    <div class="btn-list flex-nowrap">
+                      <!-- Edit User Button -->
+                      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ .ID }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-edit">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                          <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+                          <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
+                          <path d="M16 5l3 3" />
+                        </svg>
+                        Edit
+                      </button>
+
+                      {{ if .IsActive }}
+                      <!-- Deactivate User Button -->
+                      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deactivateModal{{ .ID }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-x">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                          <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
+                          <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" />
+                          <path d="M22 22l-5 -5" />
+                          <path d="M17 22l5 -5" />
+                        </svg>
+                        Deactivate
+                      </button>
+                      {{ end }}
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Edit User Modal -->
+                <div class="modal modal-blur fade" id="editModal{{ .ID }}" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <form action="/admin/update" method="post">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Edit User: {{ .Name }}</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <input type="hidden" name="user_id" value="{{ .ID }}">
+
+                          <div class="mb-3">
+                            <label class="form-label">User Information</label>
+                            <div class="form-text">
+                              <strong>Name:</strong> {{ .Name }}<br>
+                              <strong>Email:</strong> {{ .Email }}
+                            </div>
+                          </div>
+
+                          <div class="mb-3">
+                            <label class="form-check form-switch">
+                              <input class="form-check-input" type="checkbox" name="is_active" {{ if .IsActive }}checked{{ end }}>
+                              <span class="form-check-label">Active User</span>
+                            </label>
+                          </div>
+
+                          <div class="mb-3">
+                            <label class="form-check form-switch">
+                              <input class="form-check-input" type="checkbox" name="is_admin" {{ if .IsAdmin }}checked{{ end }}>
+                              <span class="form-check-label">Administrator</span>
+                            </label>
+                          </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Deactivate User Modal -->
+                <div class="modal modal-blur fade" id="deactivateModal{{ .ID }}" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <form action="/admin/delete" method="post">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Deactivate User</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          <input type="hidden" name="user_id" value="{{ .ID }}">
+                          <p>Are you sure you want to deactivate <strong>{{ .Name }}</strong> ({{ .Email }})?</p>
+                          <p class="text-muted">This will prevent the user from logging in, but their data will be preserved.</p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="submit" class="btn btn-danger">Deactivate User</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                {{ else }}
+                <tr>
+                  <td colspan="7" class="text-center text-muted">
+                    No users found in the system.
+                  </td>
+                </tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Run Migrations Modal -->
+<div class="modal modal-blur fade" id="migrationsModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Run Database Migrations</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning">
+          <div class="d-flex">
+            <div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
+                <path d="M12 9v4" />
+                <path d="M12 17h.01" />
+              </svg>
+            </div>
+            <div>
+              <h4>Important Notice</h4>
+              <div class="text-secondary">
+                This action will apply all pending database migrations. This operation:
+                <ul class="mt-2 mb-0">
+                  <li>Cannot be easily undone</li>
+                  <li>May take several minutes to complete</li>
+                  <li>Should not be interrupted once started</li>
+                  <li>Will modify the database structure</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {{ if .migrations }}
+        <p><strong>The following {{ len .migrations.Pending }} migrations will be applied:</strong></p>
+        <div class="list-group list-group-flush">
+          {{ range .migrations.Pending }}
+          <div class="list-group-item">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <code>{{ .Version }}</code>
+              </div>
+              <div class="col">
+                <strong>{{ .Description }}</strong>
+                <div class="text-muted">{{ .Filename }}</div>
+              </div>
+            </div>
+          </div>
+          {{ end }}
+        </div>
+        {{ end }}
+
+        <div class="mt-3">
+          <p class="text-muted">
+            <strong>Recommendation:</strong> Ensure you have a database backup before proceeding.
+            This operation is typically safe but should be done during maintenance windows in production.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form action="/admin/migrations/run" method="post" style="display: inline;">
+          <button type="submit" class="btn btn-primary" onclick="this.disabled=true; this.innerHTML='<span class=&quot;spinner-border spinner-border-sm me-2&quot;></span>Running...'; this.form.submit();">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+              <path d="M5 12l5 5l10 -10"/>
+            </svg>
+            Run All Migrations
+          </button>
+        </form>
       </div>
     </div>
   </div>

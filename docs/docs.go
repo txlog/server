@@ -23,6 +23,47 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/admin/migrations/run": {
+            "post": {
+                "description": "Applies all pending database migrations (Admin only)",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Run Database Migrations",
+                "responses": {
+                    "302": {
+                        "description": "Redirect to admin panel",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/callback": {
             "get": {
                 "description": "Process OIDC callback and create user session",
@@ -130,27 +171,6 @@ const docTemplate = `{
                         "description": "Redirect to login",
                         "schema": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/debug/oidc": {
-            "get": {
-                "description": "Returns diagnostic information about OIDC configuration and connectivity",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "debug"
-                ],
-                "summary": "OIDC Debug Information",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
                         }
                     }
                 }

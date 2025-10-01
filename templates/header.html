@@ -111,7 +111,7 @@
         {{ end }}
         <div class="nav-item dropdown">
           <div class="d-none d-xl-block ps-2">
-            <span class="badge bg-light-lt">{{ .Context.Keys.env.instance }}</span>
+            <span class="badge bg-light text-dark">{{ .Context.Keys.env.instance }}</span>
           </div>
         </div>
         {{ end }}
@@ -127,7 +127,7 @@
           <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
             <div class="dropdown-header">{{ .Context.Keys.user.Name }}</div>
             <div class="dropdown-item-text">
-              <span class="badge bg-light-lt">{{ .Context.Keys.env.instance }}</span>
+              <span class="badge bg-light text-dark">{{ .Context.Keys.env.instance }}</span>
             </div>
             {{ $latestVersion := .Context.Keys.env.latestVersion }}
             {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}

@@ -83,7 +83,7 @@ func AdminMiddleware() gin.HandlerFunc {
 
 func getUserBySessionID(db *sql.DB, sessionID string) (*models.User, error) {
 	query := `
-		SELECT u.id, u.sub, u.email, u.name, u.picture, u.is_active, u.is_admin,
+		SELECT u.id, u.sub, u.email, u.name, COALESCE(u.picture, '') as picture, u.is_active, u.is_admin,
 		       u.created_at, u.updated_at, u.last_login_at
 		FROM users u
 		INNER JOIN user_sessions s ON u.id = s.user_id

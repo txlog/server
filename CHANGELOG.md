@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - OIDC support for authentication
+- Admin interface for user management
 
 ## [1.12.1] - 2025-09-23
 

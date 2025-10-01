@@ -135,6 +135,27 @@ const docTemplate = `{
                 }
             }
         },
+        "/debug/oidc": {
+            "get": {
+                "description": "Returns diagnostic information about OIDC configuration and connectivity",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "debug"
+                ],
+                "summary": "OIDC Debug Information",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/v1/assets/requiring-restart": {
             "get": {
                 "description": "This endpoint retrieves assets that have the latest execution data indicating a restart is required.",

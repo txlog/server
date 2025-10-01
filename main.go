@@ -114,6 +114,9 @@ func main() {
 	r.GET("/assets", controllers.GetAssetsIndex(database.Db))
 	r.GET("/packages", controllers.GetPackagesIndex(database.Db))
 
+	// Debug routes (remove in production or add authentication)
+	r.GET("/debug/oidc", controllers.GetDebugOIDC(database.Db))
+
 	// Admin routes (requires admin middleware)
 	adminGroup := r.Group("/admin")
 	adminGroup.Use(middleware.AdminMiddleware())

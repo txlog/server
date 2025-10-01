@@ -77,7 +77,10 @@ func ConnectDatabase() {
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		logger.Error("Failed to apply migrations: " + err.Error())
+		logger.Error("Migration may be incomplete. Check database state and consider manual migration.")
+	} else if err == migrate.ErrNoChange {
+		logger.Info("Migrations: no new migrations to apply.")
+	} else {
+		logger.Info("Migrations: successfully applied.")
 	}
-
-	logger.Info("Migrations: applied.")
 }

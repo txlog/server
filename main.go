@@ -114,10 +114,6 @@ func main() {
 	r.GET("/assets", controllers.GetAssetsIndex(database.Db))
 	r.GET("/packages", controllers.GetPackagesIndex(database.Db))
 
-	// Debug routes (remove in production or add authentication)
-	r.GET("/debug/oidc", controllers.GetDebugOIDC(database.Db))
-	r.POST("/debug/migrations", controllers.PostDebugMigrations(database.Db))
-
 	// Admin routes (requires admin middleware)
 	adminGroup := r.Group("/admin")
 	adminGroup.Use(middleware.AdminMiddleware())
@@ -125,6 +121,7 @@ func main() {
 		adminGroup.GET("", controllers.GetAdminIndex(database.Db))
 		adminGroup.POST("/update", controllers.PostAdminUpdateUser(database.Db))
 		adminGroup.POST("/delete", controllers.PostAdminDeleteUser(database.Db))
+		adminGroup.POST("/migrations/run", controllers.PostAdminRunMigrations(database.Db))
 	}
 	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
 	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))

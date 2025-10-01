@@ -65,6 +65,7 @@
                 </tr>
               </thead>
               <tbody>
+                {{ if .users }}
                 {{ range .users }}
                 <tr>
                   <td data-label="User">
@@ -195,6 +196,7 @@
                     </div>
                   </div>
                 </div>
+                {{ end }}
                 {{ else }}
                 <tr>
                   <td colspan="7" class="text-center text-muted">
@@ -424,7 +426,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <form action="/admin/migrations/run" method="post" style="display: inline;">
-          <button type="submit" class="btn btn-primary" onclick="this.disabled=true; this.innerHTML='<span class=&quot;spinner-border spinner-border-sm me-2&quot;></span>Running...'; this.form.submit();">
+          <button type="submit" class="btn btn-primary" id="runMigrationsBtn">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
               <path d="M5 12l5 5l10 -10"/>
             </svg>
@@ -435,5 +437,19 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Handle migration button click
+  document.addEventListener('DOMContentLoaded', function() {
+    const runMigrationsBtn = document.getElementById('runMigrationsBtn');
+    if (runMigrationsBtn) {
+      runMigrationsBtn.addEventListener('click', function() {
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Running...';
+        this.form.submit();
+      });
+    }
+  });
+</script>
 
 {{ template "footer.html" . }}

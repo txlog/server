@@ -237,7 +237,7 @@ func (s *OIDCService) getUserBySub(sub string) (*models.User, error) {
 	)
 
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, sql.ErrNoRows
 	}
 
 	return user, err

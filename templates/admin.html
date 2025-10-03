@@ -307,6 +307,7 @@
       </div>
 
       <!-- System Users Management Card -->
+      {{ if .Context.Keys.oidc_enabled }}
       <div class="col-12">
         <div class="card">
           <div class="card-header">
@@ -477,8 +478,10 @@
           </div>
         </div>
       </div>
+      {{ end }}
 
       <!-- API Keys Management Card -->
+      {{ if .Context.Keys.oidc_enabled }}
       <div class="col-12">
         <div class="card">
           <div class="card-header">
@@ -655,6 +658,7 @@
           </div>
         </div>
       </div>
+      {{ end }}
 
       <!-- Database Migrations Card -->
       <div class="col-12">

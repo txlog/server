@@ -181,6 +181,9 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		envVars := map[string]string{
 			"instance":                 os.Getenv("INSTANCE"),
+			"logLevel":                 os.Getenv("LOG_LEVEL"),
+			"ginMode":                  os.Getenv("GIN_MODE"),
+			"port":                     os.Getenv("PORT"),
 			"pgsqlHost":                os.Getenv("PGSQL_HOST"),
 			"pgsqlPort":                os.Getenv("PGSQL_PORT"),
 			"pgsqlUser":                os.Getenv("PGSQL_USER"),
@@ -192,6 +195,11 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 			"cronStatisticsExpression": os.Getenv("CRON_STATS_EXPRESSION"),
 			"ignoreEmptyExecution":     os.Getenv("IGNORE_EMPTY_EXECUTION"),
 			"latestVersion":            os.Getenv("LATEST_VERSION"),
+			"oidcIssuerUrl":            os.Getenv("OIDC_ISSUER_URL"),
+			"oidcClientId":             os.Getenv("OIDC_CLIENT_ID"),
+			"oidcClientSecret":         util.MaskString(os.Getenv("OIDC_CLIENT_SECRET")),
+			"oidcRedirectUrl":          os.Getenv("OIDC_REDIRECT_URL"),
+			"oidcSkipTlsVerify":        os.Getenv("OIDC_SKIP_TLS_VERIFY"),
 		}
 
 		c.Set("env", envVars)

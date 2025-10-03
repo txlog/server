@@ -124,14 +124,20 @@ func main() {
 	adminGroup.Use(middleware.AdminMiddleware())
 	{
 		adminGroup.GET("", controllers.GetAdminIndex(database.Db))
-		adminGroup.POST("/update", controllers.PostAdminUpdateUser(database.Db))
-		adminGroup.POST("/delete", controllers.PostAdminDeleteUser(database.Db))
 		adminGroup.POST("/migrations/run", controllers.PostAdminRunMigrations(database.Db))
+	}
 
-		// API key management routes
-		adminGroup.POST("/apikeys/create", controllers.PostAdminCreateAPIKey(database.Db))
-		adminGroup.POST("/apikeys/revoke", controllers.PostAdminRevokeAPIKey(database.Db))
-		adminGroup.POST("/apikeys/delete", controllers.DeleteAdminAPIKey(database.Db))
+	// Admin routes that require OIDC (user and API key management)
+	if oidcService != nil {
+		adminAuthGroup := r.Group("/admin")
+		adminAuthGroup.Use(middleware.AdminMiddleware())
+		{
+			adminAuthGroup.POST("/update", controllers.PostAdminUpdateUser(database.Db))
+			adminAuthGroup.POST("/delete", controllers.PostAdminDeleteUser(database.Db))
+			adminAuthGroup.POST("/apikeys/create", controllers.PostAdminCreateAPIKey(database.Db))
+			adminAuthGroup.POST("/apikeys/revoke", controllers.PostAdminRevokeAPIKey(database.Db))
+			adminAuthGroup.POST("/apikeys/delete", controllers.DeleteAdminAPIKey(database.Db))
+		}
 	}
 	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
 	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))

@@ -19,6 +19,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- API Key authentication system for /v1 endpoints
+- Swagger/OpenAPI security definitions for API key authentication
+- Admin panel accessible without OIDC authentication
+- Server Configuration card in admin panel with comprehensive settings display
+- First user auto-promotion to administrator when using OIDC
+- Enhanced admin panel styling
+
+### Changed
+
+- Moved Settings functionality from footer offcanvas to admin panel
+- Environment variables middleware expanded
+- Admin middleware behavior refined
+- Admin panel route structure reorganized
+
+### Security
+
+- API keys stored as bcrypt hashes (cost 10) in database
+- API key secrets masked in admin interface
+- Password and sensitive data consistently masked
+- API endpoints protected by API key authentication
+- Admin panel endpoints properly protected
+
+### Fixed
+
+- Admin panel card label contrast improved using `fw-bold` class
+- OIDC authentication empty state provides link to documentation
+- API key creation modal closes and refreshes list automatically
+- Delete and revoke operations redirect properly (no 404 errors)
+
 ## [1.13.1] - 2025-10-01
 
 ### Fixed

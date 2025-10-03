@@ -230,28 +230,7 @@
             </div>
           </div>
 
-          <div class="card-body">
-            <div class="alert alert-info">
-              <div class="d-flex">
-                <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                    <path d="M12 9h.01" />
-                    <path d="M11 12h1v4h1" />
-                  </svg>
-                </div>
-                <div>
-                  <h4>API Key Authentication</h4>
-                  <div class="text-secondary">
-                    All API endpoints under <code>/v1/</code> require authentication using an API key. 
-                    Send the key in the <code>X-API-Key</code> header: <code>X-API-Key: txlog_your_key_here</code>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+          {{ if .apiKeys }}
           <div class="table-responsive">
             <table class="table table-vcenter table-mobile-md card-table">
               <thead>
@@ -266,8 +245,7 @@
                 </tr>
               </thead>
               <tbody>
-                {{ if .apiKeys }}
-                {{ range .apiKeys }}
+              {{ range .apiKeys }}
                 <tr>
                   <td data-label="Name">
                     <div class="font-weight-medium">{{ .Name }}</div>
@@ -373,7 +351,11 @@
                   </div>
                 </div>
                 {{ end }}
-                {{ else }}
+              </tbody>
+            </table>
+          </div>
+
+          {{ else }}
           <div class="card-body">
             <div class="empty">
               <div class="empty-icon">
@@ -400,9 +382,6 @@
             </div>
           </div>
                 {{ end }}
-              </tbody>
-            </table>
-          </div>
 
           <div class="card-footer">
             <p class="m-0 text-secondary">
@@ -779,7 +758,7 @@
             createForm.style.display = 'none';
             resultDiv.style.display = 'block';
             generateBtn.style.display = 'none';
-            
+
             // Set the API key value
             document.getElementById('apiKeyValue').value = data.key;
             document.getElementById('apiKeyExample').textContent = data.key;
@@ -806,13 +785,13 @@
         const apiKeyInput = document.getElementById('apiKeyValue');
         apiKeyInput.select();
         document.execCommand('copy');
-        
+
         // Change button text temporarily
         const originalHTML = copyBtn.innerHTML;
         copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10"/></svg> Copied!';
         copyBtn.classList.add('btn-success');
         copyBtn.classList.remove('btn-primary');
-        
+
         setTimeout(function() {
           copyBtn.innerHTML = originalHTML;
           copyBtn.classList.remove('btn-success');
@@ -826,7 +805,7 @@
       modal.addEventListener('hidden.bs.modal', function() {
         // Check if a key was created (result is visible)
         const wasKeyCreated = resultDiv.style.display === 'block';
-        
+
         // Reset form
         createForm.style.display = 'block';
         resultDiv.style.display = 'none';

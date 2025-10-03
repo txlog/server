@@ -46,9 +46,6 @@
         <div class="card">
           <div class="card-header">
             <h3 class="card-title">System Users</h3>
-            <div class="card-actions">
-              <span class="badge bg-blue text-white">{{ len .users }} total users</span>
-            </div>
           </div>
 
           <div class="table-responsive">
@@ -207,6 +204,12 @@
               </tbody>
             </table>
           </div>
+
+          <div class="card-footer">
+            <p class="m-0 text-secondary">
+              Showing <span>{{ len .users }}</span> total user{{ if ne (len .users) 1 }}s{{ end }}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -216,7 +219,6 @@
           <div class="card-header">
             <h3 class="card-title">API Keys</h3>
             <div class="card-actions">
-              <span class="badge bg-blue text-white">{{ len .apiKeys }} total keys</span>
               <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createAPIKeyModal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
@@ -400,6 +402,12 @@
                 {{ end }}
               </tbody>
             </table>
+          </div>
+
+          <div class="card-footer">
+            <p class="m-0 text-secondary">
+              Showing <span>{{ len .apiKeys }}</span> total key{{ if ne (len .apiKeys) 1 }}s{{ end }}
+            </p>
           </div>
         </div>
       </div>

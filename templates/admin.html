@@ -146,7 +146,7 @@
                         </tr>
                         <tr>
                           <td class="fw-bold">Client Secret</td>
-                          <td><code>{{ .Context.Keys.env.oidcClientSecret }}</code></td>
+                          <td><code>{{ maskString .Context.Keys.env.oidcClientSecret }}</code></td>
                         </tr>
                         <tr>
                           <td class="fw-bold">Redirect URL</td>
@@ -223,7 +223,7 @@
                         </tr>
                         <tr>
                           <td class="fw-bold">Password</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlPassword }}</code></td>
+                          <td><code>{{ maskString .Context.Keys.env.pgsqlPassword }}</code></td>
                         </tr>
                         <tr>
                           <td class="fw-bold">SSL Mode</td>

@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -79,7 +80,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 		}
 
 		if !isActive {
-			logger.Warn("API request with inactive key (ID: " + string(rune(keyID)) + ") from " + c.ClientIP())
+			logger.Warn(fmt.Sprintf("API request with inactive key (ID: %d) from %s", keyID, c.ClientIP()))
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid API key.",
 			})

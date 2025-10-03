@@ -23,161 +23,13 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/migrations/run": {
-            "post": {
-                "description": "Applies all pending database migrations (Admin only)",
-                "consumes": [
-                    "application/x-www-form-urlencoded"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Run Database Migrations",
-                "responses": {
-                    "302": {
-                        "description": "Redirect to admin panel",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/callback": {
-            "get": {
-                "description": "Process OIDC callback and create user session",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Handle OIDC callback",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization code",
-                        "name": "code",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "State parameter",
-                        "name": "state",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "302": {
-                        "description": "Redirect to dashboard",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/login": {
-            "post": {
-                "description": "Redirects to OIDC provider for authentication",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Initiate OIDC authentication",
-                "responses": {
-                    "302": {
-                        "description": "Redirect to OIDC provider",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/logout": {
-            "post": {
-                "description": "Invalidates user session and redirects to home page",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "auth"
-                ],
-                "summary": "Logout user",
-                "responses": {
-                    "303": {
-                        "description": "Redirect to home page",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/assets/requiring-restart": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "This endpoint retrieves assets that have the latest execution data indicating a restart is required.",
                 "consumes": [
                     "application/json"
@@ -211,6 +63,11 @@ const docTemplate = `{
         },
         "/v1/executions": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "List executions",
                 "consumes": [
                     "application/json"
@@ -256,6 +113,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new execution",
                 "consumes": [
                     "application/json"
@@ -308,6 +170,11 @@ const docTemplate = `{
         },
         "/v1/items": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get saved items for a transaction",
                 "consumes": [
                     "application/json"
@@ -343,6 +210,11 @@ const docTemplate = `{
         },
         "/v1/items/ids": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get saved item IDs for a transaction",
                 "consumes": [
                     "application/json"
@@ -378,6 +250,11 @@ const docTemplate = `{
         },
         "/v1/machines": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "List machine IDs",
                 "consumes": [
                     "application/json"
@@ -425,6 +302,11 @@ const docTemplate = `{
         },
         "/v1/machines/ids": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "List machine IDs",
                 "consumes": [
                     "application/json"
@@ -502,6 +384,11 @@ const docTemplate = `{
         },
         "/v1/transactions": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get saved transactions for a host",
                 "consumes": [
                     "application/json"
@@ -529,6 +416,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Create a new transaction",
                 "consumes": [
                     "application/json"
@@ -575,6 +467,11 @@ const docTemplate = `{
         },
         "/v1/transactions/ids": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get saved transactions IDs for a host",
                 "consumes": [
                     "application/json"
@@ -596,6 +493,11 @@ const docTemplate = `{
         },
         "/v1/version": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "Get server version",
                 "consumes": [
                     "application/json"
@@ -762,6 +664,14 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "description": "API key authentication for /v1 endpoints. Generate your API key in the admin panel at /admin",
+            "type": "apiKey",
+            "name": "X-API-Key",
+            "in": "header"
         }
     }
 }`

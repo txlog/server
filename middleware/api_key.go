@@ -54,8 +54,8 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 		var keyID int
 		var isActive bool
 		query := `
-			SELECT id, is_active 
-			FROM api_keys 
+			SELECT id, is_active
+			FROM api_keys
 			WHERE key_hash = $1
 		`
 		err := db.QueryRow(query, keyHash).Scan(&keyID, &isActive)
@@ -81,7 +81,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 		if !isActive {
 			logger.Warn("API request with inactive key (ID: " + string(rune(keyID)) + ") from " + c.ClientIP())
 			c.JSON(http.StatusUnauthorized, gin.H{
-				"error": "API key has been revoked.",
+				"error": "Invalid API key.",
 			})
 			c.Abort()
 			return

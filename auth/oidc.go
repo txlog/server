@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
+	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 	"golang.org/x/oauth2"
 )
@@ -176,20 +177,36 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 	}
 
 	// Create new user
+	// Check if this is the first user (should be admin)
+	var userCount int
+	countQuery := `SELECT COUNT(*) FROM users`
+	err = s.DB.QueryRow(countQuery).Scan(&userCount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count existing users: %w", err)
+	}
+
+	// First user should be admin, others are regular users
+	isAdmin := userCount == 0
+
 	insertQuery := `
 		INSERT INTO users (sub, email, name, picture, is_active, is_admin, created_at, updated_at, last_login_at)
-		VALUES ($1, $2, $3, $4, true, false, $5, $5, $5)
+		VALUES ($1, $2, $3, $4, true, $5, $6, $6, $6)
 		RETURNING id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, created_at, updated_at, last_login_at
 	`
 
 	user := &models.User{}
-	err = s.DB.QueryRow(insertQuery, claims.Sub, claims.Email, claims.Name, claims.Picture, now).Scan(
+	err = s.DB.QueryRow(insertQuery, claims.Sub, claims.Email, claims.Name, claims.Picture, isAdmin, now).Scan(
 		&user.ID, &user.Sub, &user.Email, &user.Name, &user.Picture,
 		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 	)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new user (sub: %s, email: %s): %w", claims.Sub, claims.Email, err)
+	}
+
+	// Log if this is the first admin user
+	if isAdmin {
+		logger.Info(fmt.Sprintf("First user created as administrator: %s (%s)", user.Name, user.Email))
 	}
 
 	return user, nil

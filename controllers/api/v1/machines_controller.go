@@ -31,6 +31,7 @@ type MachineID struct {
 //	@Failure		400				{string}	string	"Invalid execution data"
 //	@Failure		400				{string}	string	"Invalid JSON input"
 //	@Failure		500				{string}	string	"Database error"
+//	@Security		ApiKeyAuth
 //	@Router			/v1/machines [get]
 func GetMachines(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -123,6 +124,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 //	@Failure		400	{string}	string	"Invalid execution data"
 //	@Failure		400	{string}	string	"Invalid JSON input"
 //	@Failure		500	{string}	string	"Database error"
+//	@Security		ApiKeyAuth
 //	@Router			/v1/assets/requiring-restart [get]
 func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -189,6 +191,7 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 //	@Failure		400			{string}	string	"Invalid execution data"
 //	@Failure		400			{string}	string	"Invalid JSON input"
 //	@Failure		500			{string}	string	"Database error"
+//	@Security		ApiKeyAuth
 //	@Router			/v1/machines/ids [get]
 func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {

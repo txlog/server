@@ -20,6 +20,7 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	interface{}
+//	@Security		ApiKeyAuth
 //	@Router			/v1/transactions/ids [get]
 func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -79,6 +80,7 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 //	@Produce		json
 //	@Param			machine_id	query		string	false	"Machine ID"
 //	@Success		200			{object}	interface{}
+//	@Security		ApiKeyAuth
 //	@Router			/v1/transactions [get]
 func GetTransactions(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -158,6 +160,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 //	@Failure		400			{string}	string				"Invalid transaction data"
 //	@Failure		400			{string}	string				"Invalid JSON input"
 //	@Failure		500			{string}	string				"Database error"
+//	@Security		ApiKeyAuth
 //	@Router			/v1/transactions [post]
 func PostTransactions(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {

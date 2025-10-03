@@ -26,14 +26,6 @@ func GetLogin(oidcService *auth.OIDCService) gin.HandlerFunc {
 }
 
 // PostLogin initiates OIDC authentication flow
-//
-//	@Summary		Initiate OIDC authentication
-//	@Description	Redirects to OIDC provider for authentication
-//	@Tags			auth
-//	@Produce		json
-//	@Success		302	{string}	string	"Redirect to OIDC provider"
-//	@Failure		500	{object}	map[string]string
-//	@Router			/auth/login [post]
 func PostLogin(oidcService *auth.OIDCService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		state, err := auth.GenerateState()
@@ -52,18 +44,6 @@ func PostLogin(oidcService *auth.OIDCService) gin.HandlerFunc {
 }
 
 // GetCallback handles OIDC callback
-//
-//	@Summary		Handle OIDC callback
-//	@Description	Process OIDC callback and create user session
-//	@Tags			auth
-//	@Param			code	query	string	true	"Authorization code"
-//	@Param			state	query	string	true	"State parameter"
-//	@Produce		json
-//	@Success		302	{string}	string	"Redirect to dashboard"
-//	@Failure		400	{object}	map[string]string
-//	@Failure		401	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string
-//	@Router			/auth/callback [get]
 func GetCallback(oidcService *auth.OIDCService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		code := c.Query("code")
@@ -144,13 +124,6 @@ func GetCallback(oidcService *auth.OIDCService) gin.HandlerFunc {
 }
 
 // PostLogout logs out the user
-//
-//	@Summary		Logout user
-//	@Description	Invalidates user session and redirects to home page
-//	@Tags			auth
-//	@Produce		json
-//	@Success		303	{string}	string	"Redirect to home page"
-//	@Router			/auth/logout [post]
 func PostLogout(oidcService *auth.OIDCService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionID, err := c.Cookie("session_id")

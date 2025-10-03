@@ -12,6 +12,7 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	interface{}
+//	@Security		ApiKeyAuth
 //	@Router			/v1/version [get]
 func GetVersions(version string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {

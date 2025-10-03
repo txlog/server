@@ -30,14 +30,19 @@ var staticFiles embed.FS
 //go:embed templates/*
 var templateFS embed.FS
 
-// @title			Txlog Server
-// @version		v1
-// @description	The centralized system that stores transaction data
-// @termsOfService	https://github.com/txlog
-// @contact.name	Txlog repository issues
-// @contact.url	https://github.com/txlog/server/issues
-// @license.name	MIT License
-// @license.url	https://github.com/txlog/.github/blob/main/profile/LICENSE.md
+// @title						Txlog Server
+// @version					v1
+// @description				The centralized system that stores transaction data
+// @termsOfService				https://github.com/txlog
+// @contact.name				Txlog repository issues
+// @contact.url				https://github.com/txlog/server/issues
+// @license.name				MIT License
+// @license.url				https://github.com/txlog/.github/blob/main/profile/LICENSE.md
+//
+// @securityDefinitions.apikey	ApiKeyAuth
+// @in							header
+// @name						X-API-Key
+// @description				API key authentication for /v1 endpoints. Generate your API key in the admin panel at /admin
 func main() {
 	logger.InitLogger()
 
@@ -122,6 +127,11 @@ func main() {
 		adminGroup.POST("/update", controllers.PostAdminUpdateUser(database.Db))
 		adminGroup.POST("/delete", controllers.PostAdminDeleteUser(database.Db))
 		adminGroup.POST("/migrations/run", controllers.PostAdminRunMigrations(database.Db))
+
+		// API key management routes
+		adminGroup.POST("/apikeys/create", controllers.PostAdminCreateAPIKey(database.Db))
+		adminGroup.POST("/apikeys/revoke", controllers.PostAdminRevokeAPIKey(database.Db))
+		adminGroup.POST("/apikeys/delete", controllers.DeleteAdminAPIKey(database.Db))
 	}
 	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
 	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
@@ -139,6 +149,7 @@ func main() {
 	))
 
 	v1Group := r.Group("/v1")
+	v1Group.Use(middleware.APIKeyMiddleware(database.Db))
 	{
 		// txlog version
 		v1Group.GET("/version", v1API.GetVersions(version.SemVer))

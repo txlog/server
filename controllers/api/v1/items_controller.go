@@ -23,6 +23,7 @@ import (
 //	@Param			transaction_id	query		string	false	"Transaction ID. If not provided, the last transaction will be used."
 //
 //	@Success		200				{object}	interface{}
+//	@Security		ApiKeyAuth
 //	@Router			/v1/items/ids [get]
 func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -92,6 +93,7 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 //	@Param			machine_id		query		string	false	"Machine ID"
 //	@Param			transaction_id	query		string	false	"Transaction ID. If not provided, the last transaction will be used."
 //	@Success		200				{object}	interface{}
+//	@Security		ApiKeyAuth
 //	@Router			/v1/items [get]
 func GetItems(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {

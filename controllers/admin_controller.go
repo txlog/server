@@ -11,6 +11,7 @@ import (
 	"github.com/txlog/server/database"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
+	"github.com/txlog/server/util"
 )
 
 // GetAdminIndex displays the admin panel
@@ -34,11 +35,20 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 			migrationStatus = &models.MigrationStatus{}
 		}
 
+		// Get API keys
+		apiKeys, err := getAllAPIKeys(db)
+		if err != nil {
+			logger.Error("Failed to get API keys: " + err.Error())
+			// Don't fail the page, just show empty API keys list
+			apiKeys = []models.ApiKey{}
+		}
+
 		c.HTML(http.StatusOK, "admin.html", gin.H{
 			"Context":    c,
 			"title":      "Administration - Txlog Server",
 			"users":      users,
 			"migrations": migrationStatus,
+			"apiKeys":    apiKeys,
 		})
 	}
 }
@@ -64,7 +74,7 @@ func PostAdminUpdateUser(db *sql.DB) gin.HandlerFunc {
 		}
 
 		logger.Info("User " + userIDStr + " updated successfully")
-		c.Redirect(http.StatusTemporaryRedirect, "/admin")
+		c.Redirect(http.StatusSeeOther, "/admin")
 	}
 }
 
@@ -86,14 +96,14 @@ func PostAdminDeleteUser(db *sql.DB) gin.HandlerFunc {
 		}
 
 		logger.Info("User " + userIDStr + " deactivated successfully")
-		c.Redirect(http.StatusTemporaryRedirect, "/admin")
+		c.Redirect(http.StatusSeeOther, "/admin")
 	}
 }
 
 // getAllUsers retrieves all users from the database
 func getAllUsers(db *sql.DB) ([]models.User, error) {
 	query := `
-		SELECT id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, 
+		SELECT id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin,
 		       created_at, updated_at, last_login_at
 		FROM users
 		ORDER BY created_at DESC
@@ -125,7 +135,7 @@ func getAllUsers(db *sql.DB) ([]models.User, error) {
 // updateUser updates user status in the database
 func updateUser(db *sql.DB, userID int, isActive, isAdmin bool) error {
 	query := `
-		UPDATE users 
+		UPDATE users
 		SET is_active = $1, is_admin = $2, updated_at = $3
 		WHERE id = $4
 	`
@@ -137,7 +147,7 @@ func updateUser(db *sql.DB, userID int, isActive, isAdmin bool) error {
 // deactivateUser deactivates a user in the database
 func deactivateUser(db *sql.DB, userID int) error {
 	query := `
-		UPDATE users 
+		UPDATE users
 		SET is_active = false, updated_at = $1
 		WHERE id = $2
 	`
@@ -147,16 +157,6 @@ func deactivateUser(db *sql.DB, userID int) error {
 }
 
 // PostAdminRunMigrations runs all pending migrations
-//
-//	@Summary		Run Database Migrations
-//	@Description	Applies all pending database migrations (Admin only)
-//	@Tags			admin
-//	@Accept			x-www-form-urlencoded
-//	@Produce		json
-//	@Success		302	{string}	string	"Redirect to admin panel"
-//	@Failure		400	{object}	map[string]string
-//	@Failure		500	{object}	map[string]string
-//	@Router			/admin/migrations/run [post]
 func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Apply all pending migrations using database package function
@@ -171,7 +171,7 @@ func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 		}
 
 		logger.Info("All pending migrations applied successfully via admin panel")
-		c.Redirect(http.StatusTemporaryRedirect, "/admin?migration_success=1")
+		c.Redirect(http.StatusSeeOther, "/admin?migration_success=1")
 	}
 }
 
@@ -212,4 +212,147 @@ func getMigrationStatus(db *sql.DB) (*models.MigrationStatus, error) {
 
 	status.TotalCount = len(allMigrations)
 	return status, nil
+}
+
+// getAllAPIKeys retrieves all API keys from the database
+func getAllAPIKeys(db *sql.DB) ([]models.ApiKey, error) {
+	query := `
+		SELECT
+			ak.id,
+			ak.name,
+			ak.key_prefix,
+			ak.created_at,
+			ak.last_used_at,
+			ak.is_active,
+			ak.created_by,
+			COALESCE(u.name, 'System') as creator_name
+		FROM api_keys ak
+		LEFT JOIN users u ON ak.created_by = u.id
+		ORDER BY ak.created_at DESC
+	`
+
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var apiKeys []models.ApiKey
+	for rows.Next() {
+		var key models.ApiKey
+		err := rows.Scan(
+			&key.ID,
+			&key.Name,
+			&key.KeyPrefix,
+			&key.CreatedAt,
+			&key.LastUsedAt,
+			&key.IsActive,
+			&key.CreatedBy,
+			&key.CreatorName,
+		)
+		if err != nil {
+			return nil, err
+		}
+		apiKeys = append(apiKeys, key)
+	}
+
+	return apiKeys, rows.Err()
+}
+
+// PostAdminCreateAPIKey creates a new API key
+func PostAdminCreateAPIKey(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		name := c.PostForm("name")
+		if name == "" || len(name) < 3 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Name must be at least 3 characters"})
+			return
+		}
+
+		// Generate API key
+		fullKey, keyHash, keyPrefix, err := util.GenerateAPIKey()
+		if err != nil {
+			logger.Error("Failed to generate API key: " + err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate API key"})
+			return
+		}
+
+		// Get user ID from context if available
+		var createdBy *int
+		if userInterface, exists := c.Get("user"); exists {
+			if user, ok := userInterface.(*models.User); ok {
+				createdBy = &user.ID
+			}
+		}
+
+		// Insert into database
+		var keyID int
+		query := `
+			INSERT INTO api_keys (name, key_hash, key_prefix, created_by, created_at, is_active)
+			VALUES ($1, $2, $3, $4, $5, true)
+			RETURNING id
+		`
+		err = db.QueryRow(query, name, keyHash, keyPrefix, createdBy, time.Now()).Scan(&keyID)
+		if err != nil {
+			logger.Error("Failed to insert API key: " + err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create API key"})
+			return
+		}
+
+		logger.Info(fmt.Sprintf("API key created: ID=%d, Name=%s", keyID, name))
+
+		// Return the full key (this is the only time it will be shown)
+		c.JSON(http.StatusOK, gin.H{
+			"success": true,
+			"id":      keyID,
+			"name":    name,
+			"key":     fullKey,
+			"message": "API key created successfully. Save this key now - it won't be shown again!",
+		})
+	}
+}
+
+// PostAdminRevokeAPIKey revokes (deactivates) an API key
+func PostAdminRevokeAPIKey(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		keyIDStr := c.PostForm("key_id")
+		keyID, err := strconv.Atoi(keyIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API key ID"})
+			return
+		}
+
+		query := `UPDATE api_keys SET is_active = false WHERE id = $1`
+		_, err = db.Exec(query, keyID)
+		if err != nil {
+			logger.Error("Failed to revoke API key: " + err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke API key"})
+			return
+		}
+
+		logger.Info(fmt.Sprintf("API key revoked: ID=%d", keyID))
+		c.Redirect(http.StatusSeeOther, "/admin?apikey_revoked=1")
+	}
+}
+
+// DeleteAdminAPIKey permanently deletes an API key
+func DeleteAdminAPIKey(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		keyIDStr := c.PostForm("key_id")
+		keyID, err := strconv.Atoi(keyIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid API key ID"})
+			return
+		}
+
+		query := `DELETE FROM api_keys WHERE id = $1`
+		_, err = db.Exec(query, keyID)
+		if err != nil {
+			logger.Error("Failed to delete API key: " + err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete API key"})
+			return
+		}
+
+		logger.Info(fmt.Sprintf("API key deleted: ID=%d", keyID))
+		c.Redirect(http.StatusSeeOther, "/admin?apikey_deleted=1")
+	}
 }

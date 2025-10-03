@@ -41,7 +41,272 @@
     </script>
 
     <div class="row row-deck row-cards">
-      <!-- Users Management Card -->
+      <!-- Server Settings Card -->
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Server Configuration</h3>
+            <div class="card-actions">
+              <span class="badge bg-gray">Read-only</span>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="row g-3">
+              <!-- Server -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Server</h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-vcenter card-table">
+                      <tbody>
+                        <tr>
+                          <td class="w-50 fw-bold">Instance</td>
+                          <td>
+                            {{ if .Context.Keys.env.instance }}
+                            <code>{{ .Context.Keys.env.instance }}</code>
+                            {{ else }}
+                            <span class="text-muted">Not set</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Server Mode</td>
+                          <td>
+                            {{ if eq .Context.Keys.env.ginMode "release" }}
+                            <span class="badge bg-success text-white">Release</span>
+                            {{ else if eq .Context.Keys.env.ginMode "debug" }}
+                            <span class="badge bg-warning text-white">Debug</span>
+                            {{ else if eq .Context.Keys.env.ginMode "test" }}
+                            <span class="badge bg-warning text-white">Test</span>
+                            {{ else }}
+                            <span class="badge bg-success text-white">Default (Release)</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Log Level</td>
+                          <td>
+                            {{ if .Context.Keys.env.logLevel }}
+                            <code>{{ .Context.Keys.env.logLevel }}</code>
+                            {{ else }}
+                            <span class="text-muted">Default (INFO)</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">HTTP Port</td>
+                          <td>
+                            {{ if .Context.Keys.env.port }}
+                            <code>{{ .Context.Keys.env.port }}</code>
+                            {{ else }}
+                            <code>8080</code> <span class="text-muted">(default)</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Latest Version</td>
+                          <td>
+                            {{ if .Context.Keys.env.latestVersion }}
+                            <code>{{ .Context.Keys.env.latestVersion }}</code>
+                            {{ else }}
+                            <span class="text-muted">Not checked</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Authentication -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Authentication</h4>
+                  </div>
+                  {{ if .Context.Keys.oidc_enabled }}
+                  <div class="table-responsive">
+                    <table class="table table-sm table-vcenter card-table">
+                      <tbody>
+                        <tr>
+                          <td class="w-50 fw-bold">OIDC Status</td>
+                          <td><span class="badge bg-success text-white">Enabled</span></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Issuer URL</td>
+                          <td><code>{{ .Context.Keys.env.oidcIssuerUrl }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Client ID</td>
+                          <td><code>{{ .Context.Keys.env.oidcClientId }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Client Secret</td>
+                          <td><code>{{ .Context.Keys.env.oidcClientSecret }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Redirect URL</td>
+                          <td><code>{{ .Context.Keys.env.oidcRedirectUrl }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Skip TLS Verify</td>
+                          <td>
+                            {{ if eq .Context.Keys.env.oidcSkipTlsVerify "true" }}
+                            <span class="badge bg-warning text-white">Yes (Insecure)</span>
+                            {{ else }}
+                            <span class="badge bg-success text-white">No (Secure)</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  {{ else }}
+                  <div class="card-body">
+                    <div class="empty">
+                      <div class="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                          <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+                          <path d="M9 12l2 2l4 -4" />
+                        </svg>
+                      </div>
+                      <p class="empty-title">OIDC Not Configured</p>
+                      <p class="empty-subtitle text-muted">
+                        OpenID Connect authentication is not enabled. All users have full access to the system.
+                      </p>
+                      <div class="empty-action">
+                        <a href="https://txlog.rda.run/docs/server#authentication" target="_blank" class="btn btn-primary" rel="noopener">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                            <path d="M12 9h.01" />
+                            <path d="M11 12h1v4h1" />
+                          </svg>
+                          Learn How to Configure OIDC
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  {{ end }}
+                </div>
+              </div>
+
+              <!-- Database Server -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Database Server</h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-vcenter card-table">
+                      <tbody>
+                        <tr>
+                          <td class="w-50 fw-bold">Hostname</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlHost }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Port</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlPort }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Database</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlDb }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Username</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlUser }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Password</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlPassword }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">SSL Mode</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlSslmode }}</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Housekeeping -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Housekeeping</h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-vcenter card-table">
+                      <tbody>
+                        <tr>
+                          <td class="w-50 fw-bold">Retention Days</td>
+                          <td><code>{{ .Context.Keys.env.cronRetentionDays }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Schedule Expression</td>
+                          <td><code>{{ .Context.Keys.env.cronRetentionExpression }}</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Statistics -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Statistics</h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-vcenter card-table">
+                      <tbody>
+                        <tr>
+                          <td class="w-50 fw-bold">Schedule Expression</td>
+                          <td><code>{{ .Context.Keys.env.cronStatisticsExpression }}</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Executions -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Executions</h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-vcenter card-table">
+                      <tbody>
+                        <tr>
+                          <td class="w-50 fw-bold">Ignore Empty</td>
+                          <td>
+                            {{ if eq .Context.Keys.env.ignoreEmptyExecution "true" }}
+                            <span class="badge bg-success text-white">Enabled</span>
+                            {{ else }}
+                            <span class="badge bg-secondary text-white">Disabled</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Users Management Card -->
       <div class="col-12">
         <div class="card">
           <div class="card-header">

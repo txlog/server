@@ -83,6 +83,7 @@ func main() {
 		"hasAction":        util.HasAction,
 		"hasPrefix":        util.HasPrefix,
 		"iterate":          util.Iterate,
+		"maskString":       util.MaskString,
 		"min":              util.Min,
 		"text2html":        util.Text2HTML,
 		"trimPrefix":       util.TrimPrefix,

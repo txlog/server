@@ -62,6 +62,8 @@ make run    # Starts development server with live reload via air
 - Requires `.env` file with database configuration
 - Auto-reloads on file changes (excluding templates/, tmp/, images/, testdata/)
 
+> Note: Copilot can execute `make run` to test and validate generated code before suggesting commits or additional changes. The command keeps the server running (via Air) until manually stopped. To stop it, press Ctrl+C. If the process does not terminate, kill it forcefully (e.g., `pkill -f txlog-server` or `kill -9 <PID>`).
+
 #### Testing (Takes ~1 second)
 ```bash
 go test ./... -v    # Run all tests
@@ -97,7 +99,7 @@ IGNORE_EMPTY_EXECUTION=true
 ### Common Issues and Workarounds
 
 1. **"swag not found" error**: Install swag using the curl command above
-2. **"air not found" error**: Install air using the curl command above  
+2. **"air not found" error**: Install air using the curl command above
 3. **Database connection errors**: Verify PostgreSQL is running and `.env` is configured correctly
 4. **Build failures**: Always run `make fmt` and `make vet` first
 5. **Template changes not reflected**: Restart `make run` after template modifications
@@ -219,5 +221,4 @@ make doc                    # Update API documentation (if API changed)
 6. **Environment variables are required** - create `.env` file for development
 7. **Migration naming is strict** - follow `YYYYMMDD_description.up/down.sql` format
 8. **Docker builds use multi-stage** - final image is minimal scratch-based container
-
-**Trust these instructions** - they have been validated by building, testing, and running the application. Only search for additional information if these instructions prove incomplete or incorrect.
+9. **Copilot pode executar `make run` para validar rapidamente alterações de código antes de concluir a sugestão**

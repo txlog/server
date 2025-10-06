@@ -122,11 +122,50 @@
                 </div>
               </div>
 
-              <!-- Authentication -->
+              <!-- Database Server -->
               <div class="col-md-6">
                 <div class="card">
                   <div class="card-header">
-                    <h4 class="card-title">Authentication</h4>
+                    <h4 class="card-title">Database Server</h4>
+                  </div>
+                  <div class="table-responsive">
+                    <table class="table table-sm table-vcenter card-table">
+                      <tbody>
+                        <tr>
+                          <td class="w-50 fw-bold">Hostname</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlHost }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Port</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlPort }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Database</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlDb }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Username</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlUser }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Password</td>
+                          <td><code>{{ maskString .Context.Keys.env.pgsqlPassword }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">SSL Mode</td>
+                          <td><code>{{ .Context.Keys.env.pgsqlSslmode }}</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Authentication (OIDC) -->
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Authentication - OIDC</h4>
                   </div>
                   {{ if .Context.Keys.oidc_enabled }}
                   <div class="table-responsive">
@@ -177,7 +216,7 @@
                       </div>
                       <p class="empty-title">OIDC Not Configured</p>
                       <p class="empty-subtitle text-muted">
-                        OpenID Connect authentication is not enabled. All users have full access to the system.
+                        OpenID Connect authentication is not enabled.
                       </p>
                       <div class="empty-action">
                         <a href="https://txlog.rda.run/docs/server#authentication" target="_blank" class="btn btn-primary" rel="noopener">
@@ -196,42 +235,149 @@
                 </div>
               </div>
 
-              <!-- Database Server -->
+              <!-- Authentication (LDAP) -->
               <div class="col-md-6">
                 <div class="card">
                   <div class="card-header">
-                    <h4 class="card-title">Database Server</h4>
+                    <h4 class="card-title">Authentication - LDAP</h4>
                   </div>
+                  {{ if .Context.Keys.ldap_enabled }}
                   <div class="table-responsive">
                     <table class="table table-sm table-vcenter card-table">
                       <tbody>
                         <tr>
-                          <td class="w-50 fw-bold">Hostname</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlHost }}</code></td>
+                          <td class="w-50 fw-bold">LDAP Status</td>
+                          <td><span class="badge bg-success text-white">Enabled</span></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Host</td>
+                          <td><code>{{ .Context.Keys.env.ldapHost }}</code></td>
                         </tr>
                         <tr>
                           <td class="fw-bold">Port</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlPort }}</code></td>
+                          <td>
+                            {{ if .Context.Keys.env.ldapPort }}
+                            <code>{{ .Context.Keys.env.ldapPort }}</code>
+                            {{ else }}
+                            <code>389</code> <span class="text-muted">(default)</span>
+                            {{ end }}
+                          </td>
                         </tr>
                         <tr>
-                          <td class="fw-bold">Database</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlDb }}</code></td>
+                          <td class="fw-bold">Use TLS</td>
+                          <td>
+                            {{ if eq .Context.Keys.env.ldapUseTls "true" }}
+                            <span class="badge bg-success text-white">Yes (Secure)</span>
+                            {{ else }}
+                            <span class="badge bg-secondary text-white">No</span>
+                            {{ end }}
+                          </td>
                         </tr>
                         <tr>
-                          <td class="fw-bold">Username</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlUser }}</code></td>
+                          <td class="fw-bold">Skip TLS Verify</td>
+                          <td>
+                            {{ if eq .Context.Keys.env.ldapSkipTlsVerify "true" }}
+                            <span class="badge bg-warning text-white">Yes (Insecure)</span>
+                            {{ else }}
+                            <span class="badge bg-success text-white">No (Secure)</span>
+                            {{ end }}
+                          </td>
                         </tr>
                         <tr>
-                          <td class="fw-bold">Password</td>
-                          <td><code>{{ maskString .Context.Keys.env.pgsqlPassword }}</code></td>
+                          <td class="fw-bold">Base DN</td>
+                          <td><code>{{ .Context.Keys.env.ldapBaseDn }}</code></td>
                         </tr>
                         <tr>
-                          <td class="fw-bold">SSL Mode</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlSslmode }}</code></td>
+                          <td class="fw-bold">Bind DN</td>
+                          <td>
+                            {{ if .Context.Keys.env.ldapBindDn }}
+                            <code>{{ .Context.Keys.env.ldapBindDn }}</code>
+                            {{ else }}
+                            <span class="text-muted">Anonymous bind</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Bind Password</td>
+                          <td>
+                            {{ if .Context.Keys.env.ldapBindPassword }}
+                            <code>{{ maskString .Context.Keys.env.ldapBindPassword }}</code>
+                            {{ else }}
+                            <span class="text-muted">Not set</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">User Filter</td>
+                          <td>
+                            {{ if .Context.Keys.env.ldapUserFilter }}
+                            <code>{{ .Context.Keys.env.ldapUserFilter }}</code>
+                            {{ else }}
+                            <code>(uid=%s)</code> <span class="text-muted">(default)</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Admin Group</td>
+                          <td>
+                            {{ if .Context.Keys.env.ldapAdminGroup }}
+                            <code>{{ .Context.Keys.env.ldapAdminGroup }}</code>
+                            {{ else }}
+                            <span class="text-muted">Not configured</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Viewer Group</td>
+                          <td>
+                            {{ if .Context.Keys.env.ldapViewerGroup }}
+                            <code>{{ .Context.Keys.env.ldapViewerGroup }}</code>
+                            {{ else }}
+                            <span class="text-muted">Not configured</span>
+                            {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Group Filter</td>
+                          <td>
+                            {{ if .Context.Keys.env.ldapGroupFilter }}
+                            <code>{{ .Context.Keys.env.ldapGroupFilter }}</code>
+                            {{ else }}
+                            <code>(member=%s)</code> <span class="text-muted">(default)</span>
+                            {{ end }}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
                   </div>
+                  {{ else }}
+                  <div class="card-body">
+                    <div class="empty">
+                      <div class="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                          <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+                          <path d="M9 12l2 2l4 -4" />
+                        </svg>
+                      </div>
+                      <p class="empty-title">LDAP Not Configured</p>
+                      <p class="empty-subtitle text-muted">
+                        LDAP authentication is not enabled.
+                      </p>
+                      <div class="empty-action">
+                        <a href="https://txlog.rda.run/docs/server#ldap-authentication" target="_blank" class="btn btn-primary" rel="noopener">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                            <path d="M12 9h.01" />
+                            <path d="M11 12h1v4h1" />
+                          </svg>
+                          Learn How to Configure LDAP
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  {{ end }}
                 </div>
               </div>
 

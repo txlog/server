@@ -165,12 +165,72 @@ CRON_RETENTION_DAYS=1
 CRON_RETENTION_EXPRESSION=0 2 * * *
 CRON_STATS_EXPRESSION=0 * * * *
 IGNORE_EMPTY_EXECUTION=true
+
+# OIDC Authentication (Optional)
 OIDC_ISSUER_URL=https://id.example.com
 OIDC_CLIENT_ID=your_oidc_client_id
 OIDC_CLIENT_SECRET=your_oidc_client_secret
 OIDC_REDIRECT_URL=https://txlog.example.com/auth/callback
 OIDC_SKIP_TLS_VERIFY=false
+
+# LDAP Authentication (Optional)
+LDAP_HOST=ldap.example.com
+LDAP_PORT=389
+LDAP_USE_TLS=false
+LDAP_SKIP_TLS_VERIFY=false
+LDAP_BIND_DN=cn=admin,dc=example,dc=com
+LDAP_BIND_PASSWORD=your_bind_password
+LDAP_BASE_DN=ou=users,dc=example,dc=com
+LDAP_USER_FILTER=(uid=%s)
+LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
+LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
+LDAP_GROUP_FILTER=(member=%s)
 ```
+
+#### Authentication Configuration
+
+Txlog Server supports three authentication modes:
+
+1. **No Authentication** (Default): If neither OIDC nor LDAP is configured, the
+   server runs without authentication
+2. **OIDC Authentication**: Configure OIDC environment variables to enable
+   OpenID Connect authentication
+3. **LDAP Authentication**: Configure LDAP environment variables to enable LDAP
+   authentication
+4. **Both OIDC and LDAP**: Both can be enabled simultaneously, allowing users to
+   choose their preferred authentication method
+
+##### LDAP Configuration Details
+
+- **LDAP_HOST** (Required): LDAP server hostname
+- **LDAP_PORT**: LDAP server port (default: 389 for LDAP, 636 for LDAPS)
+- **LDAP_USE_TLS**: Enable TLS connection (default: false)
+- **LDAP_SKIP_TLS_VERIFY**: Skip TLS certificate verification for self-signed
+  certificates (default: false)
+- **LDAP_BIND_DN** (Optional): Distinguished Name for service account bind
+  - **Not required** if your LDAP allows anonymous searches
+  - **Recommended** for Active Directory and restricted LDAP servers
+- **LDAP_BIND_PASSWORD** (Optional): Password for service account
+- **LDAP_BASE_DN** (Required): Base DN for user searches
+- **LDAP_USER_FILTER**: LDAP filter for finding users (default: `(uid=%s)`,
+  where %s is replaced with username)
+- **LDAP_ADMIN_GROUP**: DN of the admin group (users in this group have full
+  admin access)
+- **LDAP_VIEWER_GROUP**: DN of the viewer group (users in this group have
+  read-only access)
+- **LDAP_GROUP_FILTER**: LDAP filter for checking group membership (default:
+  `(member=%s)`, where %s is replaced with user DN)
+
+**Note**: At least one of `LDAP_ADMIN_GROUP` or `LDAP_VIEWER_GROUP` must be
+configured. Users must be members of at least one of these groups to
+authenticate successfully.
+
+**Service Account**: `LDAP_BIND_DN` and `LDAP_BIND_PASSWORD` are **optional**.
+If not provided, the server will:
+
+- Use anonymous bind for user searches (works with OpenLDAP)
+- Use the authenticated user's session for group membership checks
+- Active Directory typically **requires** a service account
 
 ### Development commands
 

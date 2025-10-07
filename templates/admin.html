@@ -453,7 +453,7 @@
       </div>
 
       <!-- System Users Management Card -->
-      {{ if .Context.Keys.oidc_enabled }}
+      {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
       <div class="col-12">
         <div class="card">
           <div class="card-header">
@@ -627,7 +627,7 @@
       {{ end }}
 
       <!-- API Keys Management Card -->
-      {{ if .Context.Keys.oidc_enabled }}
+      {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
       <div class="col-12">
         <div class="card">
           <div class="card-header">

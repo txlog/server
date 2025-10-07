@@ -89,132 +89,132 @@ This directory contains complete documentation for LDAP authentication in Txlog 
 
 ---
 
-## 🎯 Fluxo de Configuração Recomendado
+## 🎯 Recommended Configuration Flow
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│ 1. Leia LDAP_AUTHENTICATION.md                              │
-│    └─ Entenda como funciona e o que é necessário            │
+│ 1. Read LDAP_AUTHENTICATION.md                              │
+│    └─ Understand how it works and what's needed             │
 └─────────────────────────────────────────────────────────────┘
                              ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 2. Use LDAP_FILTERS_QUICK.md ou ldap-discovery.sh          │
-│    └─ Descubra os valores corretos para seu LDAP            │
+│ 2. Use LDAP_FILTERS_QUICK.md or ldap-discovery.sh          │
+│    └─ Discover the correct values for your LDAP             │
 └─────────────────────────────────────────────────────────────┘
                              ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 3. Configure o .env com os valores descobertos              │
-│    └─ Siga os exemplos do LDAP_QUICK_REFERENCE.md          │
+│ 3. Configure .env with discovered values                    │
+│    └─ Follow examples from LDAP_QUICK_REFERENCE.md         │
 └─────────────────────────────────────────────────────────────┘
                              ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ 4. Inicie o servidor e teste o login                        │
-│    └─ Use o troubleshooting se necessário                   │
+│ 4. Start server and test login                              │
+│    └─ Use troubleshooting if needed                         │
 └─────────────────────────────────────────────────────────────┘
-```text
+```
 
 ---
 
-## 🔍 Qual Documento Usar?
+## 🔍 Which Document to Use?
 
-### Preciso descobrir LDAP_USER_FILTER e LDAP_GROUP_FILTER?
+### Need to discover LDAP_USER_FILTER and LDAP_GROUP_FILTER?
 
-➡️ **Use:** `LDAP_FILTERS_QUICK.md` ou `./ldap-discovery.sh`
+➡️ **Use:** `LDAP_FILTERS_QUICK.md` or `./ldap-discovery.sh`
 
-### Primeira vez configurando LDAP?
+### First time configuring LDAP?
 
-➡️ **Use:** `LDAP_AUTHENTICATION.md` → depois `LDAP_FILTERS_QUICK.md`
+➡️ **Use:** `LDAP_AUTHENTICATION.md` → then `LDAP_FILTERS_QUICK.md`
 
-### Meu LDAP não tem conta de serviço?
+### My LDAP doesn't have a service account?
 
 ➡️ **Use:** `LDAP_SEM_SERVICE_ACCOUNT.md`
 
-### Preciso de um exemplo rápido de .env?
+### Need a quick .env example?
 
 ➡️ **Use:** `LDAP_QUICK_REFERENCE.md`
 
-### Tenho dúvidas sobre segurança/permissões?
+### Have questions about security/permissions?
 
 ➡️ **Use:** `LDAP_SERVICE_ACCOUNT_FAQ.md`
 
-### Estou tendo problemas de autenticação?
+### Having authentication problems?
 
-➡️ **Use:** Seção Troubleshooting do `LDAP_AUTHENTICATION.md` ou `LDAP_ERROR_CODES.md`
+➡️ **Use:** Troubleshooting section of `LDAP_AUTHENTICATION.md` or `LDAP_ERROR_CODES.md`
 
-### Recebendo "LDAP Result Code 32: No Such Object"?
+### Getting "LDAP Result Code 32: No Such Object"?
 
-➡️ **Use:** `LDAP_ERROR_CODES.md` - Explica este erro em detalhes
+➡️ **Use:** `LDAP_ERROR_CODES.md` - Explains this error in detail
 
-### Quero entender como funciona por dentro?
+### Want to understand how it works internally?
 
 ➡️ **Use:** `LDAP_IMPLEMENTATION_SUMMARY.md`
 
-### Preciso de todos os detalhes sobre filtros?
+### Need all details about filters?
 
 ➡️ **Use:** `LDAP_FILTER_DISCOVERY.md`
 
 ---
 
-## 🌟 Exemplos de Configuração por Servidor
+## 🌟 Configuration Examples by Server
 
 ### OpenLDAP
 
 ```bash
-LDAP_HOST=ldap.empresa.com
+LDAP_HOST=ldap.company.com
 LDAP_PORT=389
-LDAP_BASE_DN=dc=empresa,dc=com
+LDAP_BASE_DN=dc=company,dc=com
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
-LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=empresa,dc=com
-```text
+LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=company,dc=com
+```
 
 ### Active Directory
 
 ```bash
-LDAP_HOST=ad.empresa.com
+LDAP_HOST=ad.company.com
 LDAP_PORT=636
 LDAP_USE_TLS=true
-LDAP_BASE_DN=DC=empresa,DC=com
+LDAP_BASE_DN=DC=company,DC=com
 LDAP_USER_FILTER=(sAMAccountName=%s)
 LDAP_GROUP_FILTER=(member=%s)
-LDAP_ADMIN_GROUP=CN=Txlog Admins,OU=Groups,DC=empresa,DC=com
-```text
+LDAP_ADMIN_GROUP=CN=Txlog Admins,OU=Groups,DC=company,DC=com
+```
 
 ### FreeIPA
 
 ```bash
-LDAP_HOST=ipa.empresa.com
+LDAP_HOST=ipa.company.com
 LDAP_PORT=389
-LDAP_BASE_DN=dc=empresa,dc=com
+LDAP_BASE_DN=dc=company,dc=com
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
-LDAP_ADMIN_GROUP=cn=admins,cn=groups,cn=accounts,dc=empresa,dc=com
-```text
+LDAP_ADMIN_GROUP=cn=admins,cn=groups,cn=accounts,dc=company,dc=com
+```
 
 ---
 
-## 🛠️ Ferramentas Úteis
+## 🛠️ Useful Tools
 
-### Script de Descoberta (Recomendado)
+### Discovery Script (Recommended)
 
 ```bash
 ./ldap-discovery.sh
-```text
+```
 
-### Comandos ldapsearch
+### ldapsearch Commands
 
 ```bash
-# Testar conexão
-ldapsearch -H ldap://servidor:389 -x -b "dc=exemplo,dc=com" -D "cn=admin,dc=exemplo,dc=com" -W "(objectClass=*)"
+# Test connection
+ldapsearch -H ldap://server:389 -x -b "dc=example,dc=com" -D "cn=admin,dc=example,dc=com" -W "(objectClass=*)"
 
-# Buscar usuários
-ldapsearch -H ldap://servidor:389 -x -b "dc=exemplo,dc=com" -D "cn=admin,dc=exemplo,dc=com" -W "(uid=usuario)"
+# Search users
+ldapsearch -H ldap://server:389 -x -b "dc=example,dc=com" -D "cn=admin,dc=example,dc=com" -W "(uid=user)"
 
-# Buscar grupos
-ldapsearch -H ldap://servidor:389 -x -b "dc=exemplo,dc=com" -D "cn=admin,dc=exemplo,dc=com" -W "(cn=admins)"
-```text
+# Search groups
+ldapsearch -H ldap://server:389 -x -b "dc=example,dc=com" -D "cn=admin,dc=example,dc=com" -W "(cn=admins)"
+```
 
-### Ferramentas GUI
+### GUI Tools
 
 - **Apache Directory Studio**: <https://directory.apache.org/studio/>
 - **JXplorer**: <http://jxplorer.org/>
@@ -222,49 +222,49 @@ ldapsearch -H ldap://servidor:389 -x -b "dc=exemplo,dc=com" -D "cn=admin,dc=exem
 
 ---
 
-## 📞 Suporte
+## 📞 Support
 
-Se você está tendo problemas:
+If you're having problems:
 
-1. ✅ Verifique a seção **Troubleshooting** em `LDAP_AUTHENTICATION.md`
-2. ✅ Use o script `ldap-discovery.sh` para validar sua configuração
-3. ✅ Verifique os logs do servidor (nível DEBUG mostra mais detalhes)
-4. ✅ Teste os filtros manualmente com `ldapsearch`
-
----
-
-## 🔐 Segurança
-
-**Boas práticas:**
-
-- ✅ Use TLS/LDAPS em produção (`LDAP_USE_TLS=true`)
-- ✅ Use conta de serviço com permissões mínimas (apenas leitura)
-- ✅ Nunca use `LDAP_SKIP_TLS_VERIFY=true` em produção
-- ✅ Mantenha senhas no `.env` e adicione `.env` ao `.gitignore`
-- ✅ Configure grupos separados para admins e viewers
+1. ✅ Check the **Troubleshooting** section in `LDAP_AUTHENTICATION.md`
+2. ✅ Use the `ldap-discovery.sh` script to validate your configuration
+3. ✅ Check server logs (DEBUG level shows more details)
+4. ✅ Test filters manually with `ldapsearch`
 
 ---
 
-## 📊 Status da Implementação
+## 🔐 Security
 
-✅ Autenticação LDAP funcional  
-✅ Suporte a múltiplos tipos de servidores LDAP  
-✅ Integração com sessões web  
-✅ Controle de acesso por grupos (admin/viewer)  
-✅ Sincronização de usuários com banco de dados local  
-✅ Interface de login unificada (OIDC + LDAP)  
-✅ Configuração via variáveis de ambiente  
-✅ Documentação completa  
-✅ Script de descoberta interativo  
+**Best practices:**
+
+- ✅ Use TLS/LDAPS in production (`LDAP_USE_TLS=true`)
+- ✅ Use service account with minimal permissions (read-only)
+- ✅ Never use `LDAP_SKIP_TLS_VERIFY=true` in production
+- ✅ Keep passwords in `.env` and add `.env` to `.gitignore`
+- ✅ Configure separate groups for admins and viewers
 
 ---
 
-## 🚀 Versão
+## 📊 Implementation Status
 
-Documentação atualizada para Txlog Server v1.14.0+
+✅ Functional LDAP authentication  
+✅ Support for multiple LDAP server types  
+✅ Web session integration  
+✅ Group-based access control (admin/viewer)  
+✅ User synchronization with local database  
+✅ Unified login interface (OIDC + LDAP)  
+✅ Configuration via environment variables  
+✅ Complete documentation  
+✅ Interactive discovery script  
 
 ---
 
-## Boa configuração! 🎉
+## 🚀 Version
 
-Se você tiver dúvidas ou sugestões, abra uma issue no repositório.
+Documentation updated for Txlog Server v1.14.0+
+
+---
+
+## Happy configuring! 🎉
+
+If you have questions or suggestions, open an issue in the repository.

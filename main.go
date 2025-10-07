@@ -94,6 +94,7 @@ func main() {
 		"formatPercentage": util.FormatPercentage,
 		"hasAction":        util.HasAction,
 		"hasPrefix":        util.HasPrefix,
+		"initial":          util.Initial,
 		"iterate":          util.Iterate,
 		"maskString":       util.MaskString,
 		"min":              util.Min,

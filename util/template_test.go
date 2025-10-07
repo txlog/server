@@ -536,3 +536,55 @@ func TestVersionsEqual(t *testing.T) {
 		})
 	}
 }
+
+func TestInitial(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "?",
+		},
+		{
+			name:     "single character",
+			input:    "A",
+			expected: "A",
+		},
+		{
+			name:     "lowercase single character",
+			input:    "a",
+			expected: "A",
+		},
+		{
+			name:     "full name",
+			input:    "John Doe",
+			expected: "J",
+		},
+		{
+			name:     "lowercase full name",
+			input:    "john doe",
+			expected: "J",
+		},
+		{
+			name:     "unicode character",
+			input:    "Übung",
+			expected: "Ü",
+		},
+		{
+			name:     "emoji",
+			input:    "🚀 Rocket",
+			expected: "🚀",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Initial(tt.input); got != tt.expected {
+				t.Errorf("Initial() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}

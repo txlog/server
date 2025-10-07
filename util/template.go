@@ -367,3 +367,18 @@ func VersionsEqual(version1, version2 string) bool {
 
 	return normalized1 == normalized2
 }
+
+// Initial returns the first character of a string in uppercase.
+// Useful for creating avatar initials from names.
+//
+// Parameters:
+//   - s: The string to extract the initial from
+//
+// Returns:
+//   - string: The first character in uppercase, or "?" if string is empty
+func Initial(s string) string {
+	if s == "" {
+		return "?"
+	}
+	return strings.ToUpper(string([]rune(s)[0]))
+}

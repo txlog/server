@@ -1,91 +1,91 @@
-# Documentação LDAP - Índice Mestre
+# LDAP Documentation - Master Index
 
-Este diretório contém documentação completa sobre autenticação LDAP no Txlog Server.
+This directory contains complete documentation for LDAP authentication in Txlog Server.
 
-## 📚 Documentação Disponível
+## 📚 Available Documentation
 
-### 🚀 Para Começar
+### 🚀 Getting Started
 
 1. **[LDAP_AUTHENTICATION.md](LDAP_AUTHENTICATION.md)**  
-   📖 Guia completo de autenticação LDAP  
-   - Visão geral da funcionalidade
-   - Configuração passo a passo
-   - Variáveis de ambiente
-   - Exemplos práticos
+   📖 Complete LDAP authentication guide  
+   - Feature overview
+   - Step-by-step configuration
+   - Environment variables
+   - Practical examples
    - Troubleshooting
 
-### 🔍 Descobrindo seus Filtros LDAP
+### 🔍 Discovering Your LDAP Filters
 
-**Cada servidor LDAP é diferente!** Use estes recursos para descobrir os valores corretos:
+**Each LDAP server is different!** Use these resources to discover the correct values:
 
-1. **[LDAP_FILTERS_QUICK.md](LDAP_FILTERS_QUICK.md)** ⭐ **COMECE AQUI**  
-   ⚡ Guia rápido e prático  
-   - Tabela de referência por tipo de servidor
-   - Comandos prontos para usar
-   - Valores comuns (OpenLDAP, AD, FreeIPA)
-   - Como testar seus filtros
+1. **[LDAP_FILTERS_QUICK.md](LDAP_FILTERS_QUICK.md)** ⭐ **START HERE**  
+   ⚡ Quick and practical guide  
+   - Reference table by server type
+   - Ready-to-use commands
+   - Common values (OpenLDAP, AD, FreeIPA)
+   - How to test your filters
 
 2. **[LDAP_FILTER_DISCOVERY.md](LDAP_FILTER_DISCOVERY.md)**  
-   📘 Guia completo e detalhado  
-   - Passo a passo para explorar seu LDAP
-   - Explicação de cada tipo de filtro
-   - Uso de ldapsearch e Apache Directory Studio
-   - Troubleshooting avançado
+   📘 Complete and detailed guide  
+   - Step-by-step LDAP exploration
+   - Explanation of each filter type
+   - Using ldapsearch and Apache Directory Studio
+   - Advanced troubleshooting
 
-3. **[ldap-discovery.sh](ldap-discovery.sh)** 🛠️ **Script Interativo**  
+3. **[ldap-discovery.sh](ldap-discovery.sh)** 🛠️ **Interactive Script**  
 
    ```bash
    chmod +x ldap-discovery.sh
    ./ldap-discovery.sh
    ```
 
-   - Menu interativo para explorar seu LDAP
-   - Testa conexão automaticamente
-   - Descobre usuários e grupos
-   - Testa filtros em tempo real
-   - Gera configuração recomendada
+   - Interactive menu to explore your LDAP
+   - Automatically tests connection
+   - Discovers users and groups
+   - Tests filters in real-time
+   - Generates recommended configuration
 
-### 📋 Referências Rápidas
+### 📋 Quick References
 
 4. **[LDAP_QUICK_REFERENCE.md](LDAP_QUICK_REFERENCE.md)**  
-   📄 Cheatsheet de configuração  
-   - Variáveis de ambiente resumidas
-   - Exemplos de .env por cenário
-   - Comandos úteis
+   📄 Configuration cheatsheet  
+   - Summary of environment variables
+   - .env examples by scenario
+   - Useful commands
 
-### 🔐 Conta de Serviço
+### 🔐 Service Account
 
 5. **[LDAP_SERVICE_ACCOUNT_FAQ.md](LDAP_SERVICE_ACCOUNT_FAQ.md)**  
-   ❓ Perguntas frequentes sobre conta de serviço  
-   - Quando usar conta de serviço vs anonymous bind
-   - Como criar conta de serviço
-   - Permissões necessárias
-   - Melhores práticas de segurança
+   ❓ Service account FAQ  
+   - When to use service account vs anonymous bind
+   - How to create service account
+   - Required permissions
+   - Security best practices
 
 6. **[LDAP_SEM_SERVICE_ACCOUNT.md](LDAP_SEM_SERVICE_ACCOUNT.md)**  
-   🔓 Como usar sem conta de serviço (anonymous bind)  
-   - Configuração para anonymous bind
-   - Limitações e considerações
-   - Quando é possível usar
+   🔓 How to use without service account (anonymous bind)  
+   - Anonymous bind configuration
+   - Limitations and considerations
+   - When it's possible to use
 
-### 🏗️ Informações Técnicas
+### 🏗️ Technical Information
 
 7. **[LDAP_IMPLEMENTATION_SUMMARY.md](LDAP_IMPLEMENTATION_SUMMARY.md)**  
-   🔧 Detalhes de implementação  
-   - Arquitetura do código
-   - Fluxo de autenticação
-   - Estrutura de banco de dados
-   - Endpoints da API
+   🔧 Implementation details  
+   - Code architecture
+   - Authentication flow
+   - Database structure
+   - API endpoints
 
 ### 🚨 Troubleshooting
 
 8. **[LDAP_ERROR_CODES.md](LDAP_ERROR_CODES.md)**  
-   🔍 Códigos de erro LDAP explicados  
-   - **LDAP Result Code 32: No Such Object** (mais comum)
+   🔍 LDAP error codes explained  
+   - **LDAP Result Code 32: No Such Object** (most common)
    - LDAP Result Code 49: Invalid Credentials
    - LDAP Result Code 50: Insufficient Access
-   - Como diagnosticar cada erro
-   - Soluções práticas
+   - How to diagnose each error
+   - Practical solutions
 
 ---
 

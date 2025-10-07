@@ -197,8 +197,15 @@ while true; do
             echo ""
             echo -e "${BLUE}Testando filtro: $test_filter${NC}"
             
-            result=$(ldapsearch -H "$LDAP_URL" -x -b "$BASE_DN" -D "$BIND_DN" -w "$BIND_PASSWORD" -LLL "$test_filter" 2>/dev/null)
-            if [ ! -z "$result" ]; then
+            error_output=$(mktemp)
+            result=$(ldapsearch -H "$LDAP_URL" -x -b "$BASE_DN" -D "$BIND_DN" -w "$BIND_PASSWORD" -LLL "$test_filter" 2>"$error_output")
+            exit_code=$?
+            
+            if [ $exit_code -ne 0 ]; then
+                echo -e "${RED}❌ Erro ao executar ldapsearch:${NC}"
+                cat "$error_output"
+                rm -f "$error_output"
+            elif [ ! -z "$result" ]; then
                 echo "$result"
                 echo ""
                 count=$(echo "$result" | grep -c "^dn:" || true)
@@ -209,8 +216,10 @@ while true; do
                 else
                     echo -e "${RED}❌ Nenhum usuário encontrado.${NC}"
                 fi
+                rm -f "$error_output"
             else
                 echo -e "${RED}❌ Nenhum usuário encontrado.${NC}"
+                rm -f "$error_output"
             fi
             echo ""
             ;;
@@ -233,13 +242,22 @@ while true; do
             echo -e "${BLUE}Grupo: $test_group_dn${NC}"
             echo -e "${BLUE}Filtro: $test_filter${NC}"
             
-            result=$(ldapsearch -H "$LDAP_URL" -x -b "$test_group_dn" -D "$BIND_DN" -w "$BIND_PASSWORD" -s base -LLL "$test_filter" dn 2>/dev/null)
-            if [ ! -z "$result" ]; then
+            error_output=$(mktemp)
+            result=$(ldapsearch -H "$LDAP_URL" -x -b "$test_group_dn" -D "$BIND_DN" -w "$BIND_PASSWORD" -s base -LLL "$test_filter" dn 2>"$error_output")
+            exit_code=$?
+            
+            if [ $exit_code -ne 0 ]; then
+                echo -e "${RED}❌ Erro ao executar ldapsearch:${NC}"
+                cat "$error_output"
+                rm -f "$error_output"
+            elif [ ! -z "$result" ]; then
                 echo "$result"
                 echo ""
                 echo -e "${GREEN}✅ Usuário é membro do grupo!${NC}"
+                rm -f "$error_output"
             else
                 echo -e "${RED}❌ Usuário NÃO é membro do grupo, ou filtro incorreto.${NC}"
+                rm -f "$error_output"
             fi
             echo ""
             ;;

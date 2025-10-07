@@ -11,11 +11,11 @@ import (
 )
 
 // AuthMiddleware checks for valid user sessions
-// If OIDC is not configured, it allows all requests through
+// If neither OIDC nor LDAP is configured, it allows all requests through
 func AuthMiddleware(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// If OIDC is not configured, skip authentication entirely
-		if !auth.IsConfigured() {
+		// If neither OIDC nor LDAP is configured, skip authentication entirely
+		if !auth.IsConfigured() && !auth.IsLDAPConfigured() {
 			c.Next()
 			return
 		}
@@ -54,11 +54,11 @@ func AuthMiddleware(db *sql.DB) gin.HandlerFunc {
 }
 
 // AdminMiddleware checks if user has admin privileges
-// If OIDC is not configured, it allows all requests through
+// If neither OIDC nor LDAP is configured, it allows all requests through
 func AdminMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// If OIDC is not configured, skip admin check
-		if !auth.IsConfigured() {
+		// If neither OIDC nor LDAP is configured, skip admin check
+		if !auth.IsConfigured() && !auth.IsLDAPConfigured() {
 			c.Next()
 			return
 		}

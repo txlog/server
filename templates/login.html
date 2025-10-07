@@ -25,7 +25,7 @@
     <div class="page page-center">
       <div class="container container-tight py-4">
         <div class="text-center mb-4">
-          <a href="." class="navbar-brand navbar-brand-autodark"><img src="/images/logbook.png" height="200" width="200" alt="Txlog Server"></a>
+          <a href="." class="navbar-brand navbar-brand-autodark"><img src="/images/logbook.png" height="100" width="100" alt="Txlog Server"></a>
         </div>
         <div class="card card-md">
           <div class="card-body">
@@ -39,10 +39,11 @@
 
                 if (error) {
                   let errorMessage = 'An error occurred during authentication.';
+                  let errorTitle = 'Authentication Error';
 
                   switch (error) {
                     case 'auth_failed':
-                      errorMessage = 'Authentication failed. Please try again.';
+                      errorMessage = 'Authentication failed. Please check your credentials and try again.';
                       break;
                     case 'invalid_state':
                       errorMessage = 'Invalid request state. Please try again.';
@@ -65,6 +66,27 @@
                     case 'session_creation_failed':
                       errorMessage = 'Failed to create user session.';
                       break;
+                    case 'invalid_credentials':
+                      errorMessage = 'Invalid username or password.';
+                      break;
+                    case 'user_not_found':
+                      errorMessage = 'User not found in the directory. Please check your username.';
+                      break;
+                    case 'unauthorized_group':
+                      errorMessage = 'You are not authorized to access this system. Please contact an administrator.';
+                      break;
+                    case 'ldap_connection_error':
+                      errorTitle = 'LDAP Connection Error';
+                      errorMessage = 'Unable to connect to the authentication server. Please contact an administrator.';
+                      break;
+                    case 'ldap_bind_error':
+                      errorTitle = 'LDAP Configuration Error';
+                      errorMessage = 'Authentication service is misconfigured. Please contact an administrator to check the service account settings.';
+                      break;
+                    case 'ldap_config_error':
+                      errorTitle = 'LDAP Configuration Error';
+                      errorMessage = 'Authentication service has a configuration issue. Please contact an administrator to verify the directory settings.';
+                      break;
                   }
 
                   document.getElementById('error-container').innerHTML =
@@ -74,7 +96,7 @@
                     '<svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>' +
                     '</div>' +
                     '<div>' +
-                    '<h4>Authentication Error</h4>' +
+                    '<h4>' + errorTitle + '</h4>' +
                     '<div class="text-secondary">' + errorMessage + '</div>' +
                     '</div>' +
                     '</div>' +
@@ -83,37 +105,42 @@
               </script>
             </div>
 
-            <form action="/auth/login" method="post" autocomplete="off" novalidate>
+            {{ if .ldap_enabled }}
+            <!-- Email/Password Login Form -->
+            <form action="/auth/ldap/login" method="post" autocomplete="off" novalidate>
               <div class="mb-3">
-                <label class="form-label">Authentication Method</label>
-                <div class="form-selectgroup-boxes row mb-3">
-                  <div class="col-lg-12">
-                    <label class="form-selectgroup-item">
-                      <input type="radio" name="auth-method" value="oidc" class="form-selectgroup-input" checked>
-                      <span class="form-selectgroup-label d-flex align-items-center p-3">
-                        <span class="me-3">
-                          <span class="form-selectgroup-check"></span>
-                        </span>
-                        <span class="form-selectgroup-label-content">
-                          <span class="form-selectgroup-title strong mb-1">OpenID Connect</span>
-                          <span class="d-block text-secondary">Sign in with your OIDC provider</span>
-                        </span>
-                      </span>
-                    </label>
-                  </div>
-                </div>
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="john.doe" autocomplete="off" required>
+              </div>
+              <div class="mb-2">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" class="form-control" placeholder="**********" autocomplete="off" required>
               </div>
               <div class="form-footer">
-                <button type="submit" class="btn btn-primary w-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 12l2 2l4 -4" /><path d="M21 12c0 1.268 -.63 2.39 -1.593 3.068a3.745 3.745 0 0 1 -1.043 3.296a3.745 3.745 0 0 1 -3.296 1.043a3.745 3.745 0 0 1 -3.068 1.593a3.745 3.745 0 0 1 -3.068 -1.593a3.745 3.745 0 0 1 -3.296 -1.043a3.745 3.745 0 0 1 -1.043 -3.296a3.745 3.745 0 0 1 -1.593 -3.068a3.745 3.745 0 0 1 1.593 -3.068a3.745 3.745 0 0 1 1.043 -3.296a3.745 3.745 0 0 1 3.296 -1.043a3.745 3.745 0 0 1 3.068 -1.593a3.745 3.745 0 0 1 3.068 1.593a3.745 3.745 0 0 1 3.296 1.043a3.745 3.745 0 0 1 1.043 3.296a3.745 3.745 0 0 1 1.593 3.068z" /></svg>
-                  Sign in
-                </button>
+                <button type="submit" class="btn btn-primary w-100">Sign in</button>
               </div>
             </form>
+            {{ end }}
+
+            {{ if and .oidc_enabled .ldap_enabled }}
+            <!-- OR Divider -->
+            <div class="hr-text">or</div>
+            {{ end }}
+
+            {{ if .oidc_enabled }}
+            <!-- OIDC Login Buttons -->
+            <div class="row">
+              <div class="col">
+                <form action="/auth/login" method="post" autocomplete="off" novalidate>
+                  <button type="submit" class="btn w-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon text-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 12l2 2l4 -4" /><path d="M21 12c0 1.268 -.63 2.39 -1.593 3.068a3.745 3.745 0 0 1 -1.043 3.296a3.745 3.745 0 0 1 -3.296 1.043a3.745 3.745 0 0 1 -3.068 1.593a3.745 3.745 0 0 1 -3.068 -1.593a3.745 3.745 0 0 1 -3.296 -1.043a3.745 3.745 0 0 1 -1.043 -3.296a3.745 3.745 0 0 1 -1.593 -3.068a3.745 3.745 0 0 1 1.593 -3.068a3.745 3.745 0 0 1 1.043 -3.296a3.745 3.745 0 0 1 3.296 -1.043a3.745 3.745 0 0 1 3.068 -1.593a3.745 3.745 0 0 1 3.068 1.593a3.745 3.745 0 0 1 3.296 1.043a3.745 3.745 0 0 1 1.043 3.296a3.745 3.745 0 0 1 1.593 3.068z" /></svg>
+                    Login with SSO
+                  </button>
+                </form>
+              </div>
+            </div>
+            {{ end }}
           </div>
-        </div>
-        <div class="text-center text-secondary mt-3">
-          Secure authentication powered by OpenID Connect
         </div>
       </div>
     </div>

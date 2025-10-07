@@ -61,11 +61,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Log OIDC status
+	// Initialize LDAP service (optional)
+	var ldapService *auth.LDAPService
+	ldapService, err = auth.NewLDAPService(database.Db)
+	if err != nil {
+		logger.Error("Failed to initialize LDAP service: " + err.Error())
+		os.Exit(1)
+	}
+
+	// Log authentication status
 	if oidcService != nil {
 		logger.Info("OIDC authentication enabled")
-	} else {
-		logger.Info("OIDC authentication disabled - running without authentication")
+	}
+	if ldapService != nil {
+		logger.Info("LDAP authentication enabled")
+	}
+	if oidcService == nil && ldapService == nil {
+		logger.Info("No authentication configured - running without authentication")
 	}
 
 	r := gin.Default()
@@ -82,6 +94,7 @@ func main() {
 		"formatPercentage": util.FormatPercentage,
 		"hasAction":        util.HasAction,
 		"hasPrefix":        util.HasPrefix,
+		"initial":          util.Initial,
 		"iterate":          util.Iterate,
 		"maskString":       util.MaskString,
 		"min":              util.Min,
@@ -107,12 +120,21 @@ func main() {
 
 	r.NoRoute(controllers.Get404)
 
-	// Authentication routes (only if OIDC is configured)
+	// Authentication routes (if OIDC or LDAP is configured)
+	if oidcService != nil || ldapService != nil {
+		r.GET("/login", controllers.GetLogin(oidcService, ldapService))
+		r.POST("/auth/logout", controllers.PostLogout(oidcService, ldapService))
+	}
+
+	// OIDC-specific routes
 	if oidcService != nil {
-		r.GET("/login", controllers.GetLogin(oidcService))
 		r.POST("/auth/login", controllers.PostLogin(oidcService))
 		r.GET("/auth/callback", controllers.GetCallback(oidcService))
-		r.POST("/auth/logout", controllers.PostLogout(oidcService))
+	}
+
+	// LDAP-specific routes
+	if ldapService != nil {
+		r.POST("/auth/ldap/login", controllers.PostLDAPLogin(ldapService))
 	}
 
 	// Main application routes
@@ -128,8 +150,8 @@ func main() {
 		adminGroup.POST("/migrations/run", controllers.PostAdminRunMigrations(database.Db))
 	}
 
-	// Admin routes that require OIDC (user and API key management)
-	if oidcService != nil {
+	// Admin routes that require OIDC or LDAP (user and API key management)
+	if oidcService != nil || ldapService != nil {
 		adminAuthGroup := r.Group("/admin")
 		adminAuthGroup.Use(middleware.AdminMiddleware())
 		{
@@ -207,6 +229,17 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 			"oidcClientSecret":         util.MaskString(os.Getenv("OIDC_CLIENT_SECRET")),
 			"oidcRedirectUrl":          os.Getenv("OIDC_REDIRECT_URL"),
 			"oidcSkipTlsVerify":        os.Getenv("OIDC_SKIP_TLS_VERIFY"),
+			"ldapHost":                 os.Getenv("LDAP_HOST"),
+			"ldapPort":                 os.Getenv("LDAP_PORT"),
+			"ldapUseTls":               os.Getenv("LDAP_USE_TLS"),
+			"ldapSkipTlsVerify":        os.Getenv("LDAP_SKIP_TLS_VERIFY"),
+			"ldapBindDn":               os.Getenv("LDAP_BIND_DN"),
+			"ldapBindPassword":         util.MaskString(os.Getenv("LDAP_BIND_PASSWORD")),
+			"ldapBaseDn":               os.Getenv("LDAP_BASE_DN"),
+			"ldapUserFilter":           os.Getenv("LDAP_USER_FILTER"),
+			"ldapAdminGroup":           os.Getenv("LDAP_ADMIN_GROUP"),
+			"ldapViewerGroup":          os.Getenv("LDAP_VIEWER_GROUP"),
+			"ldapGroupFilter":          os.Getenv("LDAP_GROUP_FILTER"),
 		}
 
 		c.Set("env", envVars)
@@ -218,6 +251,7 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 
 		// Add OIDC status to template context
 		c.Set("oidc_enabled", auth.IsConfigured())
+		c.Set("ldap_enabled", auth.IsLDAPConfigured())
 
 		c.Next()
 	}

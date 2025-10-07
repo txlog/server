@@ -326,7 +326,16 @@ func (s *LDAPService) checkGroupMembership(conn *ldap.Conn, userDN string) (bool
 }
 
 func (s *LDAPService) isGroupMember(conn *ldap.Conn, userDN, groupDN, groupFilter string) (bool, error) {
-	filter := fmt.Sprintf(groupFilter, ldap.EscapeFilter(userDN))
+	// Check if the filter uses memberUid (posixGroup) instead of member/uniqueMember
+	// posixGroup uses only the uid value, not the full DN
+	filterValue := userDN
+	if strings.Contains(groupFilter, "memberUid") {
+		// Extract uid from DN (e.g., "uid=john,ou=users,dc=example,dc=com" -> "john")
+		filterValue = extractUIDFromDN(userDN)
+		logger.Debug(fmt.Sprintf("Using memberUid filter, extracted uid: %s from DN: %s", filterValue, userDN))
+	}
+
+	filter := fmt.Sprintf(groupFilter, ldap.EscapeFilter(filterValue))
 
 	searchRequest := ldap.NewSearchRequest(
 		groupDN,
@@ -347,6 +356,36 @@ func (s *LDAPService) isGroupMember(conn *ldap.Conn, userDN, groupDN, groupFilte
 	}
 
 	return len(result.Entries) > 0, nil
+}
+
+// extractUIDFromDN extracts the uid value from a DN
+// Example: "uid=john.doe,ou=users,dc=example,dc=com" -> "john.doe"
+func extractUIDFromDN(dn string) string {
+	// Split by comma to get RDN components
+	parts := strings.Split(dn, ",")
+	if len(parts) == 0 {
+		return dn
+	}
+
+	// Get the first component (should be uid=value)
+	firstPart := strings.TrimSpace(parts[0])
+
+	// Split by = to separate attribute from value
+	kvPair := strings.SplitN(firstPart, "=", 2)
+	if len(kvPair) != 2 {
+		return dn
+	}
+
+	// Check if it's a uid attribute
+	attr := strings.ToLower(strings.TrimSpace(kvPair[0]))
+	value := strings.TrimSpace(kvPair[1])
+
+	if attr == "uid" {
+		return value
+	}
+
+	// If not uid, return the whole DN (fallback)
+	return dn
 }
 
 func (s *LDAPService) getAttributeValue(attrs map[string]string, key string) string {

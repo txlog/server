@@ -479,7 +479,11 @@
                 <tr>
                   <td data-label="User">
                     <div class="d-flex py-1 align-items-center">
+                      {{ if .Picture }}
                       <span class="avatar me-2" style="background-image: url({{ .Picture }})"></span>
+                      {{ else }}
+                      <span class="avatar me-2">{{ initial .Name }}</span>
+                      {{ end }}
                       <div class="flex-fill">
                         <div class="font-weight-medium">{{ .Name }}</div>
                         <div class="text-muted">ID: {{ .ID }}</div>

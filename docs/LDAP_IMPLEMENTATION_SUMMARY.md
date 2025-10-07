@@ -2,7 +2,8 @@
 
 ## Overview
 
-LDAP authentication has been successfully added to Txlog Server. The implementation provides username/password authentication with group-based authorization, working alongside the existing OIDC authentication system.
+LDAP authentication has been successfully added to Txlog Server. The implementation provides username/password
+authentication with group-based authorization, working alongside the existing OIDC authentication system.
 
 ## Changes Made
 

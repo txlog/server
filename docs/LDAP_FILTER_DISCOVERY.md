@@ -3,6 +3,7 @@
 Este guia ajuda você a descobrir os valores corretos para `LDAP_USER_FILTER` e `LDAP_GROUP_FILTER` no seu ambiente LDAP específico.
 
 ## Índice
+
 - [Ferramentas Necessárias](#ferramentas-necessárias)
 - [Passo 1: Conectar ao Servidor LDAP](#passo-1-conectar-ao-servidor-ldap)
 - [Passo 2: Explorar a Estrutura](#passo-2-explorar-a-estrutura)
@@ -16,6 +17,7 @@ Este guia ajuda você a descobrir os valores corretos para `LDAP_USER_FILTER` e 
 ## Ferramentas Necessárias
 
 ### Linux/Mac
+
 ```bash
 # Instalar ldap-utils (Debian/Ubuntu)
 sudo apt-get install ldap-utils
@@ -25,10 +27,11 @@ sudo yum install openldap-clients
 
 # Instalar ldap-utils (Mac)
 brew install openldap
-```
+```text
 
 ### Windows
-- Baixe e instale **Apache Directory Studio** (GUI): https://directory.apache.org/studio/
+
+- Baixe e instale **Apache Directory Studio** (GUI): <https://directory.apache.org/studio/>
 - Ou use **ldp.exe** (já incluído no Windows Server)
 
 ---
@@ -53,9 +56,10 @@ ldapsearch -H ldaps://seu-servidor-ldap.com:636 \
   -D "cn=admin,dc=exemplo,dc=com" \
   -W \
   "(objectClass=*)" dn
-```
+```text
 
 **Parâmetros:**
+
 - `-H`: URL do servidor LDAP
 - `-x`: Autenticação simples
 - `-b`: Base DN (ponto inicial da busca)
@@ -103,17 +107,18 @@ ldapsearch -H ldap://seu-servidor-ldap.com:389 \
   -W \
   -LLL \
   "(objectClass=organizationalUnit)" dn
-```
+```text
 
 **Estruturas comuns:**
-```
+
+```text
 dc=exemplo,dc=com
 ├── ou=users          ← Usuários geralmente ficam aqui
 ├── ou=people         ← Ou aqui
 ├── ou=grupos         ← Grupos geralmente ficam aqui
 ├── ou=groups         ← Ou aqui
 └── ou=departments    ← Estrutura organizacional
-```
+```text
 
 ---
 
@@ -148,7 +153,7 @@ ldapsearch -H ldap://seu-servidor-ldap.com:389 \
   -W \
   -LLL \
   "(objectClass=posixAccount)"
-```
+```text
 
 ### 3.2 Examinar um Usuário Específico
 
@@ -179,7 +184,7 @@ ldapsearch -H ldap://seu-servidor-ldap.com:389 \
   -W \
   -LLL \
   "(sAMAccountName=joao.silva)"
-```
+```text
 
 ### 3.3 Identificar o Atributo de Login
 
@@ -192,7 +197,7 @@ objectClass: posixAccount
 uid: joao.silva              ← Atributo de login (comum em OpenLDAP)
 cn: João Silva
 mail: joao.silva@exemplo.com
-```
+```text
 
 ou
 
@@ -203,9 +208,10 @@ sAMAccountName: joao.silva   ← Atributo de login (Active Directory)
 cn: João Silva
 userPrincipalName: joao.silva@exemplo.com
 mail: joao.silva@exemplo.com
-```
+```text
 
 **Atributos comuns de login:**
+
 - `uid`: OpenLDAP, FreeIPA, 389 Directory Server
 - `sAMAccountName`: Active Directory
 - `cn`: Alguns sistemas mais antigos
@@ -253,7 +259,7 @@ ldapsearch -H ldap://seu-servidor-ldap.com:389 \
   -W \
   -LLL \
   "(objectClass=group)"
-```
+```text
 
 ### 4.2 Examinar um Grupo Específico
 
@@ -266,13 +272,14 @@ ldapsearch -H ldap://seu-servidor-ldap.com:389 \
   -W \
   -LLL \
   "(cn=admins)"
-```
+```text
 
 ### 4.3 Identificar o Atributo de Membros
 
 Examine a saída e procure por:
 
-**Tipo 1: groupOfNames (OpenLDAP)**
+#### Tipo 1: groupOfNames (OpenLDAP)
+
 ```ldif
 dn: cn=admins,ou=groups,dc=exemplo,dc=com
 objectClass: groupOfNames
@@ -281,7 +288,8 @@ member: uid=joao.silva,ou=users,dc=exemplo,dc=com    ← DN completo do usuário
 member: uid=maria.santos,ou=users,dc=exemplo,dc=com
 ```
 
-**Tipo 2: groupOfUniqueNames**
+#### Tipo 2: groupOfUniqueNames
+
 ```ldif
 dn: cn=admins,ou=groups,dc=exemplo,dc=com
 objectClass: groupOfUniqueNames
@@ -290,7 +298,8 @@ uniqueMember: uid=joao.silva,ou=users,dc=exemplo,dc=com  ← DN completo
 uniqueMember: uid=maria.santos,ou=users,dc=exemplo,dc=com
 ```
 
-**Tipo 3: posixGroup**
+#### Tipo 3: posixGroup
+
 ```ldif
 dn: cn=admins,ou=groups,dc=exemplo,dc=com
 objectClass: posixGroup
@@ -300,7 +309,8 @@ memberUid: joao.silva      ← Apenas o uid, não o DN completo
 memberUid: maria.santos
 ```
 
-**Tipo 4: Active Directory**
+#### Tipo 4: Active Directory
+
 ```ldif
 dn: CN=Admins,CN=Users,DC=exemplo,DC=com
 objectClass: group
@@ -355,7 +365,7 @@ ou=groups: cn=admins com member=uid=joao.silva,ou=users,dc=exemplo,dc=com
 # Configuração
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
-```
+```text
 
 ### OpenLDAP com posixGroup
 
@@ -367,7 +377,7 @@ ou=groups: cn=admins com memberUid=joao.silva
 # Configuração
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(memberUid=%s)
-```
+```text
 
 **⚠️ IMPORTANTE:** Para posixGroup, você precisa modificar o código do Txlog Server para extrair apenas o `uid` do DN antes de fazer a busca de grupo. Atualmente, ele passa o DN completo.
 
@@ -381,7 +391,7 @@ CN=Groups: cn=Admins com member=CN=João Silva,CN=Users,DC=exemplo,DC=com
 # Configuração
 LDAP_USER_FILTER=(sAMAccountName=%s)
 LDAP_GROUP_FILTER=(member=%s)
-```
+```text
 
 ### FreeIPA
 
@@ -393,7 +403,7 @@ cn=groups: cn=admins com member=uid=joao.silva,cn=users,cn=accounts,dc=exemplo,d
 # Configuração
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
-```
+```text
 
 ### 389 Directory Server
 
@@ -405,7 +415,7 @@ ou=Groups: cn=admins com member=uid=joao.silva,ou=People,dc=exemplo,dc=com
 # Configuração
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
-```
+```text
 
 ---
 
@@ -424,7 +434,7 @@ ldapsearch -H ldap://seu-servidor-ldap.com:389 \
   "(uid=joao.silva)"
 
 # Se retornar exatamente 1 usuário, o filtro está correto
-```
+```text
 
 ### Testar LDAP_GROUP_FILTER
 
@@ -443,7 +453,7 @@ ldapsearch -H ldap://seu-servidor-ldap.com:389 \
   "(member=uid=joao.silva,ou=users,dc=exemplo,dc=com)"
 
 # Se retornar o grupo, o filtro está correto
-```
+```text
 
 ---
 
@@ -457,7 +467,7 @@ LDAP_USER_FILTER=(|(uid=%s)(mail=%s))
 
 # Buscar usuário por sAMAccountName OU userPrincipalName (AD)
 LDAP_USER_FILTER=(|(sAMAccountName=%s)(userPrincipalName=%s))
-```
+```text
 
 ### Filtrar por ObjectClass
 
@@ -467,28 +477,32 @@ LDAP_USER_FILTER=(&(objectClass=inetOrgPerson)(uid=%s))
 
 # Garantir que é um grupo específico com membro
 LDAP_GROUP_FILTER=(&(objectClass=groupOfNames)(member=%s))
-```
+```text
 
 ---
 
 ## Troubleshooting
 
 ### Erro: "user not found"
+
 1. Verifique se o `LDAP_BASE_DN` está correto
 2. Teste o `LDAP_USER_FILTER` manualmente com `ldapsearch`
 3. Verifique se o usuário realmente existe no diretório
 
 ### Erro: "not a member of any authorized group"
+
 1. Verifique se o `LDAP_ADMIN_GROUP` ou `LDAP_VIEWER_GROUP` está correto (deve ser o DN completo do grupo)
 2. Teste o `LDAP_GROUP_FILTER` manualmente com `ldapsearch`
 3. Verifique se o usuário é realmente membro do grupo no LDAP
 
 ### Erro: "failed to connect to LDAP"
+
 1. Verifique se o host e porta estão corretos
 2. Teste conectividade: `telnet ldap-server 389` ou `openssl s_client -connect ldap-server:636`
 3. Verifique firewall e regras de rede
 
 ### Erro: "failed to bind with service account"
+
 1. Verifique se o `LDAP_BIND_DN` está correto (formato completo do DN)
 2. Verifique se a senha em `LDAP_BIND_PASSWORD` está correta
 3. Teste o bind manualmente com `ldapsearch`
@@ -497,11 +511,11 @@ LDAP_GROUP_FILTER=(&(objectClass=groupOfNames)(member=%s))
 
 ## Recursos Adicionais
 
-- **OpenLDAP Documentation**: https://www.openldap.org/doc/
-- **Active Directory LDAP**: https://docs.microsoft.com/en-us/windows/win32/adsi/search-filter-syntax
-- **FreeIPA Documentation**: https://www.freeipa.org/page/Documentation
-- **Apache Directory Studio**: https://directory.apache.org/studio/
-- **LDAP Filter Syntax**: https://ldap.com/ldap-filters/
+- **OpenLDAP Documentation**: <https://www.openldap.org/doc/>
+- **Active Directory LDAP**: <https://docs.microsoft.com/en-us/windows/win32/adsi/search-filter-syntax>
+- **FreeIPA Documentation**: <https://www.freeipa.org/page/Documentation>
+- **Apache Directory Studio**: <https://directory.apache.org/studio/>
+- **LDAP Filter Syntax**: <https://ldap.com/ldap-filters/>
 
 ---
 
@@ -519,7 +533,7 @@ LDAP_USER_FILTER=(uid=%s)
 LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=exemplo,dc=com
 LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=exemplo,dc=com
 LDAP_GROUP_FILTER=(member=%s)
-```
+```text
 
 ```bash
 # Active Directory
@@ -533,7 +547,7 @@ LDAP_USER_FILTER=(sAMAccountName=%s)
 LDAP_ADMIN_GROUP=CN=Txlog Admins,CN=Users,DC=exemplo,DC=com
 LDAP_VIEWER_GROUP=CN=Txlog Viewers,CN=Users,DC=exemplo,DC=com
 LDAP_GROUP_FILTER=(member=%s)
-```
+```text
 
 ---
 

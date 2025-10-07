@@ -1,6 +1,7 @@
 # Txlog Server Documentation
 
-This directory contains all documentation for Txlog Server, including auto-generated Swagger API documentation and user-facing Markdown documentation.
+This directory contains all documentation for Txlog Server, including auto-generated Swagger API documentation
+and user-facing Markdown documentation.
 
 ## 📚 Documentation Index
 
@@ -70,6 +71,7 @@ Complete documentation for LDAP authentication integration.
 ### Markdown Validation
 
 Ensure your Markdown is valid:
+
 - Use proper heading hierarchy (H1 → H2 → H3)
 - Include blank lines between sections
 - Use code blocks with language tags
@@ -101,7 +103,7 @@ More content...
 ## 📝 Documentation Standards
 
 - **Headings:** Use clear, descriptive headings
-- **Code blocks:** Always specify language (```bash, ```go, etc.)
+- **Code blocks:** Always specify language (```bash,```go, etc.)
 - **Tables:** Use for comparisons and reference data
 - **Examples:** Provide working examples with explanations
 - **Links:** Use relative links for internal docs
@@ -150,4 +152,4 @@ Looking for specific information?
 
 ---
 
-**Happy documenting! 📚✨**
+## Happy documenting! 📚✨

@@ -114,7 +114,7 @@ IGNORE_EMPTY_EXECUTION=true
 │   └── api/v1/          # Versioned API endpoints
 ├── database/            # Database connection and migrations
 │   └── migrations/      # SQL migration files (up/down pairs)
-├── docs/               # Auto-generated Swagger documentation
+├── docs/               # Documentation (Swagger auto-gen + user Markdown docs)
 ├── images/             # Static images (embedded in binary)
 ├── logger/             # Custom logging implementation
 ├── models/             # Data structures and business logic
@@ -222,3 +222,4 @@ make doc                    # Update API documentation (if API changed)
 7. **Migration naming is strict** - follow `YYYYMMDD_description.up/down.sql` format
 8. **Docker builds use multi-stage** - final image is minimal scratch-based container
 9. **Copilot pode executar `make run` para validar rapidamente alterações de código antes de concluir a sugestão**
+10. **Documentation files must be placed in `./docs/` directory** - all Markdown documentation files should be created inside the `docs/` folder and must be valid Markdown format

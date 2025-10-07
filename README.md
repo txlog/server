@@ -1,6 +1,6 @@
 # Transaction Log Server
 
-<!-- markdownlint-disable MD033 -->
+<!-- markdownlint-disable MD033 MD013 -->
 <p align="center">
   <p align="center"><img width="100" height="100" src="https://raw.githubusercontent.com/txlog/.github/refs/heads/main/profile/logbook.png" alt="The Logo"></p>
   <p align="center"><strong>Server to receive data from Txlog Agent</strong></p>
@@ -12,6 +12,7 @@
     <a href="https://deepwiki.com/txlog/server"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   </p>
 </p>
+<!-- markdownlint-enable MD033 MD013 -->
 
 This repository contains the code for the Txlog Server.
 

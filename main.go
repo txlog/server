@@ -94,6 +94,7 @@ func main() {
 		"dnfUser":          util.DnfUser,
 		"formatInteger":    util.FormatInteger,
 		"formatPercentage": util.FormatPercentage,
+		"formatDateTime":   util.FormatDateTime,
 		"hasAction":        util.HasAction,
 		"hasPrefix":        util.HasPrefix,
 		"initial":          util.Initial,

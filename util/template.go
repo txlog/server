@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/txlog/server/version"
 )
@@ -381,4 +382,19 @@ func Initial(s string) string {
 		return "?"
 	}
 	return strings.ToUpper(string([]rune(s)[0]))
+}
+
+// FormatDateTime formats a time.Time pointer into a string with the format "DD/MM/YYYY HH:MM:SS TZD".
+// If the pointer is nil, it returns an empty string.
+//
+// Parameters:
+//   - t: A pointer to a time.Time object
+//
+// Returns:
+//   - string: The formatted date and time string, or an empty string
+func FormatDateTime(t *time.Time) string {
+	if t == nil {
+		return ""
+	}
+	return t.Format("02/01/2006 15:04:05 MST")
 }

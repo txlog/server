@@ -68,7 +68,7 @@
                 <tbody>
                   {{ range .graphData }}
                     <tr>
-                      <td>{{ .Week.Format "02/01/2006" }}</td>
+                      <td>{{ formatDateTime .Week }}</td>
                       <td class="text-nowrap">{{ formatInteger .Install }}</td>
                       <td class="text-nowrap">{{ formatInteger .Upgraded }}</td>
                     </tr>
@@ -139,7 +139,7 @@
             },
             labels: [
               {{ range .graphData }}
-                "{{ .Week.Format "02/01/2006" }}",
+                "{{ formatDateTime .Week }}",
               {{ end }}
             ],
             colors: [

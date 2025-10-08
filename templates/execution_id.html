@@ -44,7 +44,7 @@
           <div class="datagrid-item">
             <div class="datagrid-title">Executed at</div>
             <div class="datagrid-content">
-              {{ if .execution.ExecutedAt }}{{ .execution.ExecutedAt }}{{ else }}–{{ end }}
+              {{ if .execution.ExecutedAt }}{{ formatDateTime .execution.ExecutedAt }}{{ else }}–{{ end }}
             </div>
           </div>
           <div class="datagrid-item">

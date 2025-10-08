@@ -1,10 +1,10 @@
 name: Build and Scan Docker Image
 on:
   push:
-    branches: [ "*" ]
-    tags: ['v*']
-  create:
-    tags: ['v*']
+    branches:
+      - "*"
+    tags:
+      - 'v*'
 
 jobs:
 
@@ -49,3 +49,15 @@ jobs:
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: ${{ steps.scan.outputs.sarif }}
+
+    - name: Clean untagged images
+      uses: quartx-analytics/ghcr-cleaner@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        owner-type: org
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repository-owner: ${{ github.repository_owner }}
+        package-name: ${{ github.event.repository.name }}
+        delete-untagged: true
+        keep-at-most: 0
+        skip-tags: v*

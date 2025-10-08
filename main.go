@@ -95,6 +95,7 @@ func main() {
 		"formatInteger":    util.FormatInteger,
 		"formatPercentage": util.FormatPercentage,
 		"formatDateTime":   util.FormatDateTime,
+		"formatDate":       util.FormatDate,
 		"hasAction":        util.HasAction,
 		"hasPrefix":        util.HasPrefix,
 		"initial":          util.Initial,

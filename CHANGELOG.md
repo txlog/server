@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.15.1] - 2025-10-08
+
+### Fixed
+
+- API key authentication is now only required when OIDC or LDAP authentication is
+  enabled. When both are disabled, /v1 endpoints are accessible without API key
+
 ## [1.15.0] - 2025-10-07
 
 ### Added

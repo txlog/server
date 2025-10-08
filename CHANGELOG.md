@@ -19,6 +19,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.15.0] - 2025-10-07
+
+### Added
+
+- LDAP authentication support with comprehensive integration
+- User avatar display with initials extraction from DN
+- Markdownlint configuration file (`.markdownlint.json`)
+
+### Changed
+
+- Enhanced login interface to support LDAP authentication with improved error handling
+- Updated authentication controller to handle both OIDC and LDAP login requests
+- Modified authentication middleware to allow requests when neither OIDC nor LDAP is configured
+- Improved admin panel with LDAP-specific user management features
+- Updated header template with conditional LDAP/OIDC authentication state checks
+- Updated dependencies in `go.mod` and `go.sum` for LDAP functionality
+- Bumped `github.com/coreos/go-oidc/v3` from 3.15.0 to 3.16.0
+
+### Fixed
+
+- Conditional rendering for user avatar in admin template
+- Markdown linting comments for consistency in README
+
 ## [1.14.0] - 2025-10-03
 
 ### Added

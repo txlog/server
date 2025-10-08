@@ -38,7 +38,9 @@ jobs:
       with:
         context: .
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+        tags: |
+          ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+          ${{ startsWith(github.ref, 'refs/tags/v') && format('ghcr.io/{0}/{1}:latest', github.repository_owner, github.event.repository.name) || '' }}
 
     - uses: anchore/scan-action@7c05671ae9be166aeb155bad2d7df9121823df32 # v6
       id: scan
@@ -59,5 +61,15 @@ jobs:
         repository-owner: ${{ github.repository_owner }}
         package-name: ${{ github.event.repository.name }}
         delete-untagged: true
+
+    - name: Clean branch images
+      uses: quartx-analytics/ghcr-cleaner@v1
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        owner-type: org
+        token: ${{ secrets.CLEANUP_TOKEN }}
+        repository-owner: ${{ github.repository_owner }}
+        package-name: ${{ github.event.repository.name }}
+        delete-untagged: false
         keep-at-most: 0
-        skip-tags: v*
+        skip-tags: v*,latest

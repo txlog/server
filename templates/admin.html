@@ -508,11 +508,10 @@
                     {{ end }}
                   </td>
                   <td data-label="Last Login">
-                    <div>{{ .LastLoginAt.Format "Jan 2, 2006" }}</div>
-                    <div class="text-muted">{{ .LastLoginAt.Format "15:04" }}</div>
+                    <div>{{ formatDateTime .LastLoginAt }}</div>
                   </td>
                   <td data-label="Created">
-                    <div>{{ .CreatedAt.Format "Jan 2, 2006" }}</div>
+                    <div>{{ formatDateTime .CreatedAt }}</div>
                   </td>
                   <td>
                     <div class="btn-list flex-nowrap">
@@ -673,16 +672,14 @@
                     <code>{{ .KeyPrefix }}</code>
                   </td>
                   <td data-label="Created">
-                    <div>{{ .CreatedAt.Format "Jan 2, 2006" }}</div>
-                    <div class="text-muted">{{ .CreatedAt.Format "15:04" }}</div>
+                    <div>{{ formatDateTime .CreatedAt }}</div>
                   </td>
                   <td data-label="Created By">
                     {{ .CreatorName }}
                   </td>
                   <td data-label="Last Used">
                     {{ if .LastUsedAt }}
-                      <div>{{ .LastUsedAt.Format "Jan 2, 2006" }}</div>
-                      <div class="text-muted">{{ .LastUsedAt.Format "15:04" }}</div>
+                      <div>{{ formatDateTime .LastUsedAt }}</div>
                     {{ else }}
                       <span class="text-muted">Never</span>
                     {{ end }}

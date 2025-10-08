@@ -125,7 +125,7 @@
                   {{ range . }}
                     <tr>
                       <td><kbd data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ .Actions }}">{{ .TransactionID }}</kbd></td>
-                      <td>{{ .BeginTime.Format "02/01/2006 15:04:05 MST" }}</td>
+                      <td>{{ formatDateTime .BeginTime }}</td>
                       <td>{{ dnfUser .User }}</td>
                       <td>
                         <div class="avatar-list">
@@ -215,7 +215,7 @@
                         </span>
                       </td>
                       <td><kbd>{{ .Hostname }}</kbd></td>
-                      <td>{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</td>
+                      <td>{{ formatDateTime .ExecutedAt }}</td>
                       <td>{{ .TransactionsProcessed }}</td>
                       <td>{{ .TransactionsSent }}</td>
                       <td>
@@ -262,7 +262,7 @@
                     <tr>
                       <td><a href="/assets/{{ .MachineID }}"><kbd>{{ .MachineID }}</kbd></a></td>
                       <td><kbd>{{ .Hostname }}</kbd></td>
-                      <td>{{ .ExecutedAt.Format "02/01/2006 15:04:05 MST" }}</td>
+                      <td>{{ formatDateTime .ExecutedAt }}</td>
                       <td>{{ .AgentVersion }}</td>
                       <td>{{ .OS }}</td>
                     </tr>

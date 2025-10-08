@@ -398,3 +398,14 @@ func FormatDateTime(t *time.Time) string {
 	}
 	return t.Format("02/01/2006 15:04:05 MST")
 }
+
+// FormatDate formats a time.Time into a string with the format "DD/MM/YYYY".
+//
+// Parameters:
+//   - t: A time.Time object
+//
+// Returns:
+//   - string: The formatted date string
+func FormatDate(t time.Time) string {
+	return t.Format("02/01/2006")
+}

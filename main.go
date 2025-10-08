@@ -77,7 +77,9 @@ func main() {
 		logger.Info("LDAP authentication enabled")
 	}
 	if oidcService == nil && ldapService == nil {
-		logger.Info("No authentication configured - running without authentication")
+		logger.Info("No authentication configured - API endpoints accessible without API key")
+	} else {
+		logger.Info("API key authentication required for /v1 endpoints")
 	}
 
 	r := gin.Default()
@@ -178,7 +180,10 @@ func main() {
 	))
 
 	v1Group := r.Group("/v1")
-	v1Group.Use(middleware.APIKeyMiddleware(database.Db))
+	// Only require API key when authentication is enabled (OIDC or LDAP)
+	if oidcService != nil || ldapService != nil {
+		v1Group.Use(middleware.APIKeyMiddleware(database.Db))
+	}
 	{
 		// txlog version
 		v1Group.GET("/version", v1API.GetVersions(version.SemVer))

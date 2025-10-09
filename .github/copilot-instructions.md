@@ -8,7 +8,7 @@ interface and REST API.
 
 ### High-Level Information
 
-- **Language**: Go 1.24.2+ (currently using Go 1.24.7)
+- **Language**: Go 1.25.2+ (currently using Go 1.25.2)
 - **Framework**: Gin web framework for HTTP routing and middleware
 - **Database**: PostgreSQL with golang-migrate for schema management
 - **Architecture**: MVC-like structure with embedded templates and static files
@@ -22,7 +22,7 @@ interface and REST API.
 
 **ALWAYS install these tools before development work:**
 
-1. **Go 1.24.0+** (currently using 1.24.7)
+1. **Go 1.25.2+** (currently using 1.25.2)
 2. **Swag** for Swagger documentation generation:
 
    ```bash
@@ -202,7 +202,7 @@ Located in `database/migrations/` with numbered prefixes:
 **Build Pipeline** (`.github/workflows/build.yml`):
 
 1. Checkout code
-2. Setup Go 1.24.0
+2. Setup Go 1.25.2
 3. Compile binary: `CGO_ENABLED=0 GOOS="linux" GOARCH="amd64" go build -trimpath -buildvcs=false -ldflags "-s -w" -o bin/txlog-server`
 4. Build and push Docker image to GitHub Container Registry
 5. Run Anchore security scan

@@ -77,10 +77,10 @@ make run    # Starts development server with live reload via air
 - Requires `.env` file with database configuration
 - Auto-reloads on file changes (excluding templates/, tmp/, images/, testdata/)
 
-> Note: Gemini can execute `make run` to test and validate generated code before suggesting commits or
-> additional changes. The command keeps the server running (via Air) until manually stopped. To stop it,
-> press Ctrl+C. If the process does not terminate, kill it forcefully
-> (e.g., `pkill -f txlog-server` or `kill -9 <PID>`).
+Note: Gemini can execute `make run` to test and validate generated code before suggesting commits or
+additional changes. The command keeps the server running (via Air) until manually stopped. To stop it,
+press Ctrl+C. If the process does not terminate, kill it forcefully
+(e.g., `pkill -f txlog-server` or `kill -9 <PID>`).
 
 #### Testing (Takes ~1 second)
 

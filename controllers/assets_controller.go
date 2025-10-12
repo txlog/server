@@ -37,6 +37,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		search := c.Query("search")
 		restart := c.Query("restart")
+		inactive := c.Query("inactive")
 
 		searchType := "hostname"
 		if len(search) == 32 && !util.ContainsSpecialCharacters(search) {
@@ -59,9 +60,13 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		if search != "" {
 			restartQuery := ""
-
 			if restart == "true" {
 				restartQuery = ` AND needs_restarting IS TRUE`
+			}
+
+			inactiveQuery := ""
+			if inactive == "true" {
+				inactiveQuery = ` AND sub.executed_at < NOW() - INTERVAL '15 days'`
 			}
 
 			query = `
@@ -70,6 +75,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
         FROM (
           SELECT
             hostname,
+			executed_at,
             ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
           FROM
             executions
@@ -79,13 +85,18 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
         ) sub
         WHERE
           sub.rn = 1
+          ` + inactiveQuery + `
       `
 			err = database.QueryRow(query, util.FormatSearchTerm(search)).Scan(&total)
 		} else {
 			restartQuery := ""
-
 			if restart == "true" {
 				restartQuery = ` WHERE needs_restarting IS TRUE`
+			}
+
+			inactiveQuery := ""
+			if inactive == "true" {
+				inactiveQuery = ` AND sub.executed_at < NOW() - INTERVAL '15 days'`
 			}
 
 			query = `
@@ -94,6 +105,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
         FROM (
           SELECT
             hostname,
+			executed_at,
             ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
           FROM
             executions
@@ -101,6 +113,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
         ) sub
         WHERE
           sub.rn = 1
+		  ` + inactiveQuery + `
       `
 			err = database.QueryRow(query).Scan(&total)
 		}
@@ -117,9 +130,13 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		if search != "" {
 			restartQuery := ""
-
 			if restart == "true" {
 				restartQuery = ` AND needs_restarting IS TRUE`
+			}
+
+			inactiveQuery := ""
+			if inactive == "true" {
+				inactiveQuery = ` AND sub.executed_at < NOW() - INTERVAL '15 days'`
 			}
 
 			query = `
@@ -147,6 +164,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
         ) sub
         WHERE
             sub.rn = 1
+			` + inactiveQuery + `
         ORDER BY
             hostname
         LIMIT $1 OFFSET $2
@@ -154,9 +172,13 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			rows, err = database.Query(query, limit, offset, util.FormatSearchTerm(search))
 		} else {
 			restartQuery := ""
-
 			if restart == "true" {
 				restartQuery = ` WHERE needs_restarting IS TRUE`
+			}
+
+			inactiveQuery := ""
+			if inactive == "true" {
+				inactiveQuery = ` AND sub.executed_at < NOW() - INTERVAL '15 days'`
 			}
 
 			query = `
@@ -182,6 +204,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
         ) sub
         WHERE
           sub.rn = 1
+		  ` + inactiveQuery + `
         ORDER BY
           hostname
         LIMIT $1 OFFSET $2
@@ -276,6 +299,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			"statistics":   statistics,
 			"search":       search,
 			"restart":      restart,
+			"inactive":     inactive,
 		})
 	}
 }

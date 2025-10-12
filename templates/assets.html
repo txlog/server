@@ -19,9 +19,9 @@
           <div class="card-header">
             <h3 class="card-title">
                 {{ if .search }}
-                Assets {{ if eq .restart "true" }}that need to be restarted {{ end }}containing <kbd>{{ .search }}</kbd>
+                Assets {{ if eq .restart "true" }}that need to be restarted{{ end }}{{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}{{ if eq .inactive "true" }} that are inactive{{ end }} containing <kbd>{{ .search }}</kbd>
               {{ else }}
-                Registered assets {{ if eq .restart "true" }}that need to be restarted{{ end }}
+                Registered assets {{ if eq .restart "true" }}that need to be restarted{{ end }}{{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}{{ if eq .inactive "true" }} that are inactive{{ end }}
               {{ end }}
             </h3>
             <div class="card-actions">
@@ -36,6 +36,15 @@
                       <span class="form-selectgroup-label">
                         <!-- Download SVG icon from http://tabler.io/icons/icon/refresh-alert -->
                         <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-refresh-alert"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /><path d="M12 9l0 3" /><path d="M12 15l.01 0" /></svg>
+                      </span>
+                    </label>
+                  </div>
+                  <div class="col-auto">
+                    <label class="form-selectgroup-item" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="Show only assets that have not sent data in the last 15 days">
+                      <input type="checkbox" id="inactive" name="inactive" value="true" class="form-selectgroup-input"{{ if eq .inactive "true" }} checked{{ end }}>
+                      <span class="form-selectgroup-label">
+                        <!-- Download SVG icon from http://tabler.io/icons/icon/power -->
+                        <svg  xmlns="http://www.w.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-power"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 6a7.75 7.75 0 1 0 10 0" /><path d="M12 4l0 8" /></svg>
                       </span>
                     </label>
                   </div>
@@ -150,10 +159,12 @@
   function search() {
     const searchValue = document.getElementById('search').value;
     const restartValue = document.getElementById('restart').checked;
+    const inactiveValue = document.getElementById('inactive').checked;
     const hasQueryParams = window.location.search.includes('?');
     const url = new URL(window.location.href);
     url.searchParams.set('search', searchValue);
     url.searchParams.set('restart', restartValue);
+    url.searchParams.set('inactive', inactiveValue);
     window.location.href = url.toString();
   }
 

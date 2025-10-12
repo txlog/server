@@ -19,6 +19,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.16.0] - 2025-10-11
+
+### Added
+
+- Add inactive filter to asset search functionality.
+
+### Changed
+
+- Update Go version to 1.25.2 across documentation and build files.
+- Bump `golang.org/x/oauth2` from 0.31.0 to 0.32.0.
+
+### Fixed
+
+- Adjust formatting of note regarding `make run` command in `GEMINI.md`.
+- Update Docker image tags handling and clean branch images in build workflow.
+
 ## [1.15.2] - 2025-10-08
 
 ### Changed

@@ -174,6 +174,7 @@ func main() {
 	r.GET("/package-progression", controllers.GetPackagesByWeekIndex(database.Db))
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
+	r.GET("/web/machines", v1API.GetMachinesWeb(database.Db))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
 		ginSwagger.PersistAuthorization(true),
@@ -182,6 +183,7 @@ func main() {
 	))
 
 	v1Group := r.Group("/v1")
+
 	// Only require API key when authentication is enabled (OIDC or LDAP)
 	if oidcService != nil || ldapService != nil {
 		v1Group.Use(middleware.APIKeyMiddleware(database.Db))

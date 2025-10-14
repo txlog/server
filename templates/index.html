@@ -260,11 +260,14 @@
 
 <script>
   function showAgentModal(agentVersion) {
+    const tableBody = document.getElementById('modal-table-body');
+    tableBody.innerHTML = '<tr><td colspan="2"><div class="progress progress-sm"><div class="progress-bar progress-bar-indeterminate"></div></div></td></tr>';
+
     if (agentVersion == "") {
       agentVersion = "with undefined version";
     }
 
-    fetch(`/v1/machines?agent_version=${agentVersion}`)
+    fetch(`/web/machines?agent_version=${agentVersion}`)
       .then(response => response.json())
       .then(data => {
         const result = data;
@@ -299,11 +302,14 @@
   }
 
   function showOSModal(os) {
+    const tableBody = document.getElementById('modal-table-body');
+    tableBody.innerHTML = '<tr><td colspan="2"><div class="progress progress-sm"><div class="progress-bar progress-bar-indeterminate"></div></div></td></tr>';
+
     if (os == "") {
       os = "Undefined OS";
     }
 
-    fetch(`/v1/machines?os=${os}`)
+    fetch(`/web/machines?os=${os}`)
       .then(response => response.json())
       .then(data => {
         const result = data;

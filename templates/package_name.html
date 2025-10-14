@@ -188,7 +188,7 @@
             document.getElementById('table-placeholder').style.display = 'block';
 
             // Fetch data from API
-            const response = await fetch(`/v1/packages/${encodeURIComponent(packageName)}/${encodeURIComponent(version)}/assets`);
+            const response = await fetch(`/web/packages/${encodeURIComponent(packageName)}/${encodeURIComponent(version)}/assets`);
 
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
@@ -215,6 +215,9 @@
               // Update footer
               entriesCount.textContent = assets.length;
               tableFooter.style.display = 'block';
+            } else {
+              tableBody.innerHTML = `<tr><td colspan="2" class="text-center text-muted">No assets are currently using version ${version}</td></tr>`;
+              tableFooter.style.display = 'none';
             }
 
           } catch (error) {

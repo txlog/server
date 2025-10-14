@@ -175,6 +175,7 @@ func main() {
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/web/machines", v1API.GetMachinesWeb(database.Db))
+	r.GET("/web/packages/:name/:version/assets", v1API.GetAssetsUsingPackageVersionWeb(database.Db))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
 		ginSwagger.PersistAuthorization(true),

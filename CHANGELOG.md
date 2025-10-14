@@ -19,6 +19,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.16.1] - 2025-10-13
+
+### Changed
+
+- Show a full empty-state component on the package details page when no assets
+  run the selected version, improving the user experience.
+
+### Fixed
+
+- Fixed package details page failing to load asset lists when an API key was
+  missing by adding a web-only endpoint that uses session-based authentication.
+- Fixed assets list endpoint returning `null` instead of `[]` when no assets
+  were found, preventing frontend failures.
+
 ## [1.16.0] - 2025-10-11
 
 ### Added

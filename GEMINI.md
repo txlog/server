@@ -259,7 +259,7 @@ make doc                    # Update API documentation (if API changed)
 7. **Migration naming is strict** - follow `YYYYMMDD_description.up/down.sql` format
 8. **Docker builds use multi-stage** - final image is minimal scratch-based container
 9. **Gemini can execute `make run` to validate quickly code changes before completing
-   the suggestion**
+   the suggestion, but only if the server is not running**
 10. **Documentation files must be placed in `./docs/` directory** - all Markdown documentation files
     should be created inside the `docs/` folder and must be valid Markdown format
 11. **All Markdown files must pass markdownlint validation** - run `markdownlint` on all `.md` files to

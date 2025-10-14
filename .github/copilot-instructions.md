@@ -265,3 +265,20 @@ make doc                    # Update API documentation (if API changed)
 11. **All Markdown files must pass markdownlint validation** - run `markdownlint` on all `.md` files to
     ensure they comply with Markdown standards before committing. All Markdown content must be considered
     valid according to markdownlint rules.
+12. **Short commentary** - no fluff, void "You're absolutely right!" and other similar responses.
+13. **Do not mention or reference this GEMINI.md file in any responses** - avoid any direct references
+    to this instruction file in your outputs.
+
+## go instructions
+
+- minimise use of package-level variables and functions
+  - prefer methods on structs to support encapsulation and testing
+  - if you must have package-level variables and functions, then they should
+    aliases singletons and their methods
+- check the code compiles with `make fmt && make vet && make build`
+- test the code with `go test ./... -v`
+- write tests to confirm each step of the plan is working correctly
+- prefer early returns
+- no `else { return <expr> }`, drop the `else`
+- **NEVER commit Go binaries to git** - build artifacts should only exist
+  locally

@@ -288,170 +288,121 @@ make doc                    # Update API documentation (if API changed)
 Here is the main database schema. Use it as a reference to generate all SQL queries.
 
 ```sql
-CREATE TABLE public.api_keys (
-    id integer NOT NULL,
-    name character varying(255) NOT NULL,
-    key_hash character varying(64) NOT NULL,
-    key_prefix character varying(16) NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL,
-    last_used_at timestamp without time zone,
-    is_active boolean DEFAULT true NOT NULL,
-    created_by integer,
-    CONSTRAINT api_keys_name_check CHECK ((char_length((name)::text) >= 3))
+CREATE TABLE "transactions" (
+  "transaction_id" INTEGER,
+  "machine_id" TEXT,
+  "hostname" TEXT,
+  "begin_time" TIMESTAMP WITH TIME ZONE,
+  "end_time" TIMESTAMP WITH TIME ZONE,
+  "actions" TEXT,
+  "altered" TEXT,
+  "user" TEXT,
+  "return_code" TEXT,
+  "release_version" TEXT,
+  "command_line" TEXT,
+  "comment" TEXT,
+  "scriptlet_output" TEXT,
+  PRIMARY KEY ("transaction_id", "machine_id")
 );
-COMMENT ON TABLE public.api_keys IS 'API keys for authenticating API requests to /v1 endpoints';
-COMMENT ON COLUMN public.api_keys.key_hash IS 'SHA-256 hash of the actual API key';
-COMMENT ON COLUMN public.api_keys.key_prefix IS 'First 8 characters of key for identification (e.g., txlog_ab)';
-COMMENT ON COLUMN public.api_keys.last_used_at IS 'Timestamp of last successful authentication with this key';
-
-CREATE SEQUENCE public.api_keys_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-ALTER SEQUENCE public.api_keys_id_seq OWNED BY public.api_keys.id;
-
-CREATE TABLE public.cron_lock (
-    job_name character varying(255) NOT NULL,
-    locked_at timestamp with time zone
+CREATE TABLE "transaction_items" (
+  "item_id" SERIAL PRIMARY KEY,
+  "transaction_id" INTEGER,
+  "machine_id" TEXT,
+  "action" TEXT,
+  "package" TEXT,
+  "version" TEXT,
+  "release" TEXT,
+  "epoch" TEXT,
+  "arch" TEXT,
+  "repo" TEXT,
+  "from_repo" TEXT
 );
-
-CREATE TABLE public.executions (
-    id integer NOT NULL,
-    machine_id text NOT NULL,
-    hostname text NOT NULL,
-    executed_at timestamp with time zone NOT NULL,
-    success boolean NOT NULL,
-    details text,
-    transactions_processed integer,
-    transactions_sent integer,
-    agent_version text,
-    os text,
-    needs_restarting boolean,
-    restarting_reason text
+ALTER TABLE "transaction_items" ADD FOREIGN KEY ("transaction_id", "machine_id") REFERENCES "transactions" ("transaction_id", "machine_id");
+CREATE TABLE "executions" (
+  "id" SERIAL PRIMARY KEY,
+  "machine_id" text NOT NULL,
+  "hostname" text NOT NULL,
+  "executed_at" timestamp with time zone NOT NULL,
+  "success" boolean NOT NULL,
+  "details" text,
+  "transactions_processed" integer,
+  "transactions_sent" integer
 );
-CREATE SEQUENCE public.executions_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-ALTER SEQUENCE public.executions_id_seq OWNED BY public.executions.id;
-
-CREATE TABLE public.schema_migrations (
-    version bigint NOT NULL,
-    dirty boolean NOT NULL
+CREATE TABLE cron_lock
+(
+    job_name VARCHAR(255) PRIMARY KEY,
+    locked_at TIMESTAMP WITH TIME ZONE
 );
-
-CREATE TABLE public.statistics (
-    name text NOT NULL,
-    value integer NOT NULL,
-    percentage numeric(5,2),
-    updated_at timestamp with time zone
+CREATE TABLE statistics
+(
+    name TEXT NOT NULL,
+    value INTEGER NOT NULL,
+    percentage NUMERIC(5, 2),
+    updated_at TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (name)
 );
-
-CREATE TABLE public.transaction_items (
-    item_id integer NOT NULL,
-    transaction_id integer,
-    machine_id text,
-    action text,
-    package text,
-    version text,
-    release text,
-    epoch text,
-    arch text,
-    repo text,
-    from_repo text
+ALTER TABLE IF EXISTS public.executions ADD COLUMN agent_version text;
+ALTER TABLE IF EXISTS public.executions ADD COLUMN os text;
+ALTER TABLE IF EXISTS public.executions ADD COLUMN needs_restarting boolean;
+ALTER TABLE IF EXISTS public.executions ADD COLUMN restarting_reason text;
+CREATE INDEX IF NOT EXISTS idx_executions_ranked_optim ON public.executions (hostname, executed_at DESC) INCLUDE (machine_id, needs_restarting);
+CREATE INDEX IF NOT EXISTS idx_ti_pkg_ver_rel ON public.transaction_items (package, version DESC, release DESC);
+CREATE INDEX IF NOT EXISTS idx_ti_pkg_machid ON public.transaction_items (package, machine_id);
+DO $$
+BEGIN
+    -- Try to create the extension
+    CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    -- If extension exists, create the GIN index
+    IF EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm') THEN
+        CREATE INDEX IF NOT EXISTS idx_ti_package_gin ON public.transaction_items USING GIN (package gin_trgm_ops);
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Log the error but don't fail the migration
+        RAISE NOTICE 'Could not create pg_trgm extension or GIN index: %', SQLERRM;
+END $$;
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    sub VARCHAR(255) UNIQUE NOT NULL,  -- OIDC Subject identifier
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    picture VARCHAR(512),
+    is_active BOOLEAN DEFAULT true,
+    is_admin BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    last_login_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
-CREATE SEQUENCE public.transaction_items_item_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-ALTER SEQUENCE public.transaction_items_item_id_seq OWNED BY public.transaction_items.item_id;
-
-CREATE TABLE public.transactions (
-    transaction_id integer NOT NULL,
-    machine_id text NOT NULL,
-    hostname text,
-    begin_time timestamp with time zone,
-    end_time timestamp with time zone,
-    actions text,
-    altered text,
-    "user" text,
-    return_code text,
-    release_version text,
-    command_line text,
-    comment text,
-    scriptlet_output text
+CREATE TABLE IF NOT EXISTS user_sessions (
+    id VARCHAR(64) PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT true
 );
-
-CREATE TABLE public.user_sessions (
-    id character varying(64) NOT NULL,
-    user_id integer NOT NULL,
-    created_at timestamp with time zone DEFAULT now(),
-    expires_at timestamp with time zone NOT NULL,
-    is_active boolean DEFAULT true
+CREATE INDEX IF NOT EXISTS idx_users_sub ON users(sub);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_is_active ON users(is_active);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_is_active ON user_sessions(is_active);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at);
+CREATE TABLE IF NOT EXISTS api_keys (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    key_hash VARCHAR(64) NOT NULL UNIQUE,
+    key_prefix VARCHAR(16) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    last_used_at TIMESTAMP,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT api_keys_name_check CHECK (char_length(name) >= 3)
 );
-
-CREATE TABLE public.users (
-    id integer NOT NULL,
-    sub character varying(255) NOT NULL,
-    email character varying(255) NOT NULL,
-    name character varying(255) NOT NULL,
-    picture character varying(512),
-    is_active boolean DEFAULT true,
-    is_admin boolean DEFAULT false,
-    created_at timestamp with time zone DEFAULT now(),
-    updated_at timestamp with time zone DEFAULT now(),
-    last_login_at timestamp with time zone DEFAULT now()
-);
-CREATE SEQUENCE public.users_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
-
-ALTER TABLE ONLY public.api_keys ALTER COLUMN id SET DEFAULT nextval('public.api_keys_id_seq'::regclass);
-ALTER TABLE ONLY public.executions ALTER COLUMN id SET DEFAULT nextval('public.executions_id_seq'::regclass);
-ALTER TABLE ONLY public.transaction_items ALTER COLUMN item_id SET DEFAULT nextval('public.transaction_items_item_id_seq'::regclass);
-ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
-ALTER TABLE ONLY public.api_keys ADD CONSTRAINT api_keys_key_hash_key UNIQUE (key_hash);
-ALTER TABLE ONLY public.api_keys ADD CONSTRAINT api_keys_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.cron_lock ADD CONSTRAINT cron_lock_pkey PRIMARY KEY (job_name);
-ALTER TABLE ONLY public.executions ADD CONSTRAINT executions_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.schema_migrations ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
-ALTER TABLE ONLY public.statistics ADD CONSTRAINT statistics_pkey PRIMARY KEY (name);
-ALTER TABLE ONLY public.transaction_items ADD CONSTRAINT transaction_items_pkey PRIMARY KEY (item_id);
-ALTER TABLE ONLY public.transactions ADD CONSTRAINT transactions_pkey PRIMARY KEY (transaction_id, machine_id);
-ALTER TABLE ONLY public.user_sessions ADD CONSTRAINT user_sessions_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.users ADD CONSTRAINT users_email_key UNIQUE (email);
-ALTER TABLE ONLY public.users ADD CONSTRAINT users_pkey PRIMARY KEY (id);
-ALTER TABLE ONLY public.users ADD CONSTRAINT users_sub_key UNIQUE (sub);
-
-CREATE INDEX idx_api_keys_created_at ON public.api_keys USING btree (created_at DESC);
-CREATE INDEX idx_api_keys_key_hash ON public.api_keys USING btree (key_hash) WHERE (is_active = true);
-CREATE INDEX idx_executions_ranked_optim ON public.executions USING btree (hostname, executed_at DESC) INCLUDE (machine_id, needs_restarting);
-CREATE INDEX idx_ti_pkg_machid ON public.transaction_items USING btree (package, machine_id);
-CREATE INDEX idx_ti_pkg_ver_rel ON public.transaction_items USING btree (package, version DESC, release DESC);
-CREATE INDEX idx_user_sessions_expires_at ON public.user_sessions USING btree (expires_at);
-CREATE INDEX idx_user_sessions_is_active ON public.user_sessions USING btree (is_active);
-CREATE INDEX idx_user_sessions_user_id ON public.user_sessions USING btree (user_id);
-CREATE INDEX idx_users_email ON public.users USING btree (email);
-CREATE INDEX idx_users_is_active ON public.users USING btree (is_active);
-CREATE INDEX idx_users_sub ON public.users USING btree (sub);
-
-ALTER TABLE ONLY public.api_keys ADD CONSTRAINT api_keys_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id) ON DELETE SET NULL;
-ALTER TABLE ONLY public.transaction_items ADD CONSTRAINT transaction_items_transaction_id_machine_id_fkey FOREIGN KEY (transaction_id, machine_id) REFERENCES public.transactions(transaction_id, machine_id);
-ALTER TABLE ONLY public.user_sessions ADD CONSTRAINT user_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+CREATE INDEX idx_api_keys_key_hash ON api_keys(key_hash) WHERE is_active = true;
+CREATE INDEX idx_api_keys_created_at ON api_keys(created_at DESC);
+COMMENT ON TABLE api_keys IS 'API keys for authenticating API requests to /v1 endpoints';
+COMMENT ON COLUMN api_keys.key_hash IS 'SHA-256 hash of the actual API key';
+COMMENT ON COLUMN api_keys.key_prefix IS 'First 8 characters of key for identification (e.g., txlog_ab)';
+COMMENT ON COLUMN api_keys.last_used_at IS 'Timestamp of last successful authentication with this key';
 ```
 
 ### Additional Instructions for PostgreSQL Queries

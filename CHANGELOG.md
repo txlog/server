@@ -19,7 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
-## [Unreleased]
+## [1.16.2] - 2025-10-14
+
+### Fixed
+
+- Package listing page showing incorrect version counts due to 'Change ' prefix
+  in package names.
 
 ### Security
 

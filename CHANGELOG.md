@@ -19,6 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Security
+
+- Fix CVE-2025-59530 in github.com/quic-go/quic-go via minor version upgrade
+  from 0.54.0 to 0.54.1
+
 ## [1.16.1] - 2025-10-13
 
 ### Changed

@@ -37,18 +37,18 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
         WITH RankedItems AS (
             -- This part identifies the most recent version/release for each package
             SELECT
-                package,
-                ROW_NUMBER() OVER(PARTITION BY package ORDER BY version DESC, release DESC) as rn
+                REPLACE(package, 'Change ', '') AS package,
+                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
             FROM
                 public.transaction_items
         ),
         VersionCounts AS (
             -- This part counts how many unique version/release combinations each package has
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 COUNT(*) as total_versions
             FROM (
-                SELECT DISTINCT package, version, release
+                SELECT DISTINCT REPLACE(package, 'Change ', '') AS package, version, release
                 FROM public.transaction_items
             ) as distinct_versions
             GROUP BY
@@ -57,7 +57,7 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
         MachineCounts AS (
             -- This part counts on how many unique machines each package appears
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 COUNT(DISTINCT machine_id) as machine_count
             FROM
                 public.transaction_items
@@ -83,18 +83,18 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
         WITH RankedItems AS (
             -- This part identifies the most recent version/release for each package
             SELECT
-                package,
-                ROW_NUMBER() OVER(PARTITION BY package ORDER BY version DESC, release DESC) as rn
+                REPLACE(package, 'Change ', '') AS package,
+                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
             FROM
                 public.transaction_items
         ),
         VersionCounts AS (
             -- This part counts how many unique version/release combinations each package has
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 COUNT(*) as total_versions
             FROM (
-                SELECT DISTINCT package, version, release
+                SELECT DISTINCT REPLACE(package, 'Change ', '') AS package, version, release
                 FROM public.transaction_items
             ) as distinct_versions
             GROUP BY
@@ -103,7 +103,7 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
         MachineCounts AS (
             -- This part counts on how many unique machines each package appears
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 COUNT(DISTINCT machine_id) as machine_count
             FROM
                 public.transaction_items
@@ -140,22 +140,22 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
         WITH RankedItems AS (
             -- This part identifies the most recent version/release for each package
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 version,
                 release,
                 arch,
                 repo,
-                ROW_NUMBER() OVER(PARTITION BY package ORDER BY version DESC, release DESC) as rn
+                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
             FROM
                 public.transaction_items
         ),
         VersionCounts AS (
             -- This part counts how many unique version/release combinations each package has
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 COUNT(*) as total_versions
             FROM (
-                SELECT DISTINCT package, version, release
+                SELECT DISTINCT REPLACE(package, 'Change ', '') AS package, version, release
                 FROM public.transaction_items
             ) as distinct_versions
             GROUP BY
@@ -164,7 +164,7 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
         MachineCounts AS (
             -- This part counts on how many unique machines each package appears
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 COUNT(DISTINCT machine_id) as machine_count
             FROM
                 public.transaction_items
@@ -199,22 +199,22 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
         WITH RankedItems AS (
             -- This part identifies the most recent version/release for each package
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 version,
                 release,
                 arch,
                 repo,
-                ROW_NUMBER() OVER(PARTITION BY package ORDER BY version DESC, release DESC) as rn
+                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
             FROM
                 public.transaction_items
         ),
         VersionCounts AS (
             -- This part counts how many unique version/release combinations each package has
             SELECT
-                package,
+                REPLACE(package, 'Change ', '') AS package,
                 COUNT(*) as total_versions
             FROM (
-                SELECT DISTINCT package, version, release
+                SELECT DISTINCT REPLACE(package, 'Change ', '') AS package, version, release
                 FROM public.transaction_items
             ) as distinct_versions
             GROUP BY

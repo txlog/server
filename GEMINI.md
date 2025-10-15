@@ -282,3 +282,242 @@ make doc                    # Update API documentation (if API changed)
 - no `else { return <expr> }`, drop the `else`
 - **NEVER commit Go binaries to git** - build artifacts should only exist
   locally
+
+## Database schema (PostgreSQL)
+
+Here is the main database schema. Use it as a reference to generate all SQL queries.
+
+```sql
+CREATE TABLE public.api_keys (
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    key_hash character varying(64) NOT NULL,
+    key_prefix character varying(16) NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    last_used_at timestamp without time zone,
+    is_active boolean DEFAULT true NOT NULL,
+    created_by integer,
+    CONSTRAINT api_keys_name_check CHECK ((char_length((name)::text) >= 3))
+);
+COMMENT ON TABLE public.api_keys IS 'API keys for authenticating API requests to /v1 endpoints';
+COMMENT ON COLUMN public.api_keys.key_hash IS 'SHA-256 hash of the actual API key';
+COMMENT ON COLUMN public.api_keys.key_prefix IS 'First 8 characters of key for identification (e.g., txlog_ab)';
+COMMENT ON COLUMN public.api_keys.last_used_at IS 'Timestamp of last successful authentication with this key';
+
+CREATE SEQUENCE public.api_keys_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER SEQUENCE public.api_keys_id_seq OWNED BY public.api_keys.id;
+
+CREATE TABLE public.cron_lock (
+    job_name character varying(255) NOT NULL,
+    locked_at timestamp with time zone
+);
+
+CREATE TABLE public.executions (
+    id integer NOT NULL,
+    machine_id text NOT NULL,
+    hostname text NOT NULL,
+    executed_at timestamp with time zone NOT NULL,
+    success boolean NOT NULL,
+    details text,
+    transactions_processed integer,
+    transactions_sent integer,
+    agent_version text,
+    os text,
+    needs_restarting boolean,
+    restarting_reason text
+);
+CREATE SEQUENCE public.executions_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER SEQUENCE public.executions_id_seq OWNED BY public.executions.id;
+
+CREATE TABLE public.schema_migrations (
+    version bigint NOT NULL,
+    dirty boolean NOT NULL
+);
+
+CREATE TABLE public.statistics (
+    name text NOT NULL,
+    value integer NOT NULL,
+    percentage numeric(5,2),
+    updated_at timestamp with time zone
+);
+
+CREATE TABLE public.transaction_items (
+    item_id integer NOT NULL,
+    transaction_id integer,
+    machine_id text,
+    action text,
+    package text,
+    version text,
+    release text,
+    epoch text,
+    arch text,
+    repo text,
+    from_repo text
+);
+CREATE SEQUENCE public.transaction_items_item_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER SEQUENCE public.transaction_items_item_id_seq OWNED BY public.transaction_items.item_id;
+
+CREATE TABLE public.transactions (
+    transaction_id integer NOT NULL,
+    machine_id text NOT NULL,
+    hostname text,
+    begin_time timestamp with time zone,
+    end_time timestamp with time zone,
+    actions text,
+    altered text,
+    "user" text,
+    return_code text,
+    release_version text,
+    command_line text,
+    comment text,
+    scriptlet_output text
+);
+
+CREATE TABLE public.user_sessions (
+    id character varying(64) NOT NULL,
+    user_id integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now(),
+    expires_at timestamp with time zone NOT NULL,
+    is_active boolean DEFAULT true
+);
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    sub character varying(255) NOT NULL,
+    email character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    picture character varying(512),
+    is_active boolean DEFAULT true,
+    is_admin boolean DEFAULT false,
+    created_at timestamp with time zone DEFAULT now(),
+    updated_at timestamp with time zone DEFAULT now(),
+    last_login_at timestamp with time zone DEFAULT now()
+);
+CREATE SEQUENCE public.users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+ALTER TABLE ONLY public.api_keys ALTER COLUMN id SET DEFAULT nextval('public.api_keys_id_seq'::regclass);
+ALTER TABLE ONLY public.executions ALTER COLUMN id SET DEFAULT nextval('public.executions_id_seq'::regclass);
+ALTER TABLE ONLY public.transaction_items ALTER COLUMN item_id SET DEFAULT nextval('public.transaction_items_item_id_seq'::regclass);
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+ALTER TABLE ONLY public.api_keys ADD CONSTRAINT api_keys_key_hash_key UNIQUE (key_hash);
+ALTER TABLE ONLY public.api_keys ADD CONSTRAINT api_keys_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.cron_lock ADD CONSTRAINT cron_lock_pkey PRIMARY KEY (job_name);
+ALTER TABLE ONLY public.executions ADD CONSTRAINT executions_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.schema_migrations ADD CONSTRAINT schema_migrations_pkey PRIMARY KEY (version);
+ALTER TABLE ONLY public.statistics ADD CONSTRAINT statistics_pkey PRIMARY KEY (name);
+ALTER TABLE ONLY public.transaction_items ADD CONSTRAINT transaction_items_pkey PRIMARY KEY (item_id);
+ALTER TABLE ONLY public.transactions ADD CONSTRAINT transactions_pkey PRIMARY KEY (transaction_id, machine_id);
+ALTER TABLE ONLY public.user_sessions ADD CONSTRAINT user_sessions_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.users ADD CONSTRAINT users_email_key UNIQUE (email);
+ALTER TABLE ONLY public.users ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.users ADD CONSTRAINT users_sub_key UNIQUE (sub);
+
+CREATE INDEX idx_api_keys_created_at ON public.api_keys USING btree (created_at DESC);
+CREATE INDEX idx_api_keys_key_hash ON public.api_keys USING btree (key_hash) WHERE (is_active = true);
+CREATE INDEX idx_executions_ranked_optim ON public.executions USING btree (hostname, executed_at DESC) INCLUDE (machine_id, needs_restarting);
+CREATE INDEX idx_ti_pkg_machid ON public.transaction_items USING btree (package, machine_id);
+CREATE INDEX idx_ti_pkg_ver_rel ON public.transaction_items USING btree (package, version DESC, release DESC);
+CREATE INDEX idx_user_sessions_expires_at ON public.user_sessions USING btree (expires_at);
+CREATE INDEX idx_user_sessions_is_active ON public.user_sessions USING btree (is_active);
+CREATE INDEX idx_user_sessions_user_id ON public.user_sessions USING btree (user_id);
+CREATE INDEX idx_users_email ON public.users USING btree (email);
+CREATE INDEX idx_users_is_active ON public.users USING btree (is_active);
+CREATE INDEX idx_users_sub ON public.users USING btree (sub);
+
+ALTER TABLE ONLY public.api_keys ADD CONSTRAINT api_keys_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id) ON DELETE SET NULL;
+ALTER TABLE ONLY public.transaction_items ADD CONSTRAINT transaction_items_transaction_id_machine_id_fkey FOREIGN KEY (transaction_id, machine_id) REFERENCES public.transactions(transaction_id, machine_id);
+ALTER TABLE ONLY public.user_sessions ADD CONSTRAINT user_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+```
+
+### Additional Instructions for PostgreSQL Queries
+
+**General Behavior:**
+
+- You are an expert PostgreSQL developer.
+- Your primary goal is to write queries that are **correct, performant, secure,
+  and readable**.
+- Always use the schema provided above as the single source of truth for table
+  and column names. Do not invent columns.
+- If a user's request is ambiguous, ask for clarification before generating a
+  query.
+- Briefly explain the logic of complex queries, especially those involving
+  multiple CTEs or window functions.
+
+**Performance & Best Practices:**
+
+- **Prefer `JOIN` over subqueries** in the `WHERE` clause when possible for
+  better performance and readability.
+- Use **Common Table Expressions (CTEs)** with the `WITH` clause to break down
+  complex queries and improve organization.
+- When filtering on indexed columns, avoid using functions on the column itself
+  (e.g., use `WHERE indexed_column >= NOW() - INTERVAL '1 day'` instead of
+  `WHERE DATE(indexed_column) = CURRENT_DATE - 1`). This ensures the index can
+  be used effectively.
+- Use `LIMIT` when you only need a subset of results to avoid unnecessary data
+  fetching.
+- For checking existence, prefer `WHERE EXISTS (...)` over `WHERE column IN
+  (...)` as it is often more efficient.
+- Be mindful of `ILIKE` and the `%text%` pattern, as they can be slow. If
+  suggesting them, add a comment noting the potential performance impact on
+  large tables.
+- Utilize PostgreSQL-specific features when appropriate, such as `JSONB`
+  operators (`@>`, `?`, `->`), `LATERAL` joins, and window functions (`OVER
+  (...)`).
+
+**Data Types & Syntax:**
+
+- Always use the **standard SQL `-` for comments**.
+- For timestamp operations, prefer the standard and more precise `TIMESTAMP WITH
+  TIME ZONE` (`TIMESTAMPTZ`) functions like `NOW()` and `CURRENT_TIMESTAMP`.
+  Avoid `GETDATE()` which is not a standard PostgreSQL function.
+- Use `COALESCE(column, 'default_value')` to handle `NULL` values gracefully.
+- Use the `::` syntax for type casting (e.g., `'123'::INT`). It is the most
+  common and idiomatic way in PostgreSQL.
+- When generating placeholder values for user input in application code, use
+  parameterized query syntax (e.g., `$1`, `$2`, ...) instead of directly
+  embedding values to prevent SQL injection.
+
+**Security:**
+
+- **NEVER** generate queries that select sensitive user data like passwords,
+  even if they are hashed (`password_hash`, `user_salt`, etc.).
+- Avoid using `SELECT *`. Always explicitly list the columns you need. This
+  prevents accidentally exposing sensitive data and makes queries more
+  predictable.
+- Be cautious with cascading deletes (`ON DELETE CASCADE`). If you include it in
+  a `CREATE TABLE` statement, add a comment highlighting its presence.
+
+**Readability & Style:**
+
+- Format the SQL query for readability: use indentation, place each major clause
+  (`SELECT`, `FROM`, `WHERE`, `GROUP BY`) on a new line.
+- Use meaningful aliases for tables (e.g., `users u`, `products p`) and columns
+  (e.g., `COUNT(*) AS total_orders`).
+- All SQL keywords should be in uppercase (`SELECT`, `FROM`, `WHERE`, etc.).
+  Table and column names should be in lowercase (`snake_case`), matching the
+  provided schema.

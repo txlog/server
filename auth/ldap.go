@@ -399,13 +399,41 @@ func (s *LDAPService) createOrUpdateUser(username, email, name string, isAdmin b
 	// Use username as the unique identifier (sub field)
 	sub := "ldap:" + username
 
-	// Check if user already exists
-	existingUser, err := s.getUserBySub(sub)
+	// Check if user already exists by email
+	existingUser, err := s.getUserByEmail(email)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 
 	now := time.Now()
+
+	if existingUser != nil {
+		// Update existing user
+		updateQuery := `
+			UPDATE users 
+			SET sub = $1, name = $2, is_admin = $3, updated_at = $4, last_login_at = $5
+			WHERE email = $6
+			RETURNING id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, created_at, updated_at, last_login_at
+		`
+
+		user := &models.User{}
+		err = s.DB.QueryRow(updateQuery, sub, name, isAdmin, now, now, email).Scan(
+			&user.ID, &user.Sub, &user.Email, &user.Name, &user.Picture,
+			&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("failed to update user: %w", err)
+		}
+
+		return user, nil
+	}
+
+	// Check if user already exists by sub
+	existingUser, err = s.getUserBySub(sub)
+	if err != nil && err != sql.ErrNoRows {
+		return nil, fmt.Errorf("failed to check existing user: %w", err)
+	}
 
 	if existingUser != nil {
 		// Update existing user
@@ -459,6 +487,25 @@ func (s *LDAPService) getUserBySub(sub string) (*models.User, error) {
 
 	user := &models.User{}
 	err := s.DB.QueryRow(query, sub).Scan(
+		&user.ID, &user.Sub, &user.Email, &user.Name, &user.Picture,
+		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, sql.ErrNoRows
+	}
+
+	return user, err
+}
+
+func (s *LDAPService) getUserByEmail(email string) (*models.User, error) {
+	query := `
+		SELECT id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, created_at, updated_at, last_login_at
+		FROM users WHERE email = $1
+	`
+
+	user := &models.User{}
+	err := s.DB.QueryRow(query, email).Scan(
 		&user.ID, &user.Sub, &user.Email, &user.Name, &user.Picture,
 		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 	)

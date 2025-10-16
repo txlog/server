@@ -397,7 +397,7 @@ func (s *LDAPService) getAttributeValue(attrs map[string]string, key string) str
 
 func (s *LDAPService) createOrUpdateUser(username, email, name string, isAdmin bool) (*models.User, error) {
 	// Use username as the unique identifier (sub field)
-	sub := "ldap:" + username
+	ldapSub := "ldap:" + username
 
 	// Check if user already exists by email
 	existingUser, err := s.getUserByEmail(email)
@@ -408,29 +408,29 @@ func (s *LDAPService) createOrUpdateUser(username, email, name string, isAdmin b
 	now := time.Now()
 
 	if existingUser != nil {
-		// Update existing user
-		updateQuery := `
-			UPDATE users 
-			SET sub = $1, name = $2, is_admin = $3, updated_at = $4, last_login_at = $5
-			WHERE email = $6
-			RETURNING id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, created_at, updated_at, last_login_at
-		`
-
-		user := &models.User{}
-		err = s.DB.QueryRow(updateQuery, sub, name, isAdmin, now, now, email).Scan(
-			&user.ID, &user.Sub, &user.Email, &user.Name, &user.Picture,
-			&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
-		)
-
-		if err != nil {
-			return nil, fmt.Errorf("failed to update user: %w", err)
+		// User exists. If their sub is from OIDC, do not change it.
+		if !strings.HasPrefix(existingUser.Sub, "ldap:") {
+			// This is an OIDC user. Update details but NOT sub.
+			updateQuery := `
+				UPDATE users 
+				SET name = $1, is_admin = $2, updated_at = $3, last_login_at = $4
+				WHERE email = $5
+				RETURNING id, sub, email, name, COALESCE(picture, '') as picture, is_active, is_admin, created_at, updated_at, last_login_at
+			`
+			user := &models.User{}
+			err = s.DB.QueryRow(updateQuery, name, isAdmin, now, now, email).Scan(
+				&user.ID, &user.Sub, &user.Email, &user.Name, &user.Picture,
+				&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
+			)
+			if err != nil {
+				return nil, fmt.Errorf("failed to update OIDC user with LDAP details: %w", err)
+			}
+			return user, nil
 		}
-
-		return user, nil
 	}
 
 	// Check if user already exists by sub
-	existingUser, err = s.getUserBySub(sub)
+	existingUser, err = s.getUserBySub(ldapSub)
 	if err != nil && err != sql.ErrNoRows {
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
@@ -445,7 +445,7 @@ func (s *LDAPService) createOrUpdateUser(username, email, name string, isAdmin b
 		`
 
 		user := &models.User{}
-		err = s.DB.QueryRow(updateQuery, sub, email, name, isAdmin, now, now).Scan(
+		err = s.DB.QueryRow(updateQuery, ldapSub, email, name, isAdmin, now, now).Scan(
 			&user.ID, &user.Sub, &user.Email, &user.Name, &user.Picture,
 			&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 		)
@@ -465,7 +465,7 @@ func (s *LDAPService) createOrUpdateUser(username, email, name string, isAdmin b
 	`
 
 	user := &models.User{}
-	err = s.DB.QueryRow(insertQuery, sub, email, name, isAdmin, now).Scan(
+	err = s.DB.QueryRow(insertQuery, ldapSub, email, name, isAdmin, now).Scan(
 		&user.ID, &user.Sub, &user.Email, &user.Name, &user.Picture,
 		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 	)

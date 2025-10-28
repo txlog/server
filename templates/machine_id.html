@@ -306,7 +306,7 @@
   }
 
   function showModal(transactionId) {
-    fetch(`/v1/items?machine_id={{ .machine_id }}&transaction_id=${transactionId}`)
+    fetch(`/web/items?machine_id={{ .machine_id }}&transaction_id=${transactionId}`)
       .then(response => response.json())
       .then(data => {
         const result = data;

@@ -19,6 +19,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.17.0] - 2025-10-29
+
+### Added
+
+- Prioritize OIDC `sub` over LDAP `sub` for user authentication, ensuring
+  consistent user identification across different identity providers.
+
+### Changed
+
+- Bump `github.com/tavsec/gin-healthcheck` from 1.7.9 to 1.8.0.
+- Add new database indexes to improve query performance.
+
+### Fixed
+
+- Fix modal for asset details.
+- Fix a bug related to the Tabler javascript library.
+- Check for existing user by email before creating a new user to prevent
+  duplicates.
+
 ## [1.16.2] - 2025-10-14
 
 ### Fixed

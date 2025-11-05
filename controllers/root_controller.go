@@ -60,6 +60,15 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		totalActiveAssets, err := getTotalActiveAssets(database)
+		if err != nil {
+			logger.Error("Error getting total active assets:" + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
 		assetsByOS, err := getAssetsByOS(database)
 		if err != nil {
 			logger.Error("Error getting assets by OS:" + err.Error())
@@ -100,6 +109,7 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 			"Context":              c,
 			"title":                "Transaction Overview",
 			"statistics":           statistics,
+			"totalActiveAssets":    totalActiveAssets,
 			"assetsByOS":           assetsByOS,
 			"assetsByAgentVersion": assetsByAgentVersion,
 			"duplicatedAssets":     duplicatedAssets,
@@ -147,6 +157,30 @@ func getStatistics(database *sql.DB) ([]models.Statistic, error) {
 	}
 
 	return statistics, nil
+}
+
+// getTotalActiveAssets retrieves the count of active assets from the database.
+// It queries the assets table and returns the count of all assets where is_active = TRUE.
+//
+// Parameters:
+//   - database: *sql.DB - The database connection to query data from
+//
+// Returns:
+//   - int: The total number of active assets
+//   - error: An error if the database query fails, nil otherwise
+func getTotalActiveAssets(database *sql.DB) (int, error) {
+	var count int
+	err := database.QueryRow(`
+		SELECT COUNT(*)
+		FROM assets
+		WHERE is_active = TRUE
+	`).Scan(&count)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 // getAssetsByOS retrieves statistics about the number of unique machines per

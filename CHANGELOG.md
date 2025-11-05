@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `deactivated_at` timestamps.
 - `AssetManager` model for managing asset upsert, activation, and deactivation
   logic.
+- Real-time active assets count on dashboard (no longer cached in statistics
+  table).
 
 ### Changed
 
@@ -44,6 +46,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Duplicated assets detection simplified using direct COUNT on assets table.
 - API endpoints for executions and transactions now automatically maintain
   assets table.
+- Assets card in dashboard now shows real-time count instead of cached
+  statistic.
+
+### Removed
+
+- `CountServers()` statistics function (replaced with real-time query).
+- `servers-30-days` statistic from statistics table (no longer needed).
 
 ## [1.17.0] - 2025-10-29
 

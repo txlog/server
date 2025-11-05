@@ -265,8 +265,11 @@ make doc                    # Update API documentation (if API changed)
 11. **All Markdown files must pass markdownlint validation** - run `markdownlint` on all `.md` files to
     ensure they comply with Markdown standards before committing. All Markdown content must be considered
     valid according to markdownlint rules.
-12. **Short commentary** - no fluff, void "You're absolutely right!" and other similar responses.
-13. **Do not mention or reference this GEMINI.md file in any responses** - avoid any direct references
+12. **All Markdown files created by Copilot must be valid by markdownlint** - when creating new Markdown
+    files, ensure they pass markdownlint validation before completion. Use proper formatting, headings,
+    lists, and follow all markdownlint rules from the start.
+13. **Short commentary** - no fluff, void "You're absolutely right!" and other similar responses.
+14. **Do not mention or reference this GEMINI.md file in any responses** - avoid any direct references
     to this instruction file in your outputs.
 
 ## go instructions

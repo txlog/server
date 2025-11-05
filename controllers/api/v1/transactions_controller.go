@@ -254,6 +254,20 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			}
 		}
 
+		assetManager := models.NewAssetManager(database)
+		timestamp := body.BeginTime
+		if timestamp == nil {
+			now := beginTime.Time
+			timestamp = &now
+		}
+		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp)
+		if err != nil {
+			tx.Rollback()
+			logger.Error("Error upserting asset:" + err.Error())
+			c.AbortWithStatusJSON(500, gin.H{"error": "Failed to update asset registry"})
+			return
+		}
+
 		// Commit the database transaction
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()

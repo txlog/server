@@ -19,6 +19,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- Assets table to centralize asset identity management with logical (hostname)
+  and physical (machine_id) identifiers.
+- Asset lifecycle tracking with `is_active` flag to distinguish current assets
+  from replaced ones.
+- Automatic asset replacement detection when same hostname reports with
+  different machine_id.
+- Asset history preservation with `first_seen`, `last_seen`, and
+  `deactivated_at` timestamps.
+- `AssetManager` model for managing asset upsert, activation, and deactivation
+  logic.
+
+### Changed
+
+- Refactored asset queries to use centralized assets table instead of window
+  functions over executions.
+- Dashboard statistics now reflect only active assets.
+- Asset listing endpoints (`/assets`, `/v1/machines`) now query active assets
+  from dedicated table.
+- Duplicated assets detection simplified using direct COUNT on assets table.
+- API endpoints for executions and transactions now automatically maintain
+  assets table.
+
 ## [1.17.0] - 2025-10-29
 
 ### Added

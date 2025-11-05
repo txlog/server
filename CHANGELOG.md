@@ -50,6 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   statistic.
 - Improved vertical spacing consistency across all four statistics cards on
   dashboard.
+- Assets listing page (`/assets`) now uses `last_seen` column from assets table
+  for filtering inactive assets instead of querying executions table.
 
 ### Removed
 

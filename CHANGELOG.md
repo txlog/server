@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   logic.
 - Real-time active assets count on dashboard (no longer cached in statistics
   table).
+- Comprehensive test suite for assets functionality (models, controllers, and
+  integration tests).
 
 ### Changed
 

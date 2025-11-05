@@ -31,7 +31,7 @@
                     <input type="text" class="form-control" autocomplete="off" aria-label="Search assets" placeholder="Search by hostname or id" value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)">
                   </div>
                   <div class="col-auto">
-                    <label class="form-selectgroup-item" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="Show only assets that need to be restarted">
+                    <label class="form-selectgroup-item" id="restart-label" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-trigger="hover" data-bs-original-title="Show only assets that need to be restarted">
                       <input type="checkbox" id="restart" name="restart" value="true" class="form-selectgroup-input"{{ if eq .restart "true" }} checked{{ end }}>
                       <span class="form-selectgroup-label">
                         <!-- Download SVG icon from http://tabler.io/icons/icon/refresh-alert -->
@@ -40,7 +40,7 @@
                     </label>
                   </div>
                   <div class="col-auto">
-                    <label class="form-selectgroup-item" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-original-title="Show only assets that have not sent data in the last 15 days">
+                    <label class="form-selectgroup-item" id="inactive-label" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-trigger="hover" data-bs-original-title="Show only assets that have not sent data in the last 15 days">
                       <input type="checkbox" id="inactive" name="inactive" value="true" class="form-selectgroup-input"{{ if eq .inactive "true" }} checked{{ end }}>
                       <span class="form-selectgroup-label">
                         <!-- Download SVG icon from http://tabler.io/icons/icon/power -->
@@ -173,5 +173,25 @@
       search();
     }
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const restartCheckbox = document.getElementById('restart');
+    const inactiveCheckbox = document.getElementById('inactive');
+    const restartLabel = document.getElementById('restart-label');
+    const inactiveLabel = document.getElementById('inactive-label');
+
+    [restartCheckbox, inactiveCheckbox].forEach((checkbox, index) => {
+      const label = index === 0 ? restartLabel : inactiveLabel;
+      
+      checkbox.addEventListener('change', function() {
+        const tooltip = bootstrap.Tooltip.getInstance(label);
+        if (tooltip) {
+          tooltip.hide();
+        }
+        label.blur();
+        checkbox.blur();
+      });
+    });
+  });
 </script>
 {{ template "footer.html" . }}

@@ -61,6 +61,13 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		baseCountQuery := `
 			SELECT COUNT(DISTINCT a.hostname)
 			FROM assets a
+			LEFT JOIN LATERAL (
+				SELECT os, needs_restarting
+				FROM executions
+				WHERE machine_id = a.machine_id AND hostname = a.hostname
+				ORDER BY executed_at DESC
+				LIMIT 1
+			) e ON true
 			WHERE a.is_active = TRUE
 		`
 

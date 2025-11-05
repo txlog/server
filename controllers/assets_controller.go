@@ -59,10 +59,15 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		var queryArgs []interface{}
 
 		activeFilter := "a.is_active = TRUE"
+		// When searching by machine_id, include both active and inactive assets.
+		// This allows users to view historical assets by their unique machine ID,
+		// even if the asset is no longer active.
 		if searchType == "a.machine_id" {
 			activeFilter = "1=1"
 		}
 
+		// Note: activeFilter is safe to concatenate into SQL as it only contains
+		// two hardcoded values ("a.is_active = TRUE" or "1=1"), never user input.
 		baseCountQuery := `
 			SELECT COUNT(DISTINCT a.hostname)
 			FROM assets a
@@ -77,7 +82,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		`
 
 		baseSelectQuery := `
-			SELECT 
+			SELECT
 				a.asset_id as execution_id,
 				a.hostname,
 				a.last_seen as executed_at,

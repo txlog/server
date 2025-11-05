@@ -7,6 +7,9 @@ tmp_dir = "tmp"
   bin = "./tmp/main"
   cmd = "go build -o ./tmp/main ."
   delay = 1000
+  # Templates are embedded in the binary, so changes to template files
+  # will trigger a rebuild to update the embedded content. This ensures
+  # template modifications are immediately reflected in the running application.
   exclude_dir = ["tmp", "testdata"]
   exclude_file = []
   exclude_regex = ["_test.go"]

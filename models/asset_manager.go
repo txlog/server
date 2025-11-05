@@ -20,8 +20,8 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 	var existingIsActive bool
 
 	err := tx.QueryRow(`
-		SELECT asset_id, is_active 
-		FROM assets 
+		SELECT asset_id, is_active
+		FROM assets
 		WHERE hostname = $1 AND machine_id = $2
 	`, hostname, machineID).Scan(&existingAssetID, &existingIsActive)
 
@@ -49,7 +49,7 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 	}
 
 	_, err = tx.Exec(`
-		UPDATE assets 
+		UPDATE assets
 		SET last_seen = $1
 		WHERE asset_id = $2
 	`, timestamp, existingAssetID)
@@ -66,7 +66,7 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 		}
 
 		_, err = tx.Exec(`
-			UPDATE assets 
+			UPDATE assets
 			SET is_active = TRUE, deactivated_at = NULL
 			WHERE asset_id = $1
 		`, existingAssetID)
@@ -84,10 +84,10 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 
 func (am *AssetManager) deactivateOldAssets(tx *sql.Tx, hostname string, newMachineID string) error {
 	_, err := tx.Exec(`
-		UPDATE assets 
+		UPDATE assets
 		SET is_active = FALSE, deactivated_at = CURRENT_TIMESTAMP
-		WHERE hostname = $1 
-		AND machine_id != $2 
+		WHERE hostname = $1
+		AND machine_id != $2
 		AND is_active = TRUE
 	`, hostname, newMachineID)
 
@@ -101,6 +101,8 @@ func (am *AssetManager) deactivateOldAssets(tx *sql.Tx, hostname string, newMach
 
 func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 	var asset Asset
+	var deactivatedAt sql.NullTime
+
 	err := am.db.QueryRow(`
 		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at
 		FROM assets
@@ -114,11 +116,15 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 		&asset.LastSeen,
 		&asset.IsActive,
 		&asset.CreatedAt,
-		&asset.DeactivatedAt,
+		&deactivatedAt,
 	)
 
 	if err != nil {
 		return nil, err
+	}
+
+	if deactivatedAt.Valid {
+		asset.DeactivatedAt = &deactivatedAt.Time
 	}
 
 	return &asset, nil

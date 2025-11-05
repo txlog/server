@@ -19,9 +19,16 @@
           <div class="card-header">
             <h3 class="card-title">
               {{ if .search }}
-                Assets {{ if eq .restart "true" }}that need to be restarted{{ end }}{{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}{{ if eq .inactive "true" }} without data in the last 15 days{{ end }} containing <kbd>{{ .search }}</kbd>
+                Assets
+                {{ if eq .restart "true" }}that need to be restarted{{ end }}
+                {{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}
+                {{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
+                containing <kbd>{{ .search }}</kbd>
               {{ else }}
-                Registered assets {{ if eq .restart "true" }}that need to be restarted{{ end }}{{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}{{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
+                Registered assets
+                {{ if eq .restart "true" }}that need to be restarted{{ end }}
+                {{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}
+                {{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
               {{ end }}
             </h3>
             <div class="card-actions">

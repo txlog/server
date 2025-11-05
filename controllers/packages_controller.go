@@ -55,12 +55,16 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 package
         ),
         MachineCounts AS (
-            -- This part counts on how many unique machines each package appears
+            -- This part counts on how many unique machines each package appears (active assets only)
             SELECT
-                REPLACE(package, 'Change ', '') AS package,
-                COUNT(DISTINCT machine_id) as machine_count
+                REPLACE(ti.package, 'Change ', '') AS package,
+                COUNT(DISTINCT ti.machine_id) as machine_count
             FROM
-                public.transaction_items
+                public.transaction_items ti
+            JOIN
+                public.assets a ON ti.machine_id = a.machine_id
+            WHERE
+                a.is_active = TRUE
             GROUP BY
                 package
         )
@@ -101,12 +105,16 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 package
         ),
         MachineCounts AS (
-            -- This part counts on how many unique machines each package appears
+            -- This part counts on how many unique machines each package appears (active assets only)
             SELECT
-                REPLACE(package, 'Change ', '') AS package,
-                COUNT(DISTINCT machine_id) as machine_count
+                REPLACE(ti.package, 'Change ', '') AS package,
+                COUNT(DISTINCT ti.machine_id) as machine_count
             FROM
-                public.transaction_items
+                public.transaction_items ti
+            JOIN
+                public.assets a ON ti.machine_id = a.machine_id
+            WHERE
+                a.is_active = TRUE
             GROUP BY
                 package
         )
@@ -162,12 +170,16 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 package
         ),
         MachineCounts AS (
-            -- This part counts on how many unique machines each package appears
+            -- This part counts on how many unique machines each package appears (active assets only)
             SELECT
-                REPLACE(package, 'Change ', '') AS package,
-                COUNT(DISTINCT machine_id) as machine_count
+                REPLACE(ti.package, 'Change ', '') AS package,
+                COUNT(DISTINCT ti.machine_id) as machine_count
             FROM
-                public.transaction_items
+                public.transaction_items ti
+            JOIN
+                public.assets a ON ti.machine_id = a.machine_id
+            WHERE
+                a.is_active = TRUE
             GROUP BY
                 package
         )
@@ -221,12 +233,16 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 package
         ),
         MachineCounts AS (
-            -- This part counts on how many unique machines each package appears
+            -- This part counts on how many unique machines each package appears (active assets only)
             SELECT
-                package,
-                COUNT(DISTINCT machine_id) as machine_count
+                ti.package,
+                COUNT(DISTINCT ti.machine_id) as machine_count
             FROM
-                public.transaction_items
+                public.transaction_items ti
+            JOIN
+                public.assets a ON ti.machine_id = a.machine_id
+            WHERE
+                a.is_active = TRUE
             GROUP BY
                 package
         )

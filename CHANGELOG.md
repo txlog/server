@@ -37,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   table).
 - Comprehensive test suite for assets functionality (models, controllers, and
   integration tests).
+- Test suite for statistics package (CountExecutions, CountInstalledPackages,
+  CountUpgradedPackages).
+- Test suite for scheduler package (lock acquisition, housekeeping, retention).
+- Test suite for packages_by_week_controller (graph data, ordering, filters).
+- Code documentation and comments explaining business logic and SQL injection
+  safety.
 
 ### Changed
 
@@ -54,10 +60,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dashboard.
 - Assets listing page (`/assets`) now uses `last_seen` column from assets table
   for filtering inactive assets instead of querying executions table.
+- Package listing page now shows machine counts only for active assets (excludes
+  replaced/inactive assets from statistics).
+- Dashboard statistics cards (OS distribution, Agent distribution, Replaced
+  assets, Most updated packages) now filter to show only active assets.
+- Improved template readability by breaking nested conditionals into multiple
+  lines in assets.html.
+- Enhanced Air configuration with comments explaining template rebuild behavior.
+
+### Fixed
+
+- Fixed `GetActiveAsset` method to properly handle NULL `deactivated_at` values
+  using `sql.NullTime` to prevent scan errors.
+- Fixed package machine counts including inactive assets, causing inflated
+  statistics for replaced machines.
+- Fixed dashboard cards showing data from both active and inactive assets.
 
 ### Removed
 
 - `CountServers()` statistics function (replaced with real-time query).
+- `servers-30-days` statistic from statistics table (no longer needed).
 - `servers-30-days` statistic from statistics table (no longer needed).
 
 ## [1.17.0] - 2025-10-29

@@ -61,20 +61,25 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		baseCountQuery := `
 			SELECT COUNT(DISTINCT a.hostname)
 			FROM assets a
-			INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
 			WHERE a.is_active = TRUE
 		`
 
 		baseSelectQuery := `
 			SELECT 
-				e.id as execution_id,
+				a.asset_id as execution_id,
 				a.hostname,
-				e.executed_at,
+				a.last_seen as executed_at,
 				a.machine_id,
 				e.os,
 				e.needs_restarting
 			FROM assets a
-			INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+			LEFT JOIN LATERAL (
+				SELECT os, needs_restarting
+				FROM executions
+				WHERE machine_id = a.machine_id AND hostname = a.hostname
+				ORDER BY executed_at DESC
+				LIMIT 1
+			) e ON true
 			WHERE a.is_active = TRUE
 		`
 
@@ -92,18 +97,10 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if inactive == "true" {
-			whereClause += " AND e.executed_at < NOW() - INTERVAL '15 days'"
+			whereClause += " AND a.last_seen < NOW() - INTERVAL '15 days'"
 		}
 
-		subquery := `
-			AND e.executed_at = (
-				SELECT MAX(e2.executed_at)
-				FROM executions e2
-				WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
-			)
-		`
-
-		countQuery = baseCountQuery + whereClause + subquery
+		countQuery = baseCountQuery + whereClause
 		err = database.QueryRow(countQuery, queryArgs...).Scan(&total)
 
 		if err != nil {
@@ -116,7 +113,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		totalPages := (total + limit - 1) / limit
 
-		selectQuery := baseSelectQuery + whereClause + subquery + `
+		selectQuery := baseSelectQuery + whereClause + `
 			ORDER BY a.hostname
 			LIMIT $` + strconv.Itoa(paramNum) + ` OFFSET $` + strconv.Itoa(paramNum+1)
 

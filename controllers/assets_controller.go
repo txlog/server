@@ -39,9 +39,9 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		restart := c.Query("restart")
 		inactive := c.Query("inactive")
 
-		searchType := "hostname"
+		searchType := "a.hostname"
 		if len(search) == 32 && !util.ContainsSpecialCharacters(search) {
-			searchType = "machine_id"
+			searchType = "a.machine_id"
 		}
 
 		limit := 100
@@ -54,72 +54,60 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		}
 		offset := (page - 1) * limit
 
-		// First, get total asset count
 		var total int
-		var query string
+		var countQuery string
+		var queryArgs []interface{}
+
+		baseCountQuery := `
+			SELECT COUNT(DISTINCT a.hostname)
+			FROM assets a
+			INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+			WHERE a.is_active = TRUE
+		`
+
+		baseSelectQuery := `
+			SELECT 
+				e.id as execution_id,
+				a.hostname,
+				e.executed_at,
+				a.machine_id,
+				e.os,
+				e.needs_restarting
+			FROM assets a
+			INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+			WHERE a.is_active = TRUE
+		`
+
+		whereClause := ""
+		paramNum := 1
 
 		if search != "" {
-			restartQuery := ""
-			if restart == "true" {
-				restartQuery = ` AND needs_restarting IS TRUE`
-			}
-
-			inactiveQuery := ""
-			if inactive == "true" {
-				inactiveQuery = ` AND sub.executed_at < NOW() - INTERVAL '15 days'`
-			}
-
-			query = `
-        SELECT
-          count(hostname)
-        FROM (
-          SELECT
-            hostname,
-			executed_at,
-            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-          FROM
-            executions
-          WHERE
-            ` + searchType + ` ILIKE $1
-            ` + restartQuery + `
-        ) sub
-        WHERE
-          sub.rn = 1
-          ` + inactiveQuery + `
-      `
-			err = database.QueryRow(query, util.FormatSearchTerm(search)).Scan(&total)
-		} else {
-			restartQuery := ""
-			if restart == "true" {
-				restartQuery = ` WHERE needs_restarting IS TRUE`
-			}
-
-			inactiveQuery := ""
-			if inactive == "true" {
-				inactiveQuery = ` AND sub.executed_at < NOW() - INTERVAL '15 days'`
-			}
-
-			query = `
-        SELECT
-          count(hostname)
-        FROM (
-          SELECT
-            hostname,
-			executed_at,
-            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-          FROM
-            executions
-          ` + restartQuery + `
-        ) sub
-        WHERE
-          sub.rn = 1
-		  ` + inactiveQuery + `
-      `
-			err = database.QueryRow(query).Scan(&total)
+			whereClause += " AND " + searchType + " ILIKE $" + strconv.Itoa(paramNum)
+			queryArgs = append(queryArgs, util.FormatSearchTerm(search))
+			paramNum++
 		}
 
+		if restart == "true" {
+			whereClause += " AND e.needs_restarting IS TRUE"
+		}
+
+		if inactive == "true" {
+			whereClause += " AND e.executed_at < NOW() - INTERVAL '15 days'"
+		}
+
+		subquery := `
+			AND e.executed_at = (
+				SELECT MAX(e2.executed_at)
+				FROM executions e2
+				WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
+			)
+		`
+
+		countQuery = baseCountQuery + whereClause + subquery
+		err = database.QueryRow(countQuery, queryArgs...).Scan(&total)
+
 		if err != nil {
-			logger.Error("Error counting executions:" + err.Error())
+			logger.Error("Error counting assets:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -128,92 +116,15 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		totalPages := (total + limit - 1) / limit
 
-		if search != "" {
-			restartQuery := ""
-			if restart == "true" {
-				restartQuery = ` AND needs_restarting IS TRUE`
-			}
+		selectQuery := baseSelectQuery + whereClause + subquery + `
+			ORDER BY a.hostname
+			LIMIT $` + strconv.Itoa(paramNum) + ` OFFSET $` + strconv.Itoa(paramNum+1)
 
-			inactiveQuery := ""
-			if inactive == "true" {
-				inactiveQuery = ` AND sub.executed_at < NOW() - INTERVAL '15 days'`
-			}
-
-			query = `
-        SELECT
-          execution_id,
-          hostname,
-          executed_at,
-          machine_id,
-          os,
-          needs_restarting
-        FROM (
-          SELECT
-            id as execution_id,
-            hostname,
-            executed_at,
-            machine_id,
-            os,
-            needs_restarting,
-            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-          FROM
-            executions
-          WHERE
-            ` + searchType + ` ILIKE $3
-            ` + restartQuery + `
-        ) sub
-        WHERE
-            sub.rn = 1
-			` + inactiveQuery + `
-        ORDER BY
-            hostname
-        LIMIT $1 OFFSET $2
-      `
-			rows, err = database.Query(query, limit, offset, util.FormatSearchTerm(search))
-		} else {
-			restartQuery := ""
-			if restart == "true" {
-				restartQuery = ` WHERE needs_restarting IS TRUE`
-			}
-
-			inactiveQuery := ""
-			if inactive == "true" {
-				inactiveQuery = ` AND sub.executed_at < NOW() - INTERVAL '15 days'`
-			}
-
-			query = `
-        SELECT
-          execution_id,
-          hostname,
-          executed_at,
-          machine_id,
-          os,
-          needs_restarting
-        FROM (
-          SELECT
-            id as execution_id,
-            hostname,
-            executed_at,
-            machine_id,
-            os,
-            needs_restarting,
-            ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-          FROM
-            executions
-          ` + restartQuery + `
-        ) sub
-        WHERE
-          sub.rn = 1
-		  ` + inactiveQuery + `
-        ORDER BY
-          hostname
-        LIMIT $1 OFFSET $2
-      `
-			rows, err = database.Query(query, limit, offset)
-		}
+		queryArgs = append(queryArgs, limit, offset)
+		rows, err = database.Query(selectQuery, queryArgs...)
 
 		if err != nil {
-			logger.Error("Error listing executions:" + err.Error())
+			logger.Error("Error listing assets:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -228,13 +139,13 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			err := rows.Scan(
 				&asset.ExecutionID,
 				&asset.Hostname,
-				&asset.ExecutedAt,
+				&executedAt,
 				&asset.MachineID,
 				&asset.OS,
 				&asset.NeedsRestarting,
 			)
 			if err != nil {
-				logger.Error("Error iterating machine_id:" + err.Error())
+				logger.Error("Error iterating assets:" + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 					"error": err.Error(),
 				})
@@ -361,6 +272,15 @@ func DeleteMachineID(database *sql.DB) gin.HandlerFunc {
 			tx.Rollback()
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": "Failed to delete executions: " + err.Error(),
+			})
+			return
+		}
+
+		_, err = tx.Exec(`DELETE FROM assets WHERE machine_id = $1`, machineID)
+		if err != nil {
+			tx.Rollback()
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"error": "Failed to delete asset: " + err.Error(),
 			})
 			return
 		}
@@ -527,20 +447,18 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 		}
 
 		rows, err = database.Query(`
-      SELECT e.machine_id, e.hostname, e.executed_at, e.agent_version, e.os
-      FROM executions e
-      INNER JOIN (
-        SELECT machine_id, MAX(executed_at) as max_executed_at
+      SELECT a.machine_id, a.hostname, a.last_seen, e.agent_version, e.os
+      FROM assets a
+      LEFT JOIN LATERAL (
+        SELECT agent_version, os
         FROM executions
-        WHERE hostname = $1
-        AND machine_id != $2
-        GROUP BY machine_id
-      ) latest ON e.machine_id = latest.machine_id
-        AND e.executed_at = latest.max_executed_at
-      WHERE e.hostname = $1
-      AND e.machine_id != $2
-      AND e.success is true
-      ORDER BY e.executed_at DESC;`,
+        WHERE machine_id = a.machine_id AND hostname = a.hostname
+        ORDER BY executed_at DESC
+        LIMIT 1
+      ) e ON true
+      WHERE a.hostname = $1
+      AND a.machine_id != $2
+      ORDER BY a.last_seen DESC;`,
 			hostname, machineID)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{

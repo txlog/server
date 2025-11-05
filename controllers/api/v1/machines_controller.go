@@ -43,20 +43,16 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 
 		query := `
     SELECT
-      hostname,
-      machine_id
-    FROM (
-      SELECT
-        hostname,
-        agent_version,
-        os,
-        machine_id,
-        ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-      FROM
-        executions
-    ) sub
-    WHERE
-      sub.rn = 1`
+      a.hostname,
+      a.machine_id
+    FROM assets a
+    INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+    WHERE a.is_active = TRUE
+    AND e.executed_at = (
+      SELECT MAX(e2.executed_at)
+      FROM executions e2
+      WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
+    )`
 
 		var params []interface{}
 		var paramCount int
@@ -67,7 +63,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 				os = ""
 			}
 			paramCount++
-			query += ` AND os = $` + strconv.Itoa(paramCount)
+			query += ` AND e.os = $` + strconv.Itoa(paramCount)
 			params = append(params, os)
 		}
 
@@ -77,7 +73,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 				agentVersion = ""
 			}
 			paramCount++
-			query += ` AND agent_version = $` + strconv.Itoa(paramCount)
+			query += ` AND e.agent_version = $` + strconv.Itoa(paramCount)
 			params = append(params, agentVersion)
 		}
 
@@ -132,24 +128,19 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 		var err error
 
 		query := `
-      WITH RankedExecutions AS (
-          SELECT
-              hostname,
-              machine_id,
-              needs_restarting,
-              ROW_NUMBER() OVER (PARTITION BY hostname ORDER BY executed_at DESC) as rn
-          FROM
-              public.executions
-      )
       SELECT
-          hostname,
-          machine_id
-      FROM
-          RankedExecutions
-      WHERE
-          rn = 1 AND needs_restarting IS TRUE
-      ORDER BY
-          hostname ASC;`
+        a.hostname,
+        a.machine_id
+      FROM assets a
+      INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+      WHERE a.is_active = TRUE
+      AND e.needs_restarting IS TRUE
+      AND e.executed_at = (
+        SELECT MAX(e2.executed_at)
+        FROM executions e2
+        WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
+      )
+      ORDER BY a.hostname ASC;`
 
 		rows, err = database.Query(query)
 
@@ -203,20 +194,16 @@ func GetMachinesWeb(database *sql.DB) gin.HandlerFunc {
 
 		query := `
     SELECT
-      hostname,
-      machine_id
-    FROM (
-      SELECT
-        hostname,
-        agent_version,
-        os,
-        machine_id,
-        ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-      FROM
-        executions
-    ) sub
-    WHERE
-      sub.rn = 1`
+      a.hostname,
+      a.machine_id
+    FROM assets a
+    INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+    WHERE a.is_active = TRUE
+    AND e.executed_at = (
+      SELECT MAX(e2.executed_at)
+      FROM executions e2
+      WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
+    )`
 
 		var params []interface{}
 		var paramCount int
@@ -227,7 +214,7 @@ func GetMachinesWeb(database *sql.DB) gin.HandlerFunc {
 				os = ""
 			}
 			paramCount++
-			query += ` AND os = $` + strconv.Itoa(paramCount)
+			query += ` AND e.os = $` + strconv.Itoa(paramCount)
 			params = append(params, os)
 		}
 
@@ -237,7 +224,7 @@ func GetMachinesWeb(database *sql.DB) gin.HandlerFunc {
 				agentVersion = ""
 			}
 			paramCount++
-			query += ` AND agent_version = $` + strconv.Itoa(paramCount)
+			query += ` AND e.agent_version = $` + strconv.Itoa(paramCount)
 			params = append(params, agentVersion)
 		}
 

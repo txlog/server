@@ -157,23 +157,18 @@ func getStatistics(database *sql.DB) ([]models.Statistic, error) {
 func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
 	rows, err := database.Query(`
   SELECT
-    os,
-    COUNT(DISTINCT machine_id) AS num_machines
-  FROM (
-    SELECT
-      os,
-      machine_id,
-      hostname,
-      ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-    FROM
-      executions
-  ) sub
-  WHERE
-    sub.rn = 1
-  GROUP BY
-    os
-  ORDER BY
-    num_machines DESC;`)
+    e.os,
+    COUNT(DISTINCT a.hostname) AS num_machines
+  FROM assets a
+  INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+  WHERE a.is_active = TRUE
+  AND e.executed_at = (
+    SELECT MAX(e2.executed_at)
+    FROM executions e2
+    WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
+  )
+  GROUP BY e.os
+  ORDER BY num_machines DESC;`)
 
 	if err != nil {
 		return nil, err
@@ -207,23 +202,18 @@ func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
 func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
 	rows, err := database.Query(`
   SELECT
-    agent_version,
-    COUNT(DISTINCT machine_id) AS num_machines
-  FROM (
-    SELECT
-      agent_version,
-      machine_id,
-      hostname,
-      ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-    FROM
-      executions
-  ) sub
-  WHERE
-    sub.rn = 1
-  GROUP BY
-    agent_version
-  ORDER BY
-    num_machines DESC;`)
+    e.agent_version,
+    COUNT(DISTINCT a.hostname) AS num_machines
+  FROM assets a
+  INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+  WHERE a.is_active = TRUE
+  AND e.executed_at = (
+    SELECT MAX(e2.executed_at)
+    FROM executions e2
+    WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
+  )
+  GROUP BY e.agent_version
+  ORDER BY num_machines DESC;`)
 
 	if err != nil {
 		return nil, err
@@ -264,37 +254,14 @@ func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
 //   - The second most recent execution occurred within the last 30 days
 func getDuplicatedAssets(database *sql.DB) ([]DuplicatedAsset, error) {
 	rows, err := database.Query(`
-  WITH RankedExecutions AS (
-    SELECT
-      hostname,
-      machine_id,
-      executed_at,
-      ROW_NUMBER() OVER(PARTITION BY hostname ORDER BY executed_at DESC) as rn
-    FROM
-      public.executions
-    WHERE
-      success = true
-  ),
-  HostnameStats AS (
-    SELECT
-      hostname,
-      COUNT(DISTINCT machine_id) AS num_distinct_machine_ids,
-      MAX(CASE WHEN rn = 2 THEN executed_at ELSE NULL END) AS second_latest_execution_date
-    FROM
-      RankedExecutions
-    GROUP BY
-      hostname
-  )
   SELECT
     hostname,
-    num_distinct_machine_ids as num_machines
-  FROM
-    HostnameStats
-  WHERE
-    num_distinct_machine_ids > 1
-    AND second_latest_execution_date >= CURRENT_DATE - INTERVAL '30 day'
-  ORDER BY
-    num_distinct_machine_ids DESC;`)
+    COUNT(*) as num_machines
+  FROM assets
+  WHERE last_seen >= CURRENT_DATE - INTERVAL '30 day'
+  GROUP BY hostname
+  HAVING COUNT(*) > 1
+  ORDER BY num_machines DESC;`)
 
 	if err != nil {
 		return nil, err

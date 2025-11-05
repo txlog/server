@@ -293,6 +293,7 @@ func getDuplicatedAssets(database *sql.DB) ([]DuplicatedAsset, error) {
     COUNT(*) as num_machines
   FROM assets
   WHERE last_seen >= CURRENT_DATE - INTERVAL '30 day'
+  AND is_active = TRUE
   GROUP BY hostname
   HAVING COUNT(*) > 1
   ORDER BY num_machines DESC;`)
@@ -343,9 +344,12 @@ func getMostUpdatedPackages(database *sql.DB) ([]UpdatedPackage, error) {
       public.transaction_items AS ti
   JOIN
       public.transactions AS t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
+  JOIN
+      public.assets AS a ON t.machine_id = a.machine_id AND t.hostname = a.hostname
   WHERE
       ti.action = 'Upgrade'
       AND t.end_time >= NOW() - INTERVAL '30 days'
+      AND a.is_active = TRUE
   GROUP BY
       ti.package
   ORDER BY

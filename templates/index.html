@@ -19,19 +19,8 @@
           <div class="card-body">
             <div class="d-flex align-items-center">
               <div class="subheader">Assets</div>
-              <div class="ms-auto lh-1 text-secondary">
-                Last 30 days
-              </div>
             </div>
-            <div class="d-flex align-items-baseline">
-              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "servers-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-              <div class="me-auto">
-                <span class="{{ range .statistics }}{{ if eq .Name "servers-30-days" }}{{ if gt .Percentage 0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }} d-inline-flex align-items-center lh-1">
-                  {{ range .statistics }}{{ if eq .Name "servers-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name "servers-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"></i>
-                </span>
-              </div>
-            </div>
+            <div class="h1 mb-3">{{ printf "%s" (formatInteger .totalActiveAssets) }}</div>
           </div>
         </div>
       </div>

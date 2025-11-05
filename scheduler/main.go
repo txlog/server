@@ -56,10 +56,8 @@ func latestVersionJob() {
 // The function performs the following operations:
 // 1. Attempts to acquire a lock named "stats"
 // 2. If lock acquisition fails or another instance is running, exits early
-// 3. Counts servers for the last 30 days
+// 3. Counts executions, installed packages, and upgraded packages for the last 30 days
 // 4. Automatically releases the lock when the function completes
-//
-// Note: Some statistical operations are currently commented out in the implementation.
 func statsJob() {
 	logger.Info("Statistics: executing task...")
 
@@ -78,7 +76,6 @@ func statsJob() {
 
 	defer releaseLock(lockName)
 
-	statistics.CountServers()
 	statistics.CountExecutions()
 	statistics.CountInstalledPackages()
 	statistics.CountUpgradedPackages()

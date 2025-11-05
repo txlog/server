@@ -280,9 +280,9 @@ func TestVersion(t *testing.T) {
 	if got == "" {
 		t.Error("Version() should not return empty string")
 	}
-	// Version should follow semantic versioning format (x.y.z)
-	if matched := regexp.MustCompile(`^\d+\.\d+\.\d+$`).MatchString(got); !matched {
-		t.Errorf("Version() = %v, want format x.y.z", got)
+	// Version should follow semantic versioning format (x.y.z or x.y.z-suffix)
+	if matched := regexp.MustCompile(`^\d+\.\d+\.\d+(-\w+)?$`).MatchString(got); !matched {
+		t.Errorf("Version() = %v, want format x.y.z or x.y.z-suffix", got)
 	}
 }
 func TestDnfUser(t *testing.T) {

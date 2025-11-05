@@ -48,6 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   assets table.
 - Assets card in dashboard now shows real-time count instead of cached
   statistic.
+- Improved vertical spacing consistency across all four statistics cards on
+  dashboard.
 
 ### Removed
 

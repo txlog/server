@@ -58,6 +58,11 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		var countQuery string
 		var queryArgs []interface{}
 
+		activeFilter := "a.is_active = TRUE"
+		if searchType == "a.machine_id" {
+			activeFilter = "1=1"
+		}
+
 		baseCountQuery := `
 			SELECT COUNT(DISTINCT a.hostname)
 			FROM assets a
@@ -68,7 +73,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				ORDER BY executed_at DESC
 				LIMIT 1
 			) e ON true
-			WHERE a.is_active = TRUE
+			WHERE ` + activeFilter + `
 		`
 
 		baseSelectQuery := `
@@ -87,7 +92,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				ORDER BY executed_at DESC
 				LIMIT 1
 			) e ON true
-			WHERE a.is_active = TRUE
+			WHERE ` + activeFilter + `
 		`
 
 		whereClause := ""

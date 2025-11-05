@@ -18,10 +18,10 @@
         <div class="card">
           <div class="card-header">
             <h3 class="card-title">
-                {{ if .search }}
-                Assets {{ if eq .restart "true" }}that need to be restarted{{ end }}{{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}{{ if eq .inactive "true" }} that are inactive{{ end }} containing <kbd>{{ .search }}</kbd>
+              {{ if .search }}
+                Assets {{ if eq .restart "true" }}that need to be restarted{{ end }}{{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}{{ if eq .inactive "true" }} without data in the last 15 days{{ end }} containing <kbd>{{ .search }}</kbd>
               {{ else }}
-                Registered assets {{ if eq .restart "true" }}that need to be restarted{{ end }}{{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}{{ if eq .inactive "true" }} that are inactive{{ end }}
+                Registered assets {{ if eq .restart "true" }}that need to be restarted{{ end }}{{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}{{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
               {{ end }}
             </h3>
             <div class="card-actions">
@@ -182,7 +182,7 @@
 
     [restartCheckbox, inactiveCheckbox].forEach((checkbox, index) => {
       const label = index === 0 ? restartLabel : inactiveLabel;
-      
+
       checkbox.addEventListener('change', function() {
         const tooltip = bootstrap.Tooltip.getInstance(label);
         if (tooltip) {

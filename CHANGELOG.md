@@ -43,11 +43,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Test suite for packages_by_week_controller (graph data, ordering, filters).
 - Code documentation and comments explaining business logic and SQL injection
   safety.
+- Comprehensive table and column comments to all database tables for better
+  schema documentation.
+- Updated database schema in copilot-instructions.md with all current tables,
+  columns, and indexes from migrations.
 
 ### Changed
 
 - Refactored asset queries to use centralized assets table instead of window
   functions over executions.
+- Merged GEMINI.md instructions into .github/copilot-instructions.md for
+  unified AI assistant configuration.
+
+### Fixed
+
+- Standardized "Details" links in modals to use button styling (`btn
+  align-text-top` class) for visual consistency across Agent Version and OS
+  modals in dashboard.
 - Dashboard statistics now reflect only active assets.
 - Asset listing endpoints (`/assets`, `/v1/machines`) now query active assets
   from dedicated table.

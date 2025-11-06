@@ -233,16 +233,16 @@ func TestGetAssetsIndex_Queries(t *testing.T) {
 
 			// Test select query structure
 			baseSelectQuery := `
-				SELECT 
+				SELECT
 					a.asset_id as execution_id,
 					a.hostname,
 					a.last_seen as executed_at,
 					a.machine_id,
 					e.os,
-					e.needs_restarting
+					a.needs_restarting
 				FROM assets a
 				LEFT JOIN LATERAL (
-					SELECT os, needs_restarting
+					SELECT os
 					FROM executions
 					WHERE machine_id = a.machine_id AND hostname = a.hostname
 					ORDER BY executed_at DESC
@@ -287,9 +287,9 @@ func TestAssetsTable_LastSeenColumn(t *testing.T) {
 
 	// Verify last_seen column exists and is usable
 	query := `
-		SELECT hostname, last_seen 
-		FROM assets 
-		WHERE is_active = TRUE 
+		SELECT hostname, last_seen
+		FROM assets
+		WHERE is_active = TRUE
 		AND last_seen < NOW() - INTERVAL '15 days'
 		LIMIT 5
 	`

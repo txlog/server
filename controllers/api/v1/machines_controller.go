@@ -132,14 +132,8 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
         a.hostname,
         a.machine_id
       FROM assets a
-      INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
       WHERE a.is_active = TRUE
-      AND e.needs_restarting IS TRUE
-      AND e.executed_at = (
-        SELECT MAX(e2.executed_at)
-        FROM executions e2
-        WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
-      )
+      AND a.needs_restarting IS TRUE
       ORDER BY a.hostname ASC;`
 
 		rows, err = database.Query(query)

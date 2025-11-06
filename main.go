@@ -234,7 +234,6 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 			"cronRetentionDays":        os.Getenv("CRON_RETENTION_DAYS"),
 			"cronRetentionExpression":  os.Getenv("CRON_RETENTION_EXPRESSION"),
 			"cronStatisticsExpression": os.Getenv("CRON_STATS_EXPRESSION"),
-			"ignoreEmptyExecution":     os.Getenv("IGNORE_EMPTY_EXECUTION"),
 			"latestVersion":            os.Getenv("LATEST_VERSION"),
 			"oidcIssuerUrl":            os.Getenv("OIDC_ISSUER_URL"),
 			"oidcClientId":             os.Getenv("OIDC_CLIENT_ID"),

@@ -48,7 +48,6 @@ docker run -d -p 8080:8080 \
   -e CRON_RETENTION_DAYS=7 \
   -e CRON_RETENTION_EXPRESSION=0 2 * * * \
   -e CRON_STATS_EXPRESSION=0 * * * * \
-  -e IGNORE_EMPTY_EXECUTION=true \
   cr.rda.run/txlog/server:main
 ```
 
@@ -112,8 +111,6 @@ spec:
           value: 0 2 * * *
         - name: CRON_STATS_EXPRESSION
           value: 0 * * * *
-        - name: IGNORE_EMPTY_EXECUTION
-          value: true
 ```
 
 If you want to use a production (stable) version, replace `main` by the version
@@ -165,7 +162,6 @@ PGSQL_SSLMODE=require
 CRON_RETENTION_DAYS=1
 CRON_RETENTION_EXPRESSION=0 2 * * *
 CRON_STATS_EXPRESSION=0 * * * *
-IGNORE_EMPTY_EXECUTION=true
 
 # OIDC Authentication (Optional)
 OIDC_ISSUER_URL=https://id.example.com

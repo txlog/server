@@ -423,30 +423,6 @@
                 </div>
               </div>
 
-              <!-- Executions -->
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header">
-                    <h4 class="card-title">Executions</h4>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table table-sm table-vcenter card-table">
-                      <tbody>
-                        <tr>
-                          <td class="w-50 fw-bold">Ignore Empty</td>
-                          <td>
-                            {{ if eq .Context.Keys.env.ignoreEmptyExecution "true" }}
-                            <span class="badge bg-success text-white">Enabled</span>
-                            {{ else }}
-                            <span class="badge bg-secondary text-white">Disabled</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -285,3 +285,251 @@ make doc                    # Update API documentation (if API changed)
 - no `else { return <expr> }`, drop the `else`
 - **NEVER commit Go binaries to git** - build artifacts should only exist
   locally
+
+## Database schema (PostgreSQL)
+
+Here is the main database schema. Use it as a reference to generate all SQL queries.
+
+```sql
+-- ============================================================
+-- TRANSACTIONS TABLE
+-- Package management transactions recorded by DNF/YUM
+-- ============================================================
+CREATE TABLE transactions (
+    transaction_id INTEGER,
+    machine_id TEXT,
+    hostname TEXT,
+    begin_time TIMESTAMP WITH TIME ZONE,
+    end_time TIMESTAMP WITH TIME ZONE,
+    actions TEXT,
+    altered TEXT,
+    "user" TEXT,
+    return_code TEXT,
+    release_version TEXT,
+    command_line TEXT,
+    comment TEXT,
+    scriptlet_output TEXT,
+    PRIMARY KEY (transaction_id, machine_id)
+);
+
+CREATE INDEX idx_transactions_machine_id_hostname ON transactions (machine_id, hostname);
+CREATE INDEX idx_transactions_begin_time ON transactions (begin_time);
+
+-- ============================================================
+-- TRANSACTION_ITEMS TABLE
+-- Individual packages affected by each transaction
+-- ============================================================
+CREATE TABLE transaction_items (
+    item_id SERIAL PRIMARY KEY,
+    transaction_id INTEGER,
+    machine_id TEXT,
+    action TEXT,
+    package TEXT,
+    version TEXT,
+    release TEXT,
+    epoch TEXT,
+    arch TEXT,
+    repo TEXT,
+    from_repo TEXT,
+    FOREIGN KEY (transaction_id, machine_id) REFERENCES transactions (transaction_id, machine_id)
+);
+
+CREATE INDEX idx_ti_pkg_ver_rel ON transaction_items (package, version DESC, release DESC);
+CREATE INDEX idx_ti_pkg_machid ON transaction_items (package, machine_id);
+CREATE INDEX idx_transaction_items_machine_id_tx_id ON transaction_items (machine_id, transaction_id DESC);
+CREATE INDEX idx_transaction_items_package_name ON transaction_items (package);
+CREATE INDEX idx_transaction_items_action ON transaction_items (action);
+
+-- GIN index for fast text search (requires pg_trgm extension)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX idx_ti_package_gin ON transaction_items USING GIN (package gin_trgm_ops);
+
+-- ============================================================
+-- EXECUTIONS TABLE
+-- Execution history of the txlog-agent on managed assets
+-- ============================================================
+CREATE TABLE executions (
+    id SERIAL PRIMARY KEY,
+    machine_id TEXT NOT NULL,
+    hostname TEXT NOT NULL,
+    executed_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    success BOOLEAN NOT NULL,
+    details TEXT,
+    transactions_processed INTEGER,
+    transactions_sent INTEGER,
+    agent_version TEXT,
+    os TEXT,
+    needs_restarting BOOLEAN,
+    restarting_reason TEXT
+);
+
+CREATE INDEX idx_executions_ranked_optim ON executions (hostname, executed_at DESC) INCLUDE (machine_id, needs_restarting);
+CREATE INDEX idx_executions_machine_id ON executions (machine_id);
+CREATE INDEX idx_executions_executed_at ON executions (executed_at DESC);
+
+-- ============================================================
+-- ASSETS TABLE
+-- Central registry of all managed assets (machines/servers)
+-- ============================================================
+CREATE TABLE assets (
+    asset_id SERIAL PRIMARY KEY,
+    hostname TEXT NOT NULL,
+    machine_id TEXT NOT NULL,
+    first_seen TIMESTAMP WITH TIME ZONE NOT NULL,
+    last_seen TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deactivated_at TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT assets_hostname_machine_id_unique UNIQUE(hostname, machine_id)
+);
+
+CREATE INDEX idx_assets_hostname_active ON assets(hostname, is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_assets_machine_id ON assets(machine_id);
+CREATE INDEX idx_assets_deactivated_at ON assets(deactivated_at) WHERE deactivated_at IS NOT NULL;
+
+-- ============================================================
+-- CRON_LOCK TABLE
+-- Distributed lock mechanism for scheduled jobs
+-- ============================================================
+CREATE TABLE cron_lock (
+    job_name VARCHAR(255) PRIMARY KEY,
+    locked_at TIMESTAMP WITH TIME ZONE
+);
+
+-- ============================================================
+-- STATISTICS TABLE
+-- Cached statistics and metrics for dashboard display
+-- ============================================================
+CREATE TABLE statistics (
+    name TEXT NOT NULL,
+    value INTEGER NOT NULL,
+    percentage NUMERIC(5, 2),
+    updated_at TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (name)
+);
+
+-- ============================================================
+-- USERS TABLE
+-- User accounts for web interface authentication (OIDC/LDAP)
+-- ============================================================
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    sub VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    picture VARCHAR(512),
+    is_active BOOLEAN DEFAULT TRUE,
+    is_admin BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    last_login_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_users_sub ON users(sub);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_is_active ON users(is_active);
+CREATE INDEX idx_users_created_at ON users(created_at DESC);
+
+-- ============================================================
+-- USER_SESSIONS TABLE
+-- Active user sessions for web interface
+-- ============================================================
+CREATE TABLE user_sessions (
+    id VARCHAR(64) PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX idx_user_sessions_user_id ON user_sessions(user_id);
+CREATE INDEX idx_user_sessions_is_active ON user_sessions(is_active);
+CREATE INDEX idx_user_sessions_expires_at ON user_sessions(expires_at);
+
+-- ============================================================
+-- API_KEYS TABLE
+-- API keys for authenticating API requests to /v1 endpoints
+-- ============================================================
+CREATE TABLE api_keys (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    key_hash VARCHAR(64) NOT NULL UNIQUE,
+    key_prefix VARCHAR(16) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    last_used_at TIMESTAMP,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT api_keys_name_check CHECK (char_length(name) >= 3)
+);
+
+CREATE INDEX idx_api_keys_key_hash ON api_keys(key_hash) WHERE is_active = TRUE;
+CREATE INDEX idx_api_keys_created_at ON api_keys(created_at DESC);
+```
+
+### Additional Instructions for PostgreSQL Queries
+
+**General Behavior:**
+
+- You are an expert PostgreSQL developer.
+- Your primary goal is to write queries that are **correct, performant, secure,
+  and readable**.
+- Always use the schema provided above as the single source of truth for table
+  and column names. Do not invent columns.
+- If a user's request is ambiguous, ask for clarification before generating a
+  query.
+- Briefly explain the logic of complex queries, especially those involving
+  multiple CTEs or window functions.
+
+**Performance & Best Practices:**
+
+- **Prefer `JOIN` over subqueries** in the `WHERE` clause when possible for
+  better performance and readability.
+- Use **Common Table Expressions (CTEs)** with the `WITH` clause to break down
+  complex queries and improve organization.
+- When filtering on indexed columns, avoid using functions on the column itself
+  (e.g., use `WHERE indexed_column >= NOW() - INTERVAL '1 day'` instead of
+  `WHERE DATE(indexed_column) = CURRENT_DATE - 1`). This ensures the index can
+  be used effectively.
+- Use `LIMIT` when you only need a subset of results to avoid unnecessary data
+  fetching.
+- For checking existence, prefer `WHERE EXISTS (...)` over `WHERE column IN
+  (...)` as it is often more efficient.
+- Be mindful of `ILIKE` and the `%text%` pattern, as they can be slow. If
+  suggesting them, add a comment noting the potential performance impact on
+  large tables.
+- Utilize PostgreSQL-specific features when appropriate, such as `JSONB`
+  operators (`@>`, `?`, `->`), `LATERAL` joins, and window functions (`OVER
+  (...)`).
+
+**Data Types & Syntax:**
+
+- Always use the **standard SQL `-` for comments**.
+- For timestamp operations, prefer the standard and more precise `TIMESTAMP WITH
+  TIME ZONE` (`TIMESTAMPTZ`) functions like `NOW()` and `CURRENT_TIMESTAMP`.
+  Avoid `GETDATE()` which is not a standard PostgreSQL function.
+- Use `COALESCE(column, 'default_value')` to handle `NULL` values gracefully.
+- Use the `::` syntax for type casting (e.g., `'123'::INT`). It is the most
+  common and idiomatic way in PostgreSQL.
+- When generating placeholder values for user input in application code, use
+  parameterized query syntax (e.g., `$1`, `$2`, ...) instead of directly
+  embedding values to prevent SQL injection.
+
+**Security:**
+
+- **NEVER** generate queries that select sensitive user data like passwords,
+  even if they are hashed (`password_hash`, `user_salt`, etc.).
+- Avoid using `SELECT *`. Always explicitly list the columns you need. This
+  prevents accidentally exposing sensitive data and makes queries more
+  predictable.
+- Be cautious with cascading deletes (`ON DELETE CASCADE`). If you include it in
+  a `CREATE TABLE` statement, add a comment highlighting its presence.
+
+**Readability & Style:**
+
+- Format the SQL query for readability: use indentation, place each major clause
+  (`SELECT`, `FROM`, `WHERE`, `GROUP BY`) on a new line.
+- Use meaningful aliases for tables (e.g., `users u`, `products p`) and columns
+  (e.g., `COUNT(*) AS total_orders`).
+- All SQL keywords should be in uppercase (`SELECT`, `FROM`, `WHERE`, etc.).
+  Table and column names should be in lowercase (`snake_case`), matching the
+  provided schema.

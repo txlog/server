@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -61,11 +60,6 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		if body.RestartingReason != nil {
 			restartingReason.String = *body.RestartingReason
 			restartingReason.Valid = true
-		}
-
-		if body.TransactionsSent == 0 && os.Getenv("IGNORE_EMPTY_EXECUTION") == "true" {
-			c.JSON(http.StatusAccepted, gin.H{"message": "Execution will be ignored: no transactions sent"})
-			return
 		}
 
 		// Start database transaction

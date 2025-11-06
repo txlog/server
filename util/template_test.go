@@ -609,7 +609,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-1 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-green status-animated",
+			expected: "status-dot status-dot-animated status-green",
 		},
 		{
 			name: "less than 24 hours - 23 hours ago",
@@ -617,7 +617,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-23 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-green status-animated",
+			expected: "status-dot status-dot-animated status-green",
 		},
 		{
 			name: "exactly 24 hours ago",
@@ -665,7 +665,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-5 * time.Minute)
 				return &t
 			}(),
-			expected: "status-dot status-green status-animated",
+			expected: "status-dot status-dot-animated status-green",
 		},
 	}
 

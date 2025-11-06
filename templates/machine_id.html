@@ -469,7 +469,10 @@
               <a href="#" class="btn w-100" data-bs-dismiss="modal"> Cancel </a>
             </div>
             <div class="col">
-              <button class="btn btn-danger w-100" onclick="deleteAsset('{{ .machine_id }}')">Delete all asset data</button>
+              <button id="delete-asset-btn" class="btn btn-danger w-100" onclick="deleteAsset('{{ .machine_id }}')">
+                <span id="delete-btn-text">Delete all asset data</span>
+                <div id="delete-btn-spinner" class="spinner-border spinner-border-sm ms-2" style="display: none;" role="status"></div>
+              </button>
             </div>
           </div>
         </div>
@@ -479,19 +482,42 @@
 </div>
 <script>
 function deleteAsset(assetId) {
-fetch(`/assets/${assetId}`, { method: 'DELETE' })
-  .then(response => {
-    if (response.redirected) {
-      alert(`Asset ${assetId} deleted successfully.`);
-      window.location.href = response.url;
-    } else if (response.ok) {
-      alert(`Asset ${assetId} deleted successfully.`);
-      window.location.href = "/assets";
-    } else {
+  const btn = document.getElementById('delete-asset-btn');
+  const btnText = document.getElementById('delete-btn-text');
+  const btnSpinner = document.getElementById('delete-btn-spinner');
+  const closeBtn = document.querySelector('#modal-delete .btn-close');
+  const cancelBtn = document.querySelector('#modal-delete .btn[data-bs-dismiss="modal"]');
+
+  // Disable button and show loading
+  btn.disabled = true;
+  btnSpinner.style.display = 'inline-block';
+  closeBtn.disabled = true;
+  cancelBtn.classList.add('disabled');
+
+  fetch(`/assets/${assetId}`, { method: 'DELETE' })
+    .then(response => {
+      if (response.ok || response.redirected) {
+        // Store success message in sessionStorage
+        sessionStorage.setItem('assetDeleted', assetId);
+        // Redirect to assets page
+        window.location.href = "/assets";
+      } else {
+        // Re-enable button on error
+        btn.disabled = false;
+        btnSpinner.style.display = 'none';
+        closeBtn.disabled = false;
+        cancelBtn.classList.remove('disabled');
+        alert('Failed to delete asset.');
+      }
+    })
+    .catch(() => {
+      // Re-enable button on error
+      btn.disabled = false;
+      btnSpinner.style.display = 'none';
+      closeBtn.disabled = false;
+      cancelBtn.classList.remove('disabled');
       alert('Failed to delete asset.');
-    }
-  })
-  .catch(() => alert('Failed to delete asset.'));
+    });
 }
 </script>
 {{ template "footer.html" . }}

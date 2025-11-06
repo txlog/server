@@ -418,7 +418,7 @@ func FormatDate(t time.Time) string {
 //
 // Returns:
 //   - string: CSS class name based on time difference:
-//   - "status-dot status-green status-animated" if less than 24 hours
+//   - "status-dot status-dot-animated status-green" if less than 24 hours
 //   - "status-dot status-yellow" if between 24 hours and 15 days
 //   - "status-dot status-red" if more than 15 days
 //   - "status-dot status-red" if pointer is nil
@@ -431,7 +431,7 @@ func TimeStatusClass(t *time.Time) string {
 	diff := now.Sub(*t)
 
 	if diff < 24*time.Hour {
-		return "status-dot status-green status-animated"
+		return "status-dot status-dot-animated status-green"
 	} else if diff < 15*24*time.Hour {
 		return "status-dot status-yellow"
 	}

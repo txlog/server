@@ -103,6 +103,7 @@ func main() {
 		"maskString":       util.MaskString,
 		"min":              util.Min,
 		"text2html":        util.Text2HTML,
+		"timeStatusClass":  util.TimeStatusClass,
 		"trimPrefix":       util.TrimPrefix,
 		"version":          util.Version,
 		"versionsEqual":    util.VersionsEqual,

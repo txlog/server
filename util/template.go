@@ -409,3 +409,31 @@ func FormatDateTime(t *time.Time) string {
 func FormatDate(t time.Time) string {
 	return t.Format("02/01/2006")
 }
+
+// TimeStatusClass returns a CSS class based on how old a timestamp is.
+// Used to show status indicators for asset last_seen times.
+//
+// Parameters:
+//   - t: A pointer to a time.Time object
+//
+// Returns:
+//   - string: CSS class name based on time difference:
+//   - "status-dot status-green status-animated" if less than 24 hours
+//   - "status-dot status-yellow" if between 24 hours and 15 days
+//   - "status-dot status-red" if more than 15 days
+//   - "status-dot status-red" if pointer is nil
+func TimeStatusClass(t *time.Time) string {
+	if t == nil {
+		return "status-dot status-red"
+	}
+
+	now := time.Now()
+	diff := now.Sub(*t)
+
+	if diff < 24*time.Hour {
+		return "status-dot status-green status-animated"
+	} else if diff < 15*24*time.Hour {
+		return "status-dot status-yellow"
+	}
+	return "status-dot status-red"
+}

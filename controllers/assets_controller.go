@@ -72,7 +72,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			SELECT COUNT(DISTINCT a.hostname)
 			FROM assets a
 			LEFT JOIN LATERAL (
-				SELECT os, needs_restarting
+				SELECT os
 				FROM executions
 				WHERE machine_id = a.machine_id AND hostname = a.hostname
 				ORDER BY executed_at DESC
@@ -88,10 +88,10 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				a.last_seen as executed_at,
 				a.machine_id,
 				e.os,
-				e.needs_restarting
+				a.needs_restarting
 			FROM assets a
 			LEFT JOIN LATERAL (
-				SELECT os, needs_restarting
+				SELECT os
 				FROM executions
 				WHERE machine_id = a.machine_id AND hostname = a.hostname
 				ORDER BY executed_at DESC
@@ -110,7 +110,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if restart == "true" {
-			whereClause += " AND e.needs_restarting IS TRUE"
+			whereClause += " AND a.needs_restarting IS TRUE"
 		}
 
 		if inactive == "true" {
@@ -150,12 +150,13 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		for rows.Next() {
 			var asset models.Execution
 			var executedAt sql.NullTime
+			var os sql.NullString
 			err := rows.Scan(
 				&asset.ExecutionID,
 				&asset.Hostname,
 				&executedAt,
 				&asset.MachineID,
-				&asset.OS,
+				&os,
 				&asset.NeedsRestarting,
 			)
 			if err != nil {
@@ -167,6 +168,9 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			}
 			if executedAt.Valid {
 				asset.ExecutedAt = &executedAt.Time
+			}
+			if os.Valid {
+				asset.OS = os.String
 			}
 			assets = append(assets, asset)
 		}
@@ -518,9 +522,8 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 		var restartingReason sql.NullString
 		err = database.QueryRow(`
       SELECT needs_restarting, restarting_reason
-      FROM executions
+      FROM assets
       WHERE machine_id = $1
-      ORDER BY executed_at DESC
       LIMIT 1
       `, machineID).Scan(&needsRestarting, &restartingReason)
 		if err != nil && err != sql.ErrNoRows {

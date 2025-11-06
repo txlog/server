@@ -48,7 +48,7 @@ func TestAssetManager_UpsertAsset_NewAsset(t *testing.T) {
 	machineID := "test-machine-001"
 	timestamp := time.Now()
 
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp)
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Errorf("UpsertAsset() failed for new asset: %v", err)
 	}
@@ -87,13 +87,13 @@ func TestAssetManager_UpsertAsset_UpdateExisting(t *testing.T) {
 	timestamp2 := time.Now()
 
 	// First insert
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp1)
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp1, sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Fatalf("First UpsertAsset() failed: %v", err)
 	}
 
 	// Second update
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp2)
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp2, sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Errorf("Second UpsertAsset() failed: %v", err)
 	}
@@ -133,13 +133,13 @@ func TestAssetManager_UpsertAsset_ReplacesOldAsset(t *testing.T) {
 	timestamp := time.Now()
 
 	// Insert old asset
-	err = am.UpsertAsset(tx, hostname, oldMachineID, timestamp.Add(-2*time.Hour))
+	err = am.UpsertAsset(tx, hostname, oldMachineID, timestamp.Add(-2*time.Hour), sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Fatalf("Failed to insert old asset: %v", err)
 	}
 
 	// Insert new asset with same hostname
-	err = am.UpsertAsset(tx, hostname, newMachineID, timestamp)
+	err = am.UpsertAsset(tx, hostname, newMachineID, timestamp, sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Errorf("Failed to insert new asset: %v", err)
 	}
@@ -207,7 +207,7 @@ func TestAssetManager_UpsertAsset_ReactivatesInactive(t *testing.T) {
 	timestamp := time.Now()
 
 	// Insert asset
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp.Add(-3*time.Hour))
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp.Add(-3*time.Hour), sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Fatalf("Failed to insert asset: %v", err)
 	}
@@ -222,7 +222,7 @@ func TestAssetManager_UpsertAsset_ReactivatesInactive(t *testing.T) {
 	}
 
 	// Reactivate by upserting again
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp)
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Errorf("Failed to reactivate asset: %v", err)
 	}
@@ -264,7 +264,7 @@ func TestAssetManager_GetActiveAsset(t *testing.T) {
 	timestamp := time.Now()
 
 	// Insert asset
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp)
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Fatalf("Failed to insert asset: %v", err)
 	}
@@ -308,7 +308,7 @@ func TestAssetManager_GetAssetByMachineID(t *testing.T) {
 	timestamp := time.Now()
 
 	// Insert asset
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp)
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Fatalf("Failed to insert asset: %v", err)
 	}
@@ -351,18 +351,18 @@ func TestAssetManager_DeactivateOldAssets(t *testing.T) {
 	timestamp := time.Now()
 
 	// Insert multiple old assets
-	err = am.UpsertAsset(tx, hostname, oldMachineID1, timestamp.Add(-3*time.Hour))
+	err = am.UpsertAsset(tx, hostname, oldMachineID1, timestamp.Add(-3*time.Hour), sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Fatalf("Failed to insert old asset 1: %v", err)
 	}
 
-	err = am.UpsertAsset(tx, hostname, oldMachineID2, timestamp.Add(-2*time.Hour))
+	err = am.UpsertAsset(tx, hostname, oldMachineID2, timestamp.Add(-2*time.Hour), sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Fatalf("Failed to insert old asset 2: %v", err)
 	}
 
 	// Insert new asset
-	err = am.UpsertAsset(tx, hostname, newMachineID, timestamp)
+	err = am.UpsertAsset(tx, hostname, newMachineID, timestamp, sql.NullBool{}, sql.NullString{})
 	if err != nil {
 		t.Fatalf("Failed to insert new asset: %v", err)
 	}

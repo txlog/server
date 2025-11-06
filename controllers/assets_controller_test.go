@@ -55,7 +55,7 @@ func createTestAssetWithData(t *testing.T, db *sql.DB, hostname, machineID, os s
 	// Insert execution
 	_, err = tx.Exec(`
 		INSERT INTO executions (
-			machine_id, hostname, executed_at, success, 
+			machine_id, hostname, executed_at, success,
 			transactions_processed, transactions_sent, agent_version, os, needs_restarting
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
 		machineID, hostname, lastSeen, true, 5, 3, "1.0.0", os, needsRestart,
@@ -64,9 +64,13 @@ func createTestAssetWithData(t *testing.T, db *sql.DB, hostname, machineID, os s
 		t.Fatalf("Failed to insert execution: %v", err)
 	}
 
-	// Insert asset
+	// Insert asset with needs_restarting information
 	am := models.NewAssetManager(db)
-	err = am.UpsertAsset(tx, hostname, machineID, lastSeen)
+	var needsRestartingNull sql.NullBool
+	if needsRestart {
+		needsRestartingNull = sql.NullBool{Bool: needsRestart, Valid: true}
+	}
+	err = am.UpsertAsset(tx, hostname, machineID, lastSeen, needsRestartingNull, sql.NullString{})
 	if err != nil {
 		t.Fatalf("Failed to insert asset: %v", err)
 	}

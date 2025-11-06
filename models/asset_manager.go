@@ -15,7 +15,7 @@ func NewAssetManager(db *sql.DB) *AssetManager {
 	return &AssetManager{db: db}
 }
 
-func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID string, timestamp time.Time) error {
+func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID string, timestamp time.Time, needsRestarting sql.NullBool, restartingReason sql.NullString) error {
 	var existingAssetID int
 	var existingIsActive bool
 
@@ -32,9 +32,9 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 		}
 
 		_, err = tx.Exec(`
-			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at)
-			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP)
-		`, hostname, machineID, timestamp)
+			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason)
+			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5)
+		`, hostname, machineID, timestamp, needsRestarting, restartingReason)
 
 		if err != nil {
 			logger.Error("Error inserting asset: " + err.Error())
@@ -50,9 +50,9 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 
 	_, err = tx.Exec(`
 		UPDATE assets
-		SET last_seen = $1
-		WHERE asset_id = $2
-	`, timestamp, existingAssetID)
+		SET last_seen = $1, needs_restarting = $2, restarting_reason = $3
+		WHERE asset_id = $4
+	`, timestamp, needsRestarting, restartingReason, existingAssetID)
 
 	if err != nil {
 		logger.Error("Error updating asset last_seen: " + err.Error())
@@ -102,9 +102,11 @@ func (am *AssetManager) deactivateOldAssets(tx *sql.Tx, hostname string, newMach
 func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 	var asset Asset
 	var deactivatedAt sql.NullTime
+	var needsRestarting sql.NullBool
+	var restartingReason sql.NullString
 
 	err := am.db.QueryRow(`
-		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at
+		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason
 		FROM assets
 		WHERE hostname = $1 AND is_active = TRUE
 		LIMIT 1
@@ -117,6 +119,8 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 		&asset.IsActive,
 		&asset.CreatedAt,
 		&deactivatedAt,
+		&needsRestarting,
+		&restartingReason,
 	)
 
 	if err != nil {
@@ -127,15 +131,25 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 		asset.DeactivatedAt = &deactivatedAt.Time
 	}
 
+	if needsRestarting.Valid {
+		asset.NeedsRestarting = &needsRestarting.Bool
+	}
+
+	if restartingReason.Valid {
+		asset.RestartingReason = &restartingReason.String
+	}
+
 	return &asset, nil
 }
 
 func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 	var asset Asset
 	var deactivatedAt sql.NullTime
+	var needsRestarting sql.NullBool
+	var restartingReason sql.NullString
 
 	err := am.db.QueryRow(`
-		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at
+		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason
 		FROM assets
 		WHERE machine_id = $1
 		LIMIT 1
@@ -148,6 +162,8 @@ func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 		&asset.IsActive,
 		&asset.CreatedAt,
 		&deactivatedAt,
+		&needsRestarting,
+		&restartingReason,
 	)
 
 	if err != nil {
@@ -158,16 +174,26 @@ func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 		asset.DeactivatedAt = &deactivatedAt.Time
 	}
 
+	if needsRestarting.Valid {
+		asset.NeedsRestarting = &needsRestarting.Bool
+	}
+
+	if restartingReason.Valid {
+		asset.RestartingReason = &restartingReason.String
+	}
+
 	return &asset, nil
 }
 
 type Asset struct {
-	AssetID       int
-	Hostname      string
-	MachineID     string
-	FirstSeen     time.Time
-	LastSeen      time.Time
-	IsActive      bool
-	CreatedAt     time.Time
-	DeactivatedAt *time.Time
+	AssetID          int
+	Hostname         string
+	MachineID        string
+	FirstSeen        time.Time
+	LastSeen         time.Time
+	IsActive         bool
+	CreatedAt        time.Time
+	DeactivatedAt    *time.Time
+	NeedsRestarting  *bool
+	RestartingReason *string
 }

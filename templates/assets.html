@@ -113,7 +113,10 @@
                         </div>
                       </td>
                       <td data-label="Title">
-                        <div class="text-secondary">{{ formatDateTime .ExecutedAt }}</div>
+                        <div class="d-flex align-items-center">
+                          <span class="{{ timeStatusClass .ExecutedAt }}"></span>
+                          <div class="text-secondary ms-2">{{ formatDateTime .ExecutedAt }}</div>
+                        </div>
                       </td>
                       <td>
                         <a class="btn align-text-top" href="/assets/{{ .MachineID }}">Details</a>

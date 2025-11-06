@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"regexp"
 	"testing"
+	"time"
 )
 
 func TestText2HTML(t *testing.T) {
@@ -584,6 +585,94 @@ func TestInitial(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Initial(tt.input); got != tt.expected {
 				t.Errorf("Initial() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestTimeStatusClass(t *testing.T) {
+	now := time.Now()
+
+	tests := []struct {
+		name     string
+		input    *time.Time
+		expected string
+	}{
+		{
+			name:     "nil time",
+			input:    nil,
+			expected: "status-dot status-red",
+		},
+		{
+			name: "less than 24 hours - 1 hour ago",
+			input: func() *time.Time {
+				t := now.Add(-1 * time.Hour)
+				return &t
+			}(),
+			expected: "status-dot status-green status-animated",
+		},
+		{
+			name: "less than 24 hours - 23 hours ago",
+			input: func() *time.Time {
+				t := now.Add(-23 * time.Hour)
+				return &t
+			}(),
+			expected: "status-dot status-green status-animated",
+		},
+		{
+			name: "exactly 24 hours ago",
+			input: func() *time.Time {
+				t := now.Add(-24 * time.Hour)
+				return &t
+			}(),
+			expected: "status-dot status-yellow",
+		},
+		{
+			name: "between 24 hours and 15 days - 2 days ago",
+			input: func() *time.Time {
+				t := now.Add(-48 * time.Hour)
+				return &t
+			}(),
+			expected: "status-dot status-yellow",
+		},
+		{
+			name: "between 24 hours and 15 days - 14 days ago",
+			input: func() *time.Time {
+				t := now.Add(-14 * 24 * time.Hour)
+				return &t
+			}(),
+			expected: "status-dot status-yellow",
+		},
+		{
+			name: "exactly 15 days ago",
+			input: func() *time.Time {
+				t := now.Add(-15 * 24 * time.Hour)
+				return &t
+			}(),
+			expected: "status-dot status-red",
+		},
+		{
+			name: "more than 15 days - 30 days ago",
+			input: func() *time.Time {
+				t := now.Add(-30 * 24 * time.Hour)
+				return &t
+			}(),
+			expected: "status-dot status-red",
+		},
+		{
+			name: "recent - 5 minutes ago",
+			input: func() *time.Time {
+				t := now.Add(-5 * time.Minute)
+				return &t
+			}(),
+			expected: "status-dot status-green status-animated",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := TimeStatusClass(tt.input); got != tt.expected {
+				t.Errorf("TimeStatusClass() = %v, want %v", got, tt.expected)
 			}
 		})
 	}

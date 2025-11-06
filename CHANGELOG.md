@@ -47,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   schema documentation.
 - Updated database schema in copilot-instructions.md with all current tables,
   columns, and indexes from migrations.
+- Time status indicator for asset last seen times.
+- Success modal for asset deletion with improved delete button functionality.
+- `needs_restarting` and `restarting_reason` fields to assets management.
 
 ### Changed
 
@@ -54,6 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   functions over executions.
 - Merged GEMINI.md instructions into .github/copilot-instructions.md for
   unified AI assistant configuration.
+- Updated Go version to 1.25.4 across documentation and configuration files.
+- Changed order of packages by week to ascending.
+- Enhanced Air configuration by excluding unnecessary directories (testdata,
+  tmp).
 
 ### Fixed
 
@@ -79,20 +86,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved template readability by breaking nested conditionals into multiple
   lines in assets.html.
 - Enhanced Air configuration with comments explaining template rebuild behavior.
-
-### Fixed
-
 - Fixed `GetActiveAsset` method to properly handle NULL `deactivated_at` values
   using `sql.NullTime` to prevent scan errors.
 - Fixed package machine counts including inactive assets, causing inflated
   statistics for replaced machines.
 - Fixed dashboard cards showing data from both active and inactive assets.
+- Updated asset filtering logic and improved display text for inactive assets.
+- Updated status class names for time status indicator.
+- Removed unnecessary overflow-y style from header for improved layout.
 
 ### Removed
 
 - `CountServers()` statistics function (replaced with real-time query).
 - `servers-30-days` statistic from statistics table (no longer needed).
-- `servers-30-days` statistic from statistics table (no longer needed).
+- `IGNORE_EMPTY_EXECUTION` environment variable and related logic that skipped
+  recording executions without transactions. All executions are now recorded
+  regardless of transaction count.
 
 ## [1.17.0] - 2025-10-29
 

@@ -346,7 +346,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/packages/{name}/{version}/assets": {
+        "/v1/packages/{name}/{version}/{release}/assets": {
             "get": {
                 "description": "Get assets that are using a specific package version",
                 "produces": [
@@ -368,6 +368,13 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Package version",
                         "name": "version",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Package release",
+                        "name": "release",
                         "in": "path",
                         "required": true
                     }

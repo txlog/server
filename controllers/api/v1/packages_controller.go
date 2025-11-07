@@ -17,8 +17,9 @@ import (
 // @produce		json
 // @param			name	path		string	true	"Package name"
 // @param			version	path		string	true	"Package version"
+// @param			release	path		string	true	"Package release"
 // @success		200		{object}	models.Package
-// @router			/v1/packages/{name}/{version}/assets [get]
+// @router			/v1/packages/{name}/{version}/{release}/assets [get]
 func GetAssetsUsingPackageVersion(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var pkg models.Package
@@ -30,37 +31,37 @@ func GetAssetsUsingPackageVersion(database *sql.DB) gin.HandlerFunc {
 		query := `
 WITH LatestPackageVersion AS (
   SELECT
-machine_id,
-version,
-action,
-ROW_NUMBER() OVER (
-  PARTITION BY
-machine_id
-  ORDER BY
-version DESC,
-release DESC,
-transaction_id DESC
-) AS rn
+    machine_id,
+    version,
+    release,
+    action,
+    ROW_NUMBER() OVER (
+      PARTITION BY machine_id
+      ORDER BY
+        version DESC,
+        release DESC,
+        transaction_id DESC
+    ) AS rn
   FROM
-public.transaction_items
+    public.transaction_items
   WHERE
-package = $1
+    package = $1
 )
 SELECT
   DISTINCT t.hostname,
   lpv.machine_id
 FROM
   LatestPackageVersion AS lpv
-  INNER JOIN public.transactions AS t
-ON lpv.machine_id = t.machine_id
+  INNER JOIN public.transactions AS t ON lpv.machine_id = t.machine_id
 WHERE
   lpv.rn = 1
   AND lpv.version = $2
+  AND lpv.release = $3
   AND lpv.action IN ('Install', 'Upgrade', 'Downgrade')
 ORDER BY
   t.hostname ASC;`
 
-		rows, err := database.Query(query, pkg.Name, pkg.Version)
+		rows, err := database.Query(query, pkg.Name, pkg.Version, pkg.Release)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query database"})
 			return
@@ -102,37 +103,37 @@ func GetAssetsUsingPackageVersionWeb(database *sql.DB) gin.HandlerFunc {
 		query := `
 WITH LatestPackageVersion AS (
   SELECT
-machine_id,
-version,
-action,
-ROW_NUMBER() OVER (
-  PARTITION BY
-machine_id
-  ORDER BY
-version DESC,
-release DESC,
-transaction_id DESC
-) AS rn
+    machine_id,
+    version,
+    release,
+    action,
+    ROW_NUMBER() OVER (
+      PARTITION BY machine_id
+      ORDER BY
+        version DESC,
+        release DESC,
+        transaction_id DESC
+    ) AS rn
   FROM
-public.transaction_items
+    public.transaction_items
   WHERE
-package = $1
+    package = $1
 )
 SELECT
   DISTINCT t.hostname,
   lpv.machine_id
 FROM
   LatestPackageVersion AS lpv
-  INNER JOIN public.transactions AS t
-ON lpv.machine_id = t.machine_id
+  INNER JOIN public.transactions AS t ON lpv.machine_id = t.machine_id
 WHERE
   lpv.rn = 1
   AND lpv.version = $2
+  AND lpv.release = $3
   AND lpv.action IN ('Install', 'Upgrade', 'Downgrade')
 ORDER BY
   t.hostname ASC;`
 
-		rows, err := database.Query(query, pkg.Name, pkg.Version)
+		rows, err := database.Query(query, pkg.Name, pkg.Version, pkg.Release)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query database"})
 			return

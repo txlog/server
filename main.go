@@ -176,7 +176,7 @@ func main() {
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/web/machines", v1API.GetMachinesWeb(database.Db))
-	r.GET("/web/packages/:name/:version/assets", v1API.GetAssetsUsingPackageVersionWeb(database.Db))
+	r.GET("/web/packages/:name/:version/:release/assets", v1API.GetAssetsUsingPackageVersionWeb(database.Db))
 	r.GET("/web/items", v1API.GetItems(database.Db))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
@@ -204,7 +204,7 @@ func main() {
 		v1Group.GET("/assets/requiring-restart", v1API.GetAssetsRequiringRestart(database.Db))
 
 		// Package listing
-		v1Group.GET("/packages/:name/:version/assets", v1API.GetAssetsUsingPackageVersion(database.Db))
+		v1Group.GET("/packages/:name/:version/:release/assets", v1API.GetAssetsUsingPackageVersion(database.Db))
 
 		// Endpoints for agent pre-v1.6.0
 		v1Group.GET("/machines/ids", v1API.GetMachineIDs(database.Db))

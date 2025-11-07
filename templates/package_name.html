@@ -73,7 +73,7 @@
               <div class="card timeline-event-card">
                 <div class="card-body">
                   <div class="text-secondary float-end">
-                    <a href="javascript:loadPackageAssets('{{ $.name }}', '{{ .Version }}')">List assets
+                    <a href="javascript:loadPackageAssets('{{ $.name }}', '{{ .Version }}', '{{ .Release }}')">List assets
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-end icon-2"><path d="M9 6l6 6l-6 6"></path></svg>
                     </a>
                   </div>
@@ -181,7 +181,7 @@
         <script>
         let isLoadingAssets = false;
 
-        async function loadPackageAssets(packageName, version) {
+        async function loadPackageAssets(packageName, version, release) {
           // Prevent multiple simultaneous calls
           if (isLoadingAssets) {
             return;
@@ -199,14 +199,15 @@
 
           try {
             // Show loading state
-            versionDisplay.textContent = version;
+            const displayVersion = version + '-' + release;
+            versionDisplay.textContent = displayVersion;
             tableCard.style.display = 'block';
             assetsTableContainer.style.display = 'none';
             emptyStateContainer.style.display = 'none';
             document.getElementById('table-placeholder').style.display = 'block';
 
             // Fetch data from API
-            const response = await fetch(`/web/packages/${encodeURIComponent(packageName)}/${encodeURIComponent(version)}/assets`);
+            const response = await fetch(`/web/packages/${encodeURIComponent(packageName)}/${encodeURIComponent(version)}/${encodeURIComponent(release)}/assets`);
 
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
@@ -235,7 +236,7 @@
               assetsTableContainer.style.display = 'block';
               emptyStateContainer.style.display = 'none';
             } else {
-              emptyStateSubtitle.textContent = `No assets are currently using version ${version}`;
+              emptyStateSubtitle.textContent = `No assets are currently using version ${displayVersion}`;
               assetsTableContainer.style.display = 'none';
               emptyStateContainer.style.display = 'block';
             }

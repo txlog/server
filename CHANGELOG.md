@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Package version filtering now considers both version and release fields for
+  precise asset identification (previously only version was used).
+- Package details timeline now displays version-release combination as the
+  unique identifier.
+- Assets listing for package versions now filters by exact version-release
+  match instead of version alone.
+- API endpoints for package assets updated from `/packages/:name/:version/assets`
+  to `/packages/:name/:version/:release/assets`.
+
 ### Added
 
 - Assets table to centralize asset identity management with logical (hostname)

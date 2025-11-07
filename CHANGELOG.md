@@ -21,98 +21,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- Package version filtering now considers both version and release fields for
-  precise asset identification (previously only version was used).
-- Package details timeline now displays version-release combination as the
-  unique identifier.
-- Assets listing for package versions now filters by exact version-release
-  match instead of version alone.
-- API endpoints for package assets updated from `/packages/:name/:version/assets`
-  to `/packages/:name/:version/:release/assets`.
-
 ### Added
 
-- Assets table to centralize asset identity management with logical (hostname)
-  and physical (machine_id) identifiers.
-- Asset lifecycle tracking with `is_active` flag to distinguish current assets
-  from replaced ones.
-- Automatic asset replacement detection when same hostname reports with
-  different machine_id.
-- Asset history preservation with `first_seen`, `last_seen`, and
-  `deactivated_at` timestamps.
-- `AssetManager` model for managing asset upsert, activation, and deactivation
-  logic.
-- Real-time active assets count on dashboard (no longer cached in statistics
-  table).
-- Comprehensive test suite for assets functionality (models, controllers, and
-  integration tests).
-- Test suite for statistics package (CountExecutions, CountInstalledPackages,
-  CountUpgradedPackages).
-- Test suite for scheduler package (lock acquisition, housekeeping, retention).
-- Test suite for packages_by_week_controller (graph data, ordering, filters).
-- Code documentation and comments explaining business logic and SQL injection
-  safety.
-- Comprehensive table and column comments to all database tables for better
-  schema documentation.
-- Updated database schema in copilot-instructions.md with all current tables,
-  columns, and indexes from migrations.
-- Time status indicator for asset last seen times.
-- Success modal for asset deletion with improved delete button functionality.
-- `needs_restarting` and `restarting_reason` fields to assets management.
+- AI report generator for package updates on the Package Progression page with
+  month and year selection.
+- Automatic CVE research instruction in generated prompts using Red Hat errata
+  as reference.
+- Support for multiple AI assistants (ChatGPT, Claude, Gemini).
+- Modal dialogs for displaying prompts and error messages.
+- Assets table for centralized server identity and lifecycle management.
+- Automatic detection and tracking of replaced servers (same hostname,
+  different machine ID).
+- Real-time asset count throughout the application.
+- Comprehensive test coverage for assets, statistics, scheduler, and
+  controllers.
+- Time-based status indicators for server last activity.
+- `needs_restarting` field to track servers requiring reboot.
+- Complete database schema documentation with table and column comments.
 
 ### Changed
 
-- Refactored asset queries to use centralized assets table instead of window
-  functions over executions.
-- Merged GEMINI.md instructions into .github/copilot-instructions.md for
-  unified AI assistant configuration.
-- Updated Go version to 1.25.4 across documentation and configuration files.
-- Changed order of packages by week to ascending.
-- Enhanced Air configuration by excluding unnecessary directories (testdata,
-  tmp).
+- Package update reports now prioritize servers affected over total transaction
+  count.
+- AI prompts translated to English for broader compatibility.
+- Package filtering uses both version and release fields for precise
+  identification.
+- Asset queries now use dedicated assets table instead of complex window
+  functions.
+- All statistics and listings reflect only active servers.
+- Package order changed to ascending in weekly progression view.
+- API endpoints updated to `/packages/:name/:version/:release/assets` format.
 
 ### Fixed
 
-- Standardized "Details" links in modals to use button styling (`btn
-  align-text-top` class) for visual consistency across Agent Version and OS
-  modals in dashboard.
-- Dashboard statistics now reflect only active assets.
-- Asset listing endpoints (`/assets`, `/v1/machines`) now query active assets
-  from dedicated table.
-- Duplicated assets detection simplified using direct COUNT on assets table.
-- API endpoints for executions and transactions now automatically maintain
-  assets table.
-- Assets card in dashboard now shows real-time count instead of cached
-  statistic.
-- Improved vertical spacing consistency across all four statistics cards on
-  dashboard.
-- Assets listing page (`/assets`) now uses `last_seen` column from assets table
-  for filtering inactive assets instead of querying executions table.
-- Package listing page now shows machine counts only for active assets (excludes
-  replaced/inactive assets from statistics).
-- Dashboard statistics cards (OS distribution, Agent distribution, Replaced
-  assets, Most updated packages) now filter to show only active assets.
-- Improved template readability by breaking nested conditionals into multiple
-  lines in assets.html.
-- Enhanced Air configuration with comments explaining template rebuild behavior.
-- Fixed `GetActiveAsset` method to properly handle NULL `deactivated_at` values
-  using `sql.NullTime` to prevent scan errors.
-- Fixed package machine counts including inactive assets, causing inflated
-  statistics for replaced machines.
-- Fixed dashboard cards showing data from both active and inactive assets.
-- Updated asset filtering logic and improved display text for inactive assets.
-- Updated status class names for time status indicator.
-- Removed unnecessary overflow-y style from header for improved layout.
+- Consistent button styling across all modals.
+- Package counts now exclude inactive servers from statistics.
+- Dashboard cards show only active server data.
+- NULL handling in asset queries using proper SQL types.
+- Improved template readability with better formatting.
 
 ### Removed
 
-- `CountServers()` statistics function (replaced with real-time query).
-- `servers-30-days` statistic from statistics table (no longer needed).
-- `IGNORE_EMPTY_EXECUTION` environment variable and related logic that skipped
-  recording executions without transactions. All executions are now recorded
-  regardless of transaction count.
+- Cached server count statistics (now computed in real-time).
+- `IGNORE_EMPTY_EXECUTION` environment variable and related logic.
 
 ## [1.17.0] - 2025-10-29
 

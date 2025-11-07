@@ -244,6 +244,15 @@
       const successModal = new bootstrap.Modal(document.getElementById('modal-success'));
       successModal.show();
     }
+
+    // Force reflow to ensure animations start immediately
+    const animatedDots = document.querySelectorAll('.status-dot-animated');
+    animatedDots.forEach(dot => {
+      // Trigger reflow by accessing offsetHeight
+      void dot.offsetHeight;
+      // Ensure animation class is properly applied
+      dot.classList.add('status-dot-animated');
+    });
   });
 </script>
 

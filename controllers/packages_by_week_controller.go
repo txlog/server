@@ -31,20 +31,28 @@ func GetPackagesByWeekIndex(database *sql.DB) gin.HandlerFunc {
 func getGraphData(database *sql.DB) ([]models.PackageProgression, error) {
 	rows, err := database.Query(`
     SELECT
-      DATE_TRUNC('week', t.begin_time)::DATE AS week,
-      COUNT(*) FILTER (WHERE ti.action = 'Install') AS install,
-      COUNT(*) FILTER (WHERE ti.action = 'Upgraded') AS upgraded
-    FROM
-      transaction_items AS ti
-    JOIN
-      transactions AS t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
-    WHERE
-      ti.action IN ('Install', 'Upgraded')
-    GROUP BY
-      week
+      week,
+      install,
+      upgraded
+    FROM (
+      SELECT
+        DATE_TRUNC('week', t.begin_time)::DATE AS week,
+        COUNT(*) FILTER (WHERE ti.action = 'Install') AS install,
+        COUNT(*) FILTER (WHERE ti.action = 'Upgraded') AS upgraded
+      FROM
+        transaction_items AS ti
+      JOIN
+        transactions AS t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
+      WHERE
+        ti.action IN ('Install', 'Upgraded')
+      GROUP BY
+        week
+      ORDER BY
+        week DESC
+      LIMIT 15
+    ) AS recent_weeks
     ORDER BY
-      week ASC
-    LIMIT 15;`)
+      week ASC;`)
 
 	if err != nil {
 		return nil, err

@@ -1,3 +1,3 @@
 package version
 
-var SemVer = "1.18.0-dev"
+var SemVer = "1.18.0"

@@ -55,6 +55,54 @@
 
       <div class="col-lg-12">
         <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Generate Management Report AI Prompt</h3>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Select Month</label>
+                <select class="form-select" id="report-month">
+                  <option value="1">January</option>
+                  <option value="2">February</option>
+                  <option value="3">March</option>
+                  <option value="4">April</option>
+                  <option value="5">May</option>
+                  <option value="6">June</option>
+                  <option value="7">July</option>
+                  <option value="8">August</option>
+                  <option value="9">September</option>
+                  <option value="10">October</option>
+                  <option value="11">November</option>
+                  <option value="12">December</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Select Year</label>
+                <select class="form-select" id="report-year">
+                  <!-- Years will be populated by JavaScript -->
+                </select>
+              </div>
+              <div class="col-md-4 d-flex align-items-end">
+                <button type="button" class="btn btn-primary" id="generate-report-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-text">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                    <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
+                    <path d="M9 9l1 0" />
+                    <path d="M9 13l6 0" />
+                    <path d="M9 17l6 0" />
+                  </svg>
+                  Generate Prompt
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-12">
+        <div class="card">
 
             <div class="card-table table-responsive">
               <table class="table">
@@ -150,8 +198,200 @@
             },
           }).render();
       });
+
+      // Populate year selector
+      const yearSelect = document.getElementById('report-year');
+      const currentYear = new Date().getFullYear();
+      for (let year = currentYear; year >= currentYear - 5; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+      }
+
+      // Set current month and year as default
+      const currentMonth = new Date().getMonth() + 1;
+      document.getElementById('report-month').value = currentMonth;
+
+      // Generate report button handler
+      document.getElementById('generate-report-btn').addEventListener('click', async function() {
+        const month = document.getElementById('report-month').value;
+        const year = document.getElementById('report-year').value;
+        const btn = this;
+
+        // Disable button and show loading state
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Loading...';
+
+        try {
+          const response = await fetch(`/api/packages-by-month?month=${month}&year=${year}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch data');
+          }
+
+          const data = await response.json();
+          const csvContent = data.csv_content;
+          const assetCount = data.asset_count;
+
+          // Check if there's data for the selected period
+          const csvLines = csvContent.trim().split('\n');
+          if (csvLines.length <= 1) {
+            // Only header or empty CSV
+            throw new Error(`No package updates found for the selected period (${getMonthName(month)} ${year}).`);
+          }
+
+          // Get month name for the prompt
+          const monthName = getMonthName(month);
+
+          // Generate the prompt (translated to English)
+          const prompt = `Act as an SRE specialist preparing an executive summary for management. The tone should be professional, direct, and focused on impact and security. Format the final response in Markdown.
+
+Report Period: ${monthName} ${year}
+
+Context: Below is the list of packages that were updated in our infrastructure during the reporting period, along with the number of updates executed and the number of servers where each update was applied. Our total infrastructure consists of ${assetCount} servers.
+
+Data:
+---
+${csvContent}
+---
+
+Task:
+Based on this data, write a brief management report in Markdown format (1-2 paragraphs) highlighting:
+1. The most critical and high-impact updates, considering the number of affected servers. Give special attention to security packages (such as OpenSSL) or system packages (such as the Kernel).
+2. The overall reach of the updates (percentage of servers impacted by the most important updates).
+3. Any relevant patterns or observations that management should be aware of.
+4. Research on the internet which CVEs these packages may have fixed during the selected period, always summarizing each CVE in one or two sentences. Use Red Hat Enterprise Linux errata as a reference, since RPM-based systems are based on RHEL.`;
+
+          // Show modal with the prompt
+          showPromptModal(prompt);
+
+        } catch (error) {
+          showErrorModal(error.message);
+        } finally {
+          // Re-enable button
+          btn.disabled = false;
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-text"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M9 9l1 0" /><path d="M9 13l6 0" /><path d="M9 17l6 0" /></svg> Generate Prompt';
+        }
+      });
+
+      function getMonthName(monthNumber) {
+        const months = [
+          'January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        return months[monthNumber - 1];
+      }
+
+      function showPromptModal(prompt) {
+        // Create modal dynamically
+        const modalHtml = `
+          <div class="modal modal-blur fade show" id="prompt-modal" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Generated AI Report Prompt</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <p class="text-muted">Copy the prompt below and paste it into any LLM (ChatGPT, Claude, Gemini, etc.) to generate your management report:</p>
+                  <textarea class="form-control font-monospace" id="prompt-text" rows="15" readonly>${prompt}</textarea>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" id="copy-prompt-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-copy">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" />
+                      <path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" />
+                    </svg>
+                    Copy to Clipboard
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-backdrop fade show"></div>
+        `;
+
+        // Insert modal into body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Add event listeners
+        const modal = document.getElementById('prompt-modal');
+        const closeButtons = modal.querySelectorAll('[data-bs-dismiss="modal"]');
+        closeButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            modal.remove();
+            document.querySelector('.modal-backdrop').remove();
+          });
+        });
+
+        // Copy button handler
+        document.getElementById('copy-prompt-btn').addEventListener('click', async function() {
+          const promptText = document.getElementById('prompt-text');
+          try {
+            await navigator.clipboard.writeText(promptText.value);
+            this.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg> Copied!';
+            setTimeout(() => {
+              this.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-copy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z" /><path d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1" /></svg> Copy to Clipboard';
+            }, 2000);
+          } catch (err) {
+            alert('Failed to copy to clipboard');
+          }
+        });
+      }
+
+      function showErrorModal(errorMessage) {
+        // Create error modal dynamically using Tabler modal-danger format
+        const modalHtml = `
+          <div class="modal modal-blur fade show" id="error-modal" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+              <div class="modal-content">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-status bg-danger"></div>
+                <div class="modal-body text-center py-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mb-2 text-danger icon-lg">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M12 9v4" />
+                    <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
+                    <path d="M12 16h.01" />
+                  </svg>
+                  <h3>No Data Available</h3>
+                  <div class="text-secondary">${errorMessage}</div>
+                </div>
+                <div class="modal-footer">
+                  <div class="w-100">
+                    <div class="row">
+                      <div class="col">
+                        <button type="button" class="btn w-100" data-bs-dismiss="modal">
+                          Close
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-backdrop fade show"></div>
+        `;
+
+        // Insert modal into body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Add event listeners
+        const modal = document.getElementById('error-modal');
+        const closeButtons = modal.querySelectorAll('[data-bs-dismiss="modal"]');
+        closeButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            modal.remove();
+            document.querySelector('.modal-backdrop').remove();
+          });
+        });
+      }
     </script>
   </div>
 </div>
 
 {{ template "footer.html" . }}
+

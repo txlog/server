@@ -173,6 +173,7 @@ func main() {
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/package-progression", controllers.GetPackagesByWeekIndex(database.Db))
+	r.GET("/api/packages-by-month", controllers.GetPackagesByMonth(database.Db))
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
 	r.GET("/web/machines", v1API.GetMachinesWeb(database.Db))

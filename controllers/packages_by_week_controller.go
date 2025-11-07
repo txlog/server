@@ -136,13 +136,13 @@ func GetPackagesByMonth(database *sql.DB) gin.HandlerFunc {
 func getMonthlyPackageData(database *sql.DB, month, year int) (string, error) {
 	// Query to get package updates for the specified month
 	// Groups by package name and counts:
-	// - Total number of updates (install + upgrade)
-	// - Number of unique machines affected
+	// - Number of unique machines that received the update
+	// - Total number of update transactions (some packages may be updated multiple times)
 	query := `
 		SELECT
 			ti.package,
-			COUNT(*) AS total_updates,
-			COUNT(DISTINCT ti.machine_id) AS machine_count
+			COUNT(DISTINCT ti.machine_id) AS machine_count,
+			COUNT(*) AS total_updates
 		FROM
 			transaction_items AS ti
 		JOIN
@@ -166,13 +166,13 @@ func getMonthlyPackageData(database *sql.DB, month, year int) (string, error) {
 
 	// Build CSV content
 	var csvBuilder strings.Builder
-	csvBuilder.WriteString("Package Name,Total Updates,Servers Affected\n")
+	csvBuilder.WriteString("Package Name,Servers Affected,Total Updates\n")
 
 	for rows.Next() {
 		var packageName string
-		var totalUpdates, machineCount int
+		var machineCount, totalUpdates int
 
-		err := rows.Scan(&packageName, &totalUpdates, &machineCount)
+		err := rows.Scan(&packageName, &machineCount, &totalUpdates)
 		if err != nil {
 			return "", err
 		}
@@ -183,7 +183,7 @@ func getMonthlyPackageData(database *sql.DB, month, year int) (string, error) {
 			escapedName = fmt.Sprintf("\"%s\"", strings.ReplaceAll(packageName, "\"", "\"\""))
 		}
 
-		csvBuilder.WriteString(fmt.Sprintf("%s,%d,%d\n", escapedName, totalUpdates, machineCount))
+		csvBuilder.WriteString(fmt.Sprintf("%s,%d,%d\n", escapedName, machineCount, totalUpdates))
 	}
 
 	if err := rows.Err(); err != nil {

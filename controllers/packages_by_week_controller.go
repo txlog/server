@@ -135,24 +135,40 @@ func GetPackagesByMonth(database *sql.DB) gin.HandlerFunc {
 
 func getMonthlyPackageData(database *sql.DB, month, year int) (string, error) {
 	// Query to get package updates for the specified month
-	// Groups by package name and counts:
+	// Gets OS version from executions table (most recent execution per machine)
+	// Groups by OS version, package name, version, release, and arch
+	// Counts:
 	// - Number of unique machines that received the update
 	// - Total number of update transactions (some packages may be updated multiple times)
 	query := `
+		WITH latest_executions AS (
+			SELECT DISTINCT ON (machine_id)
+				machine_id,
+				os
+			FROM executions
+			WHERE os IS NOT NULL AND os != ''
+			ORDER BY machine_id, executed_at DESC
+		)
 		SELECT
+			COALESCE(le.os, 'Unknown OS') AS os_version,
 			ti.package,
+			ti.version,
+			ti.release,
+			ti.arch,
 			COUNT(DISTINCT ti.machine_id) AS machine_count,
 			COUNT(*) AS total_updates
 		FROM
 			transaction_items AS ti
 		JOIN
 			transactions AS t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
+		LEFT JOIN
+			latest_executions AS le ON ti.machine_id = le.machine_id
 		WHERE
 			ti.action IN ('Install', 'Upgraded')
 			AND EXTRACT(MONTH FROM t.begin_time) = $1
 			AND EXTRACT(YEAR FROM t.begin_time) = $2
 		GROUP BY
-			ti.package
+			le.os, ti.package, ti.version, ti.release, ti.arch
 		ORDER BY
 			machine_count DESC, total_updates DESC
 		LIMIT 500
@@ -166,24 +182,25 @@ func getMonthlyPackageData(database *sql.DB, month, year int) (string, error) {
 
 	// Build CSV content
 	var csvBuilder strings.Builder
-	csvBuilder.WriteString("Package Name,Servers Affected,Total Updates\n")
+	csvBuilder.WriteString("OS Version,Package RPM,Servers Affected,Total Updates\n")
 
 	for rows.Next() {
-		var packageName string
+		var osVersion, packageName, version, release, arch string
 		var machineCount, totalUpdates int
 
-		err := rows.Scan(&packageName, &machineCount, &totalUpdates)
+		err := rows.Scan(&osVersion, &packageName, &version, &release, &arch, &machineCount, &totalUpdates)
 		if err != nil {
 			return "", err
 		}
 
-		// Escape package name if it contains commas or quotes
-		escapedName := packageName
-		if strings.Contains(packageName, ",") || strings.Contains(packageName, "\"") {
-			escapedName = fmt.Sprintf("\"%s\"", strings.ReplaceAll(packageName, "\"", "\"\""))
-		}
+		// Build full RPM package name: package-version-release.arch
+		fullPackageName := fmt.Sprintf("%s-%s-%s.%s", packageName, version, release, arch)
 
-		csvBuilder.WriteString(fmt.Sprintf("%s,%d,%d\n", escapedName, machineCount, totalUpdates))
+		// Escape fields if they contain commas or quotes
+		escapedOS := escapeCSVField(osVersion)
+		escapedPackage := escapeCSVField(fullPackageName)
+
+		csvBuilder.WriteString(fmt.Sprintf("%s,%s,%d,%d\n", escapedOS, escapedPackage, machineCount, totalUpdates))
 	}
 
 	if err := rows.Err(); err != nil {
@@ -191,4 +208,12 @@ func getMonthlyPackageData(database *sql.DB, month, year int) (string, error) {
 	}
 
 	return csvBuilder.String(), nil
+}
+
+// escapeCSVField escapes a CSV field if it contains commas, quotes, or newlines
+func escapeCSVField(field string) string {
+	if strings.ContainsAny(field, ",\"\n") {
+		return fmt.Sprintf("\"%s\"", strings.ReplaceAll(field, "\"", "\"\""))
+	}
+	return field
 }

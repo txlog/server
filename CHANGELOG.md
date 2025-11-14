@@ -9,8 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!--
 
-## [Unreleased]
-
 `Added` for new features.
 `Changed` for changes in existing functionality.
 `Deprecated` for soon-to-be removed features.
@@ -18,6 +16,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Fixed` for any bug fixes.
 `Security` in case of vulnerabilities.
 -->
+
+## [1.18.1] - 2025-11-13
+
+### Changed
+
+- Monthly package data retrieval now uses OS version from `executions` table
+  instead of `transactions.release_version` for more accurate OS information.
+- CSV output for management reports now includes full RPM package names in
+  format `package-version-release.arch` (e.g., `nginx-1.20.1-14.el9.x86_64`).
+- Enhanced `PostTransactions` endpoint to handle existing transactions and
+  return appropriate status messages.
+
+### Dependencies
+
+- Bumped `golang.org/x/oauth2` from 0.32.0 to 0.33.0.
 
 ## [1.18.0] - 2025-11-07
 

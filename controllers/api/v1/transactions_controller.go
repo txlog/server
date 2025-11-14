@@ -199,13 +199,14 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		}
 
 		// Insert the rpm transaction
-		_, err = tx.Exec(`
+		result, err := tx.Exec(`
       INSERT INTO transactions (
         transaction_id, machine_id, hostname, begin_time, end_time, actions, altered, "user",
         return_code, release_version, command_line, comment, scriptlet_output
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
-      )`,
+      )
+      ON CONFLICT (transaction_id, machine_id) DO NOTHING`,
 			body.TransactionID,
 			body.MachineID,
 			body.Hostname,
@@ -224,6 +225,20 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			tx.Rollback()
 			logger.Error("Error inserting transaction: " + err.Error())
 			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+			return
+		}
+
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			tx.Rollback()
+			logger.Error("Error checking rows affected: " + err.Error())
+			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
+			return
+		}
+
+		if rowsAffected == 0 {
+			tx.Rollback()
+			c.JSON(http.StatusOK, gin.H{"message": "Transaction already exists"})
 			return
 		}
 

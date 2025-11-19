@@ -378,7 +378,7 @@ func TestDeleteMachineID_Isolation(t *testing.T) {
 	// Insert transaction items for both
 	_, err = db.Exec(`
 		INSERT INTO transaction_items (transaction_id, machine_id, package, version, release, arch)
-		VALUES 
+		VALUES
 		($1, $2, 'pkg-1', '1.0', '1', 'x86_64'),
 		($1, $3, 'pkg-1', '1.0', '1', 'x86_64')`,
 		txID, machineID1, machineID2,

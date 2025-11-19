@@ -349,3 +349,74 @@ func TestGetMachineID_WithMultipleAssetsSameHostname(t *testing.T) {
 		t.Error("Expected non-empty response body")
 	}
 }
+
+func TestDeleteMachineID_Isolation(t *testing.T) {
+	db := setupAssetsTestDB(t)
+	defer db.Close()
+	defer cleanupAssetsControllerTestData(t, db)
+
+	machineID1 := "assets-ctrl-test-iso-001"
+	machineID2 := "assets-ctrl-test-iso-002"
+	hostname := "assets-ctrl-test-iso-host"
+	now := time.Now()
+	txID := 99999
+
+	// Create assets and executions
+	createTestAssetWithData(t, db, hostname, machineID1, "Linux", false, now)
+	createTestAssetWithData(t, db, hostname, machineID2, "Linux", false, now)
+
+	// Insert transactions with SAME transaction_id but DIFFERENT machine_id
+	_, err := db.Exec(`
+		INSERT INTO transactions (transaction_id, machine_id, hostname, begin_time, end_time)
+		VALUES ($1, $2, $3, $4, $5), ($1, $6, $3, $4, $5)`,
+		txID, machineID1, hostname, now, now, machineID2,
+	)
+	if err != nil {
+		t.Fatalf("Failed to insert transactions: %v", err)
+	}
+
+	// Insert transaction items for both
+	_, err = db.Exec(`
+		INSERT INTO transaction_items (transaction_id, machine_id, package, version, release, arch)
+		VALUES 
+		($1, $2, 'pkg-1', '1.0', '1', 'x86_64'),
+		($1, $3, 'pkg-1', '1.0', '1', 'x86_64')`,
+		txID, machineID1, machineID2,
+	)
+	if err != nil {
+		t.Fatalf("Failed to insert transaction items: %v", err)
+	}
+
+	// Delete machineID1
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.DELETE("/assets/:machine_id", DeleteMachineID(db))
+
+	req, _ := http.NewRequest("DELETE", "/assets/"+machineID1, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusSeeOther {
+		t.Errorf("Expected status 303, got %d", w.Code)
+	}
+
+	// Verify machineID1 items are gone
+	var count1 int
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_items WHERE machine_id = $1", machineID1).Scan(&count1)
+	if err != nil {
+		t.Fatalf("Failed to count items for machine 1: %v", err)
+	}
+	if count1 != 0 {
+		t.Errorf("Expected 0 items for machine 1, found %d", count1)
+	}
+
+	// Verify machineID2 items STILL EXIST
+	var count2 int
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_items WHERE machine_id = $1", machineID2).Scan(&count2)
+	if err != nil {
+		t.Fatalf("Failed to count items for machine 2: %v", err)
+	}
+	if count2 != 1 {
+		t.Errorf("Expected 1 item for machine 2, found %d. This indicates the bug regression!", count2)
+	}
+}

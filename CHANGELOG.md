@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- Empty states for the Package Progression screen when no data is available.
+
 ## [1.18.2] - 2025-11-19
 
 ### Fixed

@@ -14,11 +14,32 @@
 <div class="page-body">
   <div class="container-xl">
     <div class="row row-deck row-cards">
+      {{ if not .graphData }}
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="empty">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <circle cx="12" cy="12" r="9" />
+                <line x1="9" y1="10" x2="9.01" y2="10" />
+                <line x1="15" y1="10" x2="15.01" y2="10" />
+                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
+              </svg>
+            </div>
+            <p class="empty-title">No package progression data</p>
+            <p class="empty￧-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent"
+                target="_blank">Txlog Agent</a> in one of your servers.</p>
+          </div>
+        </div>
+      </div>
+      {{ else }}
       <div class="col-lg-12">
         <div class="card">
           <div class="card-body">
             <div class="d-flex">
-                <h3 class="card-title">Package Progression by Week <span class="card-subtitle">last 3 months</span></h3>
+              <h3 class="card-title">Package Progression by Week <span class="card-subtitle">last 3 months</span></h3>
             </div>
             <div class="row">
               <div class="col">
@@ -27,7 +48,8 @@
               <div class="col-md-auto">
                 <div class="divide-y divide-y-fill">
                   <div class="px-3">
-                    <div class="text-secondary"><span class="status-dot" style="background-color: #F44336;"></span> Installed</div>
+                    <div class="text-secondary"><span class="status-dot" style="background-color: #F44336;"></span>
+                      Installed</div>
                     <div class="h2">
                       {{ $total := 0 }}
                       {{ range .graphData }}
@@ -37,7 +59,8 @@
                     </div>
                   </div>
                   <div class="px-3">
-                    <div class="text-secondary"><span class="status-dot" style="background-color: #066fd1;"></span> Upgraded</div>
+                    <div class="text-secondary"><span class="status-dot" style="background-color: #066fd1;"></span>
+                      Upgraded</div>
                     <div class="h2">
                       {{ $total := 0 }}
                       {{ range .graphData }}
@@ -52,7 +75,9 @@
           </div>
         </div>
       </div>
+      {{ end }}
 
+      {{ if .graphData }}
       <div class="col-lg-12">
         <div class="card">
           <div class="card-header">
@@ -85,8 +110,10 @@
               </div>
               <div class="col-md-4 d-flex align-items-end">
                 <button type="button" class="btn btn-primary" id="generate-report-btn">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-file-text">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-file-text">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M14 3v4a1 1 0 0 0 1 1h4" />
                     <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" />
                     <path d="M9 9l1 0" />
@@ -100,32 +127,35 @@
           </div>
         </div>
       </div>
+      {{ end }}
 
+      {{ if .graphData }}
       <div class="col-lg-12">
         <div class="card">
 
-            <div class="card-table table-responsive">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Week</th>
-                    <th>Installed packages</th>
-                    <th>Upgraded packages</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{ range .graphData }}
-                    <tr>
-                      <td>{{ formatDate .Week }}</td>
-                      <td class="text-nowrap">{{ formatInteger .Install }}</td>
-                      <td class="text-nowrap">{{ formatInteger .Upgraded }}</td>
-                    </tr>
-                  {{ end }}
-                </tbody>
-              </table>
-            </div>
+          <div class="card-table table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Week</th>
+                  <th>Installed packages</th>
+                  <th>Upgraded packages</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ range .graphData }}
+                <tr>
+                  <td>{{ formatDate .Week }}</td>
+                  <td class="text-nowrap">{{ formatInteger .Install }}</td>
+                  <td class="text-nowrap">{{ formatInteger .Upgraded }}</td>
+                </tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
+      {{ end }}
 
     </div>
     <script>
@@ -152,50 +182,50 @@
             series: [
               {
                 name: "Installed",
-                data: [{{ range .graphData }}{{ .Install }},{{ end }}],
+                data: [{{ range .graphData }}{{ .Install }}, {{ end }}],
               },
-              {
-                name: "Upgraded",
-                data: [{{ range .graphData }}{{ .Upgraded }},{{ end }}],
+        {
+          name: "Upgraded",
+          data: [{{ range .graphData }}{{ .Upgraded }}, {{ end }}],
               },
             ],
-            tooltip: {
-              theme: "dark",
-            },
-            grid: {
-              padding: {
-                top: -20,
-                right: 0,
-                left: -4,
-                bottom: -4,
-              },
-              strokeDashArray: 4,
-            },
-            xaxis: {
-              labels: {
-                padding: 0,
-              },
-              tooltip: {
-                enabled: false,
-              },
-              type: "string",
-            },
-            yaxis: {
-              labels: {
-                padding: 4,
-              },
-            },
-            labels: [
-              {{ range .graphData }}
-                "{{ formatDate .Week }}",
-              {{ end }}
-            ],
-            colors: [
-              '#F44336', '#066fd1'
-            ],
-            legend: {
-              show: false,
-            },
+        tooltip: {
+        theme: "dark",
+      },
+        grid: {
+        padding: {
+          top: -20,
+          right: 0,
+          left: -4,
+          bottom: -4,
+        },
+        strokeDashArray: 4,
+      },
+        xaxis: {
+        labels: {
+          padding: 0,
+        },
+        tooltip: {
+          enabled: false,
+        },
+        type: "string",
+      },
+        yaxis: {
+        labels: {
+          padding: 4,
+        },
+      },
+        labels: [
+        {{ range .graphData }}
+        "{{ formatDate .Week }}",
+        {{ end }}
+      ],
+        colors: [
+        '#F44336', '#066fd1'
+      ],
+        legend: {
+        show: false,
+      },
           }).render();
       });
 
@@ -214,7 +244,7 @@
       document.getElementById('report-month').value = currentMonth;
 
       // Generate report button handler
-      document.getElementById('generate-report-btn').addEventListener('click', async function() {
+      document.getElementById('generate-report-btn').addEventListener('click', async function () {
         const month = document.getElementById('report-month').value;
         const year = document.getElementById('report-year').value;
         const btn = this;
@@ -327,7 +357,7 @@ Based on this data, write a brief management report in Markdown format (1-2 para
         });
 
         // Copy button handler
-        document.getElementById('copy-prompt-btn').addEventListener('click', async function() {
+        document.getElementById('copy-prompt-btn').addEventListener('click', async function () {
           const promptText = document.getElementById('prompt-text');
           try {
             await navigator.clipboard.writeText(promptText.value);
@@ -394,4 +424,3 @@ Based on this data, write a brief management report in Markdown format (1-2 para
 </div>
 
 {{ template "footer.html" . }}
-

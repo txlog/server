@@ -26,7 +26,7 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 	`, hostname, machineID).Scan(&existingAssetID, &existingIsActive)
 
 	if err == sql.ErrNoRows {
-		err = am.deactivateOldAssets(tx, hostname, machineID)
+		err = am.deactivateAssetsByMachineID(tx, machineID)
 		if err != nil {
 			return err
 		}
@@ -60,7 +60,7 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 	}
 
 	if !existingIsActive {
-		err = am.deactivateOldAssets(tx, hostname, machineID)
+		err = am.deactivateAssetsByMachineID(tx, machineID)
 		if err != nil {
 			return err
 		}
@@ -82,17 +82,16 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 	return nil
 }
 
-func (am *AssetManager) deactivateOldAssets(tx *sql.Tx, hostname string, newMachineID string) error {
+func (am *AssetManager) deactivateAssetsByMachineID(tx *sql.Tx, machineID string) error {
 	_, err := tx.Exec(`
 		UPDATE assets
 		SET is_active = FALSE, deactivated_at = CURRENT_TIMESTAMP
-		WHERE hostname = $1
-		AND machine_id != $2
+		WHERE machine_id = $1
 		AND is_active = TRUE
-	`, hostname, newMachineID)
+	`, machineID)
 
 	if err != nil {
-		logger.Error("Error deactivating old assets: " + err.Error())
+		logger.Error("Error deactivating old assets by machine_id: " + err.Error())
 		return err
 	}
 

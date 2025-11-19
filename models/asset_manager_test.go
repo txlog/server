@@ -56,7 +56,7 @@ func TestAssetManager_UpsertAsset_NewAsset(t *testing.T) {
 	// Verify asset was created
 	var count int
 	err = tx.QueryRow(`
-		SELECT COUNT(*) FROM assets 
+		SELECT COUNT(*) FROM assets
 		WHERE hostname = $1 AND machine_id = $2 AND is_active = TRUE
 	`, hostname, machineID).Scan(&count)
 
@@ -101,7 +101,7 @@ func TestAssetManager_UpsertAsset_UpdateExisting(t *testing.T) {
 	// Verify last_seen was updated
 	var lastSeen time.Time
 	err = tx.QueryRow(`
-		SELECT last_seen FROM assets 
+		SELECT last_seen FROM assets
 		WHERE hostname = $1 AND machine_id = $2
 	`, hostname, machineID).Scan(&lastSeen)
 
@@ -147,7 +147,7 @@ func TestAssetManager_UpsertAsset_ReplacesOldAsset(t *testing.T) {
 	// Verify old asset is inactive
 	var oldIsActive bool
 	err = tx.QueryRow(`
-		SELECT is_active FROM assets 
+		SELECT is_active FROM assets
 		WHERE hostname = $1 AND machine_id = $2
 	`, hostname, oldMachineID).Scan(&oldIsActive)
 
@@ -162,7 +162,7 @@ func TestAssetManager_UpsertAsset_ReplacesOldAsset(t *testing.T) {
 	// Verify new asset is active
 	var newIsActive bool
 	err = tx.QueryRow(`
-		SELECT is_active FROM assets 
+		SELECT is_active FROM assets
 		WHERE hostname = $1 AND machine_id = $2
 	`, hostname, newMachineID).Scan(&newIsActive)
 
@@ -177,7 +177,7 @@ func TestAssetManager_UpsertAsset_ReplacesOldAsset(t *testing.T) {
 	// Verify only one asset is active per hostname
 	var activeCount int
 	err = tx.QueryRow(`
-		SELECT COUNT(*) FROM assets 
+		SELECT COUNT(*) FROM assets
 		WHERE hostname = $1 AND is_active = TRUE
 	`, hostname).Scan(&activeCount)
 
@@ -231,7 +231,7 @@ func TestAssetManager_UpsertAsset_ReactivatesInactive(t *testing.T) {
 	var isActive bool
 	var deactivatedAt sql.NullTime
 	err = tx.QueryRow(`
-		SELECT is_active, deactivated_at FROM assets 
+		SELECT is_active, deactivated_at FROM assets
 		WHERE hostname = $1 AND machine_id = $2
 	`, hostname, machineID).Scan(&isActive, &deactivatedAt)
 
@@ -332,7 +332,7 @@ func TestAssetManager_GetAssetByMachineID(t *testing.T) {
 	}
 }
 
-func TestAssetManager_DeactivateOldAssets(t *testing.T) {
+func TestAssetManager_DeactivateAssetsByMachineID(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 	defer cleanupTestData(t, db)
@@ -344,56 +344,76 @@ func TestAssetManager_DeactivateOldAssets(t *testing.T) {
 	}
 	defer tx.Rollback()
 
-	hostname := "test-server07"
-	oldMachineID1 := "test-machine-007-old1"
-	oldMachineID2 := "test-machine-007-old2"
-	newMachineID := "test-machine-007-new"
+	machineID := "test-machine-unique-id"
+	hostname1 := "test-server-01"
+	hostname2 := "test-server-02"
 	timestamp := time.Now()
 
-	// Insert multiple old assets
-	err = am.UpsertAsset(tx, hostname, oldMachineID1, timestamp.Add(-3*time.Hour), sql.NullBool{}, sql.NullString{})
+	// 1. Insert first asset (Host1, ID)
+	err = am.UpsertAsset(tx, hostname1, machineID, timestamp.Add(-1*time.Hour), sql.NullBool{}, sql.NullString{})
 	if err != nil {
-		t.Fatalf("Failed to insert old asset 1: %v", err)
+		t.Fatalf("Failed to insert asset 1: %v", err)
 	}
 
-	err = am.UpsertAsset(tx, hostname, oldMachineID2, timestamp.Add(-2*time.Hour), sql.NullBool{}, sql.NullString{})
+	// Check active count for machineID
+	var count int
+	err = tx.QueryRow("SELECT COUNT(*) FROM assets WHERE machine_id = $1 AND is_active = TRUE", machineID).Scan(&count)
 	if err != nil {
-		t.Fatalf("Failed to insert old asset 2: %v", err)
+		t.Fatalf("Query failed: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("Expected 1 active asset, got %d", count)
 	}
 
-	// Insert new asset
-	err = am.UpsertAsset(tx, hostname, newMachineID, timestamp, sql.NullBool{}, sql.NullString{})
+	// 2. Insert second asset with SAME ID but DIFFERENT Hostname (Host2, ID)
+	// This should deactivate the previous asset with the same machineID
+	err = am.UpsertAsset(tx, hostname2, machineID, timestamp, sql.NullBool{}, sql.NullString{})
 	if err != nil {
-		t.Fatalf("Failed to insert new asset: %v", err)
+		t.Fatalf("Failed to insert asset 2: %v", err)
 	}
 
-	// Verify all old assets are inactive
-	var inactiveCount int
-	err = tx.QueryRow(`
-		SELECT COUNT(*) FROM assets 
-		WHERE hostname = $1 AND is_active = FALSE
-	`, hostname).Scan(&inactiveCount)
-
+	// Verify Host1 is now INACTIVE
+	var isActive bool
+	err = tx.QueryRow("SELECT is_active FROM assets WHERE hostname = $1 AND machine_id = $2", hostname1, machineID).Scan(&isActive)
 	if err != nil {
-		t.Fatalf("Failed to count inactive assets: %v", err)
+		t.Fatalf("Query failed: %v", err)
+	}
+	if isActive {
+		t.Errorf("Expected asset 1 to be inactive")
 	}
 
-	if inactiveCount != 2 {
-		t.Errorf("Expected 2 inactive assets, got %d", inactiveCount)
-	}
-
-	// Verify only one is active
-	var activeCount int
-	err = tx.QueryRow(`
-		SELECT COUNT(*) FROM assets 
-		WHERE hostname = $1 AND is_active = TRUE
-	`, hostname).Scan(&activeCount)
-
+	// Verify Host2 is ACTIVE
+	err = tx.QueryRow("SELECT is_active FROM assets WHERE hostname = $1 AND machine_id = $2", hostname2, machineID).Scan(&isActive)
 	if err != nil {
-		t.Fatalf("Failed to count active assets: %v", err)
+		t.Fatalf("Query failed: %v", err)
+	}
+	if !isActive {
+		t.Errorf("Expected asset 2 to be active")
 	}
 
-	if activeCount != 1 {
-		t.Errorf("Expected 1 active asset, got %d", activeCount)
+	// 3. Insert third asset with DIFFERENT ID but SAME Hostname (Host2, ID2)
+	// This should NOT deactivate the previous asset with the same hostname (Host2, ID)
+	machineID2 := "test-machine-unique-id-2"
+	err = am.UpsertAsset(tx, hostname2, machineID2, timestamp, sql.NullBool{}, sql.NullString{})
+	if err != nil {
+		t.Fatalf("Failed to insert asset 3: %v", err)
+	}
+
+	// Verify Host2/ID is STILL ACTIVE (Hostname duplication allowed)
+	err = tx.QueryRow("SELECT is_active FROM assets WHERE hostname = $1 AND machine_id = $2", hostname2, machineID).Scan(&isActive)
+	if err != nil {
+		t.Fatalf("Query failed: %v", err)
+	}
+	if !isActive {
+		t.Errorf("Expected asset 2 (Host2, ID) to remain active")
+	}
+
+	// Verify Host2/ID2 is ACTIVE
+	err = tx.QueryRow("SELECT is_active FROM assets WHERE hostname = $1 AND machine_id = $2", hostname2, machineID2).Scan(&isActive)
+	if err != nil {
+		t.Fatalf("Query failed: %v", err)
+	}
+	if !isActive {
+		t.Errorf("Expected asset 3 (Host2, ID2) to be active")
 	}
 }

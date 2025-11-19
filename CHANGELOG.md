@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [UNRELEASED]
+
+### Fixed
+
+- Fixed a bug where deleting an asset would incorrectly delete transaction items
+  from other assets that shared the same transaction_id.
+
 ## [1.18.1] - 2025-11-13
 
 ### Changed

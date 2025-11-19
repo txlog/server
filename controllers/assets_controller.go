@@ -267,7 +267,7 @@ func DeleteMachineID(database *sql.DB) gin.HandlerFunc {
 			}
 		}()
 
-		_, err = tx.Exec(`DELETE FROM transaction_items WHERE transaction_id IN (SELECT transaction_id FROM transactions WHERE machine_id = $1)`, machineID)
+		_, err = tx.Exec(`DELETE FROM transaction_items WHERE machine_id = $1`, machineID)
 		if err != nil {
 			tx.Rollback()
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{

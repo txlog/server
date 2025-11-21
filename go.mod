@@ -3,7 +3,7 @@ module github.com/txlog/server
 go 1.25.4
 
 require (
-	github.com/coreos/go-oidc/v3 v3.16.0
+	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/joho/godotenv v1.5.1

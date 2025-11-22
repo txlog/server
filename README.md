@@ -251,13 +251,18 @@ variable. If not set, the application runs normally without telemetry.
 **Environment Variables**:
 
 - **OTEL_EXPORTER_OTLP_ENDPOINT**: OTLP endpoint URL (required to enable
-  telemetry)
+  telemetry). Supports `http://` and `https://` prefixes. If `http://` is used,
+  insecure mode is automatically enabled. If no prefix is provided, it defaults
+  to `https://`.
 - **OTEL_EXPORTER_OTLP_HEADERS**: Additional headers for authentication
   (format: `key1=value1,key2=value2`)
 - **OTEL_SERVICE_NAME**: Service name for telemetry (default: `txlog-server`)
 - **OTEL_SERVICE_VERSION**: Service version (default: `unknown`)
 - **OTEL_RESOURCE_ATTRIBUTES**: Additional resource attributes (format:
   `key1=value1,key2=value2`)
+- **OTEL_EXPORTER_OTLP_INSECURE**: Set to "true" to use HTTP instead of HTTPS
+  (default: `false`)
+- **OTEL_LOGS_EXPORTER**: Set to "none" to disable log export (default: `otlp`)
 
 ##### Popular Service Configurations
 

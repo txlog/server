@@ -30,6 +30,9 @@ OTEL_SERVICE_VERSION=dev
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment=development
 ```
 
+> **Nota**: O endpoint suporta prefixos `http://` e `https://`. Se `http://` for usado, o modo inseguro é ativado automaticamente.
+> Se nenhum prefixo for fornecido, o padrão é `https://`.
+
 ### 3. Iniciar o Txlog Server
 
 ```bash
@@ -243,7 +246,8 @@ docker-compose up -d
 Verifique:
 
 - O endpoint OTLP está acessível?
-- O formato do endpoint está correto? (<http://host:port>)
+- O formato do endpoint está correto? (ex: `http://host:port` ou `host:port`)
+  - Prefixos `http://` e `https://` são suportados e configuram o modo seguro/inseguro automaticamente.
 - Não inclua `/v1/traces` no endpoint - o SDK adiciona automaticamente
 
 ### Traces não aparecem no Jaeger

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -32,6 +34,8 @@ var (
 //   - OTEL_SERVICE_NAME: Service name for telemetry (default: txlog-server)
 //   - OTEL_SERVICE_VERSION: Service version (default: unknown)
 //   - OTEL_RESOURCE_ATTRIBUTES: Additional resource attributes (format: key1=value1,key2=value2)
+//   - OTEL_EXPORTER_OTLP_INSECURE: Set to "true" to use HTTP instead of HTTPS (default: false)
+//   - OTEL_LOGS_EXPORTER: Set to "none" to disable log export (default: otlp)
 //
 // If OTEL_EXPORTER_OTLP_ENDPOINT is not set, telemetry is disabled and the function returns nil.
 // This allows the application to run normally without OpenTelemetry configuration.
@@ -68,8 +72,10 @@ func InitTelemetry() error {
 	}
 
 	// Initialize log exporter
-	if err := initLogProvider(ctx, res); err != nil {
-		return fmt.Errorf("failed to initialize log provider: %w", err)
+	if os.Getenv("OTEL_LOGS_EXPORTER") != "none" {
+		if err := initLogProvider(ctx, res); err != nil {
+			return fmt.Errorf("failed to initialize log provider: %w", err)
+		}
 	}
 
 	logger.Info("OpenTelemetry: initialized successfully")
@@ -80,11 +86,19 @@ func InitTelemetry() error {
 
 // initTraceProvider initializes the OpenTelemetry trace provider with OTLP HTTP exporter
 func initTraceProvider(ctx context.Context, res *resource.Resource) error {
-	// Create OTLP trace exporter
-	traceExporter, err := otlptracehttp.New(ctx,
-		otlptracehttp.WithEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")),
+	endpoint, insecure := parseEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
+
+	opts := []otlptracehttp.Option{
+		otlptracehttp.WithEndpoint(endpoint),
 		otlptracehttp.WithHeaders(parseHeaders(os.Getenv("OTEL_EXPORTER_OTLP_HEADERS"))),
-	)
+	}
+
+	if insecure || isInsecure() {
+		opts = append(opts, otlptracehttp.WithInsecure())
+	}
+
+	// Create OTLP trace exporter
+	traceExporter, err := otlptracehttp.New(ctx, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to create trace exporter: %w", err)
 	}
@@ -110,11 +124,19 @@ func initTraceProvider(ctx context.Context, res *resource.Resource) error {
 
 // initLogProvider initializes the OpenTelemetry log provider with OTLP HTTP exporter
 func initLogProvider(ctx context.Context, res *resource.Resource) error {
-	// Create OTLP log exporter
-	logExporter, err := otlploghttp.New(ctx,
-		otlploghttp.WithEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")),
+	endpoint, insecure := parseEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
+
+	opts := []otlploghttp.Option{
+		otlploghttp.WithEndpoint(endpoint),
 		otlploghttp.WithHeaders(parseHeaders(os.Getenv("OTEL_EXPORTER_OTLP_HEADERS"))),
-	)
+	}
+
+	if insecure || isInsecure() {
+		opts = append(opts, otlploghttp.WithInsecure())
+	}
+
+	// Create OTLP log exporter
+	logExporter, err := otlploghttp.New(ctx, opts...)
 	if err != nil {
 		return fmt.Errorf("failed to create log exporter: %w", err)
 	}
@@ -236,4 +258,22 @@ func getEnvOrDefault(key, defaultValue string) string {
 		return value
 	}
 	return defaultValue
+}
+
+// isInsecure checks if the OTEL_EXPORTER_OTLP_INSECURE environment variable is set to "true"
+func isInsecure() bool {
+	val := os.Getenv("OTEL_EXPORTER_OTLP_INSECURE")
+	b, _ := strconv.ParseBool(val)
+	return b
+}
+
+// parseEndpoint parses the endpoint URL and returns the host:port and whether it is insecure (HTTP)
+func parseEndpoint(endpoint string) (string, bool) {
+	if strings.HasPrefix(endpoint, "http://") {
+		return strings.TrimPrefix(endpoint, "http://"), true
+	}
+	if strings.HasPrefix(endpoint, "https://") {
+		return strings.TrimPrefix(endpoint, "https://"), false
+	}
+	return endpoint, false
 }

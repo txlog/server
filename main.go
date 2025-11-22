@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -20,6 +22,7 @@ import (
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/middleware"
 	"github.com/txlog/server/scheduler"
+	"github.com/txlog/server/telemetry"
 	"github.com/txlog/server/util"
 	"github.com/txlog/server/version"
 )
@@ -45,6 +48,22 @@ var templateFS embed.FS
 // @description				API key authentication for /v1 endpoints. Generate your API key in the admin panel at /admin
 func main() {
 	logger.InitLogger()
+
+	// Initialize OpenTelemetry (optional)
+	if err := telemetry.InitTelemetry(); err != nil {
+		logger.Error("Failed to initialize telemetry: " + err.Error())
+		// Continue without telemetry - it's optional
+	}
+
+	// Configure logger to use OpenTelemetry if available
+	logger.SetOTelLoggerProvider(telemetry.GetLoggerProvider())
+
+	// Setup graceful shutdown for telemetry
+	defer func() {
+		if err := telemetry.Shutdown(); err != nil {
+			logger.Error("Failed to shutdown telemetry: " + err.Error())
+		}
+	}()
 
 	if os.Getenv("GIN_MODE") == "" {
 		gin.SetMode(gin.ReleaseMode)
@@ -84,6 +103,10 @@ func main() {
 
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
+
+	// Add OpenTelemetry middleware for automatic request tracing
+	r.Use(middleware.TelemetryMiddleware())
+
 	r.Use(EnvironmentVariablesMiddleware())
 	r.Use(middleware.AuthMiddleware(database.Db))
 
@@ -216,6 +239,19 @@ func main() {
 		v1Group.GET("/items", v1API.GetItems(database.Db))
 	}
 
+	// Setup signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-sigChan
+		logger.Info("Shutting down server...")
+		if err := telemetry.Shutdown(); err != nil {
+			logger.Error("Failed to shutdown telemetry: " + err.Error())
+		}
+		os.Exit(0)
+	}()
+
 	r.Run()
 }
 
@@ -252,6 +288,9 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 			"ldapAdminGroup":           os.Getenv("LDAP_ADMIN_GROUP"),
 			"ldapViewerGroup":          os.Getenv("LDAP_VIEWER_GROUP"),
 			"ldapGroupFilter":          os.Getenv("LDAP_GROUP_FILTER"),
+			"otelEndpoint":             os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"),
+			"otelServiceName":          os.Getenv("OTEL_SERVICE_NAME"),
+			"otelServiceVersion":       os.Getenv("OTEL_SERVICE_VERSION"),
 		}
 
 		c.Set("env", envVars)

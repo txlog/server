@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/XSAM/otelsql"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/lib/pq"
 	logger "github.com/txlog/server/logger"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
 var Db *sql.DB
@@ -30,7 +32,7 @@ var migrationsFS embed.FS
 //   - PGSQL_PASSWORD: Database password
 //   - PGSQL_SSLMODE: SSL mode for connection
 //
-// 2. Establishes connection to the database
+// 2. Establishes connection to the database with OpenTelemetry instrumentation
 //
 // 3. Sets up database migrations:
 //   - Creates a postgres driver instance
@@ -40,6 +42,9 @@ var migrationsFS embed.FS
 // The function will panic if it fails to establish the database connection.
 // It logs information about successful connection and migration application,
 // as well as any errors that occur during the migration process.
+//
+// If OpenTelemetry is configured, all SQL queries will be automatically traced
+// with detailed information including query text, execution time, and errors.
 func ConnectDatabase() {
 	psqlSetup := fmt.Sprintf(
 		"host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
@@ -51,14 +56,40 @@ func ConnectDatabase() {
 		os.Getenv("PGSQL_SSLMODE"),
 	)
 
-	db, errSql := sql.Open("postgres", psqlSetup)
+	// Open database connection with OpenTelemetry instrumentation
+	// This will automatically trace all SQL queries, transactions, and connection operations
+	db, errSql := otelsql.Open("postgres", psqlSetup,
+		otelsql.WithAttributes(
+			semconv.DBSystemPostgreSQL,
+			semconv.DBName(os.Getenv("PGSQL_DB")),
+		),
+		// Record query text in spans (useful for debugging, but may contain sensitive data)
+		// Set to false in production if queries contain sensitive information
+		otelsql.WithSQLCommenter(true),
+		// Trace all database calls including Ping, Exec, Query, etc.
+		otelsql.WithSpanOptions(otelsql.SpanOptions{
+			Ping:                 true,
+			RowsNext:             false, // Skip tracing individual row fetches to reduce noise
+			DisableErrSkip:       false,
+			OmitConnResetSession: true, // Skip tracing connection reset for less noise
+		}),
+	)
 	if errSql != nil {
 		logger.Error("There is an error while connecting to the database: " + errSql.Error())
 		panic(errSql)
-	} else {
-		Db = db
-		logger.Info("Database: connection established.")
 	}
+
+	// Register database stats for monitoring
+	if err := otelsql.RegisterDBStatsMetrics(db, otelsql.WithAttributes(
+		semconv.DBSystemPostgreSQL,
+		semconv.DBName(os.Getenv("PGSQL_DB")),
+	)); err != nil {
+		logger.Warn("Failed to register database metrics: " + err.Error())
+		// Continue anyway - metrics are optional
+	}
+
+	Db = db
+	logger.Info("Database: connection established with OpenTelemetry instrumentation.")
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {

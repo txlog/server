@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Jaeger - Interface de visualização de traces
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: txlog-jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4318:4318"    # OTLP HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - txlog-network
+
+  # PostgreSQL - Banco de dados do Txlog Server
+  postgres:
+    image: postgres:16-alpine
+    container_name: txlog-postgres
+    environment:
+      POSTGRES_USER: txlog
+      POSTGRES_PASSWORD: txlog_password
+      POSTGRES_DB: txlog
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - txlog-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U txlog"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Txlog Server com OpenTelemetry
+  txlog-server:
+    build: .
+    container_name: txlog-server
+    ports:
+      - "8080:8080"
+    environment:
+      # Configuração básica
+      - INSTANCE=Docker Development
+      - LOG_LEVEL=INFO
+      - GIN_MODE=debug
+
+      # Banco de dados
+      - PGSQL_HOST=postgres
+      - PGSQL_PORT=5432
+      - PGSQL_USER=txlog
+      - PGSQL_DB=txlog
+      - PGSQL_PASSWORD=txlog_password
+      - PGSQL_SSLMODE=disable
+
+      # Cron jobs
+      - CRON_RETENTION_DAYS=7
+      - CRON_RETENTION_EXPRESSION=0 2 * * *
+      - CRON_STATS_EXPRESSION=0 * * * *
+
+      # OpenTelemetry - Exportar para Jaeger
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
+      - OTEL_SERVICE_NAME=txlog-server
+      - OTEL_SERVICE_VERSION=dev
+      - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=docker-compose
+    depends_on:
+      postgres:
+        condition: service_healthy
+      jaeger:
+        condition: service_started
+    networks:
+      - txlog-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  txlog-network:
+    driver: bridge

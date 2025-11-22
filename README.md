@@ -182,6 +182,14 @@ LDAP_USER_FILTER=(uid=%s)
 LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
 LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 LDAP_GROUP_FILTER=(member=%s)
+
+# OpenTelemetry (Optional)
+# Set OTEL_EXPORTER_OTLP_ENDPOINT to enable telemetry export
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OTEL_EXPORTER_OTLP_HEADERS=authorization=Bearer your-token-here
+OTEL_SERVICE_NAME=txlog-server
+OTEL_SERVICE_VERSION=v1.0.0
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
 ```
 
 #### Authentication Configuration
@@ -228,6 +236,89 @@ If not provided, the server will:
 - Use anonymous bind for user searches (works with OpenLDAP)
 - Use the authenticated user's session for group membership checks
 - Active Directory typically **requires** a service account
+
+#### OpenTelemetry Configuration
+
+Txlog Server supports OpenTelemetry for distributed tracing and log export to
+external observability platforms. OpenTelemetry is **optional** and disabled by
+default.
+
+##### Enabling OpenTelemetry
+
+To enable OpenTelemetry, set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment
+variable. If not set, the application runs normally without telemetry.
+
+**Environment Variables**:
+
+- **OTEL_EXPORTER_OTLP_ENDPOINT**: OTLP endpoint URL (required to enable
+  telemetry)
+- **OTEL_EXPORTER_OTLP_HEADERS**: Additional headers for authentication
+  (format: `key1=value1,key2=value2`)
+- **OTEL_SERVICE_NAME**: Service name for telemetry (default: `txlog-server`)
+- **OTEL_SERVICE_VERSION**: Service version (default: `unknown`)
+- **OTEL_RESOURCE_ATTRIBUTES**: Additional resource attributes (format:
+  `key1=value1,key2=value2`)
+
+##### Popular Service Configurations
+
+**Jaeger (local development)**:
+
+```bash
+# Run Jaeger all-in-one
+docker run -d --name jaeger \
+  -p 16686:16686 \
+  -p 4318:4318 \
+  jaegertracing/all-in-one:latest
+
+# Configure Txlog Server
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OTEL_SERVICE_NAME=txlog-server
+```
+
+Access Jaeger UI at <http://localhost:16686>
+
+**Grafana Cloud**:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp-gateway-prod-us-central-0.grafana.net/otlp
+OTEL_EXPORTER_OTLP_HEADERS=authorization=Basic <base64-encoded-user:password>
+OTEL_SERVICE_NAME=txlog-server
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
+```
+
+**New Relic**:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://otlp.nr-data.net
+OTEL_EXPORTER_OTLP_HEADERS=api-key=<your-license-key>
+OTEL_SERVICE_NAME=txlog-server
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
+```
+
+**Datadog**:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+OTEL_SERVICE_NAME=txlog-server
+# Note: Datadog Agent must be running with OTLP receiver enabled
+```
+
+**Honeycomb**:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=https://api.honeycomb.io
+OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=<your-api-key>
+OTEL_SERVICE_NAME=txlog-server
+```
+
+**OpenTelemetry Collector** (recommended for production):
+
+```bash
+# Point to your collector
+OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+OTEL_SERVICE_NAME=txlog-server
+OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production,cluster=us-west-1
+```
 
 ### Development commands
 

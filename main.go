@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"html/template"
 	"io/fs"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -239,6 +241,12 @@ func main() {
 		v1Group.GET("/items", v1API.GetItems(database.Db))
 	}
 
+	// Create HTTP server with proper graceful shutdown support
+	srv := &http.Server{
+		Addr:    ":" + getEnvOrDefault("PORT", "8080"),
+		Handler: r,
+	}
+
 	// Setup signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
@@ -246,13 +254,42 @@ func main() {
 	go func() {
 		<-sigChan
 		logger.Info("Shutting down server...")
+
+		// Create shutdown context with timeout
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		// Gracefully shutdown HTTP server
+		if err := srv.Shutdown(ctx); err != nil {
+			logger.Error("Server forced to shutdown: " + err.Error())
+		}
+
+		// Shutdown telemetry after server
 		if err := telemetry.Shutdown(); err != nil {
 			logger.Error("Failed to shutdown telemetry: " + err.Error())
 		}
-		os.Exit(0)
 	}()
 
-	r.Run()
+	// Start server
+	logger.Info("Starting server on port " + getEnvOrDefault("PORT", "8080"))
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Error("Failed to start server: " + err.Error())
+		// Cleanup telemetry on startup failure
+		if shutdownErr := telemetry.Shutdown(); shutdownErr != nil {
+			logger.Error("Failed to shutdown telemetry after server error: " + shutdownErr.Error())
+		}
+		os.Exit(1)
+	}
+
+	logger.Info("Server stopped gracefully")
+}
+
+// getEnvOrDefault returns the value of an environment variable or a default value
+func getEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }
 
 func EnvironmentVariablesMiddleware() gin.HandlerFunc {

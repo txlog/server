@@ -63,9 +63,9 @@ func ConnectDatabase() {
 			semconv.DBSystemPostgreSQL,
 			semconv.DBName(os.Getenv("PGSQL_DB")),
 		),
-		// Record query text in spans (useful for debugging, but may contain sensitive data)
-		// Set to false in production if queries contain sensitive information
-		otelsql.WithSQLCommenter(true),
+		// SQL Commenter adds trace context as SQL comments for database-side correlation
+		// Set to false to disable (query text is captured in spans by default)
+		otelsql.WithSQLCommenter(false),
 		// Trace all database calls including Ping, Exec, Query, etc.
 		otelsql.WithSpanOptions(otelsql.SpanOptions{
 			Ping:                 true,

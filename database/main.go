@@ -89,8 +89,11 @@ func ConnectDatabase() {
 	}
 
 	Db = db
-	logger.Info("Database: connection established with OpenTelemetry instrumentation.")
-
+	if os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT") != "" {
+		logger.Info("Database: connection established with OpenTelemetry instrumentation.")
+	} else {
+		logger.Info("Database: connection established.")
+	}
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		logger.Error("Failed to create database driver: " + err.Error())

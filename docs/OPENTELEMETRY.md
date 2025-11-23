@@ -269,7 +269,7 @@ Check:
 
 ### Performance
 
-OpenTelemetry overhead is typically < 5%:
+OpenTelemetry overhead is typically < 1%:
 
 - Traces are sent in batch (non-blocking)
 - Logs are processed asynchronously

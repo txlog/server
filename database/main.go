@@ -84,7 +84,7 @@ func ConnectDatabase() {
 		semconv.DBSystemPostgreSQL,
 		semconv.DBName(os.Getenv("PGSQL_DB")),
 	)); err != nil {
-		logger.Warn("Failed to register database metrics: " + err.Error())
+		logger.Warn(fmt.Sprintf("Failed to register database metrics (non-fatal): %v", err))
 		// Continue anyway - metrics are optional
 	}
 

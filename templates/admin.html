@@ -382,7 +382,7 @@
               </div>
 
               <!-- Housekeeping -->
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="card">
                   <div class="card-header">
                     <h4 class="card-title">Housekeeping</h4>
@@ -405,7 +405,7 @@
               </div>
 
               <!-- Statistics -->
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <div class="card">
                   <div class="card-header">
                     <h4 class="card-title">Statistics</h4>
@@ -420,6 +420,58 @@
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+
+              <!-- OpenTelemetry -->
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">OpenTelemetry</h4>
+                  </div>
+                  {{ if .Context.Keys.env.otelEndpoint }}
+                  <div class="table-responsive">
+                    <table class="table table-sm table-vcenter card-table">
+                      <tbody>
+                        <tr>
+                          <td class="w-50 fw-bold">Status</td>
+                          <td><span class="badge bg-success text-white">Enabled</span></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Endpoint</td>
+                          <td><code>{{ .Context.Keys.env.otelEndpoint }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Service Name</td>
+                          <td><code>{{ .Context.Keys.env.otelServiceName }}</code></td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Service Version</td>
+                          <td><code>{{ .Context.Keys.env.otelServiceVersion }}</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  {{ else }}
+                  <div class="card-body">
+                    <div class="empty">
+                      <div class="empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                          <path d="M21 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                          <path d="M3.6 9h16.8" />
+                          <path d="M3.6 15h16.8" />
+                          <path d="M11.5 3a17 17 0 0 0 0 18" />
+                          <path d="M12.5 3a17 17 0 0 1 0 18" />
+                        </svg>
+                      </div>
+                      <p class="empty-title">Not Configured</p>
+                      <p class="empty-subtitle text-muted">
+                        Telemetry is disabled.
+                      </p>
+                    </div>
+                  </div>
+                  {{ end }}
                 </div>
               </div>
 

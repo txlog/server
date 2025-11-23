@@ -1,12 +1,12 @@
-# Guia de Teste - OpenTelemetry no Txlog Server
+# Testing Guide - OpenTelemetry on Txlog Server
 
-Este guia mostra como testar a implementação do OpenTelemetry no Txlog Server.
+This guide shows how to test the OpenTelemetry implementation on Txlog Server.
 
-## Teste Rápido com Jaeger
+## Quick Test with Jaeger
 
-A maneira mais fácil de testar é usar o Jaeger All-in-One localmente.
+The easiest way to test is using Jaeger All-in-One locally.
 
-### 1. Iniciar Jaeger
+### 1. Start Jaeger
 
 ```bash
 docker run -d --name jaeger \
@@ -18,9 +18,9 @@ docker run -d --name jaeger \
 - **16686**: Jaeger UI
 - **4318**: OTLP HTTP endpoint
 
-### 2. Configurar Txlog Server
+### 2. Configure Txlog Server
 
-Adicione ao seu arquivo `.env`:
+Add to your `.env` file:
 
 ```bash
 # OpenTelemetry Configuration
@@ -30,28 +30,28 @@ OTEL_SERVICE_VERSION=dev
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment=development
 ```
 
-> **Nota**: O endpoint suporta prefixos `http://` e `https://`. Se `http://` for usado, o modo inseguro é ativado automaticamente.
-> Se nenhum prefixo for fornecido, o padrão é `https://`.
+> **Note**: The endpoint supports `http://` and `https://` prefixes. If `http://` is used, insecure mode is automatically enabled.
+> If no prefix is provided, it defaults to `https://`.
 
-### 3. Iniciar o Txlog Server
+### 3. Start Txlog Server
 
 ```bash
 make run
 ```
 
-Você verá nos logs:
+You will see in the logs:
 
 ```text
 INFO OpenTelemetry: initialized successfully
 INFO OpenTelemetry: exporting to http://localhost:4318
 ```
 
-### 4. Fazer Requisições
+### 4. Make Requests
 
-Faça algumas requisições para gerar traces:
+Make some requests to generate traces:
 
 ```bash
-# Página principal
+# Main page
 curl http://localhost:8080/
 
 # API endpoint
@@ -61,80 +61,80 @@ curl http://localhost:8080/v1/version
 curl http://localhost:8080/swagger/index.html
 ```
 
-### 5. Visualizar Traces no Jaeger
+### 5. View Traces in Jaeger
 
-Abra o navegador em: <http://localhost:16686>
+Open your browser at: <http://localhost:16686>
 
-1. No campo "Service", selecione **txlog-server**
-2. Clique em "Find Traces"
-3. Você verá todas as requisições HTTP com seus detalhes:
-   - Duração
-   - Status HTTP
-   - Rota
-   - Método
-   - **Queries SQL executadas** (como spans filhos)
+1. In the "Service" field, select **txlog-server**
+2. Click "Find Traces"
+3. You will see all HTTP requests with their details:
+   - Duration
+   - HTTP Status
+   - Route
+   - Method
+   - **Executed SQL Queries** (as child spans)
 
-### 6. Visualizar SQL Queries nos Traces
+### 6. View SQL Queries in Traces
 
-Cada requisição HTTP que executa queries SQL mostrará:
+Each HTTP request that executes SQL queries will show:
 
-**Informações capturadas:**
+**Captured information:**
 
-- Texto da query SQL (sem parâmetros sensíveis)
-- Tempo de execução
-- Número de linhas afetadas
-- Erros (se houver)
-- Conexões ao banco de dados
+- SQL query text (without sensitive parameters)
+- Execution time
+- Number of affected rows
+- Errors (if any)
+- Database connections
 
-**Exemplos de spans SQL que você verá:**
+**Examples of SQL spans you will see:**
 
 - `sql:query` - SELECT queries
 - `sql:exec` - INSERT, UPDATE, DELETE
 - `sql:prepare` - Prepared statements
-- `sql:begin` - Início de transação
-- `sql:commit` - Commit de transação
-- `sql:rollback` - Rollback de transação
+- `sql:begin` - Transaction start
+- `sql:commit` - Transaction commit
+- `sql:rollback` - Transaction rollback
 
-**Atributos capturados:**
+**Captured attributes:**
 
 - `db.system`: "postgresql"
-- `db.name`: nome do banco de dados
-- `db.statement`: texto da query SQL
-- `db.operation`: tipo de operação (SELECT, INSERT, etc.)
+- `db.name`: database name
+- `db.statement`: SQL query text
+- `db.operation`: operation type (SELECT, INSERT, etc.)
 
-### 7. Visualizar Logs Correlacionados
+### 7. View Correlated Logs
 
-Os logs também são enviados para o Jaeger com correlação de trace:
+Logs are also sent to Jaeger with trace correlation:
 
-- Clique em um trace específico
-- Você verá os spans HTTP
-- Os logs estarão correlacionados com os trace_id e span_id
+- Click on a specific trace
+- You will see the HTTP spans
+- Logs will be correlated with trace_id and span_id
 
-## Teste sem OpenTelemetry
+## Testing without OpenTelemetry
 
-Para testar que a aplicação funciona sem OpenTelemetry:
+To test that the application works without OpenTelemetry:
 
-1. **Remova** ou **comente** a variável `OTEL_EXPORTER_OTLP_ENDPOINT` do `.env`
+1. **Remove** or **comment out** the `OTEL_EXPORTER_OTLP_ENDPOINT` variable from `.env`
 
-2. Inicie o servidor:
+2. Start the server:
 
 ```bash
 make run
 ```
 
-3. Você verá nos logs:
+3. You will see in the logs:
 
 ```text
 INFO OpenTelemetry: disabled (OTEL_EXPORTER_OTLP_ENDPOINT not set)
 ```
 
-4. A aplicação funciona normalmente, sem enviar telemetria
+4. The application works normally, without sending telemetry
 
-## Teste com OpenTelemetry Collector
+## Testing with OpenTelemetry Collector
 
-Para ambientes de produção, recomenda-se usar um OpenTelemetry Collector.
+For production environments, it is recommended to use an OpenTelemetry Collector.
 
-### 1. Criar arquivo `otel-collector-config.yaml`
+### 1. Create file `otel-collector-config.yaml`
 
 ```yaml
 receivers:
@@ -194,74 +194,74 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
       - OTEL_SERVICE_NAME=txlog-server
       - OTEL_RESOURCE_ATTRIBUTES=deployment.environment=production
-      # ... outras variáveis de ambiente
+      # ... other environment variables
     ports:
       - "8080:8080"
     depends_on:
       - otel-collector
 ```
 
-### 3. Iniciar
+### 3. Start
 
 ```bash
 docker-compose up -d
 ```
 
-## Verificação de Traces
+## Trace Verification
 
-### O que procurar nos traces
+### What to look for in traces
 
 1. **HTTP Spans**:
-   - Nome do span: rota HTTP (ex: `GET /v1/version`)
-   - Atributos:
+   - Span name: HTTP route (e.g., `GET /v1/version`)
+   - Attributes:
      - `http.method`: GET, POST, etc.
      - `http.status_code`: 200, 404, etc.
-     - `http.route`: rota da requisição
-     - `http.target`: URL completa
+     - `http.route`: request route
+     - `http.target`: full URL
 
-2. **SQL Spans** (dentro de HTTP spans):
-   - Nome do span: operação SQL (ex: `sql:query SELECT`, `sql:exec INSERT`)
-   - Atributos:
+2. **SQL Spans** (inside HTTP spans):
+   - Span name: SQL operation (e.g., `sql:query SELECT`, `sql:exec INSERT`)
+   - Attributes:
      - `db.system`: "postgresql"
-     - `db.name`: nome do banco de dados
-     - `db.statement`: texto da query SQL
+     - `db.name`: database name
+     - `db.statement`: SQL query text
      - `db.operation`: SELECT, INSERT, UPDATE, DELETE, etc.
-   - Hierarquia:
-     - HTTP Request (span raiz)
-       - SQL Query 1 (span filho)
-       - SQL Query 2 (span filho)
-       - SQL Transaction (span filho)
-         - SQL Query 3 (span neto)
-         - SQL Query 4 (span neto)
+   - Hierarchy:
+     - HTTP Request (root span)
+       - SQL Query 1 (child span)
+       - SQL Query 2 (child span)
+       - SQL Transaction (child span)
+         - SQL Query 3 (grandchild span)
+         - SQL Query 4 (grandchild span)
 
-3. **Logs Correlacionados**:
-   - Atributo `trace_id`: ID do trace
-   - Atributo `span_id`: ID do span
-   - Permite correlacionar logs com requisições específicas
+3. **Correlated Logs**:
+   - Attribute `trace_id`: trace ID
+   - Attribute `span_id`: span ID
+   - Allows correlating logs with specific requests
 
 ## Troubleshooting
 
 ### "Failed to initialize telemetry"
 
-Verifique:
+Check:
 
-- O endpoint OTLP está acessível?
-- O formato do endpoint está correto? (ex: `http://host:port` ou `host:port`)
-  - Prefixos `http://` e `https://` são suportados e configuram o modo seguro/inseguro automaticamente.
-- Não inclua `/v1/traces` no endpoint - o SDK adiciona automaticamente
+- Is the OTLP endpoint accessible?
+- Is the endpoint format correct? (e.g., `http://host:port` or `host:port`)
+  - Prefixes `http://` and `https://` are supported and automatically configure secure/insecure mode.
+- Do not include `/v1/traces` in the endpoint - the SDK adds it automatically
 
-### Traces não aparecem no Jaeger
+### Traces do not appear in Jaeger
 
-1. Verifique os logs do servidor:
-   - Deve aparecer "OpenTelemetry: initialized successfully"
+1. Check server logs:
+   - "OpenTelemetry: initialized successfully" should appear
 
-2. Verifique se o Jaeger está recebendo dados:
+2. Check if Jaeger is receiving data:
 
    ```bash
    docker logs jaeger
    ```
 
-3. Teste a conectividade:
+3. Test connectivity:
 
    ```bash
    curl -v http://localhost:4318/v1/traces
@@ -269,13 +269,13 @@ Verifique:
 
 ### Performance
 
-O overhead do OpenTelemetry é tipicamente < 5%:
+OpenTelemetry overhead is typically < 5%:
 
-- Traces são enviados em batch (não bloqueante)
-- Logs são processados assincronamente
-- Graceful shutdown garante que dados não sejam perdidos
+- Traces are sent in batch (non-blocking)
+- Logs are processed asynchronously
+- Graceful shutdown ensures data is not lost
 
-## Integração com Serviços em Produção
+## Integration with Production Services
 
 ### Grafana Cloud
 
@@ -293,7 +293,7 @@ OTEL_EXPORTER_OTLP_HEADERS=api-key=YOUR_LICENSE_KEY
 
 ### Datadog
 
-Primeiro configure o Datadog Agent para aceitar OTLP:
+First configure Datadog Agent to accept OTLP:
 
 ```yaml
 # datadog.yaml
@@ -304,52 +304,52 @@ otlp_config:
         endpoint: 0.0.0.0:4318
 ```
 
-Depois configure o Txlog Server:
+Then configure Txlog Server:
 
 ```bash
 OTEL_EXPORTER_OTLP_ENDPOINT=http://datadog-agent:4318
 ```
 
-## Métricas de Sucesso
+## Success Metrics
 
-Após configurar, você deve ver:
+After configuring, you should see:
 
-✅ Traces de todas as requisições HTTP
-✅ **Traces de todas as queries SQL executadas**
-✅ Logs correlacionados com trace_id
-✅ Latência de requisições HTTP e SQL
-✅ Taxas de erro (status 4xx, 5xx e erros SQL)
-✅ Throughput (requisições por segundo)
-✅ **Performance de queries individuais**
-✅ **Identificação de queries lentas (N+1 queries, etc.)**
+✅ Traces of all HTTP requests
+✅ **Traces of all executed SQL queries**
+✅ Logs correlated with trace_id
+✅ Latency of HTTP and SQL requests
+✅ Error rates (4xx, 5xx status and SQL errors)
+✅ Throughput (requests per second)
+✅ **Performance of individual queries**
+✅ **Identification of slow queries (N+1 queries, etc.)**
 
-### Exemplos do que você pode monitorar
+### Examples of what you can monitor
 
-**Requisições HTTP:**
+**HTTP Requests:**
 
-- Endpoint mais lento
-- Endpoints com mais erros
-- Throughput por endpoint
+- Slowest endpoint
+- Endpoints with most errors
+- Throughput by endpoint
 
-**Queries SQL:**
+**SQL Queries:**
 
-- Queries mais lentas
-- Queries mais frequentes
-- Queries com erros
-- Tempo médio de execução por tipo de query
-- Número de queries por requisição (detectar N+1)
+- Slowest queries
+- Most frequent queries
+- Queries with errors
+- Average execution time by query type
+- Number of queries per request (detect N+1)
 
-**Transações:**
+**Transactions:**
 
-- Tempo de commit/rollback
-- Taxa de sucesso de transações
-- Deadlocks e lock waits
+- Commit/rollback time
+- Transaction success rate
+- Deadlocks and lock waits
 
-## Próximos Passos
+## Next Steps
 
-1. Configure alertas baseados em latência (HTTP e SQL)
-2. Crie dashboards para visualização
-3. Use trace sampling em produção para reduzir custo
+1. Configure latency-based alerts (HTTP and SQL)
+2. Create dashboards for visualization
+3. Use trace sampling in production to reduce cost
 4. Configure service level objectives (SLOs)
-5. **Identifique e otimize queries lentas usando os traces**
-6. **Configure alertas para queries que excedem tempo esperado**
+5. **Identify and optimize slow queries using traces**
+6. **Configure alerts for queries exceeding expected time**

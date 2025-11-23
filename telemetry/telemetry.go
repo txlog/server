@@ -212,44 +212,13 @@ func parseHeaders(headersStr string) map[string]string {
 // splitAndTrim splits a string by a delimiter and trims whitespace
 func splitAndTrim(s, sep string) []string {
 	parts := []string{}
-	for _, part := range split(s, sep) {
-		trimmed := trim(part)
+	for _, part := range strings.Split(s, sep) {
+		trimmed := strings.TrimSpace(part)
 		if trimmed != "" {
 			parts = append(parts, trimmed)
 		}
 	}
 	return parts
-}
-
-// split is a simple string split function
-func split(s, sep string) []string {
-	if s == "" {
-		return []string{}
-	}
-	var result []string
-	start := 0
-	for i := 0; i < len(s); i++ {
-		if i+len(sep) <= len(s) && s[i:i+len(sep)] == sep {
-			result = append(result, s[start:i])
-			start = i + len(sep)
-			i += len(sep) - 1
-		}
-	}
-	result = append(result, s[start:])
-	return result
-}
-
-// trim removes leading and trailing whitespace
-func trim(s string) string {
-	start := 0
-	end := len(s)
-	for start < end && (s[start] == ' ' || s[start] == '\t' || s[start] == '\n' || s[start] == '\r') {
-		start++
-	}
-	for end > start && (s[end-1] == ' ' || s[end-1] == '\t' || s[end-1] == '\n' || s[end-1] == '\r') {
-		end--
-	}
-	return s[start:end]
 }
 
 // getEnvOrDefault returns the value of an environment variable or a default value
@@ -270,10 +239,10 @@ func isInsecure() bool {
 // parseEndpoint parses the endpoint URL and returns the host:port and whether it is insecure (HTTP)
 func parseEndpoint(endpoint string) (string, bool) {
 	if strings.HasPrefix(endpoint, "http://") {
-		return strings.TrimPrefix(endpoint, "http://"), true
+		return endpoint[7:], true
 	}
 	if strings.HasPrefix(endpoint, "https://") {
-		return strings.TrimPrefix(endpoint, "https://"), false
+		return endpoint[8:], false
 	}
 	return endpoint, false
 }

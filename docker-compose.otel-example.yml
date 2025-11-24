@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Jaeger - Interface de visualização de traces
+  # Jaeger - Trace visualization interface
   jaeger:
     image: jaegertracing/all-in-one:latest
     container_name: txlog-jaeger
@@ -13,7 +13,7 @@ services:
     networks:
       - txlog-network
 
-  # PostgreSQL - Banco de dados do Txlog Server
+  # PostgreSQL - Txlog Server database
   postgres:
     image: postgres:16-alpine
     container_name: txlog-postgres
@@ -33,19 +33,19 @@ services:
       timeout: 5s
       retries: 5
 
-  # Txlog Server com OpenTelemetry
+  # Txlog Server with OpenTelemetry
   txlog-server:
     build: .
     container_name: txlog-server
     ports:
       - "8080:8080"
     environment:
-      # Configuração básica
+      # Basic configuration
       - INSTANCE=Docker Development
       - LOG_LEVEL=INFO
       - GIN_MODE=debug
 
-      # Banco de dados
+      # Database
       - PGSQL_HOST=postgres
       - PGSQL_PORT=5432
       - PGSQL_USER=txlog
@@ -58,7 +58,7 @@ services:
       - CRON_RETENTION_EXPRESSION=0 2 * * *
       - CRON_STATS_EXPRESSION=0 * * * *
 
-      # OpenTelemetry - Exportar para Jaeger
+      # OpenTelemetry - Export to Jaeger
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318
       - OTEL_SERVICE_NAME=txlog-server
       - OTEL_SERVICE_VERSION=dev

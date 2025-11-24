@@ -18,6 +18,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 
 	logger "github.com/txlog/server/logger"
+	"github.com/txlog/server/util"
 )
 
 var defaultManager *TelemetryManager
@@ -56,8 +57,8 @@ func InitTelemetry() error {
 	// Create resource with service information
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceName(getEnvOrDefault("OTEL_SERVICE_NAME", "txlog-server")),
-			semconv.ServiceVersion(getEnvOrDefault("OTEL_SERVICE_VERSION", "unknown")),
+			semconv.ServiceName(util.GetEnvOrDefault("OTEL_SERVICE_NAME", "txlog-server")),
+			semconv.ServiceVersion(util.GetEnvOrDefault("OTEL_SERVICE_VERSION", "unknown")),
 		),
 		resource.WithFromEnv(),
 		resource.WithTelemetrySDK(),
@@ -234,14 +235,6 @@ func splitAndTrim(s, sep string) []string {
 		}
 	}
 	return parts
-}
-
-// getEnvOrDefault returns the value of an environment variable or a default value
-func getEnvOrDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }
 
 // isInsecure checks if the OTEL_EXPORTER_OTLP_INSECURE environment variable is set to "true"

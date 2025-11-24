@@ -236,7 +236,7 @@ func main() {
 
 	// Create HTTP server with proper graceful shutdown support
 	srv := &http.Server{
-		Addr:    ":" + getEnvOrDefault("PORT", "8080"),
+		Addr:    ":" + util.GetEnvOrDefault("PORT", "8080"),
 		Handler: r,
 	}
 
@@ -246,7 +246,7 @@ func main() {
 
 	// Start server in goroutine
 	go func() {
-		logger.Info("Starting server on port " + getEnvOrDefault("PORT", "8080"))
+		logger.Info("Starting server on port " + util.GetEnvOrDefault("PORT", "8080"))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logger.Error("Failed to start server: " + err.Error())
 			// Trigger graceful shutdown
@@ -273,14 +273,6 @@ func main() {
 	}
 
 	logger.Info("Server stopped gracefully")
-}
-
-// getEnvOrDefault returns the value of an environment variable or a default value
-func getEnvOrDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }
 
 func EnvironmentVariablesMiddleware() gin.HandlerFunc {

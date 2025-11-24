@@ -246,9 +246,10 @@ docker-compose up -d
 Check:
 
 - Is the OTLP endpoint accessible?
-- Is the endpoint format correct? (e.g., `http://host:port` or `host:port`)
-  - Prefixes `http://` and `https://` are supported and automatically configure secure/insecure mode.
-- Do not include `/v1/traces` in the endpoint - the SDK adds it automatically
+- Is the endpoint format correct? (e.g., `http://host:port` or `https://host/path`)
+  - Prefixes `http://` and `https://` are supported.
+  - Custom base paths (like `/otlp` for Grafana) are supported.
+- Do not include `/v1/traces` or `/v1/logs` in the endpoint - the SDK adds these automatically to the base path.
 
 ### Traces do not appear in Jaeger
 

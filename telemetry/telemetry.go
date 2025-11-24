@@ -3,7 +3,9 @@ package telemetry
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -91,11 +93,12 @@ func InitTelemetry() error {
 
 // initTraceProvider initializes the OpenTelemetry trace provider with OTLP HTTP exporter
 func (tm *TelemetryManager) initTraceProvider(ctx context.Context, res *resource.Resource) error {
-	endpoint, insecure := parseEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
+	endpoint, basePath, insecure := parseEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
 	opts := []otlptracehttp.Option{
 		otlptracehttp.WithEndpoint(endpoint),
 		otlptracehttp.WithHeaders(parseHeaders(os.Getenv("OTEL_EXPORTER_OTLP_HEADERS"))),
+		otlptracehttp.WithURLPath(path.Join("/", basePath, "v1/traces")),
 	}
 
 	if insecure || isInsecure() {
@@ -129,11 +132,12 @@ func (tm *TelemetryManager) initTraceProvider(ctx context.Context, res *resource
 
 // initLogProvider initializes the OpenTelemetry log provider with OTLP HTTP exporter
 func (tm *TelemetryManager) initLogProvider(ctx context.Context, res *resource.Resource) error {
-	endpoint, insecure := parseEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
+	endpoint, basePath, insecure := parseEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
 	opts := []otlploghttp.Option{
 		otlploghttp.WithEndpoint(endpoint),
 		otlploghttp.WithHeaders(parseHeaders(os.Getenv("OTEL_EXPORTER_OTLP_HEADERS"))),
+		otlploghttp.WithURLPath(path.Join("/", basePath, "v1/logs")),
 	}
 
 	if insecure || isInsecure() {
@@ -244,13 +248,16 @@ func isInsecure() bool {
 	return b
 }
 
-// parseEndpoint parses the endpoint URL and returns the host:port and whether it is insecure (HTTP)
-func parseEndpoint(endpoint string) (string, bool) {
-	if strings.HasPrefix(endpoint, "http://") {
-		return endpoint[7:], true
+// parseEndpoint parses the endpoint URL and returns the host, path, and whether it is insecure
+func parseEndpoint(endpoint string) (string, string, bool) {
+	if !strings.Contains(endpoint, "://") {
+		endpoint = "https://" + endpoint
 	}
-	if strings.HasPrefix(endpoint, "https://") {
-		return endpoint[8:], false
+
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return endpoint, "", false
 	}
-	return endpoint, false
+
+	return u.Host, u.Path, u.Scheme == "http"
 }

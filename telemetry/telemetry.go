@@ -20,10 +20,13 @@ import (
 	logger "github.com/txlog/server/logger"
 )
 
-var (
+var defaultManager *TelemetryManager
+
+// TelemetryManager encapsulates OpenTelemetry providers
+type TelemetryManager struct {
 	tracerProvider *sdktrace.TracerProvider
 	loggerProvider *sdklog.LoggerProvider
-)
+}
 
 // InitTelemetry initializes OpenTelemetry SDK with trace and log exporters.
 // It configures OTLP exporters based on environment variables:
@@ -47,6 +50,7 @@ func InitTelemetry() error {
 		return nil
 	}
 
+	defaultManager = &TelemetryManager{}
 	ctx := context.Background()
 
 	// Create resource with service information
@@ -67,13 +71,13 @@ func InitTelemetry() error {
 	}
 
 	// Initialize trace exporter
-	if err := initTraceProvider(ctx, res); err != nil {
+	if err := defaultManager.initTraceProvider(ctx, res); err != nil {
 		return fmt.Errorf("failed to initialize trace provider: %w", err)
 	}
 
 	// Initialize log exporter
 	if os.Getenv("OTEL_LOGS_EXPORTER") != "none" {
-		if err := initLogProvider(ctx, res); err != nil {
+		if err := defaultManager.initLogProvider(ctx, res); err != nil {
 			return fmt.Errorf("failed to initialize log provider: %w", err)
 		}
 	}
@@ -85,7 +89,7 @@ func InitTelemetry() error {
 }
 
 // initTraceProvider initializes the OpenTelemetry trace provider with OTLP HTTP exporter
-func initTraceProvider(ctx context.Context, res *resource.Resource) error {
+func (tm *TelemetryManager) initTraceProvider(ctx context.Context, res *resource.Resource) error {
 	endpoint, insecure := parseEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
 	opts := []otlptracehttp.Option{
@@ -104,14 +108,14 @@ func initTraceProvider(ctx context.Context, res *resource.Resource) error {
 	}
 
 	// Create trace provider
-	tracerProvider = sdktrace.NewTracerProvider(
+	tm.tracerProvider = sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(traceExporter),
 		sdktrace.WithResource(res),
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 
 	// Set global trace provider
-	otel.SetTracerProvider(tracerProvider)
+	otel.SetTracerProvider(tm.tracerProvider)
 
 	// Set global propagator to tracecontext (W3C Trace Context)
 	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
@@ -123,7 +127,7 @@ func initTraceProvider(ctx context.Context, res *resource.Resource) error {
 }
 
 // initLogProvider initializes the OpenTelemetry log provider with OTLP HTTP exporter
-func initLogProvider(ctx context.Context, res *resource.Resource) error {
+func (tm *TelemetryManager) initLogProvider(ctx context.Context, res *resource.Resource) error {
 	endpoint, insecure := parseEndpoint(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
 	opts := []otlploghttp.Option{
@@ -142,7 +146,7 @@ func initLogProvider(ctx context.Context, res *resource.Resource) error {
 	}
 
 	// Create log provider
-	loggerProvider = sdklog.NewLoggerProvider(
+	tm.loggerProvider = sdklog.NewLoggerProvider(
 		sdklog.WithProcessor(sdklog.NewBatchProcessor(logExporter)),
 		sdklog.WithResource(res),
 	)
@@ -154,7 +158,15 @@ func initLogProvider(ctx context.Context, res *resource.Resource) error {
 // It should be called when the application is shutting down to ensure
 // all telemetry data is flushed to the backend
 func Shutdown() error {
-	if tracerProvider == nil && loggerProvider == nil {
+	if defaultManager == nil {
+		return nil
+	}
+	return defaultManager.Shutdown()
+}
+
+// Shutdown gracefully shuts down the telemetry manager
+func (tm *TelemetryManager) Shutdown() error {
+	if tm.tracerProvider == nil && tm.loggerProvider == nil {
 		return nil
 	}
 
@@ -163,14 +175,14 @@ func Shutdown() error {
 
 	var errs []error
 
-	if tracerProvider != nil {
-		if err := tracerProvider.Shutdown(ctx); err != nil {
+	if tm.tracerProvider != nil {
+		if err := tm.tracerProvider.Shutdown(ctx); err != nil {
 			errs = append(errs, fmt.Errorf("failed to shutdown trace provider: %w", err))
 		}
 	}
 
-	if loggerProvider != nil {
-		if err := loggerProvider.Shutdown(ctx); err != nil {
+	if tm.loggerProvider != nil {
+		if err := tm.loggerProvider.Shutdown(ctx); err != nil {
 			errs = append(errs, fmt.Errorf("failed to shutdown log provider: %w", err))
 		}
 	}
@@ -186,7 +198,10 @@ func Shutdown() error {
 
 // GetLoggerProvider returns the global logger provider for use in the logger package
 func GetLoggerProvider() *sdklog.LoggerProvider {
-	return loggerProvider
+	if defaultManager == nil {
+		return nil
+	}
+	return defaultManager.loggerProvider
 }
 
 // parseHeaders parses the OTEL_EXPORTER_OTLP_HEADERS environment variable

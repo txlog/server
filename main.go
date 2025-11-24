@@ -60,13 +60,6 @@ func main() {
 	// Configure logger to use OpenTelemetry if available
 	logger.SetOTelLoggerProvider(telemetry.GetLoggerProvider())
 
-	// Setup graceful shutdown for telemetry
-	defer func() {
-		if err := telemetry.Shutdown(); err != nil {
-			logger.Error("Failed to shutdown telemetry: " + err.Error())
-		}
-	}()
-
 	if os.Getenv("GIN_MODE") == "" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -251,34 +244,32 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
+	// Start server in goroutine
 	go func() {
-		<-sigChan
-		logger.Info("Shutting down server...")
-
-		// Create shutdown context with timeout
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
-		// Gracefully shutdown HTTP server
-		if err := srv.Shutdown(ctx); err != nil {
-			logger.Error("Server forced to shutdown: " + err.Error())
-		}
-
-		// Shutdown telemetry after server
-		if err := telemetry.Shutdown(); err != nil {
-			logger.Error("Failed to shutdown telemetry: " + err.Error())
+		logger.Info("Starting server on port " + getEnvOrDefault("PORT", "8080"))
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("Failed to start server: " + err.Error())
+			// Trigger graceful shutdown
+			sigChan <- syscall.SIGTERM
 		}
 	}()
 
-	// Start server
-	logger.Info("Starting server on port " + getEnvOrDefault("PORT", "8080"))
-	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		logger.Error("Failed to start server: " + err.Error())
-		// Cleanup telemetry on startup failure
-		if shutdownErr := telemetry.Shutdown(); shutdownErr != nil {
-			logger.Error("Failed to shutdown telemetry after server error: " + shutdownErr.Error())
-		}
-		os.Exit(1)
+	// Wait for shutdown signal
+	<-sigChan
+	logger.Info("Shutting down server...")
+
+	// Create shutdown context with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Gracefully shutdown HTTP server
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Error("Server forced to shutdown: " + err.Error())
+	}
+
+	// Shutdown telemetry after server
+	if err := telemetry.Shutdown(); err != nil {
+		logger.Error("Failed to shutdown telemetry: " + err.Error())
 	}
 
 	logger.Info("Server stopped gracefully")

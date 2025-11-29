@@ -1,255 +1,254 @@
-# LDAP Service Account - Perguntas Frequentes
+# LDAP Service Account - FAQ
 
-## É obrigatório usar service account?
+## Is it mandatory to use a service account?
 
-**NÃO!** O service account é **opcional**. O Txlog Server funciona perfeitamente
-sem ele em muitos cenários.
+**NO!** The service account is **optional**. Txlog Server works perfectly without it in many scenarios.
 
-## Quando eu NÃO preciso de service account?
+## When do I NOT need a service account?
 
-Você pode autenticar **SEM service account** quando:
+You can authenticate **WITHOUT a service account** when:
 
-1. **OpenLDAP com anonymous bind habilitado**
-   - É a configuração padrão do OpenLDAP
-   - Permite buscas sem autenticação
-   - Usuários autenticados podem ler seus próprios grupos
+1. **OpenLDAP with anonymous bind enabled**
+   - This is the default OpenLDAP configuration.
+   - Allows searches without authentication.
+   - Authenticated users can read their own groups.
 
-2. **Ambiente de desenvolvimento/teste**
-   - Configuração mais rápida
-   - Menos credenciais para gerenciar
-   - Facilita testes
+2. **Development/Test Environment**
+   - Faster configuration.
+   - Fewer credentials to manage.
+   - Facilitates testing.
 
-3. **LDAP com ACLs permissivas**
-   - Permite anonymous read em users e groups
-   - Permite usuários lerem seus próprios grupos
+3. **LDAP with permissive ACLs**
+   - Allows anonymous read on users and groups.
+   - Allows users to read their own groups.
 
-## Quando eu PRECISO de service account?
+## When do I NEED a service account?
 
-Você **precisa** de service account quando:
+You **need** a service account when:
 
 1. **Active Directory**
-   - AD geralmente bloqueia anonymous bind
-   - Requer autenticação para buscas
-   - Política de segurança padrão da Microsoft
+   - AD usually blocks anonymous bind.
+   - Requires authentication for searches.
+   - Microsoft default security policy.
 
-2. **OpenLDAP com ACLs restritas**
-   - Anonymous bind desabilitado
-   - Usuários não podem ler grupos
-   - Políticas de segurança corporativas
+2. **OpenLDAP with restricted ACLs**
+   - Anonymous bind disabled.
+   - Users cannot read groups.
+   - Corporate security policies.
 
-3. **Requisitos de compliance**
-   - Auditoria de acessos
-   - Rastreamento de quem faz buscas
-   - Políticas de segurança da empresa
+3. **Compliance Requirements**
+   - Access auditing.
+   - Tracking who performs searches.
+   - Company security policies.
 
-## Como funciona SEM service account?
-
-```text
-Fluxo de autenticação:
-
-1. Usuário digita username + senha no Txlog
-   ↓
-2. Txlog conecta ao LDAP (sem autenticação)
-   ↓
-3. Busca usuário via anonymous bind
-   ↓
-4. Autentica usuário com bind usando suas credenciais
-   ↓
-5. Verifica grupos usando a sessão autenticada do usuário
-   ↓
-6. Cria sessão no Txlog
-```
-
-## Como funciona COM service account?
+## How does it work WITHOUT a service account?
 
 ```text
-Fluxo de autenticação:
+Authentication Flow:
 
-1. Usuário digita username + senha no Txlog
+1. User types username + password in Txlog
    ↓
-2. Txlog conecta ao LDAP
+2. Txlog connects to LDAP (without authentication)
    ↓
-3. Txlog faz bind com service account
+3. Searches user via anonymous bind
    ↓
-4. Busca usuário usando service account
+4. Authenticates user with bind using their credentials
    ↓
-5. Autentica usuário com bind usando credenciais do usuário
+5. Checks groups using the user's authenticated session
    ↓
-6. Re-bind com service account
-   ↓
-7. Verifica grupos usando service account
-   ↓
-8. Cria sessão no Txlog
+6. Creates session in Txlog
 ```
 
-## Qual é mais seguro?
+## How does it work WITH a service account?
 
-**Depende do seu ambiente:**
+```text
+Authentication Flow:
 
-### COM Service Account é mais seguro quando
+1. User types username + password in Txlog
+   ↓
+2. Txlog connects to LDAP
+   ↓
+3. Txlog binds with service account
+   ↓
+4. Searches user using service account
+   ↓
+5. Authenticates user with bind using user credentials
+   ↓
+6. Re-binds with service account
+   ↓
+7. Checks groups using service account
+   ↓
+8. Creates session in Txlog
+```
 
-- ✅ Você precisa rastrear todos os acessos LDAP
-- ✅ Você quer limitar exatamente quais objetos podem ser lidos
-- ✅ Você quer desabilitar anonymous bind (boa prática)
-- ✅ Você tem compliance/auditoria
+## Which is more secure?
 
-### SEM Service Account pode ser igualmente seguro quando
+**Depends on your environment:**
 
-- ✅ Anonymous bind só permite leitura (não escrita)
-- ✅ ACLs LDAP estão bem configuradas
-- ✅ Você está em rede privada/confiável
-- ✅ Você tem outros controles de segurança
+### WITH Service Account is more secure when
 
-## Qual é mais fácil de configurar?
+- ✅ You need to track all LDAP accesses.
+- ✅ You want to limit exactly which objects can be read.
+- ✅ You want to disable anonymous bind (best practice).
+- ✅ You have compliance/auditing requirements.
 
-**SEM service account** é muito mais simples:
+### WITHOUT Service Account can be equally secure when
+
+- ✅ Anonymous bind only allows read (not write).
+- ✅ LDAP ACLs are well configured.
+- ✅ You are in a private/trusted network.
+- ✅ You have other security controls.
+
+## Which is easier to configure?
+
+**WITHOUT service account** is much simpler:
 
 ```bash
-# Apenas 4 variáveis!
-LDAP_HOST=ldap.exemplo.com
-LDAP_BASE_DN=ou=users,dc=exemplo,dc=com
-LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=exemplo,dc=com
-LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=exemplo,dc=com
+# Only 4 variables!
+LDAP_HOST=ldap.example.com
+LDAP_BASE_DN=ou=users,dc=example,dc=com
+LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
+LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 ```
 
 vs
 
 ```bash
-# COM service account: 6 variáveis
-LDAP_HOST=ldap.exemplo.com
-LDAP_BIND_DN=cn=svc-txlog,dc=exemplo,dc=com      # +1
-LDAP_BIND_PASSWORD=senha_secreta                  # +2
-LDAP_BASE_DN=ou=users,dc=exemplo,dc=com
-LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=exemplo,dc=com
-LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=exemplo,dc=com
+# WITH service account: 6 variables
+LDAP_HOST=ldap.example.com
+LDAP_BIND_DN=cn=svc-txlog,dc=example,dc=com      # +1
+LDAP_BIND_PASSWORD=secret_password                # +2
+LDAP_BASE_DN=ou=users,dc=example,dc=com
+LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
+LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 ```
 
-## Como testar qual opção funciona para mim?
+## How to test which option works for me?
 
-### Teste 1: Anonymous bind funciona?
+### Test 1: Does anonymous bind work?
 
 ```bash
-ldapsearch -H ldap://seu-ldap:389 -x \
-  -b "ou=users,dc=exemplo,dc=com" \
-  "(uid=seuusuario)"
+ldapsearch -H ldap://your-ldap:389 -x \
+  -b "ou=users,dc=example,dc=com" \
+  "(uid=youruser)"
 ```
 
-- **Funciona?** → Você pode usar SEM service account
-- **Erro de acesso?** → Você precisa de service account
+- **Works?** → You can use WITHOUT service account.
+- **Access error?** → You need a service account.
 
-### Teste 2: Usuário pode ler grupos?
+### Test 2: Can user read groups?
 
 ```bash
-ldapsearch -H ldap://seu-ldap:389 \
-  -D "uid=seuusuario,ou=users,dc=exemplo,dc=com" \
-  -w "suasenha" \
-  -b "cn=admins,ou=groups,dc=exemplo,dc=com"
+ldapsearch -H ldap://your-ldap:389 \
+  -D "uid=youruser,ou=users,dc=example,dc=com" \
+  -w "yourpassword" \
+  -b "cn=admins,ou=groups,dc=example,dc=com"
 ```
 
-- **Retorna grupos?** → Verificação funcionará
-- **Erro?** → Precisa de service account com permissões
+- **Returns groups?** → Verification will work.
+- **Error?** → Need service account with permissions.
 
-## Recomendações por tipo de servidor
+## Recommendations by server type
 
-| Servidor LDAP | Recomendação | Motivo |
-|---------------|--------------|---------|
-| **OpenLDAP** (padrão) | ✅ SEM service account | Anonymous bind habilitado por padrão |
-| **OpenLDAP** (hardened) | ⚠️ COM service account | Anonymous bind desabilitado |
-| **Active Directory** | ⚠️ COM service account | Requer autenticação para buscas |
-| **FreeIPA** | ⚠️ COM service account | Políticas mais restritivas |
-| **389 Directory** | ✅ SEM service account | Geralmente permite anonymous |
+| LDAP Server | Recommendation | Reason |
+|-------------|----------------|--------|
+| **OpenLDAP** (default) | ✅ WITHOUT service account | Anonymous bind enabled by default |
+| **OpenLDAP** (hardened) | ⚠️ WITH service account | Anonymous bind disabled |
+| **Active Directory** | ⚠️ WITH service account | Requires authentication for searches |
+| **FreeIPA** | ⚠️ WITH service account | More restrictive policies |
+| **389 Directory** | ✅ WITHOUT service account | Usually allows anonymous |
 
-## Posso mudar depois?
+## Can I change later?
 
-**SIM!** Você pode:
+**YES!** You can:
 
-1. **Começar SEM service account**
-   - Testar se funciona
-   - Se funcionar, deixar assim
-   - Se não funcionar, adicionar service account
+1. **Start WITHOUT service account**
+   - Test if it works.
+   - If it works, leave it.
+   - If not, add service account.
 
-2. **Começar COM service account**
-   - Funciona em qualquer cenário
-   - Remover depois se quiser simplificar
+2. **Start WITH service account**
+   - Works in any scenario.
+   - Remove later if you want to simplify.
 
-**Não há impacto nos usuários** - é apenas configuração do servidor.
+**No impact on users** - it is just server configuration.
 
-## Exemplo prático: Minha primeira configuração
+## Practical Example: My First Configuration
 
-### Passo 1: Comece simples (SEM service account)
+### Step 1: Start simple (WITHOUT service account)
 
 ```bash
 # .env
-LDAP_HOST=ldap.minhaempresa.com
-LDAP_BASE_DN=ou=users,dc=minhaempresa,dc=com
-LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=minhaempresa,dc=com
-LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=minhaempresa,dc=com
+LDAP_HOST=ldap.company.com
+LDAP_BASE_DN=ou=users,dc=company,dc=com
+LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=company,dc=com
+LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=company,dc=com
 ```
 
-### Passo 2: Teste o login
+### Step 2: Test login
 
-- ✅ **Funcionou?** Pronto! Deixe assim.
-- ❌ **Erro "user not found"?** Adicione service account (Passo 3)
+- ✅ **Worked?** Done! Leave it like this.
+- ❌ **Error "user not found"?** Add service account (Step 3).
 
-### Passo 3: Se necessário, adicione service account
+### Step 3: If necessary, add service account
 
 ```bash
-# .env (adicione estas 2 linhas)
-LDAP_BIND_DN=cn=readonly,dc=minhaempresa,dc=com
-LDAP_BIND_PASSWORD=senha_da_conta_servico
+# .env (add these 2 lines)
+LDAP_BIND_DN=cn=readonly,dc=company,dc=com
+LDAP_BIND_PASSWORD=service_account_password
 ```
 
-## Segurança: Service Account vs Anonymous Bind
+## Security: Service Account vs Anonymous Bind
 
 ### Service Account
 
-**Vantagens de segurança:**
+**Security advantages:**
 
-- ✅ Logs mostram qual conta fez cada busca
-- ✅ Pode auditar acessos específicos
-- ✅ Pode revogar acesso facilmente
-- ✅ Pode limitar exatamente o que é acessível
+- ✅ Logs show which account performed each search.
+- ✅ Can audit specific accesses.
+- ✅ Can revoke access easily.
+- ✅ Can limit exactly what is accessible.
 
-**Desvantagens:**
+**Disadvantages:**
 
-- ❌ Mais uma credencial para proteger
-- ❌ Senha pode vazar
-- ❌ Precisa gerenciar rotação de senha
+- ❌ One more credential to protect.
+- ❌ Password can leak.
+- ❌ Need to manage password rotation.
 
 ### Anonymous Bind
 
-**Vantagens de segurança:**
+**Security advantages:**
 
-- ✅ Nenhuma credencial para vazar
-- ✅ Nenhuma senha para gerenciar
-- ✅ Mais simples = menos chance de erro
+- ✅ No credentials to leak.
+- ✅ No password to manage.
+- ✅ Simpler = less chance of error.
 
-**Desvantagens:**
+**Disadvantages:**
 
-- ❌ Mais difícil de auditar acessos
-- ❌ Qualquer um pode fazer buscas
-- ❌ Pode não atender políticas corporativas
+- ❌ Harder to audit accesses.
+- ❌ Anyone can perform searches.
+- ❌ May not meet corporate policies.
 
-## Conclusão
+## Conclusion
 
-| Critério | SEM Service Account | COM Service Account |
-|----------|---------------------|---------------------|
-| **Simplicidade** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **Segurança** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Compatibilidade** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Auditoria** | ⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Manutenção** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| Criteria | WITHOUT Service Account | WITH Service Account |
+|----------|-------------------------|----------------------|
+| **Simplicity** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| **Security** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Compatibility** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Auditing** | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Maintenance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
 
-**Resposta rápida:**
+**Quick Answer:**
 
-- 🏠 **Homelab/Desenvolvimento?** → SEM service account
-- 🏢 **Produção/Empresa?** → COM service account
-- 💼 **Active Directory?** → COM service account (obrigatório)
-- 🐧 **OpenLDAP simples?** → SEM service account
-- 📋 **Tem compliance?** → COM service account
+- 🏠 **Homelab/Development?** → WITHOUT service account
+- 🏢 **Production/Enterprise?** → WITH service account
+- 💼 **Active Directory?** → WITH service account (mandatory)
+- 🐧 **Simple OpenLDAP?** → WITHOUT service account
+- 📋 **Have compliance?** → WITH service account
 
-## Precisa de ajuda?
+## Need help?
 
-1. Consulte [LDAP_SEM_SERVICE_ACCOUNT.md](LDAP_SEM_SERVICE_ACCOUNT.md) para guia completo
-2. Veja [LDAP_QUICK_REFERENCE.md](LDAP_QUICK_REFERENCE.md) para exemplos rápidos
-3. Leia [LDAP_AUTHENTICATION.md](LDAP_AUTHENTICATION.md) para documentação completa
+1. Consult [configure-ldap-anonymous.md](../how-to/configure-ldap-anonymous.md) for full guide.
+2. See [ldap-cheatsheet.md](../reference/ldap-cheatsheet.md) for quick examples.
+3. Read [ldap-deep-dive.md](../explanation/ldap-deep-dive.md) for full documentation.

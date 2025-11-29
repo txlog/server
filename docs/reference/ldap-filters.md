@@ -1,38 +1,38 @@
-# Guia Rápido: Filtros LDAP
+# Quick Guide: LDAP Filters
 
-## TL;DR - Descobrindo seus Filtros
+## TL;DR - Discovering Your Filters
 
-### Método 1: Script Automático (Recomendado)
+### Method 1: Automatic Script (Recommended)
 
 ```bash
 ./ldap-discovery.sh
 ```
 
-### Método 2: Manual com ldapsearch
+### Method 2: Manual with ldapsearch
 
-**1. Encontrar usuários:**
+**1. Find users:**
 
 ```bash
-ldapsearch -H ldap://seu-servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W -b "dc=exemplo,dc=com" "(uid=username)"
+ldapsearch -H ldap://your-server:389 -x -D "cn=admin,dc=example,dc=com" -W -b "dc=example,dc=com" "(uid=username)"
 ```
 
-**2. Ver atributos de um usuário:**
+**2. View user attributes:**
 
 ```bash
-ldapsearch -H ldap://seu-servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W -b "dc=exemplo,dc=com" "(uid=joao)" dn uid cn sAMAccountName
+ldapsearch -H ldap://your-server:389 -x -D "cn=admin,dc=example,dc=com" -W -b "dc=example,dc=com" "(uid=john)" dn uid cn sAMAccountName
 ```
 
-**3. Ver grupos:**
+**3. View groups:**
 
 ```bash
-ldapsearch -H ldap://seu-servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W -b "dc=exemplo,dc=com" "(cn=admins)" dn member uniqueMember memberUid
+ldapsearch -H ldap://your-server:389 -x -D "cn=admin,dc=example,dc=com" -W -b "dc=example,dc=com" "(cn=admins)" dn member uniqueMember memberUid
 ```
 
 ---
 
-## Valores Comuns por Tipo de Servidor
+## Common Values by Server Type
 
-### OpenLDAP (Padrão)
+### OpenLDAP (Standard)
 
 ```bash
 LDAP_USER_FILTER=(uid=%s)
@@ -53,184 +53,184 @@ LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
 ```
 
-### OpenLDAP com posixGroup
+### OpenLDAP with posixGroup
 
 ```bash
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(memberUid=%s)
 ```
 
-⚠️ **Atenção:** posixGroup usa apenas o `uid` (ex: `joao`) e não o DN completo.
+⚠️ **Attention:** posixGroup uses only the `uid` (e.g., `john`) and not the full DN.
 
 ---
 
-## Tabela de Referência Rápida
+## Quick Reference Table
 
-### USER_FILTER - Por Sistema
+### USER_FILTER - By System
 
-| Sistema | Atributo | Filtro |
-|---------|----------|--------|
+| System | Attribute | Filter |
+|--------|-----------|--------|
 | OpenLDAP | `uid` | `(uid=%s)` |
 | Active Directory | `sAMAccountName` | `(sAMAccountName=%s)` |
 | AD (email login) | `userPrincipalName` | `(userPrincipalName=%s)` |
 | FreeIPA | `uid` | `(uid=%s)` |
-| Antigos | `cn` | `(cn=%s)` |
+| Legacy | `cn` | `(cn=%s)` |
 | Email login | `mail` | `(mail=%s)` |
 
-### GROUP_FILTER - Por Tipo de Grupo
+### GROUP_FILTER - By Group Type
 
-| ObjectClass | Atributo de Membro | Filtro | Valor Esperado |
-|-------------|-------------------|--------|----------------|
-| `groupOfNames` | `member` | `(member=%s)` | DN completo |
-| `groupOfUniqueNames` | `uniqueMember` | `(uniqueMember=%s)` | DN completo |
-| `posixGroup` | `memberUid` | `(memberUid=%s)` | Apenas uid |
-| `group` (AD) | `member` | `(member=%s)` | DN completo |
-
----
-
-## Como Saber Qual Usar?
-
-### Passo 1: Identificar o Atributo de Login do Usuário
-
-Busque um usuário e veja qual campo contém o nome de login:
-
-```bash
-ldapsearch -x -D "cn=admin,dc=exemplo,dc=com" -W -b "dc=exemplo,dc=com" "(objectClass=person)" uid cn sAMAccountName
-```
-
-Exemplo de saída OpenLDAP:
-
-```text
-dn: uid=joao.silva,ou=users,dc=exemplo,dc=com
-uid: joao.silva          ← Este é o campo de login!
-cn: João Silva
-```
-
-Exemplo de saída Active Directory:
-
-```text
-dn: CN=João Silva,CN=Users,DC=exemplo,DC=com
-sAMAccountName: joao.silva    ← Este é o campo de login!
-cn: João Silva
-```
-
-**Resultado:** Use o nome do atributo no filtro → `(uid=%s)` ou `(sAMAccountName=%s)`
+| ObjectClass | Member Attribute | Filter | Expected Value |
+|-------------|------------------|--------|----------------|
+| `groupOfNames` | `member` | `(member=%s)` | Full DN |
+| `groupOfUniqueNames` | `uniqueMember` | `(uniqueMember=%s)` | Full DN |
+| `posixGroup` | `memberUid` | `(memberUid=%s)` | uid only |
+| `group` (AD) | `member` | `(member=%s)` | Full DN |
 
 ---
 
-### Passo 2: Identificar o Atributo de Membro do Grupo
+## How to Know Which One to Use?
 
-Busque um grupo e veja qual campo lista os membros:
+### Step 1: Identify User Login Attribute
+
+Search for a user and see which field contains the login name:
 
 ```bash
-ldapsearch -x -D "cn=admin,dc=exemplo,dc=com" -W -b "dc=exemplo,dc=com" "(cn=admins)" member uniqueMember memberUid
+ldapsearch -x -D "cn=admin,dc=example,dc=com" -W -b "dc=example,dc=com" "(objectClass=person)" uid cn sAMAccountName
 ```
 
-Exemplo com `member`:
+OpenLDAP output example:
 
 ```text
-dn: cn=admins,ou=groups,dc=exemplo,dc=com
-member: uid=joao.silva,ou=users,dc=exemplo,dc=com    ← DN completo
-member: uid=maria.santos,ou=users,dc=exemplo,dc=com
+dn: uid=john.doe,ou=users,dc=example,dc=com
+uid: john.doe          ← This is the login field!
+cn: John Doe
 ```
 
-**Resultado:** `LDAP_GROUP_FILTER=(member=%s)`
-
-Exemplo com `memberUid`:
+Active Directory output example:
 
 ```text
-dn: cn=admins,ou=groups,dc=exemplo,dc=com
-memberUid: joao.silva    ← Apenas o uid, sem DN
-memberUid: maria.santos
+dn: CN=John Doe,CN=Users,DC=example,DC=com
+sAMAccountName: john.doe    ← This is the login field!
+cn: John Doe
 ```
 
-**Resultado:** `LDAP_GROUP_FILTER=(memberUid=%s)`
-⚠️ **Requer modificação no código para extrair apenas o uid do DN**
+**Result:** Use the attribute name in the filter → `(uid=%s)` or `(sAMAccountName=%s)`
 
 ---
 
-## Testando Antes de Configurar
+### Step 2: Identify Group Member Attribute
 
-### Teste 1: Usuário pode ser encontrado?
+Search for a group and see which field lists the members:
 
 ```bash
-# Substitua %s pelo username real
-ldapsearch -x -D "cn=admin,dc=exemplo,dc=com" -W -b "dc=exemplo,dc=com" "(uid=joao.silva)"
+ldapsearch -x -D "cn=admin,dc=example,dc=com" -W -b "dc=example,dc=com" "(cn=admins)" member uniqueMember memberUid
 ```
 
-✅ Deve retornar **exatamente 1 usuário**
+Example with `member`:
 
-### Teste 2: Usuário pertence ao grupo?
+```text
+dn: cn=admins,ou=groups,dc=example,dc=com
+member: uid=john.doe,ou=users,dc=example,dc=com    ← Full DN
+member: uid=jane.doe,ou=users,dc=example,dc=com
+```
+
+**Result:** `LDAP_GROUP_FILTER=(member=%s)`
+
+Example with `memberUid`:
+
+```text
+dn: cn=admins,ou=groups,dc=example,dc=com
+memberUid: john.doe    ← Just the uid, no DN
+memberUid: jane.doe
+```
+
+**Result:** `LDAP_GROUP_FILTER=(memberUid=%s)`
+⚠️ **Requires code modification to extract only the uid from the DN**
+
+---
+
+## Testing Before Configuring
+
+### Test 1: Can the user be found?
 
 ```bash
-# Substitua o DN do grupo e do usuário
-ldapsearch -x -D "cn=admin,dc=exemplo,dc=com" -W \
-  -b "cn=admins,ou=groups,dc=exemplo,dc=com" \
+# Replace %s with real username
+ldapsearch -x -D "cn=admin,dc=example,dc=com" -W -b "dc=example,dc=com" "(uid=john.doe)"
+```
+
+✅ Should return **exactly 1 user**
+
+### Test 2: Does the user belong to the group?
+
+```bash
+# Replace group DN and user DN
+ldapsearch -x -D "cn=admin,dc=example,dc=com" -W \
+  -b "cn=admins,ou=groups,dc=example,dc=com" \
   -s base \
-  "(member=uid=joao.silva,ou=users,dc=exemplo,dc=com)"
+  "(member=uid=john.doe,ou=users,dc=example,dc=com)"
 ```
 
-✅ Deve retornar o grupo se o usuário for membro
+✅ Should return the group if the user is a member
 
 ---
 
-## Exemplo Completo de .env
+## Complete .env Example
 
 ```bash
 # OpenLDAP
-LDAP_HOST=ldap.empresa.com
+LDAP_HOST=ldap.company.com
 LDAP_PORT=389
 LDAP_USE_TLS=false
-LDAP_BASE_DN=dc=empresa,dc=com
-LDAP_BIND_DN=cn=readonly,dc=empresa,dc=com
-LDAP_BIND_PASSWORD=senha_readonly
+LDAP_BASE_DN=dc=company,dc=com
+LDAP_BIND_DN=cn=readonly,dc=company,dc=com
+LDAP_BIND_PASSWORD=readonly_password
 
 LDAP_USER_FILTER=(uid=%s)
-LDAP_ADMIN_GROUP=cn=txlog-admins,ou=groups,dc=empresa,dc=com
-LDAP_VIEWER_GROUP=cn=txlog-viewers,ou=groups,dc=empresa,dc=com
+LDAP_ADMIN_GROUP=cn=txlog-admins,ou=groups,dc=company,dc=com
+LDAP_VIEWER_GROUP=cn=txlog-viewers,ou=groups,dc=company,dc=com
 LDAP_GROUP_FILTER=(member=%s)
 ```
 
 ```bash
 # Active Directory
-LDAP_HOST=ad.empresa.com
+LDAP_HOST=ad.company.com
 LDAP_PORT=636
 LDAP_USE_TLS=true
 LDAP_SKIP_TLS_VERIFY=false
-LDAP_BASE_DN=DC=empresa,DC=com
-LDAP_BIND_DN=CN=LDAP Service,OU=Service Accounts,DC=empresa,DC=com
-LDAP_BIND_PASSWORD=senha_da_conta_servico
+LDAP_BASE_DN=DC=company,DC=com
+LDAP_BIND_DN=CN=LDAP Service,OU=Service Accounts,DC=company,DC=com
+LDAP_BIND_PASSWORD=service_account_password
 
 LDAP_USER_FILTER=(sAMAccountName=%s)
-LDAP_ADMIN_GROUP=CN=Txlog Admins,OU=Security Groups,DC=empresa,DC=com
-LDAP_VIEWER_GROUP=CN=Txlog Users,OU=Security Groups,DC=empresa,DC=com
+LDAP_ADMIN_GROUP=CN=Txlog Admins,OU=Security Groups,DC=company,DC=com
+LDAP_VIEWER_GROUP=CN=Txlog Users,OU=Security Groups,DC=company,DC=com
 LDAP_GROUP_FILTER=(member=%s)
 ```
 
 ---
 
-## Erros Comuns
+## Common Errors
 
-| Erro | Causa | Solução |
-|------|-------|---------|
-| "user not found" | LDAP_USER_FILTER errado | Use `ldapsearch` para testar o filtro |
-| "not a member of any authorized group" | LDAP_GROUP_FILTER errado ou grupo incorreto | Verifique se o usuário está no grupo e teste o filtro |
-| "failed to bind" | LDAP_BIND_DN ou senha incorretos | Teste o bind manualmente |
-| "connection refused" | Host/porta incorretos ou firewall | Verifique conectividade com `telnet` |
-
----
-
-## Recursos
-
-- **Documento completo:** `LDAP_FILTER_DISCOVERY.md`
-- **Script interativo:** `./ldap-discovery.sh`
-- **Documentação LDAP oficial:** <https://ldap.com/ldap-filters/>
+| Error | Cause | Solution |
+|-------|-------|----------|
+| "user not found" | Wrong LDAP_USER_FILTER | Use `ldapsearch` to test the filter |
+| "not a member of any authorized group" | Wrong LDAP_GROUP_FILTER or incorrect group | Check if user is in group and test filter |
+| "failed to bind" | Incorrect LDAP_BIND_DN or password | Test bind manually |
+| "connection refused" | Incorrect Host/Port or firewall | Check connectivity with `telnet` |
 
 ---
 
-## Dica Final
+## Resources
 
-**Use o script `ldap-discovery.sh`** - ele guia você passo a passo para descobrir todos os valores necessários de forma interativa!
+- **Full Document:** `LDAP_FILTER_DISCOVERY.md`
+- **Interactive Script:** `./ldap-discovery.sh`
+- **Official LDAP Documentation:** <https://ldap.com/ldap-filters/>
+
+---
+
+## Final Tip
+
+**Use the `ldap-discovery.sh` script** - it guides you step-by-step to discover all necessary values interactively!
 
 ```bash
 chmod +x ldap-discovery.sh

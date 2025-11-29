@@ -1,515 +1,515 @@
-# Descobrindo Filtros LDAP para seu Servidor
+# Discovering LDAP Filters for Your Server
 
-Este guia ajuda você a descobrir os valores corretos para `LDAP_USER_FILTER` e `LDAP_GROUP_FILTER` no seu ambiente LDAP específico.
+This guide helps you discover the correct values for `LDAP_USER_FILTER` and `LDAP_GROUP_FILTER` in your specific LDAP environment.
 
-## Índice
+## Index
 
-- [Ferramentas Necessárias](#ferramentas-necessárias)
-- [Passo 1: Conectar ao Servidor LDAP](#passo-1-conectar-ao-servidor-ldap)
-- [Passo 2: Explorar a Estrutura](#passo-2-explorar-a-estrutura)
-- [Passo 3: Encontrar Usuários](#passo-3-encontrar-usuários)
-- [Passo 4: Encontrar Grupos](#passo-4-encontrar-grupos)
-- [Passo 5: Determinar Filtros](#passo-5-determinar-filtros)
-- [Exemplos Comuns](#exemplos-comuns)
+- [Required Tools](#required-tools)
+- [Step 1: Connect to LDAP Server](#step-1-connect-to-ldap-server)
+- [Step 2: Explore Structure](#step-2-explore-structure)
+- [Step 3: Find Users](#step-3-find-users)
+- [Step 4: Find Groups](#step-4-find-groups)
+- [Step 5: Determine Filters](#step-5-determine-filters)
+- [Common Examples](#common-examples)
 
 ---
 
-## Ferramentas Necessárias
+## Required Tools
 
 ### Linux/Mac
 
 ```bash
-# Instalar ldap-utils (Debian/Ubuntu)
+# Install ldap-utils (Debian/Ubuntu)
 sudo apt-get install ldap-utils
 
-# Instalar ldap-utils (Red Hat/CentOS/AlmaLinux)
+# Install ldap-utils (Red Hat/CentOS/AlmaLinux)
 sudo yum install openldap-clients
 
-# Instalar ldap-utils (Mac)
+# Install ldap-utils (Mac)
 brew install openldap
-```text
+```
 
 ### Windows
 
-- Baixe e instale **Apache Directory Studio** (GUI): <https://directory.apache.org/studio/>
-- Ou use **ldp.exe** (já incluído no Windows Server)
+- Download and install **Apache Directory Studio** (GUI): <https://directory.apache.org/studio/>
+- Or use **ldp.exe** (already included in Windows Server)
 
 ---
 
-## Passo 1: Conectar ao Servidor LDAP
+## Step 1: Connect to LDAP Server
 
-### Usando ldapsearch (Linha de Comando)
+### Using ldapsearch (Command Line)
 
 ```bash
-# Teste de conexão básica (sem TLS)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Basic connection test (no TLS)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   "(objectClass=*)" dn
 
-# Com TLS/LDAPS
-ldapsearch -H ldaps://seu-servidor-ldap.com:636 \
+# With TLS/LDAPS
+ldapsearch -H ldaps://your-ldap-server.com:636 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   "(objectClass=*)" dn
-```text
+```
 
-**Parâmetros:**
+**Parameters:**
 
-- `-H`: URL do servidor LDAP
-- `-x`: Autenticação simples
-- `-b`: Base DN (ponto inicial da busca)
-- `-D`: Bind DN (usuário para autenticação)
-- `-W`: Solicita senha interativamente
-- `-w password`: Senha na linha de comando (não recomendado)
+- `-H`: LDAP server URL
+- `-x`: Simple authentication
+- `-b`: Base DN (search starting point)
+- `-D`: Bind DN (user for authentication)
+- `-W`: Prompt for password interactively
+- `-w password`: Password on command line (not recommended)
 
-### Usando Apache Directory Studio (GUI)
+### Using Apache Directory Studio (GUI)
 
-1. Abra o Apache Directory Studio
-2. Clique em **"New Connection"**
+1. Open Apache Directory Studio
+2. Click **"New Connection"**
 3. Configure:
-   - **Connection name**: Nome descritivo
-   - **Hostname**: Endereço do servidor LDAP
-   - **Port**: 389 (LDAP) ou 636 (LDAPS)
+   - **Connection name**: Descriptive name
+   - **Hostname**: LDAP server address
+   - **Port**: 389 (LDAP) or 636 (LDAPS)
    - **Encryption**: None/LDAPS/StartTLS
-4. Na aba **"Authentication"**:
+4. On **"Authentication"** tab:
    - **Authentication Method**: Simple Authentication
-   - **Bind DN**: cn=admin,dc=exemplo,dc=com
-   - **Bind Password**: sua senha
-5. Clique em **"Check Network Parameter"** para testar
-6. Clique em **"Finish"**
+   - **Bind DN**: cn=admin,dc=example,dc=com
+   - **Bind Password**: your password
+5. Click **"Check Network Parameter"** to test
+6. Click **"Finish"**
 
 ---
 
-## Passo 2: Explorar a Estrutura
+## Step 2: Explore Structure
 
-### Descobrir a Estrutura Base
+### Discover Base Structure
 
 ```bash
-# Listar todas as entradas no nível raiz
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# List all entries at root level
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -s one \
   "(objectClass=*)" dn
 
-# Ver a estrutura completa (use com cuidado em diretórios grandes)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# View complete structure (use with caution on large directories)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(objectClass=organizationalUnit)" dn
-```text
+```
 
-**Estruturas comuns:**
+**Common structures:**
 
 ```text
-dc=exemplo,dc=com
-├── ou=users          ← Usuários geralmente ficam aqui
-├── ou=people         ← Ou aqui
-├── ou=grupos         ← Grupos geralmente ficam aqui
-├── ou=groups         ← Ou aqui
-└── ou=departments    ← Estrutura organizacional
-```text
+dc=example,dc=com
+├── ou=users          ← Users usually here
+├── ou=people         ← Or here
+├── ou=grupos         ← Groups usually here
+├── ou=groups         ← Or here
+└── ou=departments    ← Organizational structure
+```
 
 ---
 
-## Passo 3: Encontrar Usuários
+## Step 3: Find Users
 
-### 3.1 Buscar Todos os Usuários
+### 3.1 Search All Users
 
 ```bash
-# Buscar por pessoas (pessoa)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search by person
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(objectClass=person)"
 
-# Buscar por inetOrgPerson (mais comum)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search by inetOrgPerson (most common)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(objectClass=inetOrgPerson)"
 
-# Buscar por posixAccount (sistemas Unix/Linux)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search by posixAccount (Unix/Linux systems)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(objectClass=posixAccount)"
-```text
+```
 
-### 3.2 Examinar um Usuário Específico
+### 3.2 Examine a Specific User
 
 ```bash
-# Buscar usuário por uid
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search user by uid
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
-  "(uid=joao.silva)"
+  "(uid=john.doe)"
 
-# Buscar usuário por cn (common name)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search user by cn (common name)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
-  "(cn=João Silva)"
+  "(cn=John Doe)"
 
-# Buscar usuário por sAMAccountName (Active Directory)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search user by sAMAccountName (Active Directory)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
-  "(sAMAccountName=joao.silva)"
-```text
+  "(sAMAccountName=john.doe)"
+```
 
-### 3.3 Identificar o Atributo de Login
+### 3.3 Identify Login Attribute
 
-Examine a saída e procure por:
+Examine the output and look for:
 
 ```ldif
-dn: uid=joao.silva,ou=users,dc=exemplo,dc=com
+dn: uid=john.doe,ou=users,dc=example,dc=com
 objectClass: inetOrgPerson
 objectClass: posixAccount
-uid: joao.silva              ← Atributo de login (comum em OpenLDAP)
-cn: João Silva
-mail: joao.silva@exemplo.com
-```text
+uid: john.doe              ← Login attribute (common in OpenLDAP)
+cn: John Doe
+mail: john.doe@example.com
+```
 
-ou
+or
 
 ```ldif
-dn: CN=João Silva,CN=Users,DC=exemplo,DC=com
+dn: CN=John Doe,CN=Users,DC=example,DC=com
 objectClass: user
-sAMAccountName: joao.silva   ← Atributo de login (Active Directory)
-cn: João Silva
-userPrincipalName: joao.silva@exemplo.com
-mail: joao.silva@exemplo.com
-```text
+sAMAccountName: john.doe   ← Login attribute (Active Directory)
+cn: John Doe
+userPrincipalName: john.doe@example.com
+mail: john.doe@example.com
+```
 
-**Atributos comuns de login:**
+**Common login attributes:**
 
 - `uid`: OpenLDAP, FreeIPA, 389 Directory Server
 - `sAMAccountName`: Active Directory
-- `cn`: Alguns sistemas mais antigos
-- `mail`: Alguns sistemas usam email como login
+- `cn`: Some older systems
+- `mail`: Some systems use email as login
 
 ---
 
-## Passo 4: Encontrar Grupos
+## Step 4: Find Groups
 
-### 4.1 Buscar Todos os Grupos
+### 4.1 Search All Groups
 
 ```bash
-# Buscar por groupOfNames (LDAP padrão)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search by groupOfNames (Standard LDAP)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(objectClass=groupOfNames)"
 
-# Buscar por groupOfUniqueNames
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search by groupOfUniqueNames
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(objectClass=groupOfUniqueNames)"
 
-# Buscar por posixGroup (sistemas Unix/Linux)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search by posixGroup (Unix/Linux systems)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(objectClass=posixGroup)"
 
-# Buscar por group (Active Directory)
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search by group (Active Directory)
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(objectClass=group)"
-```text
+```
 
-### 4.2 Examinar um Grupo Específico
+### 4.2 Examine a Specific Group
 
 ```bash
-# Buscar grupo específico
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Search specific group
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
   "(cn=admins)"
-```text
+```
 
-### 4.3 Identificar o Atributo de Membros
+### 4.3 Identify Member Attribute
 
-Examine a saída e procure por:
+Examine the output and look for:
 
-#### Tipo 1: groupOfNames (OpenLDAP)
+#### Type 1: groupOfNames (OpenLDAP)
 
 ```ldif
-dn: cn=admins,ou=groups,dc=exemplo,dc=com
+dn: cn=admins,ou=groups,dc=example,dc=com
 objectClass: groupOfNames
 cn: admins
-member: uid=joao.silva,ou=users,dc=exemplo,dc=com    ← DN completo do usuário
-member: uid=maria.santos,ou=users,dc=exemplo,dc=com
+member: uid=john.doe,ou=users,dc=example,dc=com    ← User's full DN
+member: uid=jane.doe,ou=users,dc=example,dc=com
 ```
 
-#### Tipo 2: groupOfUniqueNames
+#### Type 2: groupOfUniqueNames
 
 ```ldif
-dn: cn=admins,ou=groups,dc=exemplo,dc=com
+dn: cn=admins,ou=groups,dc=example,dc=com
 objectClass: groupOfUniqueNames
 cn: admins
-uniqueMember: uid=joao.silva,ou=users,dc=exemplo,dc=com  ← DN completo
-uniqueMember: uid=maria.santos,ou=users,dc=exemplo,dc=com
+uniqueMember: uid=john.doe,ou=users,dc=example,dc=com  ← Full DN
+uniqueMember: uid=jane.doe,ou=users,dc=example,dc=com
 ```
 
-#### Tipo 3: posixGroup
+#### Type 3: posixGroup
 
 ```ldif
-dn: cn=admins,ou=groups,dc=exemplo,dc=com
+dn: cn=admins,ou=groups,dc=example,dc=com
 objectClass: posixGroup
 cn: admins
 gidNumber: 1000
-memberUid: joao.silva      ← Apenas o uid, não o DN completo
-memberUid: maria.santos
+memberUid: john.doe      ← Just the uid, not the full DN
+memberUid: jane.doe
 ```
 
-#### Tipo 4: Active Directory
+#### Type 4: Active Directory
 
 ```ldif
-dn: CN=Admins,CN=Users,DC=exemplo,DC=com
+dn: CN=Admins,CN=Users,DC=example,DC=com
 objectClass: group
 cn: Admins
-member: CN=João Silva,CN=Users,DC=exemplo,DC=com     ← DN completo
-member: CN=Maria Santos,CN=Users,DC=exemplo,DC=com
+member: CN=John Doe,CN=Users,DC=example,DC=com     ← Full DN
+member: CN=Jane Doe,CN=Users,DC=example,DC=com
 ```
 
 ---
 
-## Passo 5: Determinar Filtros
+## Step 5: Determine Filters
 
 ### LDAP_USER_FILTER
 
-Baseado no atributo de login identificado no **Passo 3.3**:
+Based on login attribute identified in **Step 3.3**:
 
-| Atributo de Login | LDAP_USER_FILTER | Sistema |
-|------------------|------------------|---------|
+| Login Attribute | LDAP_USER_FILTER | System |
+|-----------------|------------------|--------|
 | `uid` | `(uid=%s)` | OpenLDAP, FreeIPA, 389 DS |
 | `sAMAccountName` | `(sAMAccountName=%s)` | Active Directory |
-| `cn` | `(cn=%s)` | Sistemas antigos |
-| `mail` | `(mail=%s)` | Login por email |
-| `userPrincipalName` | `(userPrincipalName=%s)` | AD (login com email) |
+| `cn` | `(cn=%s)` | Legacy systems |
+| `mail` | `(mail=%s)` | Email login |
+| `userPrincipalName` | `(userPrincipalName=%s)` | AD (email login) |
 
-**O `%s` será substituído pelo username digitado no login.**
+**The `%s` will be replaced by the username typed at login.**
 
 ### LDAP_GROUP_FILTER
 
-Baseado no atributo de membros identificado no **Passo 4.3**:
+Based on member attribute identified in **Step 4.3**:
 
-| Atributo de Membro | LDAP_GROUP_FILTER | Sistema |
-|-------------------|-------------------|---------|
+| Member Attribute | LDAP_GROUP_FILTER | System |
+|------------------|-------------------|--------|
 | `member` | `(member=%s)` | groupOfNames, AD |
 | `uniqueMember` | `(uniqueMember=%s)` | groupOfUniqueNames |
 | `memberUid` | `(memberUid=%s)` | posixGroup |
 
-**O `%s` será substituído pelo DN completo do usuário** (ex: `uid=joao.silva,ou=users,dc=exemplo,dc=com`)
+**The `%s` will be replaced by the user's full DN** (e.g., `uid=john.doe,ou=users,dc=example,dc=com`)
 
-**EXCEÇÃO:** Para `posixGroup` com `memberUid`, o Txlog Server precisa extrair apenas o `uid` do DN do usuário.
+**EXCEPTION:** For `posixGroup` with `memberUid`, Txlog Server needs to extract only the `uid` from the user's DN.
 
 ---
 
-## Exemplos Comuns
+## Common Examples
 
-### OpenLDAP com groupOfNames
+### OpenLDAP with groupOfNames
 
 ```bash
-# Estrutura
-ou=users: uid=joao.silva
-ou=groups: cn=admins com member=uid=joao.silva,ou=users,dc=exemplo,dc=com
+# Structure
+ou=users: uid=john.doe
+ou=groups: cn=admins with member=uid=john.doe,ou=users,dc=example,dc=com
 
-# Configuração
+# Configuration
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
-```text
+```
 
-### OpenLDAP com posixGroup
+### OpenLDAP with posixGroup
 
 ```bash
-# Estrutura
-ou=users: uid=joao.silva
-ou=groups: cn=admins com memberUid=joao.silva
+# Structure
+ou=users: uid=john.doe
+ou=groups: cn=admins with memberUid=john.doe
 
-# Configuração
+# Configuration
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(memberUid=%s)
-```text
+```
 
-**⚠️ IMPORTANTE:** Para posixGroup, você precisa modificar o código do Txlog Server para extrair apenas o `uid` do DN antes de fazer a busca de grupo. Atualmente, ele passa o DN completo.
+**⚠️ IMPORTANT:** For posixGroup, you need to modify Txlog Server code to extract only the `uid` from the DN before doing the group search. Currently, it passes the full DN.
 
 ### Active Directory
 
 ```bash
-# Estrutura
-CN=Users: sAMAccountName=joao.silva
-CN=Groups: cn=Admins com member=CN=João Silva,CN=Users,DC=exemplo,DC=com
+# Structure
+CN=Users: sAMAccountName=john.doe
+CN=Groups: cn=Admins with member=CN=John Doe,CN=Users,DC=example,DC=com
 
-# Configuração
+# Configuration
 LDAP_USER_FILTER=(sAMAccountName=%s)
 LDAP_GROUP_FILTER=(member=%s)
-```text
+```
 
 ### FreeIPA
 
 ```bash
-# Estrutura
-cn=users: uid=joao.silva
-cn=groups: cn=admins com member=uid=joao.silva,cn=users,cn=accounts,dc=exemplo,dc=com
+# Structure
+cn=users: uid=john.doe
+cn=groups: cn=admins with member=uid=john.doe,cn=users,cn=accounts,dc=example,dc=com
 
-# Configuração
+# Configuration
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
-```text
+```
 
 ### 389 Directory Server
 
 ```bash
-# Estrutura similar ao OpenLDAP
-ou=People: uid=joao.silva
-ou=Groups: cn=admins com member=uid=joao.silva,ou=People,dc=exemplo,dc=com
+# Structure similar to OpenLDAP
+ou=People: uid=john.doe
+ou=Groups: cn=admins with member=uid=john.doe,ou=People,dc=example,dc=com
 
-# Configuração
+# Configuration
 LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(member=%s)
-```text
+```
 
 ---
 
-## Testando os Filtros
+## Testing Filters
 
-### Testar LDAP_USER_FILTER
+### Test LDAP_USER_FILTER
 
 ```bash
-# Substitua %s pelo username real
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Replace %s with real username
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "ou=users,dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "ou=users,dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -LLL \
-  "(uid=joao.silva)"
+  "(uid=john.doe)"
 
-# Se retornar exatamente 1 usuário, o filtro está correto
-```text
+# If it returns exactly 1 user, the filter is correct
+```
 
-### Testar LDAP_GROUP_FILTER
+### Test LDAP_GROUP_FILTER
 
 ```bash
-# Primeiro, obtenha o DN completo do usuário
-USER_DN="uid=joao.silva,ou=users,dc=exemplo,dc=com"
+# First, get the user's full DN
+USER_DN="uid=john.doe,ou=users,dc=example,dc=com"
 
-# Substitua %s pelo DN do usuário
-ldapsearch -H ldap://seu-servidor-ldap.com:389 \
+# Replace %s with user DN
+ldapsearch -H ldap://your-ldap-server.com:389 \
   -x \
-  -b "cn=admins,ou=groups,dc=exemplo,dc=com" \
-  -D "cn=admin,dc=exemplo,dc=com" \
+  -b "cn=admins,ou=groups,dc=example,dc=com" \
+  -D "cn=admin,dc=example,dc=com" \
   -W \
   -s base \
   -LLL \
-  "(member=uid=joao.silva,ou=users,dc=exemplo,dc=com)"
+  "(member=uid=john.doe,ou=users,dc=example,dc=com)"
 
-# Se retornar o grupo, o filtro está correto
-```text
+# If it returns the group, the filter is correct
+```
 
 ---
 
-## Filtros Avançados
+## Advanced Filters
 
-### Combinar Múltiplos Atributos
+### Combining Multiple Attributes
 
 ```bash
-# Buscar usuário por uid OU email
+# Search user by uid OR email
 LDAP_USER_FILTER=(|(uid=%s)(mail=%s))
 
-# Buscar usuário por sAMAccountName OU userPrincipalName (AD)
+# Search user by sAMAccountName OR userPrincipalName (AD)
 LDAP_USER_FILTER=(|(sAMAccountName=%s)(userPrincipalName=%s))
-```text
+```
 
-### Filtrar por ObjectClass
+### Filter by ObjectClass
 
 ```bash
-# Garantir que é um inetOrgPerson com uid específico
+# Ensure it is an inetOrgPerson with specific uid
 LDAP_USER_FILTER=(&(objectClass=inetOrgPerson)(uid=%s))
 
-# Garantir que é um grupo específico com membro
+# Ensure it is a specific group with member
 LDAP_GROUP_FILTER=(&(objectClass=groupOfNames)(member=%s))
-```text
+```
 
 ---
 
 ## Troubleshooting
 
-### Erro: "user not found"
+### Error: "user not found"
 
-1. Verifique se o `LDAP_BASE_DN` está correto
-2. Teste o `LDAP_USER_FILTER` manualmente com `ldapsearch`
-3. Verifique se o usuário realmente existe no diretório
+1. Verify if `LDAP_BASE_DN` is correct.
+2. Test `LDAP_USER_FILTER` manually with `ldapsearch`.
+3. Verify if user actually exists in the directory.
 
-### Erro: "not a member of any authorized group"
+### Error: "not a member of any authorized group"
 
-1. Verifique se o `LDAP_ADMIN_GROUP` ou `LDAP_VIEWER_GROUP` está correto (deve ser o DN completo do grupo)
-2. Teste o `LDAP_GROUP_FILTER` manualmente com `ldapsearch`
-3. Verifique se o usuário é realmente membro do grupo no LDAP
+1. Verify if `LDAP_ADMIN_GROUP` or `LDAP_VIEWER_GROUP` is correct (must be full group DN).
+2. Test `LDAP_GROUP_FILTER` manually with `ldapsearch`.
+3. Verify if user is actually a member of the group in LDAP.
 
-### Erro: "failed to connect to LDAP"
+### Error: "failed to connect to LDAP"
 
-1. Verifique se o host e porta estão corretos
-2. Teste conectividade: `telnet ldap-server 389` ou `openssl s_client -connect ldap-server:636`
-3. Verifique firewall e regras de rede
+1. Verify if host and port are correct.
+2. Test connectivity: `telnet ldap-server 389` or `openssl s_client -connect ldap-server:636`.
+3. Verify firewall and network rules.
 
-### Erro: "failed to bind with service account"
+### Error: "failed to bind with service account"
 
-1. Verifique se o `LDAP_BIND_DN` está correto (formato completo do DN)
-2. Verifique se a senha em `LDAP_BIND_PASSWORD` está correta
-3. Teste o bind manualmente com `ldapsearch`
+1. Verify if `LDAP_BIND_DN` is correct (full DN format).
+2. Verify if password in `LDAP_BIND_PASSWORD` is correct.
+3. Test bind manually with `ldapsearch`.
 
 ---
 
-## Recursos Adicionais
+## Additional Resources
 
 - **OpenLDAP Documentation**: <https://www.openldap.org/doc/>
 - **Active Directory LDAP**: <https://docs.microsoft.com/en-us/windows/win32/adsi/search-filter-syntax>
@@ -519,46 +519,46 @@ LDAP_GROUP_FILTER=(&(objectClass=groupOfNames)(member=%s))
 
 ---
 
-## Exemplo Completo de Configuração
+## Complete Configuration Example
 
 ```bash
-# OpenLDAP com groupOfNames
-LDAP_HOST=ldap.exemplo.com
+# OpenLDAP with groupOfNames
+LDAP_HOST=ldap.example.com
 LDAP_PORT=389
 LDAP_USE_TLS=false
-LDAP_BASE_DN=dc=exemplo,dc=com
-LDAP_BIND_DN=cn=admin,dc=exemplo,dc=com
-LDAP_BIND_PASSWORD=senha_secreta
+LDAP_BASE_DN=dc=example,dc=com
+LDAP_BIND_DN=cn=admin,dc=example,dc=com
+LDAP_BIND_PASSWORD=secret_password
 LDAP_USER_FILTER=(uid=%s)
-LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=exemplo,dc=com
-LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=exemplo,dc=com
+LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
+LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 LDAP_GROUP_FILTER=(member=%s)
-```text
+```
 
 ```bash
 # Active Directory
-LDAP_HOST=ad.exemplo.com
+LDAP_HOST=ad.example.com
 LDAP_PORT=636
 LDAP_USE_TLS=true
-LDAP_BASE_DN=DC=exemplo,DC=com
-LDAP_BIND_DN=CN=Service Account,CN=Users,DC=exemplo,DC=com
-LDAP_BIND_PASSWORD=senha_secreta
+LDAP_BASE_DN=DC=example,DC=com
+LDAP_BIND_DN=CN=Service Account,CN=Users,DC=example,DC=com
+LDAP_BIND_PASSWORD=secret_password
 LDAP_USER_FILTER=(sAMAccountName=%s)
-LDAP_ADMIN_GROUP=CN=Txlog Admins,CN=Users,DC=exemplo,DC=com
-LDAP_VIEWER_GROUP=CN=Txlog Viewers,CN=Users,DC=exemplo,DC=com
+LDAP_ADMIN_GROUP=CN=Txlog Admins,CN=Users,DC=example,DC=com
+LDAP_VIEWER_GROUP=CN=Txlog Viewers,CN=Users,DC=example,DC=com
 LDAP_GROUP_FILTER=(member=%s)
-```text
+```
 
 ---
 
-## Conclusão
+## Conclusion
 
-Cada servidor LDAP pode ter uma estrutura diferente. Use as ferramentas de exploração (`ldapsearch` ou Apache Directory Studio) para:
+Each LDAP server can have a different structure. Use exploration tools (`ldapsearch` or Apache Directory Studio) to:
 
-1. ✅ Identificar onde os usuários estão armazenados
-2. ✅ Identificar qual atributo é usado para login (uid, sAMAccountName, etc.)
-3. ✅ Identificar onde os grupos estão armazenados
-4. ✅ Identificar qual atributo armazena membros (member, uniqueMember, memberUid)
-5. ✅ Testar os filtros manualmente antes de configurar o Txlog Server
+1. ✅ Identify where users are stored.
+2. ✅ Identify which attribute is used for login (uid, sAMAccountName, etc.).
+3. ✅ Identify where groups are stored.
+4. ✅ Identify which attribute stores members (member, uniqueMember, memberUid).
+5. ✅ Test filters manually before configuring Txlog Server.
 
-Com essas informações, você pode configurar corretamente os filtros LDAP!
+With this information, you can correctly configure LDAP filters!

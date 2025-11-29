@@ -1,488 +1,487 @@
-# Códigos de Erro LDAP - Guia de Troubleshooting
+# LDAP Error Codes - Troubleshooting Guide
 
 ## LDAP Result Code 32: No Such Object
 
-### 🔍 O que significa?
+### 🔍 What does it mean?
 
-O erro **"LDAP Result Code 32: No Such Object"** significa que o servidor LDAP **não conseguiu encontrar o objeto**
-(usuário, grupo ou DN) que você está tentando acessar. É como procurar por um arquivo que não existe em um diretório.
+The error **"LDAP Result Code 32: No Such Object"** means that the LDAP server **could not find the object** (user, group, or DN) you are trying to access. It is like looking for a file that does not exist in a directory.
 
-### 📍 Onde Pode Ocorrer?
+### 📍 Where Can It Occur?
 
-Este erro pode acontecer em **4 situações** no Txlog Server:
+This error can happen in **4 situations** in Txlog Server:
 
-#### 1. **Base DN Incorreto** (Mais Comum)
-
-```bash
-# ❌ ERRADO
-LDAP_BASE_DN=ou=users,dc=exemplo,dc=com
-
-# ✅ CORRETO
-LDAP_BASE_DN=dc=exemplo,dc=com
-```text
-
-**Problema:** O `LDAP_BASE_DN` está apontando para uma OU que não existe ou está incorreta.
-
-**Como Verificar:**
+#### 1. **Incorrect Base DN** (Most Common)
 
 ```bash
-# Teste se o Base DN existe
-ldapsearch -H ldap://servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W \
-  -b "dc=exemplo,dc=com" -s base "(objectClass=*)"
+# ❌ WRONG
+LDAP_BASE_DN=ou=users,dc=example,dc=com
 
-# Se retornar erro 32, o Base DN está errado
-```text
+# ✅ CORRECT
+LDAP_BASE_DN=dc=example,dc=com
+```
 
-**Solução:**
+**Problem:** The `LDAP_BASE_DN` is pointing to an OU that does not exist or is incorrect.
 
-1. Descubra o Base DN correto explorando o servidor:
+**How to Verify:**
+
+```bash
+# Test if the Base DN exists
+ldapsearch -H ldap://server:389 -x -D "cn=admin,dc=example,dc=com" -W \
+  -b "dc=example,dc=com" -s base "(objectClass=*)"
+
+# If it returns error 32, the Base DN is wrong
+```
+
+**Solution:**
+
+1. Discover the correct Base DN by exploring the server:
 
    ```bash
-   ldapsearch -H ldap://servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W \
+   ldapsearch -H ldap://server:389 -x -D "cn=admin,dc=example,dc=com" -W \
      -b "" -s base namingContexts
    ```
 
-2. Atualize no `.env`:
+2. Update in `.env`:
 
    ```bash
-   LDAP_BASE_DN=dc=exemplo,dc=com  # Use o valor correto
+   LDAP_BASE_DN=dc=example,dc=com  # Use the correct value
    ```
 
 ---
 
-#### 2. **Bind DN Incorreto**
+#### 2. **Incorrect Bind DN**
 
 ```bash
-# ❌ ERRADO
-LDAP_BIND_DN=cn=readonly,dc=exemplo,dc=com
+# ❌ WRONG
+LDAP_BIND_DN=cn=readonly,dc=example,dc=com
 
-# ✅ CORRETO
-LDAP_BIND_DN=cn=readonly,ou=service-accounts,dc=exemplo,dc=com
-```text
+# ✅ CORRECT
+LDAP_BIND_DN=cn=readonly,ou=service-accounts,dc=example,dc=com
+```
 
-**Problema:** A conta de serviço (Bind DN) não existe no caminho especificado.
+**Problem:** The service account (Bind DN) does not exist in the specified path.
 
-**Como Verificar:**
+**How to Verify:**
 
 ```bash
-# Teste o Bind DN
-ldapsearch -H ldap://servidor:389 -x \
-  -D "cn=readonly,ou=service-accounts,dc=exemplo,dc=com" \
-  -W -b "dc=exemplo,dc=com" "(objectClass=*)"
+# Test the Bind DN
+ldapsearch -H ldap://server:389 -x \
+  -D "cn=readonly,ou=service-accounts,dc=example,dc=com" \
+  -W -b "dc=example,dc=com" "(objectClass=*)"
 
-# Se retornar erro 32, o Bind DN não existe
-```text
+# If it returns error 32, the Bind DN does not exist
+```
 
-**Solução:**
+**Solution:**
 
-1. Busque a conta de serviço:
+1. Search for the service account:
 
    ```bash
-   # Busque por CN
-   ldapsearch -H ldap://servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W \
-     -b "dc=exemplo,dc=com" "(cn=readonly)" dn
+   # Search by CN
+   ldapsearch -H ldap://server:389 -x -D "cn=admin,dc=example,dc=com" -W \
+     -b "dc=example,dc=com" "(cn=readonly)" dn
    ```
 
-2. Use o DN completo retornado no `.env`
+2. Use the full DN returned in `.env`.
 
 ---
 
-#### 3. **Admin Group ou Viewer Group Incorreto**
+#### 3. **Incorrect Admin Group or Viewer Group**
 
 ```bash
-# ❌ ERRADO
-LDAP_ADMIN_GROUP=cn=admins,ou=grupos,dc=exemplo,dc=com
+# ❌ WRONG
+LDAP_ADMIN_GROUP=cn=admins,ou=grupos,dc=example,dc=com
 
-# ✅ CORRETO
-LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=exemplo,dc=com
-```text
+# ✅ CORRECT
+LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
+```
 
-**Problema:** O DN do grupo não existe.
+**Problem:** The group DN does not exist.
 
-**Como Verificar:**
+**How to Verify:**
 
 ```bash
-# Teste se o grupo existe
-ldapsearch -H ldap://servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W \
-  -b "cn=admins,ou=groups,dc=exemplo,dc=com" -s base "(objectClass=*)"
+# Test if the group exists
+ldapsearch -H ldap://server:389 -x -D "cn=admin,dc=example,dc=com" -W \
+  -b "cn=admins,ou=groups,dc=example,dc=com" -s base "(objectClass=*)"
 
-# Se retornar erro 32, o grupo não existe nesse caminho
-```text
+# If it returns error 32, the group does not exist at this path
+```
 
-**Solução:**
+**Solution:**
 
-1. Busque o grupo correto:
+1. Search for the correct group:
 
    ```bash
-   ldapsearch -H ldap://servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W \
-     -b "dc=exemplo,dc=com" "(cn=admins)" dn
+   ldapsearch -H ldap://server:389 -x -D "cn=admin,dc=example,dc=com" -W \
+     -b "dc=example,dc=com" "(cn=admins)" dn
    ```
 
-2. Use o DN completo do grupo no `.env`:
+2. Use the full group DN in `.env`:
 
    ```bash
-   LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=exemplo,dc=com
+   LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
    ```
 
 ---
 
-#### 4. **Usuário Não Encontrado no Base DN**
+#### 4. **User Not Found in Base DN**
 
 ```bash
-# Base DN muito restrito
-LDAP_BASE_DN=ou=employees,dc=exemplo,dc=com
+# Base DN too restrictive
+LDAP_BASE_DN=ou=employees,dc=example,dc=com
 
-# Mas o usuário está em: uid=joao,ou=contractors,dc=exemplo,dc=com
-```text
+# But the user is at: uid=john,ou=contractors,dc=example,dc=com
+```
 
-**Problema:** O usuário existe no LDAP, mas **fora** do Base DN configurado.
+**Problem:** The user exists in LDAP, but **outside** the configured Base DN.
 
-**Como Verificar:**
+**How to Verify:**
 
 ```bash
-# Busque o usuário em todo o diretório
-ldapsearch -H ldap://servidor:389 -x -D "cn=admin,dc=exemplo,dc=com" -W \
-  -b "dc=exemplo,dc=com" "(uid=joao)" dn
+# Search for the user in the entire directory
+ldapsearch -H ldap://server:389 -x -D "cn=admin,dc=example,dc=com" -W \
+  -b "dc=example,dc=com" "(uid=john)" dn
 
-# Se encontrar o usuário em uma OU diferente, amplie o Base DN
-```text
+# If you find the user in a different OU, expand the Base DN
+```
 
-**Solução:**
+**Solution:**
 
-- Use um Base DN mais amplo que inclua todos os usuários:
+- Use a broader Base DN that includes all users:
 
   ```bash
-  # Em vez de:
-  LDAP_BASE_DN=ou=employees,dc=exemplo,dc=com
-  
+  # Instead of:
+  LDAP_BASE_DN=ou=employees,dc=example,dc=com
+
   # Use:
-  LDAP_BASE_DN=dc=exemplo,dc=com
+  LDAP_BASE_DN=dc=example,dc=com
   ```
 
 ---
 
-## 🔧 Como Diagnosticar Erro 32 no Txlog Server
+## 🔧 How to Diagnose Error 32 in Txlog Server
 
-### Passo 1: Ativar Logs de DEBUG
+### Step 1: Enable DEBUG Logs
 
-No `.env`:
+In `.env`:
 
 ```bash
 LOG_LEVEL=DEBUG
-```text
+```
 
-Reinicie o servidor e tente fazer login. Você verá logs detalhados:
+Restart the server and try to log in. You will see detailed logs:
 
 ```text
-time=... level=DEBUG msg="LDAP user search: baseDN=ou=users,dc=exemplo,dc=com, filter=(uid=joao)"
+time=... level=DEBUG msg="LDAP user search: baseDN=ou=users,dc=example,dc=com, filter=(uid=john)"
 time=... level=ERROR msg="LDAP search failed: LDAP Result Code 32 \"No Such Object\""
-```text
+```
 
-### Passo 2: Identificar Qual DN Está Incorreto
+### Step 2: Identify Which DN Is Incorrect
 
-Os logs mostram qual operação falhou:
+The logs show which operation failed:
 
-| Mensagem de Log | DN Incorreto | Variável .env |
-|-----------------|--------------|---------------|
+| Log Message | Incorrect DN | .env Variable |
+|-------------|--------------|---------------|
 | "LDAP user search: baseDN=..." | Base DN | `LDAP_BASE_DN` |
 | "Binding with service account: ..." | Bind DN | `LDAP_BIND_DN` |
 | "LDAP search failed: ... filter=(uid=...)" | Base DN | `LDAP_BASE_DN` |
 | "Failed to check admin group membership" | Admin Group | `LDAP_ADMIN_GROUP` |
 | "Failed to check viewer group membership" | Viewer Group | `LDAP_VIEWER_GROUP` |
 
-### Passo 3: Validar o DN Correto
+### Step 3: Validate the Correct DN
 
-Use `ldapsearch` ou o script `ldap-discovery.sh`:
+Use `ldapsearch` or the `ldap-discovery.sh` script:
 
 ```bash
 ./ldap-discovery.sh
-# Opção 1: Explorar estrutura do diretório
-# Opção 2: Buscar usuários
-# Opção 3: Buscar grupos
-```text
+# Option 1: Explore directory structure
+# Option 2: Search users
+# Option 3: Search groups
+```
 
-### Passo 4: Corrigir e Testar
+### Step 4: Fix and Test
 
-1. Atualize o `.env` com o DN correto
-2. Reinicie o servidor
-3. Tente fazer login novamente
-
----
-
-## 📋 Checklist de Verificação para Erro 32
-
-Quando encontrar **"LDAP Result Code 32"**, verifique:
-
-- [ ] **LDAP_BASE_DN** existe e está acessível?
-
-  ```bash
-  ldapsearch -H ldap://... -x -D "..." -W -b "dc=exemplo,dc=com" -s base "(objectClass=*)"
-  ```
-
-- [ ] **LDAP_BIND_DN** existe (se configurado)?
-
-  ```bash
-  ldapsearch -H ldap://... -x -D "cn=readonly,dc=exemplo,dc=com" -W -b "dc=exemplo,dc=com" -s base "(objectClass=*)"
-  ```
-
-- [ ] **LDAP_ADMIN_GROUP** existe?
-
-  ```bash
-  ldapsearch -H ldap://... -x -D "..." -W -b "cn=admins,ou=groups,dc=exemplo,dc=com" -s base "(objectClass=*)"
-  ```
-
-- [ ] **LDAP_VIEWER_GROUP** existe (se configurado)?
-
-  ```bash
-  ldapsearch -H ldap://... -x -D "..." -W -b "cn=viewers,ou=groups,dc=exemplo,dc=com" -s base "(objectClass=*)"
-  ```
-
-- [ ] Usuários estão dentro do **LDAP_BASE_DN**?
-
-  ```bash
-  ldapsearch -H ldap://... -x -D "..." -W -b "dc=exemplo,dc=com" "(uid=usuario)"
-  ```
+1. Update `.env` with the correct DN.
+2. Restart the server.
+3. Try logging in again.
 
 ---
 
-## 🌟 Exemplos de Configuração Correta
+## 📋 Verification Checklist for Error 32
 
-### OpenLDAP Típico
+When encountering **"LDAP Result Code 32"**, check:
+
+- [ ] **LDAP_BASE_DN** exists and is accessible?
+
+  ```bash
+  ldapsearch -H ldap://... -x -D "..." -W -b "dc=example,dc=com" -s base "(objectClass=*)"
+  ```
+
+- [ ] **LDAP_BIND_DN** exists (if configured)?
+
+  ```bash
+  ldapsearch -H ldap://... -x -D "cn=readonly,dc=example,dc=com" -W -b "dc=example,dc=com" -s base "(objectClass=*)"
+  ```
+
+- [ ] **LDAP_ADMIN_GROUP** exists?
+
+  ```bash
+  ldapsearch -H ldap://... -x -D "..." -W -b "cn=admins,ou=groups,dc=example,dc=com" -s base "(objectClass=*)"
+  ```
+
+- [ ] **LDAP_VIEWER_GROUP** exists (if configured)?
+
+  ```bash
+  ldapsearch -H ldap://... -x -D "..." -W -b "cn=viewers,ou=groups,dc=example,dc=com" -s base "(objectClass=*)"
+  ```
+
+- [ ] Users are within the **LDAP_BASE_DN**?
+
+  ```bash
+  ldapsearch -H ldap://... -x -D "..." -W -b "dc=example,dc=com" "(uid=user)"
+  ```
+
+---
+
+## 🌟 Examples of Correct Configuration
+
+### Typical OpenLDAP
 
 ```bash
-LDAP_BASE_DN=dc=empresa,dc=com
-LDAP_BIND_DN=cn=readonly,ou=service-accounts,dc=empresa,dc=com
-LDAP_ADMIN_GROUP=cn=txlog-admins,ou=groups,dc=empresa,dc=com
-LDAP_VIEWER_GROUP=cn=txlog-users,ou=groups,dc=empresa,dc=com
-```text
+LDAP_BASE_DN=dc=company,dc=com
+LDAP_BIND_DN=cn=readonly,ou=service-accounts,dc=company,dc=com
+LDAP_ADMIN_GROUP=cn=txlog-admins,ou=groups,dc=company,dc=com
+LDAP_VIEWER_GROUP=cn=txlog-users,ou=groups,dc=company,dc=com
+```
 
 ### Active Directory
 
 ```bash
-LDAP_BASE_DN=DC=empresa,DC=com
-LDAP_BIND_DN=CN=LDAP Service,OU=Service Accounts,DC=empresa,DC=com
-LDAP_ADMIN_GROUP=CN=Txlog Admins,OU=Security Groups,DC=empresa,DC=com
-LDAP_VIEWER_GROUP=CN=Txlog Users,OU=Security Groups,DC=empresa,DC=com
-```text
+LDAP_BASE_DN=DC=company,DC=com
+LDAP_BIND_DN=CN=LDAP Service,OU=Service Accounts,DC=company,DC=com
+LDAP_ADMIN_GROUP=CN=Txlog Admins,OU=Security Groups,DC=company,DC=com
+LDAP_VIEWER_GROUP=CN=Txlog Users,OU=Security Groups,DC=company,DC=com
+```
 
 ### FreeIPA
 
 ```bash
-LDAP_BASE_DN=dc=empresa,dc=com
-LDAP_BIND_DN=uid=readonly,cn=sysaccounts,cn=etc,dc=empresa,dc=com
-LDAP_ADMIN_GROUP=cn=txlog-admins,cn=groups,cn=accounts,dc=empresa,dc=com
-LDAP_VIEWER_GROUP=cn=txlog-users,cn=groups,cn=accounts,dc=empresa,dc=com
-```text
+LDAP_BASE_DN=dc=company,dc=com
+LDAP_BIND_DN=uid=readonly,cn=sysaccounts,cn=etc,dc=company,dc=com
+LDAP_ADMIN_GROUP=cn=txlog-admins,cn=groups,cn=accounts,dc=company,dc=com
+LDAP_VIEWER_GROUP=cn=txlog-users,cn=groups,cn=accounts,dc=company,dc=com
+```
 
 ---
 
-## 🔍 Outros Códigos de Erro LDAP Comuns
+## 🔍 Other Common LDAP Error Codes
 
 ### Code 34: Invalid DN Syntax
 
-**O que significa:** O formato do DN está incorreto.
+**What it means:** The DN format is incorrect.
 
-**Exemplo:**
+**Example:**
 
 ```bash
-# ❌ ERRADO (falta vírgula)
-LDAP_BASE_DN=ou=usersdc=exemplo,dc=com
+# ❌ WRONG (missing comma)
+LDAP_BASE_DN=ou=usersdc=example,dc=com
 
-# ✅ CORRETO
-LDAP_BASE_DN=ou=users,dc=exemplo,dc=com
-```text
+# ✅ CORRECT
+LDAP_BASE_DN=ou=users,dc=example,dc=com
+```
 
 ### Code 49: Invalid Credentials
 
-**O que significa:** Usuário/senha incorretos.
+**What it means:** Incorrect username/password.
 
-**Causas comuns:**
+**Common causes:**
 
-1. Senha errada em `LDAP_BIND_PASSWORD`
-2. Senha do usuário que está tentando fazer login está incorreta
-3. Conta de serviço expirada ou desabilitada
+1. Wrong password in `LDAP_BIND_PASSWORD`.
+2. The password of the user trying to log in is incorrect.
+3. Service account expired or disabled.
 
-**Como verificar:**
+**How to verify:**
 
 ```bash
-# Teste o Bind DN
-ldapsearch -H ldap://servidor:389 -x \
-  -D "cn=readonly,dc=exemplo,dc=com" \
-  -w "sua_senha" \
-  -b "dc=exemplo,dc=com" "(objectClass=*)"
-```text
+# Test the Bind DN
+ldapsearch -H ldap://server:389 -x \
+  -D "cn=readonly,dc=example,dc=com" \
+  -w "your_password" \
+  -b "dc=example,dc=com" "(objectClass=*)"
+```
 
 ### Code 50: Insufficient Access Rights
 
-**O que significa:** A conta não tem permissão para executar a operação.
+**What it means:** The account does not have permission to perform the operation.
 
-**Solução:** A conta de serviço precisa de:
+**Solution:** The service account needs:
 
-- Permissão de leitura no Base DN
-- Permissão de leitura nos grupos configurados
+- Read permission on the Base DN.
+- Read permission on the configured groups.
 
 ### Code 52: Unavailable
 
-**O que significa:** Servidor LDAP não está disponível.
+**What it means:** LDAP server is not available.
 
-**Causas:**
+**Causes:**
 
-1. Servidor LDAP parado
-2. Porta bloqueada por firewall
-3. Problemas de rede
+1. LDAP server down.
+2. Port blocked by firewall.
+3. Network issues.
 
-**Como verificar:**
+**How to verify:**
 
 ```bash
-# Teste conectividade
-telnet ldap.servidor.com 389
+# Test connectivity
+telnet ldap.server.com 389
 
-# Ou com LDAPS
-openssl s_client -connect ldap.servidor.com:636
-```text
+# Or with LDAPS
+openssl s_client -connect ldap.server.com:636
+```
 
 ### Code 53: Unwilling to Perform
 
-**O que significa:** Servidor recusou executar a operação.
+**What it means:** Server refused to execute the operation.
 
-**Causas comuns:**
+**Common causes:**
 
-1. Tentativa de modificar dados em modo read-only
-2. Violação de política do servidor
-3. Operação não permitida (ex: anonymous bind desabilitado)
+1. Attempt to modify data in read-only mode.
+2. Server policy violation.
+3. Operation not allowed (e.g., anonymous bind disabled).
 
 ---
 
-## 🛠️ Ferramentas de Diagnóstico
+## 🛠️ Diagnostic Tools
 
-### 1. Script ldap-discovery.sh
+### 1. ldap-discovery.sh Script
 
 ```bash
 ./ldap-discovery.sh
-# Use as opções do menu para testar cada componente
-```text
+# Use menu options to test each component
+```
 
-### 2. ldapsearch Manual
+### 2. Manual ldapsearch
 
 ```bash
-# Template completo de teste
-ldapsearch -H ldap://SERVIDOR:PORTA \
+# Complete test template
+ldapsearch -H ldap://SERVER:PORT \
   -x \
   -D "BIND_DN" \
   -W \
   -b "BASE_DN" \
   "FILTER" \
-  atributos
+  attributes
 
-# Exemplo real
-ldapsearch -H ldap://ldap.empresa.com:389 \
+# Real example
+ldapsearch -H ldap://ldap.company.com:389 \
   -x \
-  -D "cn=readonly,dc=empresa,dc=com" \
+  -D "cn=readonly,dc=company,dc=com" \
   -W \
-  -b "dc=empresa,dc=com" \
-  "(uid=joao)" \
+  -b "dc=company,dc=com" \
+  "(uid=john)" \
   dn uid cn mail
-```text
+```
 
 ### 3. Apache Directory Studio (GUI)
 
 - Download: <https://directory.apache.org/studio/>
-- Permite navegar visualmente pela árvore LDAP
-- Mostra erros de forma mais amigável
+- Allows visual browsing of the LDAP tree.
+- Shows errors in a more user-friendly way.
 
-### 4. Logs do Txlog Server
+### 4. Txlog Server Logs
 
 ```bash
-# Ative DEBUG no .env
+# Enable DEBUG in .env
 LOG_LEVEL=DEBUG
 
-# Execute o servidor
+# Run the server
 make run
 
-# Logs mostrarão:
-# - Base DN usado nas buscas
-# - Filtros aplicados
-# - Resultados de cada operação
-# - Erros detalhados
-```text
+# Logs will show:
+# - Base DN used in searches
+# - Applied filters
+# - Results of each operation
+# - Detailed errors
+```
 
 ---
 
-## 📊 Tabela Resumida de Códigos LDAP
+## 📊 LDAP Codes Summary Table
 
-| Código | Nome | Significado | Solução Comum |
-|--------|------|-------------|---------------|
-| 0 | Success | Operação bem-sucedida | N/A |
-| 32 | No Such Object | DN não existe | Verificar DNs no .env |
-| 34 | Invalid DN Syntax | Formato de DN incorreto | Verificar vírgulas e formato |
-| 49 | Invalid Credentials | Usuário/senha incorretos | Verificar credenciais |
-| 50 | Insufficient Access | Sem permissão | Ajustar ACLs da conta |
-| 52 | Unavailable | Servidor indisponível | Verificar conectividade |
-| 53 | Unwilling to Perform | Operação não permitida | Verificar políticas do servidor |
-| 65 | Object Class Violation | Problema com objectClass | Verificar schema |
+| Code | Name | Meaning | Common Solution |
+|------|------|---------|-----------------|
+| 0 | Success | Operation successful | N/A |
+| 32 | No Such Object | DN does not exist | Check DNs in .env |
+| 34 | Invalid DN Syntax | Incorrect DN format | Check commas and format |
+| 49 | Invalid Credentials | Incorrect username/password | Check credentials |
+| 50 | Insufficient Access | No permission | Adjust account ACLs |
+| 52 | Unavailable | Server unavailable | Check connectivity |
+| 53 | Unwilling to Perform | Operation not allowed | Check server policies |
+| 65 | Object Class Violation | Issue with objectClass | Check schema |
 
 ---
 
-## 🚨 Troubleshooting Passo a Passo
+## 🚨 Step-by-Step Troubleshooting
 
-### Quando receber "LDAP Result Code 32"
+### When receiving "LDAP Result Code 32"
 
 ```bash
-# 1. Ative logs detalhados
+# 1. Enable detailed logs
 echo "LOG_LEVEL=DEBUG" >> .env
 
-# 2. Reinicie o servidor e tente fazer login
+# 2. Restart the server and try to log in
 make run
 
-# 3. Nos logs, identifique qual DN falhou:
-#    - "LDAP user search: baseDN=..." → problema no LDAP_BASE_DN
-#    - "failed to bind with service account" → problema no LDAP_BIND_DN
-#    - "Failed to check ... group membership" → problema no grupo
+# 3. In logs, identify which DN failed:
+#    - "LDAP user search: baseDN=..." → problem in LDAP_BASE_DN
+#    - "failed to bind with service account" → problem in LDAP_BIND_DN
+#    - "Failed to check ... group membership" → problem in group
 
-# 4. Teste o DN manualmente:
-ldapsearch -H ldap://servidor:389 \
-  -x -D "cn=admin,dc=exemplo,dc=com" -W \
-  -b "DN_SUSPEITO" -s base "(objectClass=*)"
+# 4. Test the DN manually:
+ldapsearch -H ldap://server:389 \
+  -x -D "cn=admin,dc=example,dc=com" -W \
+  -b "SUSPICIOUS_DN" -s base "(objectClass=*)"
 
-# 5. Se retornar erro 32, o DN está errado
-#    Se retornar sucesso, o DN existe (problema em outro lugar)
+# 5. If it returns error 32, the DN is wrong
+#    If it returns success, the DN exists (problem elsewhere)
 
-# 6. Use o script para descobrir o DN correto:
+# 6. Use the script to discover the correct DN:
 ./ldap-discovery.sh
-# Opção 1: Explorar estrutura
-# Opção 2 ou 3: Buscar o objeto correto
+# Option 1: Explore structure
+# Option 2 or 3: Search for the correct object
 
-# 7. Atualize o .env com o DN correto
+# 7. Update .env with the correct DN
 
-# 8. Reinicie e teste novamente
-```text
-
----
-
-## 📞 Precisa de Ajuda?
-
-1. ✅ Use `./ldap-discovery.sh` para explorar seu LDAP
-2. ✅ Ative `LOG_LEVEL=DEBUG` para ver detalhes
-3. ✅ Teste cada DN manualmente com `ldapsearch`
-4. ✅ Consulte `LDAP_FILTER_DISCOVERY.md` para guia completo
+# 8. Restart and test again
+```
 
 ---
 
-## ✨ Resumo
+## 📞 Need Help?
 
-**"LDAP Result Code 32: No Such Object"** = **DN não existe**
+1. ✅ Use `./ldap-discovery.sh` to explore your LDAP.
+2. ✅ Enable `LOG_LEVEL=DEBUG` to see details.
+3. ✅ Test each DN manually with `ldapsearch`.
+4. ✅ Consult `LDAP_FILTER_DISCOVERY.md` for a complete guide.
 
-**Verifique sempre:**
+---
 
-1. ✅ `LDAP_BASE_DN` - O ponto de partida das buscas
-2. ✅ `LDAP_BIND_DN` - A conta de serviço (se usada)
-3. ✅ `LDAP_ADMIN_GROUP` - O grupo de administradores
-4. ✅ `LDAP_VIEWER_GROUP` - O grupo de visualizadores
+## ✨ Summary
 
-**Use ferramentas:**
+**"LDAP Result Code 32: No Such Object"** = **DN does not exist**
 
-- `./ldap-discovery.sh` - Descoberta interativa
-- `ldapsearch` - Testes manuais
-- `LOG_LEVEL=DEBUG` - Logs detalhados
+**Always check:**
 
-🎯 Na maioria dos casos, o erro 32 é causado por um **Base DN incorreto**!
+1. ✅ `LDAP_BASE_DN` - The starting point for searches.
+2. ✅ `LDAP_BIND_DN` - The service account (if used).
+3. ✅ `LDAP_ADMIN_GROUP` - The administrators group.
+4. ✅ `LDAP_VIEWER_GROUP` - The viewers group.
+
+**Use tools:**
+
+- `./ldap-discovery.sh` - Interactive discovery.
+- `ldapsearch` - Manual tests.
+- `LOG_LEVEL=DEBUG` - Detailed logs.
+
+🎯 In most cases, error 32 is caused by an **Incorrect Base DN**!

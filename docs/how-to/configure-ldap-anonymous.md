@@ -1,114 +1,114 @@
-# Configuração LDAP Sem Service Account - Guia Prático
+# LDAP Configuration Without Service Account - Practical Guide
 
-## Quando Usar
+## When to Use
 
-A autenticação **SEM service account** funciona quando:
+Authentication **WITHOUT service account** works when:
 
-✅ Seu servidor LDAP permite anonymous bind para buscas
-✅ Usuários autenticados podem ler seus próprios grupos
-✅ Você está usando OpenLDAP com configuração padrão
-✅ Você quer uma configuração mais simples e com menos credenciais
+✅ Your LDAP server allows anonymous bind for searches.
+✅ Authenticated users can read their own groups.
+✅ You are using OpenLDAP with default configuration.
+✅ You want a simpler configuration with fewer credentials.
 
-## Quando NÃO Usar (Precisa de Service Account)
+## When NOT to Use (Needs Service Account)
 
-❌ Active Directory (geralmente requer autenticação para buscas)
-❌ LDAP com ACLs restritas que bloqueiam anonymous bind
-❌ Ambientes de produção com políticas de segurança rígidas
-❌ LDAP que não permite usuários lerem seus próprios grupos
+❌ Active Directory (usually requires authentication for searches).
+❌ LDAP with restricted ACLs that block anonymous bind.
+❌ Production environments with strict security policies.
+❌ LDAP that does not allow users to read their own groups.
 
-## Exemplo 1: OpenLDAP Básico (Sem Service Account)
+## Example 1: Basic OpenLDAP (No Service Account)
 
 ```bash
-# Configuração mínima - apenas 4 variáveis!
-LDAP_HOST=ldap.minhaempresa.com
-LDAP_BASE_DN=ou=users,dc=minhaempresa,dc=com
-LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=minhaempresa,dc=com
-LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=minhaempresa,dc=com
+# Minimal configuration - only 4 variables!
+LDAP_HOST=ldap.mycompany.com
+LDAP_BASE_DN=ou=users,dc=mycompany,dc=com
+LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=mycompany,dc=com
+LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=mycompany,dc=com
 ```
 
-### Como Funciona
+### How It Works
 
-1. **Busca de Usuário**: Anonymous bind → busca usuário por `uid`
-2. **Autenticação**: Bind com as credenciais do próprio usuário
-3. **Verificação de Grupos**: Usa a sessão autenticada do usuário para ler grupos
+1. **User Search**: Anonymous bind → search user by `uid`.
+2. **Authentication**: Bind with the user's own credentials.
+3. **Group Check**: Uses the user's authenticated session to read groups.
 
-## Exemplo 2: OpenLDAP com TLS (Sem Service Account)
+## Example 2: OpenLDAP with TLS (No Service Account)
 
 ```bash
-LDAP_HOST=ldap.minhaempresa.com
+LDAP_HOST=ldap.mycompany.com
 LDAP_PORT=636
 LDAP_USE_TLS=true
-LDAP_BASE_DN=ou=people,dc=minhaempresa,dc=com
+LDAP_BASE_DN=ou=people,dc=mycompany,dc=com
 LDAP_USER_FILTER=(uid=%s)
-LDAP_ADMIN_GROUP=cn=txlog-admins,ou=groups,dc=minhaempresa,dc=com
-LDAP_VIEWER_GROUP=cn=txlog-users,ou=groups,dc=minhaempresa,dc=com
+LDAP_ADMIN_GROUP=cn=txlog-admins,ou=groups,dc=mycompany,dc=com
+LDAP_VIEWER_GROUP=cn=txlog-users,ou=groups,dc=mycompany,dc=com
 ```
 
-## Exemplo 3: Testando Sem Service Account
+## Example 3: Testing Without Service Account
 
-### Teste 1: Verificar se anonymous bind funciona
+### Test 1: Verify if anonymous bind works
 
 ```bash
-# Tenta buscar sem autenticação
-ldapsearch -H ldap://ldap.minhaempresa.com:389 \
+# Try to search without authentication
+ldapsearch -H ldap://ldap.mycompany.com:389 \
   -x \
-  -b "ou=users,dc=minhaempresa,dc=com" \
-  "(uid=meuusuario)"
+  -b "ou=users,dc=mycompany,dc=com" \
+  "(uid=myuser)"
 ```
 
-**Se funcionar**: ✅ Pode usar sem service account
-**Se falhar com "No such object" ou "Insufficient access"**: ❌ Precisa de service account
+**If it works**: ✅ Can use without service account.
+**If fails with "No such object" or "Insufficient access"**: ❌ Needs service account.
 
-### Teste 2: Verificar leitura de grupos
+### Test 2: Verify group reading
 
 ```bash
-# Autentica como usuário e tenta ler grupo
-ldapsearch -H ldap://ldap.minhaempresa.com:389 \
-  -D "uid=meuusuario,ou=users,dc=minhaempresa,dc=com" \
-  -w "minhasenha" \
-  -b "cn=admins,ou=groups,dc=minhaempresa,dc=com" \
-  "(member=uid=meuusuario,ou=users,dc=minhaempresa,dc=com)"
+# Authenticate as user and try to read group
+ldapsearch -H ldap://ldap.mycompany.com:389 \
+  -D "uid=myuser,ou=users,dc=mycompany,dc=com" \
+  -w "mypassword" \
+  -b "cn=admins,ou=groups,dc=mycompany,dc=com" \
+  "(member=uid=myuser,ou=users,dc=mycompany,dc=com)"
 ```
 
-**Se retornar o grupo**: ✅ Verificação de grupos funcionará
-**Se falhar**: ❌ Precisa de service account com permissões de leitura
+**If returns the group**: ✅ Group verification will work.
+**If fails**: ❌ Needs service account with read permissions.
 
-## Configuração OpenLDAP para Permitir Anonymous Bind
+## OpenLDAP Configuration to Allow Anonymous Bind
 
-Se você administra o servidor OpenLDAP, configure para permitir anonymous reads:
+If you manage the OpenLDAP server, configure to allow anonymous reads:
 
 ```ldif
-# /etc/ldap/slapd.conf ou via olcAccess
+# /etc/ldap/slapd.conf or via olcAccess
 
-# Permitir anonymous read para usuários e grupos
-olcAccess: {0}to dn.subtree="ou=users,dc=minhaempresa,dc=com"
+# Allow anonymous read for users and groups
+olcAccess: {0}to dn.subtree="ou=users,dc=mycompany,dc=com"
   by anonymous read
   by * read
 
-olcAccess: {1}to dn.subtree="ou=groups,dc=minhaempresa,dc=com"
+olcAccess: {1}to dn.subtree="ou=groups,dc=mycompany,dc=com"
   by anonymous read
   by * read
 ```
 
-## Comparação: Com vs Sem Service Account
+## Comparison: With vs Without Service Account
 
-### SEM Service Account (Mais Simples)
+### WITHOUT Service Account (Simpler)
 
-**Prós:**
+**Pros:**
 
-- ✅ Configuração mais simples (menos variáveis)
-- ✅ Não precisa criar conta de serviço
-- ✅ Menos credenciais para gerenciar
-- ✅ Funciona bem com OpenLDAP padrão
+- ✅ Simpler configuration (fewer variables).
+- ✅ No need to create service account.
+- ✅ Fewer credentials to manage.
+- ✅ Works well with standard OpenLDAP.
 
-**Contras:**
+**Cons:**
 
-- ❌ Não funciona com Active Directory (geralmente)
-- ❌ Requer anonymous bind habilitado
-- ❌ Pode não atender políticas de segurança
-- ❌ Usuário precisa ter permissão para ler grupos
+- ❌ Does not work with Active Directory (usually).
+- ❌ Requires anonymous bind enabled.
+- ❌ May not meet security policies.
+- ❌ User needs permission to read groups.
 
-**Configuração:**
+**Configuration:**
 
 ```bash
 LDAP_HOST=ldap.example.com
@@ -117,145 +117,145 @@ LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
 LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 ```
 
-### COM Service Account (Mais Robusto)
+### WITH Service Account (More Robust)
 
-**Prós:**
+**Pros:**
 
-- ✅ Funciona com Active Directory
-- ✅ Funciona com LDAP restritivo
-- ✅ Mais controle sobre permissões
-- ✅ Melhor para produção
+- ✅ Works with Active Directory.
+- ✅ Works with restrictive LDAP.
+- ✅ More control over permissions.
+- ✅ Better for production.
 
-**Contras:**
+**Cons:**
 
-- ❌ Mais variáveis de configuração
-- ❌ Precisa criar e gerenciar conta de serviço
-- ❌ Mais uma senha para guardar com segurança
+- ❌ More configuration variables.
+- ❌ Need to create and manage service account.
+- ❌ One more password to store securely.
 
-**Configuração:**
+**Configuration:**
 
 ```bash
 LDAP_HOST=ldap.example.com
 LDAP_BIND_DN=cn=readonly,dc=example,dc=com
-LDAP_BIND_PASSWORD=senha_da_conta_servico
+LDAP_BIND_PASSWORD=service_account_password
 LDAP_BASE_DN=ou=users,dc=example,dc=com
 LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
 LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 ```
 
-## Fluxo de Autenticação Detalhado
+## Detailed Authentication Flow
 
-### Sem Service Account
+### Without Service Account
 
 ```text
-1. Cliente envia username + password
+1. Client sends username + password
    ↓
-2. Servidor conecta ao LDAP (anonymous)
+2. Server connects to LDAP (anonymous)
    ↓
-3. Busca usuário: ldapsearch -x "(uid=username)"
+3. Searches user: ldapsearch -x "(uid=username)"
    ↓
-4. Encontra: uid=username,ou=users,dc=example,dc=com
+4. Finds: uid=username,ou=users,dc=example,dc=com
    ↓
-5. Autentica: bind com uid=username + password do usuário
+5. Authenticates: bind with uid=username + user password
    ↓
-6. Verifica grupos usando a sessão autenticada do usuário
+6. Checks groups using user's authenticated session
    ↓
-7. Cria sessão no Txlog Server
+7. Creates session in Txlog Server
    ↓
-8. Usuário logado!
+8. User logged in!
 ```
 
-### Com Service Account
+### With Service Account
 
 ```text
-1. Cliente envia username + password
+1. Client sends username + password
    ↓
-2. Servidor conecta ao LDAP
+2. Server connects to LDAP
    ↓
-3. Bind com service account
+3. Bind with service account
    ↓
-4. Busca usuário: ldapsearch "(uid=username)"
+4. Searches user: ldapsearch "(uid=username)"
    ↓
-5. Encontra: uid=username,ou=users,dc=example,dc=com
+5. Finds: uid=username,ou=users,dc=example,dc=com
    ↓
-6. Autentica: bind com uid=username + password do usuário
+6. Authenticates: bind with uid=username + user password
    ↓
-7. Re-bind com service account
+7. Re-bind with service account
    ↓
-8. Verifica grupos usando service account
+8. Checks groups using service account
    ↓
-9. Cria sessão no Txlog Server
+9. Creates session in Txlog Server
    ↓
-10. Usuário logado!
+10. User logged in!
 ```
 
 ## Troubleshooting
 
-### Erro: "User not found"
+### Error: "User not found"
 
-**Sem service account:**
+**Without service account:**
 
 ```bash
-# Teste anonymous search
-ldapsearch -H ldap://seu-ldap:389 -x \
+# Test anonymous search
+ldapsearch -H ldap://your-ldap:389 -x \
   -b "ou=users,dc=example,dc=com" \
   "(uid=testuser)"
 ```
 
-**Solução:** Se falhar, você precisa de service account.
+**Solution:** If fails, you need a service account.
 
-### Erro: "Failed to check group membership"
+### Error: "Failed to check group membership"
 
-**Sem service account:**
+**Without service account:**
 
 ```bash
-# Teste se usuário pode ler grupos
-ldapsearch -H ldap://seu-ldap:389 \
+# Test if user can read groups
+ldapsearch -H ldap://your-ldap:389 \
   -D "uid=testuser,ou=users,dc=example,dc=com" \
-  -w "senha" \
+  -w "password" \
   -b "cn=admins,ou=groups,dc=example,dc=com"
 ```
 
-**Solução:** Se falhar, configure service account com permissão de leitura em grupos.
+**Solution:** If fails, configure service account with read permission on groups.
 
-### Erro: "Failed to connect to LDAP"
+### Error: "Failed to connect to LDAP"
 
-Mesmo problema com ou sem service account - verifique:
+Same problem with or without service account - check:
 
-- Host e porta corretos
-- Firewall liberado
-- LDAP server rodando
+- Correct host and port.
+- Firewall allowed.
+- LDAP server running.
 
-## Recomendações
+## Recommendations
 
-### Desenvolvimento/Teste
+### Development/Test
 
-✅ **Use SEM service account** se possível
+✅ **Use WITHOUT service account** if possible.
 
-- Mais rápido de configurar
-- Menos complexo
-- OpenLDAP local geralmente permite
+- Faster to configure.
+- Less complex.
+- Local OpenLDAP usually allows it.
 
-### Produção
+### Production
 
-✅ **Use COM service account**
+✅ **Use WITH service account**.
 
-- Mais seguro
-- Mais controle
-- Funciona com Active Directory
-- Atende políticas de segurança
+- More secure.
+- More control.
+- Works with Active Directory.
+- Meets security policies.
 
-### Ambientes Mistos
+### Mixed Environments
 
-✅ **Comece SEM service account**
+✅ **Start WITHOUT service account**.
 
-- Teste a conectividade básica
-- Se funcionar, decida se vai adicionar service account
-- Se não funcionar, adicione service account
+- Test basic connectivity.
+- If it works, decide if you will add service account.
+- If it doesn't work, add service account.
 
-## Exemplo Completo: Docker Compose
+## Complete Example: Docker Compose
 
-### Sem Service Account (OpenLDAP)
+### Without Service Account (OpenLDAP)
 
 ```yaml
 version: '3.8'
@@ -271,14 +271,14 @@ services:
       - PGSQL_USER=txlog
       - PGSQL_PASSWORD=txlog_password
 
-      # LDAP - SEM service account
+      # LDAP - WITHOUT service account
       - LDAP_HOST=openldap
       - LDAP_BASE_DN=ou=users,dc=example,dc=com
       - LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
       - LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 ```
 
-### Com Service Account (Active Directory)
+### With Service Account (Active Directory)
 
 ```yaml
 version: '3.8'
@@ -294,26 +294,24 @@ services:
       - PGSQL_USER=txlog
       - PGSQL_PASSWORD=txlog_password
 
-      # LDAP - COM service account
-      - LDAP_HOST=ad.empresa.local
-      - LDAP_BIND_DN=CN=SvcTxlog,OU=ServiceAccounts,DC=empresa,DC=local
-      - LDAP_BIND_PASSWORD=senha_servico
-      - LDAP_BASE_DN=CN=Users,DC=empresa,DC=local
+      # LDAP - WITH service account
+      - LDAP_HOST=ad.company.local
+      - LDAP_BIND_DN=CN=SvcTxlog,OU=ServiceAccounts,DC=company,DC=local
+      - LDAP_BIND_PASSWORD=service_password
+      - LDAP_BASE_DN=CN=Users,DC=company,DC=local
       - LDAP_USER_FILTER=(sAMAccountName=%s)
-      - LDAP_ADMIN_GROUP=CN=TxlogAdmins,OU=Groups,DC=empresa,DC=local
-      - LDAP_VIEWER_GROUP=CN=TxlogUsers,OU=Groups,DC=empresa,DC=local
+      - LDAP_ADMIN_GROUP=CN=TxlogAdmins,OU=Groups,DC=company,DC=local
+      - LDAP_VIEWER_GROUP=CN=TxlogUsers,OU=Groups,DC=company,DC=local
 ```
 
-## Conclusão
+## Conclusion
 
-A autenticação **SEM service account** é:
+Authentication **WITHOUT service account** is:
 
-- ✅ **Mais simples** de configurar
-- ✅ **Perfeitamente funcional** para OpenLDAP
-- ✅ **Ideal para desenvolvimento** e ambientes menos restritivos
-- ❌ **Não funciona** com Active Directory típico
-- ❌ **Pode não atender** políticas de segurança corporativas
+- ✅ **Simpler** to configure.
+- ✅ **Perfectly functional** for OpenLDAP.
+- ✅ **Ideal for development** and less restrictive environments.
+- ❌ **Does not work** with typical Active Directory.
+- ❌ **May not meet** corporate security policies.
 
-**Recomendação:** Comece sem service account. Se funcionar e atender suas
-necessidades de segurança, ótimo! Se não funcionar ou se você precisa de mais
-controle, adicione o service account.
+**Recommendation:** Start without service account. If it works and meets your security needs, great! If it doesn't work or if you need more control, add the service account.

@@ -1,18 +1,34 @@
 package logger
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"strings"
+
+	"go.opentelemetry.io/otel/log"
+	sdklog "go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/trace"
 )
 
-var logger *slog.Logger
+var defaultLogger *Logger
+
+// Logger encapsulates the logging state
+type Logger struct {
+	slogger    *slog.Logger
+	otelLogger log.Logger
+	isInit     bool
+}
 
 // InitLogger initializes a structured logger (slog) with a configurable log
 // level. The log level can be set through the LOG_LEVEL environment variable
 // with values: "DEBUG", "INFO", "WARN", or "ERROR". If LOG_LEVEL is not set or
 // has an invalid value, it defaults to INFO level. The logger outputs to stdout
 // using text format.
+//
+// This logger is enhanced with OpenTelemetry integration. If a LoggerProvider
+// is available (configured via telemetry package), logs will also be sent to
+// the OpenTelemetry backend with trace context correlation.
 func InitLogger() {
 	levelMap := map[string]slog.Level{
 		"DEBUG": slog.LevelDebug,
@@ -27,38 +43,95 @@ func InitLogger() {
 		level = slog.LevelInfo
 	}
 
-	logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
+	defaultLogger = &Logger{
+		slogger: slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level})),
+		isInit:  true,
+	}
 }
 
-// Error logs an error message using the logger instance. It accepts a string
-// parameter that contains the message to be logged at the ERROR level.
+// SetOTelLoggerProvider configures the OpenTelemetry logger provider
+// This should be called after InitTelemetry() to enable log export
+func SetOTelLoggerProvider(provider *sdklog.LoggerProvider) {
+	if provider != nil && defaultLogger != nil {
+		defaultLogger.otelLogger = provider.Logger("txlog-server")
+	}
+}
+
+// Error logs an error message using the logger instance.
 func Error(msg string) {
-	logger.Error(msg)
+	ErrorCtx(context.Background(), msg)
 }
 
-// Info logs a message at the info level. It serves as a convenience wrapper
-// around the underlying logger's Info method.
-//
-// Parameters:
-//   - msg: The message string to be logged
+// ErrorCtx logs an error message with context.
+func ErrorCtx(ctx context.Context, msg string) {
+	if defaultLogger == nil || !defaultLogger.isInit {
+		return
+	}
+	defaultLogger.slogger.ErrorContext(ctx, msg)
+	defaultLogger.emitOTelLog(ctx, log.SeverityError, msg)
+}
+
+// Info logs a message at the info level.
 func Info(msg string) {
-	logger.Info(msg)
+	InfoCtx(context.Background(), msg)
 }
 
-// Debug logs a debug-level message. It forwards the message to the underlying
-// logger implementation. This is useful for detailed debugging information that
-// should typically only be enabled during development.
-//
-// Parameters:
-//   - msg: The debug message to be logged
+// InfoCtx logs a message at the info level with context.
+func InfoCtx(ctx context.Context, msg string) {
+	if defaultLogger == nil || !defaultLogger.isInit {
+		return
+	}
+	defaultLogger.slogger.InfoContext(ctx, msg)
+	defaultLogger.emitOTelLog(ctx, log.SeverityInfo, msg)
+}
+
+// Debug logs a debug-level message.
 func Debug(msg string) {
-	logger.Debug(msg)
+	DebugCtx(context.Background(), msg)
 }
 
-// Warn logs a message at the WARN level. It provides a convenient way to log
-// warnings that should be noted but don't necessarily indicate an error
-// condition. The message is passed directly to the underlying logger
-// implementation.
+// DebugCtx logs a debug-level message with context.
+func DebugCtx(ctx context.Context, msg string) {
+	if defaultLogger == nil || !defaultLogger.isInit {
+		return
+	}
+	defaultLogger.slogger.DebugContext(ctx, msg)
+	defaultLogger.emitOTelLog(ctx, log.SeverityDebug, msg)
+}
+
+// Warn logs a message at the WARN level.
 func Warn(msg string) {
-	logger.Warn(msg)
+	WarnCtx(context.Background(), msg)
+}
+
+// WarnCtx logs a message at the WARN level with context.
+func WarnCtx(ctx context.Context, msg string) {
+	if defaultLogger == nil || !defaultLogger.isInit {
+		return
+	}
+	defaultLogger.slogger.WarnContext(ctx, msg)
+	defaultLogger.emitOTelLog(ctx, log.SeverityWarn, msg)
+}
+
+// emitOTelLog sends a log record to OpenTelemetry if configured
+// It automatically includes trace context if available
+func (l *Logger) emitOTelLog(ctx context.Context, severity log.Severity, message string) {
+	if l.otelLogger == nil {
+		return
+	}
+
+	var record log.Record
+	record.SetSeverity(severity)
+	record.SetBody(log.StringValue(message))
+
+	// Add trace context if available
+	spanContext := trace.SpanContextFromContext(ctx)
+	if spanContext.IsValid() {
+		record.AddAttributes(
+			log.String("trace_id", spanContext.TraceID().String()),
+			log.String("span_id", spanContext.SpanID().String()),
+		)
+	}
+
+	l.otelLogger.Emit(ctx, record)
 }

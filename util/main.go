@@ -139,3 +139,11 @@ func isAlphanumeric(r rune) bool {
 		(r >= 'A' && r <= 'Z') ||
 		(r >= 'a' && r <= 'z')
 }
+
+// GetEnvOrDefault returns the value of an environment variable or a default value
+func GetEnvOrDefault(key, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
+}

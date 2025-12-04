@@ -17,6 +17,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Changed
+
+- Update Go version to 1.25.5.
+- Change version definition to `.version` file.
+- Overhaul and expand documentation with new tutorials, how-to guides, and reference material.
+- Translate LDAP documentation from Portuguese to English.
+- Update copyright year range in LICENSE.
+- Bump `github.com/golang-migrate/migrate/v4`.
+- Bump `github.com/coreos/go-oidc/v3` from 3.16.0 to 3.17.0.
+- Bump `github.com/tavsec/gin-healthcheck`.
+- Remove 'New' badge from Admin navigation link.
+
 ## [1.18.3] - 2025-11-19
 
 ### Added

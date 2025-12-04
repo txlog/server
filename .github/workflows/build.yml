@@ -21,10 +21,12 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v6
       with:
-        go-version: '1.25.4'
+        go-version: '1.25.5'
 
     - name: Compile
-      run: CGO_ENABLED=0 GOOS="linux" GOARCH="amd64" go build -trimpath -buildvcs=false -ldflags "-s -w" -o bin/txlog-server
+      run: |
+        VERSION=$(cat .version)
+        CGO_ENABLED=0 GOOS="linux" GOARCH="amd64" go build -trimpath -buildvcs=false -ldflags="-s -w -extldflags=-static -X 'github.com/txlog/server/version.SemVer=${VERSION}'" -o bin/txlog-server
 
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v3

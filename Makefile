@@ -22,9 +22,11 @@ fmt:
 vet:
 	@go vet ./...
 
+VERSION := $(shell cat .version)
+
 .PHONY: build
 build:
-		@CGO_ENABLED=0 GOOS="linux" GOARCH="amd64" go build -ldflags="-s -w -extldflags=-static" -trimpath -o bin/txlog-server
+	@CGO_ENABLED=0 GOOS="linux" GOARCH="amd64" go build -ldflags="-s -w -extldflags=-static -X 'github.com/txlog/server/version.SemVer=$(VERSION)'" -trimpath -o bin/txlog-server
 
 .PHONY: run
 run:

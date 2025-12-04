@@ -127,12 +127,12 @@ To make changes on this project, you need:
 ### Golang
 
 ```bash
-wget https://go.dev/dl/go1.25.4.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.25.5.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.25.4.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.25.5.linux-amd64.tar.gz
 echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 source ~/.bashrc
-rm go1.25.4.linux-amd64.tar.gz
+rm go1.25.5.linux-amd64.tar.gz
 ```
 
 ### Swaggo

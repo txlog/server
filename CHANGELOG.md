@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
-## [Unreleased]
+## [1.18.4] - 2025-12-04
 
 ### Changed
 
@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `github.com/golang-migrate/migrate/v4`.
 - Bump `github.com/coreos/go-oidc/v3` from 3.16.0 to 3.17.0.
 - Bump `github.com/tavsec/gin-healthcheck`.
+
+### Removed
+
 - Remove 'New' badge from Admin navigation link.
 
 ## [1.18.3] - 2025-11-19

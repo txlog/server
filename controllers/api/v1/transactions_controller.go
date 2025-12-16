@@ -168,12 +168,12 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		body := models.Transaction{}
 		data, err := c.GetRawData()
 		if err != nil {
-			c.AbortWithStatusJSON(400, "Invalid transaction data")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid transaction data")
 			return
 		}
 		err = json.Unmarshal(data, &body)
 		if err != nil {
-			c.AbortWithStatusJSON(400, "Invalid JSON input")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid JSON input")
 			logger.Error("Invalid JSON input: " + err.Error())
 			return
 		}
@@ -195,7 +195,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		tx, err := database.Begin()
 		if err != nil {
 			logger.Error("Error beginning transaction: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
 
@@ -225,7 +225,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error inserting transaction: " + err.Error())
-			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -233,7 +233,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error checking rows affected: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
 
@@ -265,7 +265,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			if err != nil {
 				tx.Rollback()
 				logger.Error("Error inserting transaction item: " + err.Error())
-				c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
 		}
@@ -280,7 +280,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error upserting asset:" + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": "Failed to update asset registry"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to update asset registry"})
 			return
 		}
 
@@ -288,7 +288,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()
 			logger.Error("Error committing transaction: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
 

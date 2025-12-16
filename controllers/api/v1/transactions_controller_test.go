@@ -229,3 +229,234 @@ func TestGetTransactionIDs_FiltersCorrectly(t *testing.T) {
 		t.Errorf("Expected transaction ID 100, got %d", response[0])
 	}
 }
+
+// Tests for POST /v1/transactions
+
+func cleanupPostTransactionsTestData(t *testing.T, db *sql.DB) {
+	_, err := db.Exec("DELETE FROM transaction_items WHERE machine_id LIKE 'post-tx-test-%'")
+	if err != nil {
+		t.Logf("Warning: Failed to cleanup transaction_items: %v", err)
+	}
+	_, err = db.Exec("DELETE FROM transactions WHERE machine_id LIKE 'post-tx-test-%'")
+	if err != nil {
+		t.Logf("Warning: Failed to cleanup transactions: %v", err)
+	}
+	_, err = db.Exec("DELETE FROM assets WHERE machine_id LIKE 'post-tx-test-%'")
+	if err != nil {
+		t.Logf("Warning: Failed to cleanup assets: %v", err)
+	}
+}
+
+func TestPostTransactions_InvalidRawData(t *testing.T) {
+	db := setupTransactionsTestDB(t)
+	defer db.Close()
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.POST("/v1/transactions", PostTransactions(db))
+
+	req, _ := http.NewRequest("POST", "/v1/transactions", nil)
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	// Empty body results in empty JSON unmarshal error
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+func TestPostTransactions_InvalidJSON(t *testing.T) {
+	db := setupTransactionsTestDB(t)
+	defer db.Close()
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.POST("/v1/transactions", PostTransactions(db))
+
+	req, _ := http.NewRequest("POST", "/v1/transactions", bytes.NewBuffer([]byte("invalid json")))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+func TestPostTransactions_CreatesTransaction(t *testing.T) {
+	db := setupTransactionsTestDB(t)
+	defer db.Close()
+	defer cleanupPostTransactionsTestData(t, db)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.POST("/v1/transactions", PostTransactions(db))
+
+	machineID := "post-tx-test-machine-001"
+	hostname := "post-tx-test-hostname"
+	transactionID := "1001"
+
+	body := models.Transaction{
+		TransactionID:  transactionID,
+		MachineID:      machineID,
+		Hostname:       hostname,
+		Actions:        "Install",
+		Altered:        "1",
+		User:           "root",
+		ReturnCode:     "0",
+		ReleaseVersion: "8.5",
+		CommandLine:    "dnf install test-package",
+		Comment:        "",
+		Items: []models.TransactionItem{
+			{
+				Action:  "Install",
+				Name:    "test-package",
+				Version: "1.0.0",
+				Release: "1.el8",
+				Epoch:   "0",
+				Arch:    "x86_64",
+				Repo:    "baseos",
+			},
+		},
+	}
+	jsonBody, _ := json.Marshal(body)
+
+	req, _ := http.NewRequest("POST", "/v1/transactions", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status %d, got %d. Body: %s", http.StatusOK, w.Code, w.Body.String())
+	}
+
+	// Verify transaction was created
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM transactions WHERE machine_id = $1 AND transaction_id = $2", machineID, transactionID).Scan(&count)
+	if err != nil {
+		t.Fatalf("Failed to query transactions: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("Expected 1 transaction, got %d", count)
+	}
+
+	// Verify items were created
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_items WHERE machine_id = $1 AND transaction_id = $2", machineID, transactionID).Scan(&count)
+	if err != nil {
+		t.Fatalf("Failed to query transaction_items: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("Expected 1 transaction item, got %d", count)
+	}
+}
+
+func TestPostTransactions_DuplicateTransaction(t *testing.T) {
+	db := setupTransactionsTestDB(t)
+	defer db.Close()
+	defer cleanupPostTransactionsTestData(t, db)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.POST("/v1/transactions", PostTransactions(db))
+
+	machineID := "post-tx-test-machine-002"
+	hostname := "post-tx-test-hostname-dup"
+	transactionID := "1002"
+
+	body := models.Transaction{
+		TransactionID:  transactionID,
+		MachineID:      machineID,
+		Hostname:       hostname,
+		Actions:        "Install",
+		Altered:        "1",
+		User:           "root",
+		ReturnCode:     "0",
+		ReleaseVersion: "8.5",
+		CommandLine:    "dnf install test-package",
+	}
+	jsonBody, _ := json.Marshal(body)
+
+	// First request - should succeed
+	req1, _ := http.NewRequest("POST", "/v1/transactions", bytes.NewBuffer(jsonBody))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	router.ServeHTTP(w1, req1)
+
+	if w1.Code != http.StatusOK {
+		t.Fatalf("First request failed with status %d", w1.Code)
+	}
+
+	// Second request with same transaction_id and machine_id - should return "already exists"
+	req2, _ := http.NewRequest("POST", "/v1/transactions", bytes.NewBuffer(jsonBody))
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req2)
+
+	if w2.Code != http.StatusOK {
+		t.Errorf("Expected status %d, got %d", http.StatusOK, w2.Code)
+	}
+
+	var response map[string]string
+	err := json.Unmarshal(w2.Body.Bytes(), &response)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if response["message"] != "Transaction already exists" {
+		t.Errorf("Expected 'Transaction already exists' message, got '%s'", response["message"])
+	}
+}
+
+func TestPostTransactions_WithMultipleItems(t *testing.T) {
+	db := setupTransactionsTestDB(t)
+	defer db.Close()
+	defer cleanupPostTransactionsTestData(t, db)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.POST("/v1/transactions", PostTransactions(db))
+
+	machineID := "post-tx-test-machine-003"
+	hostname := "post-tx-test-hostname-multi"
+	transactionID := "1003"
+
+	body := models.Transaction{
+		TransactionID:  transactionID,
+		MachineID:      machineID,
+		Hostname:       hostname,
+		Actions:        "Install",
+		Altered:        "5",
+		User:           "root",
+		ReturnCode:     "0",
+		ReleaseVersion: "8.5",
+		CommandLine:    "dnf install pkg1 pkg2 pkg3 pkg4 pkg5",
+		Items: []models.TransactionItem{
+			{Action: "Install", Name: "pkg1", Version: "1.0", Release: "1.el8", Epoch: "0", Arch: "x86_64", Repo: "baseos"},
+			{Action: "Install", Name: "pkg2", Version: "2.0", Release: "1.el8", Epoch: "0", Arch: "x86_64", Repo: "baseos"},
+			{Action: "Install", Name: "pkg3", Version: "3.0", Release: "1.el8", Epoch: "0", Arch: "x86_64", Repo: "appstream"},
+			{Action: "Install", Name: "pkg4", Version: "4.0", Release: "1.el8", Epoch: "0", Arch: "noarch", Repo: "appstream"},
+			{Action: "Install", Name: "pkg5", Version: "5.0", Release: "1.el8", Epoch: "0", Arch: "x86_64", Repo: "epel"},
+		},
+	}
+	jsonBody, _ := json.Marshal(body)
+
+	req, _ := http.NewRequest("POST", "/v1/transactions", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected status %d, got %d. Body: %s", http.StatusOK, w.Code, w.Body.String())
+	}
+
+	// Verify all items were created
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM transaction_items WHERE machine_id = $1 AND transaction_id = $2", machineID, transactionID).Scan(&count)
+	if err != nil {
+		t.Fatalf("Failed to query transaction_items: %v", err)
+	}
+	if count != 5 {
+		t.Errorf("Expected 5 transaction items, got %d", count)
+	}
+}

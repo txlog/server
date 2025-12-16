@@ -85,7 +85,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying assets: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		defer rows.Close()
@@ -99,7 +99,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 			)
 			if err != nil {
 				logger.Error("Error iterating assets: " + err.Error())
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 			machines = append(machines, machine)
@@ -140,7 +140,7 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying assets that require a restart: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		defer rows.Close()
@@ -154,7 +154,7 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 			)
 			if err != nil {
 				logger.Error("Error iterating assets: " + err.Error())
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 			machines = append(machines, machine)
@@ -230,7 +230,7 @@ func GetMachinesWeb(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying assets: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		defer rows.Close()
@@ -244,7 +244,7 @@ func GetMachinesWeb(database *sql.DB) gin.HandlerFunc {
 			)
 			if err != nil {
 				logger.Error("Error iterating assets: " + err.Error())
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 			machines = append(machines, machine)
@@ -259,7 +259,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 		hostname := c.Query("hostname")
 
 		if hostname == "" {
-			c.AbortWithStatusJSON(400, "hostname is required")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "hostname is required")
 			return
 		}
 
@@ -280,7 +280,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying machine_id: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		defer rows.Close()
@@ -296,7 +296,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 			)
 			if err != nil {
 				logger.Error("Error iterating machine_id: " + err.Error())
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 			if beginTime.Valid {

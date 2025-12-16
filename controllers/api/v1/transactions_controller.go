@@ -27,12 +27,12 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 		body := models.Transaction{}
 		data, err := c.GetRawData()
 		if err != nil {
-			c.AbortWithStatusJSON(400, "Invalid transaction data")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid transaction data")
 			return
 		}
 		err = json.Unmarshal(data, &body)
 		if err != nil {
-			c.AbortWithStatusJSON(400, "Invalid JSON input")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid JSON input")
 			logger.Error("Invalid JSON input: " + err.Error())
 			return
 		}
@@ -48,26 +48,27 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 		)
 		if err != nil {
 			logger.Error("Couldn't get saved transaction_ids for this host: " + err.Error())
-			c.AbortWithStatusJSON(400, "Couldn't get saved transaction_ids for this host.")
-		} else {
-			var transactions []int
-			for rows.Next() {
-				var id int
-				if err := rows.Scan(&id); err != nil {
-					logger.Error("Error scanning transaction_ids: " + err.Error())
-					c.AbortWithStatusJSON(500, "Error scanning transaction_ids")
-					return
-				}
-				transactions = append(transactions, id)
-			}
-			defer rows.Close()
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Couldn't get saved transaction_ids for this host.")
+			return
+		}
+		defer rows.Close()
 
-			if transactions == nil {
-				c.JSON(http.StatusOK, []int{})
+		var transactions []int
+		for rows.Next() {
+			var id int
+			if err := rows.Scan(&id); err != nil {
+				logger.Error("Error scanning transaction_ids: " + err.Error())
+				c.AbortWithStatusJSON(http.StatusInternalServerError, "Error scanning transaction_ids")
 				return
 			}
-			c.JSON(http.StatusOK, transactions)
+			transactions = append(transactions, id)
 		}
+
+		if transactions == nil {
+			c.JSON(http.StatusOK, []int{})
+			return
+		}
+		c.JSON(http.StatusOK, transactions)
 	}
 }
 
@@ -87,7 +88,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 		machineID := c.Query("machine_id")
 
 		if machineID == "" {
-			c.AbortWithStatusJSON(400, "machine_id is required")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "machine_id is required")
 			return
 		}
 
@@ -105,7 +106,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying transactions: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		defer rows.Close()
@@ -132,7 +133,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 
 			if err != nil {
 				logger.Error("Error iterating transactions: " + err.Error())
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 			if beginTime.Valid {

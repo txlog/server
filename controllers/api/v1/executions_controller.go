@@ -104,7 +104,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			now := executedAt.Time
 			timestamp = &now
 		}
-		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, needsRestarting, restartingReason)
+		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, needsRestarting, restartingReason, body.OS)
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error upserting asset:" + err.Error())

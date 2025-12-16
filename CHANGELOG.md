@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   data refreshed every 5 minutes.
 - Add scheduled job to refresh `mv_package_listing` materialized view every
   5 minutes for near real-time data with dramatically improved query performance.
+- Optimize `/assets` endpoint performance by storing the `os` field directly in
+  the `assets` table. Previously, each request executed expensive `LEFT JOIN
+  LATERAL` subqueries to fetch the OS from the latest execution for each asset;
+  now uses a simple direct query on the `assets` table.
+- Update `UpsertAsset` to save the OS with each execution, ensuring the assets
+  table always has the latest OS information in real-time.
 
 ## [1.18.5] - 2025-12-15
 

@@ -57,6 +57,9 @@ func latestVersionJob() {
 // Currently refreshes:
 //   - mv_package_listing: Pre-computed package listing data for the /packages endpoint
 //
+// Note: The /assets endpoint no longer uses a materialized view since the os column
+// is now stored directly in the assets table and updated in real-time.
+//
 // This job should run frequently (every 5 minutes) to keep the data relatively fresh
 // while avoiding the expensive CTEs on each request.
 func refreshMaterializedViewsJob() {

@@ -49,7 +49,7 @@ func TestFullAssetLifecycle(t *testing.T) {
 		defer tx.Rollback()
 
 		timestamp := time.Now()
-		err := am.UpsertAsset(tx, hostname, machineID1, timestamp, sql.NullBool{}, sql.NullString{})
+		err := am.UpsertAsset(tx, hostname, machineID1, timestamp, sql.NullBool{}, sql.NullString{}, "")
 		if err != nil {
 			t.Fatalf("Failed to create asset: %v", err)
 		}
@@ -78,7 +78,7 @@ func TestFullAssetLifecycle(t *testing.T) {
 		defer tx.Rollback()
 
 		timestamp := time.Now()
-		err := am.UpsertAsset(tx, hostname, machineID2, timestamp, sql.NullBool{}, sql.NullString{})
+		err := am.UpsertAsset(tx, hostname, machineID2, timestamp, sql.NullBool{}, sql.NullString{}, "")
 		if err != nil {
 			t.Fatalf("Failed to create replacement asset: %v", err)
 		}

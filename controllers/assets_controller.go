@@ -39,9 +39,9 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		restart := c.Query("restart")
 		inactive := c.Query("inactive")
 
-		searchType := "a.hostname"
+		searchType := "hostname"
 		if len(search) == 32 && !util.ContainsSpecialCharacters(search) {
-			searchType = "a.machine_id"
+			searchType = "machine_id"
 		}
 
 		limit := 100
@@ -55,51 +55,17 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		offset := (page - 1) * limit
 
 		var total int
-		var countQuery string
 		var queryArgs []interface{}
 
-		activeFilter := "a.is_active = TRUE"
+		activeFilter := "is_active = TRUE"
 		// When searching by machine_id, include both active and inactive assets.
 		// This allows users to view historical assets by their unique machine ID,
 		// even if the asset is no longer active.
-		if searchType == "a.machine_id" {
+		if searchType == "machine_id" {
 			activeFilter = "1=1"
 		}
 
-		// Note: activeFilter is safe to concatenate into SQL as it only contains
-		// two hardcoded values ("a.is_active = TRUE" or "1=1"), never user input.
-		baseCountQuery := `
-			SELECT COUNT(DISTINCT a.hostname)
-			FROM assets a
-			LEFT JOIN LATERAL (
-				SELECT os
-				FROM executions
-				WHERE machine_id = a.machine_id AND hostname = a.hostname
-				ORDER BY executed_at DESC
-				LIMIT 1
-			) e ON true
-			WHERE ` + activeFilter + `
-		`
-
-		baseSelectQuery := `
-			SELECT
-				a.asset_id as execution_id,
-				a.hostname,
-				a.last_seen as executed_at,
-				a.machine_id,
-				e.os,
-				a.needs_restarting
-			FROM assets a
-			LEFT JOIN LATERAL (
-				SELECT os
-				FROM executions
-				WHERE machine_id = a.machine_id AND hostname = a.hostname
-				ORDER BY executed_at DESC
-				LIMIT 1
-			) e ON true
-			WHERE ` + activeFilter + `
-		`
-
+		// Build WHERE clause for filtering
 		whereClause := ""
 		paramNum := 1
 
@@ -110,16 +76,20 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if restart == "true" {
-			whereClause += " AND a.needs_restarting IS TRUE"
+			whereClause += " AND needs_restarting IS TRUE"
 		}
 
 		if inactive == "true" {
-			whereClause += " AND a.last_seen < NOW() - INTERVAL '15 days'"
+			whereClause += " AND last_seen < NOW() - INTERVAL '15 days'"
 		}
 
-		countQuery = baseCountQuery + whereClause
-		err = database.QueryRow(countQuery, queryArgs...).Scan(&total)
+		// Count query - direct on assets table (no LATERAL JOIN needed since os is now stored in assets)
+		countQuery := `
+			SELECT COUNT(DISTINCT hostname)
+			FROM assets
+			WHERE ` + activeFilter + whereClause
 
+		err = database.QueryRow(countQuery, queryArgs...).Scan(&total)
 		if err != nil {
 			logger.Error("Error counting assets:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
@@ -130,8 +100,19 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		totalPages := (total + limit - 1) / limit
 
-		selectQuery := baseSelectQuery + whereClause + `
-			ORDER BY a.hostname
+		// Main select query - direct on assets table
+		// The os column is now stored directly in assets, updated on each execution
+		selectQuery := `
+			SELECT
+				asset_id,
+				hostname,
+				last_seen,
+				machine_id,
+				os,
+				needs_restarting
+			FROM assets
+			WHERE ` + activeFilter + whereClause + `
+			ORDER BY hostname
 			LIMIT $` + strconv.Itoa(paramNum) + ` OFFSET $` + strconv.Itoa(paramNum+1)
 
 		queryArgs = append(queryArgs, limit, offset)

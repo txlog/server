@@ -13,9 +13,6 @@ import (
 
 func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var rows *sql.Rows
-		var err error
-
 		search := c.Query("search")
 
 		limit := 100
@@ -28,14 +25,127 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
 		}
 		offset := (page - 1) * limit
 
-		// First, get total package count
-		var total int
-		var query string
+		// Try to use the materialized view first (much faster)
+		packageNames, total, err := getPackagesFromMaterializedView(database, search, limit, offset)
+		if err != nil {
+			// Fallback to direct query if materialized view doesn't exist
+			logger.Debug("Using fallback query for packages: " + err.Error())
+			packageNames, total, err = getPackagesFromDirectQuery(database, search, limit, offset)
+			if err != nil {
+				logger.Error("Error listing packages:" + err.Error())
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"error": err.Error(),
+				})
+				return
+			}
+		}
 
-		if search != "" {
-			query = `
+		totalPages := (total + limit - 1) / limit
+
+		c.HTML(http.StatusOK, "packages.html", gin.H{
+			"Context":      c,
+			"title":        "Packages",
+			"packageNames": packageNames,
+			"page":         page,
+			"totalPages":   totalPages,
+			"totalRecords": total,
+			"limit":        limit,
+			"offset":       offset,
+			"search":       search,
+		})
+	}
+}
+
+// getPackagesFromMaterializedView queries the pre-computed mv_package_listing view
+// for fast package listing. Returns packages, total count, and any error.
+func getPackagesFromMaterializedView(database *sql.DB, search string, limit, offset int) ([]models.PackageListing, int, error) {
+	var rows *sql.Rows
+	var err error
+
+	if search != "" {
+		// Use GIN index for fast text search
+		query := `
+		SELECT
+			package,
+			version,
+			release,
+			arch,
+			repo,
+			other_versions_count,
+			machine_count,
+			COUNT(*) OVER() as total_count
+		FROM mv_package_listing
+		WHERE package ILIKE $1
+		ORDER BY package
+		LIMIT $2 OFFSET $3`
+		rows, err = database.Query(query, util.FormatSearchTerm(search), limit, offset)
+	} else {
+		query := `
+		SELECT
+			package,
+			version,
+			release,
+			arch,
+			repo,
+			other_versions_count,
+			machine_count,
+			COUNT(*) OVER() as total_count
+		FROM mv_package_listing
+		ORDER BY package
+		LIMIT $1 OFFSET $2`
+		rows, err = database.Query(query, limit, offset)
+	}
+
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var total int
+	packageNames := []models.PackageListing{}
+	for rows.Next() {
+		var packageName models.PackageListing
+		err := rows.Scan(
+			&packageName.Package,
+			&packageName.Version,
+			&packageName.Release,
+			&packageName.Arch,
+			&packageName.Repo,
+			&packageName.TotalVersions,
+			&packageName.MachineCount,
+			&total,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		packageNames = append(packageNames, packageName)
+	}
+
+	// If no results but no error, we still need to get total for empty result
+	if len(packageNames) == 0 && search != "" {
+		total = 0
+	} else if len(packageNames) == 0 {
+		// Get total count when offset exceeds available data
+		err := database.QueryRow(`SELECT COUNT(*) FROM mv_package_listing`).Scan(&total)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+
+	return packageNames, total, nil
+}
+
+// getPackagesFromDirectQuery is the fallback method that uses the original complex query
+// when the materialized view is not available.
+func getPackagesFromDirectQuery(database *sql.DB, search string, limit, offset int) ([]models.PackageListing, int, error) {
+	var total int
+	var query string
+	var err error
+
+	// First, get total package count
+	if search != "" {
+		query = `
         WITH RankedItems AS (
-            -- This part identifies the most recent version/release for each package
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
                 ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
@@ -43,7 +153,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 public.transaction_items
         ),
         VersionCounts AS (
-            -- This part counts how many unique version/release combinations each package has
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
                 COUNT(*) as total_versions
@@ -55,7 +164,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 package
         ),
         MachineCounts AS (
-            -- This part counts on how many unique machines each package appears (active assets only)
             SELECT
                 REPLACE(ti.package, 'Change ', '') AS package,
                 COUNT(DISTINCT ti.machine_id) as machine_count
@@ -68,7 +176,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
             GROUP BY
                 package
         )
-        -- Count the rows that would be returned by the previous query
         SELECT
             COUNT(*) AS returned_records_count
         FROM
@@ -81,11 +188,10 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
             ri.rn = 1
             AND ri.package ILIKE $1;
       `
-			err = database.QueryRow(query, util.FormatSearchTerm(search)).Scan(&total)
-		} else {
-			query = `
+		err = database.QueryRow(query, util.FormatSearchTerm(search)).Scan(&total)
+	} else {
+		query = `
         WITH RankedItems AS (
-            -- This part identifies the most recent version/release for each package
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
                 ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
@@ -93,7 +199,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 public.transaction_items
         ),
         VersionCounts AS (
-            -- This part counts how many unique version/release combinations each package has
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
                 COUNT(*) as total_versions
@@ -105,7 +210,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 package
         ),
         MachineCounts AS (
-            -- This part counts on how many unique machines each package appears (active assets only)
             SELECT
                 REPLACE(ti.package, 'Change ', '') AS package,
                 COUNT(DISTINCT ti.machine_id) as machine_count
@@ -118,7 +222,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
             GROUP BY
                 package
         )
-        -- Count the rows that would be returned by the previous query
         SELECT
             COUNT(*) AS returned_records_count
         FROM
@@ -130,23 +233,18 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
         WHERE
             ri.rn = 1;
       `
-			err = database.QueryRow(query).Scan(&total)
-		}
+		err = database.QueryRow(query).Scan(&total)
+	}
 
-		if err != nil {
-			logger.Error("Error counting packages:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+	if err != nil {
+		return nil, 0, err
+	}
 
-		totalPages := (total + limit - 1) / limit
+	var rows *sql.Rows
 
-		if search != "" {
-			query = `
+	if search != "" {
+		query = `
         WITH RankedItems AS (
-            -- This part identifies the most recent version/release for each package
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
                 version,
@@ -158,7 +256,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 public.transaction_items
         ),
         VersionCounts AS (
-            -- This part counts how many unique version/release combinations each package has
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
                 COUNT(*) as total_versions
@@ -170,7 +267,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 package
         ),
         MachineCounts AS (
-            -- This part counts on how many unique machines each package appears (active assets only)
             SELECT
                 REPLACE(ti.package, 'Change ', '') AS package,
                 COUNT(DISTINCT ti.machine_id) as machine_count
@@ -183,7 +279,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
             GROUP BY
                 package
         )
-        -- The final query joins all results and displays them
         SELECT
             ri.package,
             ri.version,
@@ -205,11 +300,10 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
             ri.package
         LIMIT $1 OFFSET $2
       `
-			rows, err = database.Query(query, limit, offset, util.FormatSearchTerm(search))
-		} else {
-			query = `
+		rows, err = database.Query(query, limit, offset, util.FormatSearchTerm(search))
+	} else {
+		query = `
         WITH RankedItems AS (
-            -- This part identifies the most recent version/release for each package
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
                 version,
@@ -221,7 +315,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 public.transaction_items
         ),
         VersionCounts AS (
-            -- This part counts how many unique version/release combinations each package has
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
                 COUNT(*) as total_versions
@@ -233,7 +326,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
                 package
         ),
         MachineCounts AS (
-            -- This part counts on how many unique machines each package appears (active assets only)
             SELECT
                 ti.package,
                 COUNT(DISTINCT ti.machine_id) as machine_count
@@ -246,7 +338,6 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
             GROUP BY
                 package
         )
-        -- The final query joins all results and displays them
         SELECT
             ri.package,
             ri.version,
@@ -267,52 +358,33 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
             ri.package
         LIMIT $1 OFFSET $2
       `
-			rows, err = database.Query(query, limit, offset)
-		}
-
-		if err != nil {
-			logger.Error("Error listing packages:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
-		defer rows.Close()
-
-		packageNames := []models.PackageListing{}
-		for rows.Next() {
-			var packageName models.PackageListing
-			err := rows.Scan(
-				&packageName.Package,
-				&packageName.Version,
-				&packageName.Release,
-				&packageName.Arch,
-				&packageName.Repo,
-				&packageName.TotalVersions,
-				&packageName.MachineCount,
-			)
-			if err != nil {
-				logger.Error("Error iterating packages:" + err.Error())
-				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-					"error": err.Error(),
-				})
-				return
-			}
-			packageNames = append(packageNames, packageName)
-		}
-
-		c.HTML(http.StatusOK, "packages.html", gin.H{
-			"Context":      c,
-			"title":        "Packages",
-			"packageNames": packageNames,
-			"page":         page,
-			"totalPages":   totalPages,
-			"totalRecords": total,
-			"limit":        limit,
-			"offset":       offset,
-			"search":       search,
-		})
+		rows, err = database.Query(query, limit, offset)
 	}
+
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	packageNames := []models.PackageListing{}
+	for rows.Next() {
+		var packageName models.PackageListing
+		err := rows.Scan(
+			&packageName.Package,
+			&packageName.Version,
+			&packageName.Release,
+			&packageName.Arch,
+			&packageName.Repo,
+			&packageName.TotalVersions,
+			&packageName.MachineCount,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+		packageNames = append(packageNames, packageName)
+	}
+
+	return packageNames, total, nil
 }
 
 func GetPackageByName(database *sql.DB) gin.HandlerFunc {

@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Changed
+
+- Optimize `/packages` endpoint performance with materialized view for faster
+  package listing queries. Previously, each request executed multiple complex
+  CTEs scanning the entire `transaction_items` table; now uses pre-computed
+  data refreshed every 5 minutes.
+- Add scheduled job to refresh `mv_package_listing` materialized view every
+  5 minutes for near real-time data with dramatically improved query performance.
+
 ## [1.18.5] - 2025-12-15
 
 ### Security

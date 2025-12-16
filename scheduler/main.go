@@ -13,12 +13,12 @@ import (
 	"github.com/txlog/server/statistics"
 )
 
-// StartScheduler initializes and starts the scheduler system with two periodic
-// jobs:
+// StartScheduler initializes and starts the scheduler system with periodic jobs:
 //   - A housekeeping job that runs according to CRON_RETENTION_EXPRESSION
 //     environment variable
 //   - A statistics job that runs according to CRON_STATS_EXPRESSION environment
 //     variable
+//   - A materialized view refresh job that runs every 5 minutes
 //
 // The scheduler uses crontab for job scheduling and execution.
 func StartScheduler() {
@@ -26,8 +26,10 @@ func StartScheduler() {
 	ctab.MustAddJob(os.Getenv("CRON_RETENTION_EXPRESSION"), housekeepingJob)
 	ctab.MustAddJob(os.Getenv("CRON_STATS_EXPRESSION"), statsJob)
 	ctab.MustAddJob("0 * * * *", latestVersionJob)
+	ctab.MustAddJob("*/5 * * * *", refreshMaterializedViewsJob)
 
-	latestVersionJob() // Run for the first time
+	latestVersionJob()            // Run for the first time
+	refreshMaterializedViewsJob() // Run for the first time
 	logger.Info("Scheduler: started.")
 }
 
@@ -48,6 +50,46 @@ func latestVersionJob() {
 	version := strings.TrimSpace(string(body))
 	os.Setenv("LATEST_VERSION", version)
 	logger.Info("Latest version updated: " + version)
+}
+
+// refreshMaterializedViewsJob refreshes the materialized views used for performance optimization.
+// It uses a distributed lock mechanism to ensure only one instance runs at a time.
+// Currently refreshes:
+//   - mv_package_listing: Pre-computed package listing data for the /packages endpoint
+//
+// This job should run frequently (every 5 minutes) to keep the data relatively fresh
+// while avoiding the expensive CTEs on each request.
+func refreshMaterializedViewsJob() {
+	lockName := "refresh-materialized-views"
+
+	locked, err := acquireLock(lockName)
+	if err != nil {
+		logger.Error("Error acquiring lock for materialized view refresh: " + err.Error())
+		return
+	}
+
+	if !locked {
+		// Another instance is already refreshing
+		return
+	}
+
+	defer releaseLock(lockName)
+
+	// Refresh the package listing materialized view
+	// Using CONCURRENTLY to allow reads during refresh (requires UNIQUE index)
+	_, err = database.Db.Exec(`REFRESH MATERIALIZED VIEW CONCURRENTLY mv_package_listing`)
+	if err != nil {
+		// If CONCURRENTLY fails (e.g., first run or no unique index), try without it
+		_, err = database.Db.Exec(`REFRESH MATERIALIZED VIEW mv_package_listing`)
+		if err != nil {
+			// View might not exist yet (migration not applied)
+			// This is expected on first deployment, so we only log at debug level
+			logger.Debug("Could not refresh mv_package_listing: " + err.Error())
+			return
+		}
+	}
+
+	logger.Debug("Materialized views refreshed successfully.")
 }
 
 // statsJob executes statistical tasks for the system while ensuring only one instance

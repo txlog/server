@@ -292,10 +292,13 @@ func getDuplicatedAssets(database *sql.DB) ([]DuplicatedAsset, error) {
     hostname,
     COUNT(*) as num_machines
   FROM assets
-  WHERE last_seen >= CURRENT_DATE - INTERVAL '30 day'
-  AND is_active = TRUE
+  WHERE hostname IN (
+    SELECT hostname
+    FROM assets
+    WHERE is_active = FALSE
+    AND deactivated_at >= CURRENT_DATE - INTERVAL '30 day'
+  )
   GROUP BY hostname
-  HAVING COUNT(*) > 1
   ORDER BY num_machines DESC;`)
 
 	if err != nil {

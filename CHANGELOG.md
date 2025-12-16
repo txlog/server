@@ -34,6 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update `UpsertAsset` to save the OS with each execution, ensuring the assets
   table always has the latest OS information in real-time.
 
+### Fixed
+
+- Fix "Replaced assets" card on dashboard not showing any results. The previous
+  query incorrectly looked for hostnames with multiple active assets, but by
+  design only one asset can be active per hostname. Now correctly identifies
+  hostnames with assets that were deactivated (replaced) in the last 30 days.
+
 ## [1.18.5] - 2025-12-15
 
 ### Security

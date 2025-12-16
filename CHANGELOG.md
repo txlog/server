@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.18.5] - 2025-12-15
+
+### Security
+
+- Fix HTTP/3 QPACK Header Expansion DoS vulnerability by updating
+  `github.com/quic-go/quic-go` from 0.54.1 to 0.57.0.
+
 ## [1.18.4] - 2025-12-04
 
 ### Changed

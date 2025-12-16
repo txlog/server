@@ -17,6 +17,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Changed
+
+- Replace magic numbers with HTTP status constants (`http.StatusOK`,
+  `http.StatusBadRequest`, `http.StatusInternalServerError`) across all API
+  controllers for improved code readability and maintainability.
+- Optimize `GET /v1/items` endpoint by replacing `Query` with `QueryRow` for
+  single-row transaction lookup, reducing database round-trips.
+- Simplify code structure in `GET /v1/transactions/ids` with early returns
+  instead of nested if-else blocks.
+
+### Fixed
+
+- Fix resource leak in `GET /v1/items` where `defer rows.Close()` was
+  incorrectly placed after the loop instead of immediately after query success.
+- Fix resource leak in `GET /v1/items/ids` with same `defer rows.Close()`
+  positioning issue.
+- Fix resource leak in `GET /v1/transactions/ids` with same `defer rows.Close()`
+  positioning issue.
+
+### Added
+
+- Add comprehensive unit tests for `GET /v1/version` endpoint covering version
+  formats, content-type, and closure behavior.
+- Add comprehensive unit tests for `GET /v1/items` and `GET /v1/items/ids`
+  endpoints covering validation, empty results, and data retrieval scenarios.
+- Add comprehensive unit tests for `GET /v1/transactions/ids` endpoint covering
+  JSON validation, filtering, and result ordering.
+- Add comprehensive unit tests for `POST /v1/transactions` endpoint covering
+  transaction creation, duplicate handling, and multi-item transactions.
+
 ## [1.18.6] - 2025-12-16
 
 ### Changed

@@ -31,12 +31,12 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		body := models.Execution{}
 		data, err := c.GetRawData()
 		if err != nil {
-			c.AbortWithStatusJSON(400, "Invalid execution data")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid execution data")
 			return
 		}
 		err = json.Unmarshal(data, &body)
 		if err != nil {
-			c.AbortWithStatusJSON(400, "Invalid JSON input")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid JSON input")
 			logger.Error("Invalid JSON input:" + err.Error())
 			return
 		}
@@ -66,7 +66,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		tx, err := database.Begin()
 		if err != nil {
 			logger.Error("Error beginning transaction:" + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": "Database error"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
 
@@ -94,7 +94,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error inserting execution:" + err.Error())
-			c.AbortWithStatusJSON(400, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -108,7 +108,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error upserting asset:" + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": "Failed to update asset registry"})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to update asset registry"})
 			return
 		}
 
@@ -116,7 +116,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()
 			logger.Error("Error committing execution:" + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -145,7 +145,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 		success := c.Query("success")
 
 		if machineID == "" {
-			c.AbortWithStatusJSON(400, "machine_id is required")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "machine_id is required")
 			return
 		}
 
@@ -173,7 +173,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying executions:" + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		defer rows.Close()
@@ -200,7 +200,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 			execution.OS = os.String
 			if err != nil {
 				logger.Error("Error iterating executions:" + err.Error())
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 			if executedAt.Valid {

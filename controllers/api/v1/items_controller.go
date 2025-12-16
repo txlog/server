@@ -31,7 +31,7 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 		transactionID := c.Query("transaction_id")
 
 		if machineID == "" {
-			c.AbortWithStatusJSON(400, "machine_id is required")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "machine_id is required")
 			return
 		}
 
@@ -44,7 +44,7 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
         ORDER BY transaction_id DESC
         LIMIT 1`, machineID)
 			if err := row.Scan(&transactionID); err != nil {
-				c.AbortWithStatusJSON(400, "No transactions found for this machine")
+				c.AbortWithStatusJSON(http.StatusBadRequest, "No transactions found for this machine")
 				return
 			}
 		}
@@ -60,26 +60,27 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 		)
 		if err != nil {
 			logger.Error("Couldn't get saved item_ids for this transaction: " + err.Error())
-			c.AbortWithStatusJSON(400, "Couldn't get saved item_ids for this transaction.")
-		} else {
-			var items []int
-			for rows.Next() {
-				var id int
-				if err := rows.Scan(&id); err != nil {
-					logger.Error("Error scanning transaction_ids: " + err.Error())
-					c.AbortWithStatusJSON(500, "Error scanning transaction_ids")
-					return
-				}
-				items = append(items, id)
-			}
-			defer rows.Close()
+			c.AbortWithStatusJSON(http.StatusBadRequest, "Couldn't get saved item_ids for this transaction.")
+			return
+		}
+		defer rows.Close()
 
-			if items == nil {
-				c.JSON(http.StatusOK, []int{})
+		var items []int
+		for rows.Next() {
+			var id int
+			if err := rows.Scan(&id); err != nil {
+				logger.Error("Error scanning transaction_ids: " + err.Error())
+				c.AbortWithStatusJSON(http.StatusInternalServerError, "Error scanning transaction_ids")
 				return
 			}
-			c.JSON(http.StatusOK, items)
+			items = append(items, id)
 		}
+
+		if items == nil {
+			c.JSON(http.StatusOK, []int{})
+			return
+		}
+		c.JSON(http.StatusOK, items)
 	}
 }
 
@@ -101,7 +102,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 		transactionID := c.Query("transaction_id")
 
 		if machineID == "" {
-			c.AbortWithStatusJSON(400, "machine_id is required")
+			c.AbortWithStatusJSON(http.StatusBadRequest, "machine_id is required")
 			return
 		}
 
@@ -114,18 +115,17 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
         ORDER BY transaction_id DESC
         LIMIT 1`, machineID)
 			if err := row.Scan(&transactionID); err != nil {
-				c.AbortWithStatusJSON(400, "No transactions found for this machine")
+				c.AbortWithStatusJSON(http.StatusBadRequest, "No transactions found for this machine")
 				return
 			}
 		}
 
 		var transaction models.Transaction
-		var rows *sql.Rows
-		var err error
+		var beginTime sql.NullTime
+		var endTime sql.NullTime
 
-		// details about the transaction
-
-		rows, err = database.Query(`
+		// Query for transaction details using QueryRow since we expect only one row
+		row := database.QueryRow(`
       SELECT
         transaction_id,
         hostname,
@@ -146,50 +146,41 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			transactionID,
 		)
 
-		if err != nil {
-			logger.Error("Error querying transaction: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-			return
-		}
-		defer rows.Close()
+		err := row.Scan(
+			&transaction.TransactionID,
+			&transaction.Hostname,
+			&beginTime,
+			&endTime,
+			&transaction.Actions,
+			&transaction.Altered,
+			&transaction.User,
+			&transaction.ReturnCode,
+			&transaction.ReleaseVersion,
+			&transaction.CommandLine,
+			&transaction.Comment,
+			&transaction.ScriptletOutput,
+		)
 
-		if rows.Next() {
-			var beginTime sql.NullTime
-			var endTime sql.NullTime
-			err := rows.Scan(
-				&transaction.TransactionID,
-				&transaction.Hostname,
-				&beginTime,
-				&endTime,
-				&transaction.Actions,
-				&transaction.Altered,
-				&transaction.User,
-				&transaction.ReturnCode,
-				&transaction.ReleaseVersion,
-				&transaction.CommandLine,
-				&transaction.Comment,
-				&transaction.ScriptletOutput,
-			)
-
-			if err != nil {
-				logger.Error("Error reading transaction: " + err.Error())
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
-				return
-			}
-			if beginTime.Valid {
-				transaction.BeginTime = &beginTime.Time
-			}
-			if endTime.Valid {
-				transaction.EndTime = &endTime.Time
-			}
-		} else {
+		if err == sql.ErrNoRows {
 			c.JSON(http.StatusOK, gin.H{})
 			return
+		}
+		if err != nil {
+			logger.Error("Error querying transaction: " + err.Error())
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if beginTime.Valid {
+			transaction.BeginTime = &beginTime.Time
+		}
+		if endTime.Valid {
+			transaction.EndTime = &endTime.Time
 		}
 
 		// details about the items
 
-		rows, err = database.Query(`
+		rows, err := database.Query(`
     SELECT
       action,
       package,
@@ -209,7 +200,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying items: " + err.Error())
-			c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		defer rows.Close()
@@ -228,8 +219,8 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			)
 
 			if err != nil {
-				logger.Error("Error reading transaction: " + err.Error())
-				c.AbortWithStatusJSON(500, gin.H{"error": err.Error()})
+				logger.Error("Error reading transaction item: " + err.Error())
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
 

@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: txlog-server
-        image: cr.rda.run/txlog/server:main
+        image: ghcr.io/txlog/server:main
         ports:
         - containerPort: 8080
         env:

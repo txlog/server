@@ -261,7 +261,7 @@ Same problem with or without service account - check:
 version: '3.8'
 services:
   txlog-server:
-    image: cr.rda.run/txlog/server:main
+    image: ghcr.io/txlog/server:main
     ports:
       - "8080:8080"
     environment:
@@ -284,7 +284,7 @@ services:
 version: '3.8'
 services:
   txlog-server:
-    image: cr.rda.run/txlog/server:main
+    image: ghcr.io/txlog/server:main
     ports:
       - "8080:8080"
     environment:

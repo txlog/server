@@ -30,7 +30,7 @@ This repository contains the code for the Txlog Server.
 Use Docker to run this server.
 
 ```bash
-docker pull cr.rda.run/txlog/server:main
+docker pull ghcr.io/txlog/server:main
 ```
 
 Run the server.
@@ -48,7 +48,7 @@ docker run -d -p 8080:8080 \
   -e CRON_RETENTION_DAYS=7 \
   -e CRON_RETENTION_EXPRESSION=0 2 * * * \
   -e CRON_STATS_EXPRESSION=0 * * * * \
-  cr.rda.run/txlog/server:main
+  ghcr.io/txlog/server:main
 ```
 
 Or use it on your Kubernetes cluster
@@ -70,7 +70,7 @@ spec:
     spec:
       containers:
       - name: txlog-server
-        image: cr.rda.run/txlog/server:main
+        image: ghcr.io/txlog/server:main
         ports:
         - containerPort: 8080
         livenessProbe:

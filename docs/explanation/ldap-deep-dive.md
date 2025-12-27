@@ -330,7 +330,7 @@ docker run -d -p 8080:8080 \
   -e LDAP_BASE_DN=ou=users,dc=example,dc=com \
   -e LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com \
   -e LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com \
-  cr.rda.run/txlog/server:main
+  ghcr.io/txlog/server:main
 ```
 
 Or use Docker Compose:
@@ -339,7 +339,7 @@ Or use Docker Compose:
 version: '3.8'
 services:
   txlog-server:
-    image: cr.rda.run/txlog/server:main
+    image: ghcr.io/txlog/server:main
     ports:
       - "8080:8080"
     environment:

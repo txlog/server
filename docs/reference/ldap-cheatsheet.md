@@ -165,7 +165,7 @@ docker run -d -p 8080:8080 \
   -e LDAP_BASE_DN=ou=users,dc=example,dc=com \
   -e LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com \
   -e LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com \
-  cr.rda.run/txlog/server:main
+  ghcr.io/txlog/server:main
 ```
 
 ### With Service Account (Active Directory or restricted LDAP)
@@ -178,7 +178,7 @@ docker run -d -p 8080:8080 \
   -e LDAP_BIND_PASSWORD=your_password \
   -e LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com \
   -e LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com \
-  cr.rda.run/txlog/server:main
+  ghcr.io/txlog/server:main
 ```
 
 ## Documentation Links

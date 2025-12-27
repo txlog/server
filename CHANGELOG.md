@@ -426,7 +426,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.8.1
+docker pull ghcr.io/txlog/server:v1.8.1
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.8.0...v1.8.1>
@@ -441,7 +441,7 @@ docker pull cr.rda.run/txlog/server:v1.8.1
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.8.0
+docker pull ghcr.io/txlog/server:v1.8.0
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.7.4...v1.8.0>
@@ -455,7 +455,7 @@ docker pull cr.rda.run/txlog/server:v1.8.0
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.7.4
+docker pull ghcr.io/txlog/server:v1.7.4
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.7.3...v1.7.4>
@@ -472,7 +472,7 @@ docker pull cr.rda.run/txlog/server:v1.7.4
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.7.3
+docker pull ghcr.io/txlog/server:v1.7.3
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.7.2...v1.7.3>
@@ -487,7 +487,7 @@ docker pull cr.rda.run/txlog/server:v1.7.3
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.7.2
+docker pull ghcr.io/txlog/server:v1.7.2
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.7.1...v1.7.2>
@@ -501,7 +501,7 @@ docker pull cr.rda.run/txlog/server:v1.7.2
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.7.1
+docker pull ghcr.io/txlog/server:v1.7.1
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.7.0...v1.7.1>
@@ -516,7 +516,7 @@ docker pull cr.rda.run/txlog/server:v1.7.1
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.7.0
+docker pull ghcr.io/txlog/server:v1.7.0
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.6.3...v1.7.0>
@@ -531,7 +531,7 @@ docker pull cr.rda.run/txlog/server:v1.7.0
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.6.3
+docker pull ghcr.io/txlog/server:v1.6.3
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.6.2...v1.6.3>
@@ -547,7 +547,7 @@ docker pull cr.rda.run/txlog/server:v1.6.3
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.6.2
+docker pull ghcr.io/txlog/server:v1.6.2
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.6.1...v1.6.2>
@@ -575,7 +575,7 @@ docker pull cr.rda.run/txlog/server:v1.6.2
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.6.1
+docker pull ghcr.io/txlog/server:v1.6.1
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.6.0...v1.6.1>
@@ -602,7 +602,7 @@ docker pull cr.rda.run/txlog/server:v1.6.1
 ### Docker Image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.6.0
+docker pull ghcr.io/txlog/server:v1.6.0
 ```
 
 **Full Changelog**:
@@ -647,7 +647,7 @@ docker pull cr.rda.run/txlog/server:v1.6.0
 ## Docker image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.5.0
+docker pull ghcr.io/txlog/server:v1.5.0
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.4.0...v1.5.0>
@@ -662,7 +662,7 @@ docker pull cr.rda.run/txlog/server:v1.5.0
 ## Docker image
 
 ```bash
-docker pull cr.rda.run/txlog/server:v1.4.0
+docker pull ghcr.io/txlog/server:v1.4.0
 ```
 
 **Full Changelog**: <https://github.com/txlog/server/compare/v1.3.2...v1.4.0>

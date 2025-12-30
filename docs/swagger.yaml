@@ -1,0 +1,499 @@
+definitions:
+  models.Execution:
+    properties:
+      agent_version:
+        type: string
+      details:
+        type: string
+      executed_at:
+        type: string
+      execution_id:
+        type: string
+      hostname:
+        type: string
+      machine_id:
+        type: string
+      needs_restarting:
+        type: boolean
+      os:
+        type: string
+      restarting_reason:
+        type: string
+      success:
+        type: boolean
+      transactions_processed:
+        type: integer
+      transactions_sent:
+        type: integer
+    required:
+    - execution_id
+    type: object
+  models.Package:
+    properties:
+      arch:
+        type: string
+      name:
+        type: string
+      release:
+        type: string
+      repo:
+        type: string
+      version:
+        type: string
+    required:
+    - name
+    type: object
+  models.Transaction:
+    properties:
+      actions:
+        type: string
+      altered:
+        type: string
+      begin_time:
+        type: string
+      command_line:
+        type: string
+      comment:
+        type: string
+      end_time:
+        type: string
+      hostname:
+        type: string
+      items:
+        items:
+          $ref: '#/definitions/models.TransactionItem'
+        type: array
+      machine_id:
+        type: string
+      release_version:
+        type: string
+      return_code:
+        type: string
+      scriptlet_output:
+        type: string
+      transaction_id:
+        type: string
+      user:
+        type: string
+    type: object
+  models.TransactionItem:
+    properties:
+      action:
+        type: string
+      arch:
+        type: string
+      epoch:
+        type: string
+      from_repo:
+        type: string
+      name:
+        type: string
+      release:
+        type: string
+      repo:
+        type: string
+      version:
+        type: string
+    type: object
+  v1.MonthlyReportPackage:
+    properties:
+      assets_affected:
+        type: integer
+      os_version:
+        type: string
+      package_rpm:
+        type: string
+    type: object
+  v1.MonthlyReportResponse:
+    properties:
+      asset_count:
+        type: integer
+      month:
+        type: integer
+      packages:
+        items:
+          $ref: '#/definitions/v1.MonthlyReportPackage'
+        type: array
+      year:
+        type: integer
+    type: object
+info:
+  contact:
+    name: Txlog repository issues
+    url: https://github.com/txlog/server/issues
+  description: The centralized system that stores transaction data
+  license:
+    name: MIT License
+    url: https://github.com/txlog/.github/blob/main/profile/LICENSE.md
+  termsOfService: https://github.com/txlog
+  title: Txlog Server
+  version: v1
+paths:
+  /v1/assets/requiring-restart:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint retrieves assets that have the latest execution data
+        indicating a restart is required.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: List assets requiring restart
+      tags:
+      - assets
+  /v1/executions:
+    get:
+      consumes:
+      - application/json
+      description: List executions
+      parameters:
+      - description: Machine ID
+        in: query
+        name: machine_id
+        type: string
+      - description: Success
+        in: query
+        name: success
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: List executions
+      tags:
+      - executions
+    post:
+      consumes:
+      - application/json
+      description: Create a new execution
+      parameters:
+      - description: Execution data
+        in: body
+        name: Execution
+        required: true
+        schema:
+          $ref: '#/definitions/models.Execution'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Execution created
+          schema:
+            type: string
+        "202":
+          description: Execution not created
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new execution
+      tags:
+      - executions
+  /v1/items:
+    get:
+      consumes:
+      - application/json
+      description: Get saved items for a transaction
+      parameters:
+      - description: Machine ID
+        in: query
+        name: machine_id
+        type: string
+      - description: Transaction ID. If not provided, the last transaction will be
+          used.
+        in: query
+        name: transaction_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get saved items for a transaction
+      tags:
+      - items
+  /v1/items/ids:
+    get:
+      consumes:
+      - application/json
+      description: Get saved item IDs for a transaction
+      parameters:
+      - description: Machine ID
+        in: query
+        name: machine_id
+        type: string
+      - description: Transaction ID. If not provided, the last transaction will be
+          used.
+        in: query
+        name: transaction_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get saved item IDs for a transaction
+      tags:
+      - items
+  /v1/machines:
+    get:
+      consumes:
+      - application/json
+      description: List machine IDs
+      parameters:
+      - description: Operating System
+        in: query
+        name: os
+        type: string
+      - description: Agent Version
+        in: query
+        name: agent_version
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: List machine IDs
+      tags:
+      - assets
+  /v1/machines/ids:
+    get:
+      consumes:
+      - application/json
+      description: List machine IDs
+      parameters:
+      - description: Hostname
+        in: query
+        name: hostname
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: List machine IDs
+      tags:
+      - assets
+  /v1/packages/{name}/{version}/{release}/assets:
+    get:
+      description: Get assets that are using a specific package version
+      parameters:
+      - description: Package name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Package version
+        in: path
+        name: version
+        required: true
+        type: string
+      - description: Package release
+        in: path
+        name: release
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Package'
+      summary: Get assets that are using a specific package version
+      tags:
+      - packages
+  /v1/reports/monthly:
+    get:
+      description: Returns a list of package updates for a specific month/year, including
+        the number of assets in the period, OS version, package RPM, servers affected,
+        and total updates
+      parameters:
+      - description: Month (1-12)
+        in: query
+        name: month
+        required: true
+        type: integer
+      - description: Year (e.g., 2024)
+        in: query
+        name: year
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/v1.MonthlyReportResponse'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get monthly package update report
+      tags:
+      - reports
+  /v1/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Get saved transactions for a host
+      parameters:
+      - description: Machine ID
+        in: query
+        name: machine_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get saved transactions for a host
+      tags:
+      - transactions
+    post:
+      consumes:
+      - application/json
+      description: Create a new transaction
+      parameters:
+      - description: Transaction data
+        in: body
+        name: Transaction
+        required: true
+        schema:
+          $ref: '#/definitions/models.Transaction'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transaction created
+          schema:
+            type: string
+        "400":
+          description: Invalid JSON input
+          schema:
+            type: string
+        "500":
+          description: Database error
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new transaction
+      tags:
+      - transactions
+  /v1/transactions/ids:
+    get:
+      consumes:
+      - application/json
+      description: Get saved transactions IDs for a host
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get saved transactions IDs for a host
+      tags:
+      - transactions
+  /v1/version:
+    get:
+      consumes:
+      - application/json
+      description: Get server version
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema: {}
+      security:
+      - ApiKeyAuth: []
+      summary: Get server version
+      tags:
+      - version
+securityDefinitions:
+  ApiKeyAuth:
+    description: API key authentication for /v1 endpoints. Generate your API key in
+      the admin panel at /admin
+    in: header
+    name: X-API-Key
+    type: apiKey
+swagger: "2.0"

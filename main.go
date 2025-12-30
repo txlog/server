@@ -207,6 +207,9 @@ func main() {
 		// Package listing
 		v1Group.GET("/packages/:name/:version/:release/assets", v1API.GetAssetsUsingPackageVersion(database.Db))
 
+		// Reports
+		v1Group.GET("/reports/monthly", v1API.GetMonthlyReport(database.Db))
+
 		// Endpoints for agent pre-v1.6.0
 		v1Group.GET("/machines/ids", v1API.GetMachineIDs(database.Db))
 		v1Group.GET("/machines", v1API.GetMachines(database.Db))

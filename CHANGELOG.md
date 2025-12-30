@@ -17,6 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.19.0] - 2025-12-30
+
+### Added
+
+- Add `GET /v1/reports/monthly` API endpoint to expose management report data
+  in JSON format. Returns `month`, `year`, `asset_count`, and a `packages` array
+  containing `os_version`, `package_rpm`, and `assets_affected` for each package
+  updated in the specified period.
+- Add comprehensive unit tests for the new reports endpoint covering parameter
+  validation, response structure, and edge cases.
+
 ## [1.18.7] - 2025-12-17
 
 ### Changed

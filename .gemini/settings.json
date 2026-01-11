@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "txlog": {
+      "command": "/home/rdeavila/dev/txlog/agent/bin/txlog",
+      "args": [
+        "mcp",
+        "serve"
+      ]
+    }
+  }
+}

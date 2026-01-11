@@ -35,6 +35,12 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Set build metadata
+      id: meta
+      run: |
+        echo "version=$(cat .version)" >> $GITHUB_OUTPUT
+        echo "build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v6
       with:
@@ -43,6 +49,9 @@ jobs:
         tags: |
           ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
           ${{ startsWith(github.ref, 'refs/tags/v') && format('ghcr.io/{0}/{1}:latest', github.repository_owner, github.event.repository.name) || '' }}
+        build-args: |
+          VERSION=${{ steps.meta.outputs.version }}
+          BUILD_DATE=${{ steps.meta.outputs.build_date }}
 
     - uses: anchore/scan-action@7c05671ae9be166aeb155bad2d7df9121823df32 # v6
       id: scan

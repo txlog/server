@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
-## [1.19.1] - 2025-01-11
+## [1.19.1] - 2026-01-11
 
 ### Changed
 

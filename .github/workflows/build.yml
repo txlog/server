@@ -15,6 +15,7 @@ jobs:
       packages: write
       security-events: write
       actions: read
+      id-token: write
     steps:
     - uses: actions/checkout@v5
 
@@ -22,6 +23,9 @@ jobs:
       uses: actions/setup-go@v6
       with:
         go-version: '1.25.5'
+
+    - name: Install Cosign
+      uses: sigstore/cosign-installer@v3
 
     - name: Compile
       run: |
@@ -42,6 +46,7 @@ jobs:
         echo "build_date=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> $GITHUB_OUTPUT
 
     - name: Build and push Docker image
+      id: build
       uses: docker/build-push-action@v6
       with:
         context: .
@@ -52,6 +57,13 @@ jobs:
         build-args: |
           VERSION=${{ steps.meta.outputs.version }}
           BUILD_DATE=${{ steps.meta.outputs.build_date }}
+
+    - name: Sign Docker image with Sigstore
+      env:
+        DIGEST: ${{ steps.build.outputs.digest }}
+        TAGS: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+      run: |
+        cosign sign --yes "${TAGS}@${DIGEST}"
 
     - uses: anchore/scan-action@7c05671ae9be166aeb155bad2d7df9121823df32 # v6
       id: scan

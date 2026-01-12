@@ -37,11 +37,17 @@
               </div>
             </div>
             <div class="d-flex align-items-baseline">
-              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s"
+                (formatInteger .Value) }}{{ end }}{{ end }}</div>
               <div class="me-auto">
-                <span class="{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }} d-inline-flex align-items-center lh-1">
-                  {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"></i>
+                <span class="{{ range .statistics }}{{ if eq .Name " executions-30-days" }}{{ if gt .Percentage 0.0
+                  }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }}
+                  d-inline-flex align-items-center lh-1">
+                  {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatPercentage
+                  .Percentage) }}{{ end }}{{ end }}%
+                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name " executions-30-days" }}{{ if gt .Percentage 0.0
+                    }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end
+                    }}"></i>
                 </span>
               </div>
             </div>
@@ -58,11 +64,17 @@
               </div>
             </div>
             <div class="d-flex align-items-baseline">
-              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf
+                "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
               <div class="me-auto">
-                <span class="{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }} d-inline-flex align-items-center lh-1">
-                  {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"></i>
+                <span class="{{ range .statistics }}{{ if eq .Name " installed-packages-30-days" }}{{ if gt .Percentage
+                  0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end
+                  }} d-inline-flex align-items-center lh-1">
+                  {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatPercentage
+                  .Percentage) }}{{ end }}{{ end }}%
+                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name " installed-packages-30-days" }}{{ if gt
+                    .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{
+                    end }}{{ end }}"></i>
                 </span>
               </div>
             </div>
@@ -79,11 +91,17 @@
               </div>
             </div>
             <div class="d-flex align-items-baseline">
-              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf
+                "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
               <div class="me-auto">
-                <span class="{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }} d-inline-flex align-items-center lh-1">
-                  {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"></i>
+                <span class="{{ range .statistics }}{{ if eq .Name " upgraded-packages-30-days" }}{{ if gt .Percentage
+                  0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end
+                  }} d-inline-flex align-items-center lh-1">
+                  {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatPercentage
+                  .Percentage) }}{{ end }}{{ end }}%
+                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name " upgraded-packages-30-days" }}{{ if gt
+                    .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{
+                    end }}{{ end }}"></i>
                 </span>
               </div>
             </div>
@@ -96,36 +114,44 @@
             <h3 class="card-title">OS distribution</h3>
           </div>
           {{ if eq (len .assetsByOS) 0 }}
-            <div class="empty">
-              <div class="empty-img"></div>
-              <p class="empty-title">No assets found</p>
-              <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
-            </div>
+          <div class="empty">
+            <div class="empty-img"></div>
+            <p class="empty-title">No assets found</p>
+            <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent"
+                target="_blank">Txlog Agent</a> in one of your servers.</p>
+          </div>
           {{ else }}
-            <div class="card-table table-responsive">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>OS name</th>
-                    <th>Assets</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{ with .assetsByOS }}
-                    {{ range . }}
-                      <tr>
-                        <td>{{ if eq .OS "" }}Undefined OS{{ else }}{{ .OS }}{{ end }}</td>
-                        <td class="text-nowrap">
-                          <a href="#" class="text-secondary" onclick="showOSModal('{{ .OS }}')">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
-                            {{ .NumMachines }}</a>
-                        </td>
-                      </tr>
-                    {{ end }}
-                  {{ end }}
-                </tbody>
-              </table>
-            </div>
+          <div class="card-table table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>OS name</th>
+                  <th>Assets</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ with .assetsByOS }}
+                {{ range . }}
+                <tr>
+                  <td>{{ if eq .OS "" }}Undefined OS{{ else }}{{ .OS }}{{ end }}</td>
+                  <td class="text-nowrap">
+                    <a href="#" class="text-secondary" onclick="showOSModal('{{ .OS }}')">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                        <path d="M11 13l9 -9" />
+                        <path d="M15 4h5v5" />
+                      </svg>
+                      {{ .NumMachines }}</a>
+                  </td>
+                </tr>
+                {{ end }}
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
           {{ end }}
         </div>
       </div>
@@ -135,36 +161,44 @@
             <h3 class="card-title">Agent distribution</h3>
           </div>
           {{ if eq (len .assetsByAgentVersion) 0 }}
-            <div class="empty">
-              <div class="empty-img"></div>
-              <p class="empty-title">No assets found</p>
-              <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
-            </div>
+          <div class="empty">
+            <div class="empty-img"></div>
+            <p class="empty-title">No assets found</p>
+            <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent"
+                target="_blank">Txlog Agent</a> in one of your servers.</p>
+          </div>
           {{ else }}
-            <div class="card-table table-responsive">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Agent version</th>
-                    <th>Assets</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{ with .assetsByAgentVersion }}
-                    {{ range . }}
-                      <tr>
-                        <td>{{ if eq .AgentVersion "" }}Undefined Agent Version{{ else }}{{ .AgentVersion }}{{ end }}</td>
-                        <td class="text-nowrap">
-                          <a href="#" class="text-secondary" onclick="showAgentModal('{{ .AgentVersion }}')">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
-                            {{ .NumMachines }}</a>
-                        </td>
-                      </tr>
-                    {{ end }}
-                  {{ end }}
-                </tbody>
-              </table>
-            </div>
+          <div class="card-table table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Agent version</th>
+                  <th>Assets</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ with .assetsByAgentVersion }}
+                {{ range . }}
+                <tr>
+                  <td>{{ if eq .AgentVersion "" }}Undefined Agent Version{{ else }}{{ .AgentVersion }}{{ end }}</td>
+                  <td class="text-nowrap">
+                    <a href="#" class="text-secondary" onclick="showAgentModal('{{ .AgentVersion }}')">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                        <path d="M11 13l9 -9" />
+                        <path d="M15 4h5v5" />
+                      </svg>
+                      {{ .NumMachines }}</a>
+                  </td>
+                </tr>
+                {{ end }}
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
           {{ end }}
         </div>
       </div>
@@ -174,36 +208,44 @@
             <h3 class="card-title">Replaced assets <span class="card-subtitle">last 30 days</span></h3>
           </div>
           {{ if eq (len .duplicatedAssets) 0 }}
-            <div class="empty">
-              <div class="empty-img"></div>
-              <p class="empty-title">No replaced assets</p>
-              <p class="empty-subtitle text-secondary">in the last 30 days.</p>
-            </div>
+          <div class="empty">
+            <div class="empty-img"></div>
+            <p class="empty-title">No replaced assets</p>
+            <p class="empty-subtitle text-secondary">in the last 30 days.</p>
+          </div>
           {{ else }}
-            <div class="card-table table-responsive">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Hostname</th>
-                    <th>Assets</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{ with .duplicatedAssets }}
-                    {{ range . }}
-                      <tr>
-                        <td>{{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}</td>
-                        <td class="text-nowrap">
-                          <a href="/assets?search={{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}" class="text-secondary">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
-                            {{ .NumMachines }}</a>
-                        </td>
-                      </tr>
-                    {{ end }}
-                  {{ end }}
-                </tbody>
-              </table>
-            </div>
+          <div class="card-table table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Hostname</th>
+                  <th>Assets</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ with .duplicatedAssets }}
+                {{ range . }}
+                <tr>
+                  <td>{{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}</td>
+                  <td class="text-nowrap">
+                    <a href="/assets?search={{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}"
+                      class="text-secondary">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                        <path d="M11 13l9 -9" />
+                        <path d="M15 4h5v5" />
+                      </svg>
+                      {{ .NumMachines }}</a>
+                  </td>
+                </tr>
+                {{ end }}
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
           {{ end }}
         </div>
       </div>
@@ -213,37 +255,53 @@
             <h3 class="card-title">Most updated packages <span class="card-subtitle">last 30 days</span></h3>
           </div>
           {{ if eq (len .mostUpdatedPackages) 0 }}
-            <div class="empty">
-              <div class="empty-img"></div>
-              <p class="empty-title">No packages to list</p>
-              <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
-            </div>
+          <div class="empty">
+            <div class="empty-img"></div>
+            <p class="empty-title">No packages to list</p>
+            <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent"
+                target="_blank">Txlog Agent</a> in one of your servers.</p>
+          </div>
           {{ else }}
-            <div class="card-table table-responsive">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>Package</th>
-                    <th>Times Updated</th>
-                    <th>Assets Affected</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{ with .mostUpdatedPackages }}
-                    {{ range . }}
-                      <tr>
-                        <td><kbd>{{ .Package }}</kbd></td>
-                        <td>{{ .TotalUpdates }}</td>
-                        <td class="text-nowrap text-secondary">
-                          {{ .DistinctHostsUpdated }}
-                        </td>
-                      </tr>
-                    {{ end }}
-                  {{ end }}
-                </tbody>
-              </table>
-            </div>
+          <div class="card-table table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Package</th>
+                  <th>Times Updated</th>
+                  <th>Assets Affected</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ with .mostUpdatedPackages }}
+                {{ range . }}
+                <tr>
+                  <td><kbd>{{ .Package }}</kbd></td>
+                  <td>{{ .TotalUpdates }}</td>
+                  <td class="text-nowrap text-secondary">
+                    {{ .DistinctHostsUpdated }}
+                  </td>
+                </tr>
+                {{ end }}
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
           {{ end }}
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Anomalies <span class="card-subtitle">last 7 days</span></h3>
+            <div class="card-actions">
+              <a href="/analytics/anomalies" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+          </div>
+          <div class="card-body" id="anomalies-panel">
+            <div class="progress progress-sm">
+              <div class="progress-bar progress-bar-indeterminate"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -251,6 +309,38 @@
 </div>
 
 <script>
+  // Load anomalies panel
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch('/v1/reports/anomalies?days=7')
+      .then(response => response.json())
+      .then(data => {
+        const panel = document.getElementById('anomalies-panel');
+        if (data.error) {
+          panel.innerHTML = '<p class="text-muted">Unable to load anomalies.</p>';
+          return;
+        }
+
+        if (!data.anomalies || data.anomalies.length === 0) {
+          panel.innerHTML = '<div class="d-flex align-items-center text-success"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg> No anomalies detected in the last 7 days</div>';
+          return;
+        }
+
+        let html = '<div class="list-group list-group-flush">';
+        data.anomalies.slice(0, 5).forEach(a => {
+          const sev = a.severity === 'high' ? 'danger' : (a.severity === 'medium' ? 'warning' : 'info');
+          html += `<div class="list-group-item"><span class="badge bg-${sev} me-2">${a.severity}</span><strong>${a.hostname}</strong>: ${a.description}</div>`;
+        });
+        if (data.anomalies.length > 5) {
+          html += `<div class="list-group-item text-muted">... and ${data.anomalies.length - 5} more</div>`;
+        }
+        html += '</div>';
+        panel.innerHTML = html;
+      })
+      .catch(() => {
+        document.getElementById('anomalies-panel').innerHTML = '<p class="text-muted">Unable to load anomalies.</p>';
+      });
+  });
+
   function showAgentModal(agentVersion) {
     const tableBody = document.getElementById('modal-table-body');
     tableBody.innerHTML = '<tr><td colspan="2"><div class="progress progress-sm"><div class="progress-bar progress-bar-indeterminate"></div></div></td></tr>';
@@ -284,13 +374,13 @@
       })
       .catch(error => console.error('Error:', error));
 
-      document.getElementById('modal-title').textContent = "Assets using Agent " + agentVersion;
+    document.getElementById('modal-title').textContent = "Assets using Agent " + agentVersion;
 
-      var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
-        keyboard: true,
-        backdrop: 'static'
-      });
-      myModal.show();
+    var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
+      keyboard: true,
+      backdrop: 'static'
+    });
+    myModal.show();
   }
 
   function showOSModal(os) {
@@ -325,13 +415,13 @@
       })
       .catch(error => console.error('Error:', error));
 
-      document.getElementById('modal-title').textContent = "Assets using " + os;
+    document.getElementById('modal-title').textContent = "Assets using " + os;
 
-      var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
-        keyboard: true,
-        backdrop: 'static'
-      });
-      myModal.show();
+    var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
+      keyboard: true,
+      backdrop: 'static'
+    });
+    myModal.show();
   }
 </script>
 <div class="modal modal-blur fade" id="modal-scrollable" tabindex="-1" style="display: none;" aria-hidden="true">

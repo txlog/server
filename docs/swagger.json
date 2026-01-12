@@ -381,6 +381,115 @@
                 }
             }
         },
+        "/v1/reports/anomalies": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Detects unusual transaction patterns like high volume, rapid changes, or downgrades",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get transaction anomalies",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of days to analyze (default 7)",
+                        "name": "days",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Minimum severity filter (low, medium, high)",
+                        "name": "severity",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.AnomalyReport"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/compare-packages": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Compares the installed packages across 2-20 assets, highlighting differences",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Compare packages between assets",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Comma-separated list of machine IDs (2-20)",
+                        "name": "machine_ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PackageComparisonResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/reports/monthly": {
             "get": {
                 "security": [
@@ -417,6 +526,120 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/v1.MonthlyReportResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/package-adoption": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns how widely packages have been adopted across active assets",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get package adoption report",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of packages to return (default 50)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Minimum number of assets (default 1)",
+                        "name": "min_assets",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PackageAdoptionReport"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request - invalid parameters",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/reports/package-freshness": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns analysis of how current the deployed package versions are",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get package freshness analysis",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Optional machine ID for specific asset analysis",
+                        "name": "machine_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of packages to return (default 50)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PackageFreshnessReport"
                         }
                     },
                     "400": {
@@ -577,6 +800,90 @@
         }
     },
     "definitions": {
+        "models.AnomalyReport": {
+            "type": "object",
+            "properties": {
+                "anomalies": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.TransactionAnomaly"
+                    }
+                },
+                "summary": {
+                    "$ref": "#/definitions/models.AnomalySummary"
+                },
+                "time_window": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AnomalySeverity": {
+            "type": "string",
+            "enum": [
+                "low",
+                "medium",
+                "high"
+            ],
+            "x-enum-varnames": [
+                "SeverityLow",
+                "SeverityMedium",
+                "SeverityHigh"
+            ]
+        },
+        "models.AnomalySummary": {
+            "type": "object",
+            "properties": {
+                "affected_hosts": {
+                    "type": "integer"
+                },
+                "by_severity": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "by_type": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "total_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.AnomalyType": {
+            "type": "string",
+            "enum": [
+                "high_volume",
+                "rapid_change",
+                "downgrade"
+            ],
+            "x-enum-varnames": [
+                "AnomalyHighVolume",
+                "AnomalyRapidChange",
+                "AnomalyDowngrade"
+            ]
+        },
+        "models.AssetPackageSet": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string"
+                },
+                "machine_id": {
+                    "type": "string"
+                },
+                "packages": {
+                    "description": "package_name -\u003e version-release",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "models.Execution": {
             "type": "object",
             "required": [
@@ -644,6 +951,145 @@
                 }
             }
         },
+        "models.PackageAdoptionInfo": {
+            "type": "object",
+            "properties": {
+                "active_assets": {
+                    "type": "integer"
+                },
+                "package": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "total_assets": {
+                    "type": "integer"
+                },
+                "update_count_30d": {
+                    "description": "updates in last 30 days",
+                    "type": "integer"
+                }
+            }
+        },
+        "models.PackageAdoptionReport": {
+            "type": "object",
+            "properties": {
+                "packages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PackageAdoptionInfo"
+                    }
+                },
+                "total_active_assets": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.PackageComparisonResult": {
+            "type": "object",
+            "properties": {
+                "assets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AssetPackageSet"
+                    }
+                },
+                "common": {
+                    "description": "packages present in all assets with same version",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "different": {
+                    "description": "package_name -\u003e version differences across assets",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/models.PackageVersionDiff"
+                        }
+                    }
+                },
+                "only_in": {
+                    "description": "machine_id -\u003e []package_names unique to that asset",
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "models.PackageFreshnessInfo": {
+            "type": "object",
+            "properties": {
+                "age_in_days": {
+                    "type": "integer"
+                },
+                "asset_count": {
+                    "type": "integer"
+                },
+                "first_seen_at": {
+                    "type": "string"
+                },
+                "package": {
+                    "type": "string"
+                },
+                "release": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PackageFreshnessReport": {
+            "type": "object",
+            "properties": {
+                "average_age_days": {
+                    "type": "number"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "machine_id": {
+                    "type": "string"
+                },
+                "newest_package": {
+                    "$ref": "#/definitions/models.PackageFreshnessInfo"
+                },
+                "oldest_package": {
+                    "$ref": "#/definitions/models.PackageFreshnessInfo"
+                },
+                "packages": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.PackageFreshnessInfo"
+                    }
+                }
+            }
+        },
+        "models.PackageVersionDiff": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string"
+                },
+                "machine_id": {
+                    "type": "string"
+                },
+                "release": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "models.Transaction": {
             "type": "object",
             "properties": {
@@ -691,6 +1137,30 @@
                 },
                 "user": {
                     "type": "string"
+                }
+            }
+        },
+        "models.TransactionAnomaly": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "details": {},
+                "detected_at": {
+                    "type": "string"
+                },
+                "hostname": {
+                    "type": "string"
+                },
+                "machine_id": {
+                    "type": "string"
+                },
+                "severity": {
+                    "$ref": "#/definitions/models.AnomalySeverity"
+                },
+                "type": {
+                    "$ref": "#/definitions/models.AnomalyType"
                 }
             }
         },

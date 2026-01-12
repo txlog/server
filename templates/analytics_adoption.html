@@ -1,0 +1,111 @@
+{{ template "header.html" . }}
+<div class="page-header d-print-none text-white">
+  <div class="container-xl">
+    <div class="row g-2 align-items-center">
+      <div class="col">
+        <div class="page-pretitle">Analytics</div>
+        <h2 class="page-title">{{ .title }}</h2>
+        <p class="text-white-50 mt-1 mb-0">View how widely packages are adopted across your fleet, showing
+          installation rates and recent update activity.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+  <div class="container-xl">
+    <div class="row row-deck row-cards">
+      <div class="col-12 col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Summary</h3>
+          </div>
+          <div class="card-body">
+            <div class="datagrid">
+              <div class="datagrid-item">
+                <div class="datagrid-title">Total Active Assets</div>
+                <div class="datagrid-content h2" id="total-assets">-</div>
+              </div>
+              <div class="datagrid-item">
+                <div class="datagrid-title">Most Adopted Package</div>
+                <div class="datagrid-content" id="most-adopted">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-8">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Package Adoption <span class="card-subtitle">by active assets</span></h3>
+          </div>
+          <div class="card-body" id="adoption-body">
+            <div class="progress progress-sm">
+              <div class="progress-bar progress-bar-indeterminate"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    fetch('/v1/reports/package-adoption?limit=100')
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('adoption-body').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+          return;
+        }
+
+        // Update summary
+        document.getElementById('total-assets').textContent = data.total_active_assets || 0;
+
+        if (data.packages && data.packages.length > 0) {
+          const topPkg = data.packages[0];
+          const pct = topPkg.percentage.toFixed(1);
+          document.getElementById('most-adopted').innerHTML = `
+                        <div class="mb-1"><strong>${topPkg.package}</strong></div>
+                        <div class="d-flex align-items-center">
+                            <div class="progress progress-sm flex-grow-1 me-2" style="height: 6px;">
+                                <div class="progress-bar bg-primary" style="width: ${pct}%"></div>
+                            </div>
+                            <span class="text-muted small">${pct}%</span>
+                        </div>
+                        <div class="text-muted small mt-1">${topPkg.active_assets} of ${data.total_active_assets} assets</div>
+                    `;
+
+          // Build table
+          let html = `<div class="table-responsive"><table class="table table-sm table-striped">
+          <thead><tr><th>Package</th><th>Assets</th><th>Adoption</th><th>Updates (30d)</th></tr></thead><tbody>`;
+
+          data.packages.forEach(pkg => {
+            const pct = pkg.percentage.toFixed(1);
+            html += `<tr>
+            <td><kbd>${pkg.package}</kbd></td>
+            <td>${pkg.active_assets} / ${pkg.total_assets}</td>
+            <td>
+              <div class="progress progress-sm" style="min-width: 100px;">
+                <div class="progress-bar bg-primary" style="width: ${pct}%"></div>
+              </div>
+              <small class="text-muted">${pct}%</small>
+            </td>
+            <td>${pkg.update_count_30d}</td>
+          </tr>`;
+          });
+
+          html += '</tbody></table></div>';
+          document.getElementById('adoption-body').innerHTML = html;
+        } else {
+          document.getElementById('most-adopted').textContent = 'N/A';
+          document.getElementById('adoption-body').innerHTML = '<div class="empty"><p class="empty-title">No adoption data available</p></div>';
+        }
+      })
+      .catch(error => {
+        document.getElementById('adoption-body').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+      });
+  });
+</script>
+{{ template "footer.html" . }}

@@ -1,6 +1,6 @@
-# Using Analytics Features
+# Using Reports Features
 
-Txlog Server provides analytics endpoints to gain insights into package management across your fleet.
+Txlog Server provides reports endpoints to gain insights into package management across your fleet.
 
 ## Overview
 
@@ -13,8 +13,8 @@ Txlog Server provides analytics endpoints to gain insights into package manageme
 
 ## Accessing via UI
 
-1. Navigate to **Analytics** in the top navigation menu.
-2. Select the desired analytics feature.
+1. Navigate to **Reports** in the top navigation menu.
+2. Select the desired report.
 3. Configure filters and view results.
 
 ### Quick Access

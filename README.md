@@ -136,6 +136,59 @@ cosign verify \
 A successful verification will display the image digest and signature details.
 If the signature is invalid or missing, `cosign` will return an error.
 
+### Using with Zot Registry
+
+If you are mirroring images to a [Zot Registry](https://zotregistry.dev/), you
+need to configure it to verify signatures and copy the image with its referrers
+(signatures).
+
+#### 1. Enable the Trust Extension
+
+In your Zot configuration file (`config.json`), enable the trust extension:
+
+```json
+{
+  "extensions": {
+    "trust": {
+      "enable": true,
+      "cosign": true
+    }
+  }
+}
+```
+
+#### 2. Upload the Public Key
+
+Upload the public key to your Zot instance:
+
+```bash
+curl --data-binary @cosign.pub \
+  -X POST \
+  "https://your-zot-registry/v2/_zot/ext/cosign"
+```
+
+#### 3. Copy Images with Signatures
+
+The standard sync or pull operations may not copy the signature referrers. Use
+[ORAS](https://oras.land/) to copy the image along with all its referrers
+(including signatures):
+
+```bash
+oras copy --recursive \
+  ghcr.io/txlog/server:v1.19.1 \
+  your-zot-registry/txlog/server:v1.19.1
+```
+
+#### 4. Restart Zot
+
+After uploading the public key, restart Zot to re-evaluate signature validity:
+
+```bash
+sudo systemctl restart zot
+```
+
+The image should now appear as signed and trusted in the Zot UI.
+
 ## 🪴 Project Activity
 
 ![Alt](https://repobeats.axiom.co/api/embed/e7072dd27ed7e95ffffdca0b6b8b1b9b8a9687ed.svg "Repobeats analytics image")

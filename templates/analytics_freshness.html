@@ -1,0 +1,119 @@
+{{ template "header.html" . }}
+<div class="page-header d-print-none text-white">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">Analytics</div>
+                <h2 class="page-title">{{ .title }}</h2>
+                <p class="text-white-50 mt-1 mb-0">Analyze the age of package versions based on when they were first
+                    seen, helping identify outdated packages that may need updates.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-deck row-cards">
+            <div class="col-12 col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Summary</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="datagrid">
+                            <div class="datagrid-item">
+                                <div class="datagrid-title">Average Package Age</div>
+                                <div class="datagrid-content" id="avg-age">Loading...</div>
+                            </div>
+                            <div class="datagrid-item">
+                                <div class="datagrid-title">Oldest Package</div>
+                                <div class="datagrid-content" id="oldest-pkg">Loading...</div>
+                            </div>
+                            <div class="datagrid-item">
+                                <div class="datagrid-title">Newest Package</div>
+                                <div class="datagrid-content" id="newest-pkg">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Package Freshness <span class="card-subtitle">by first seen date</span>
+                        </h3>
+                    </div>
+                    <div class="card-body" id="freshness-body">
+                        <div class="progress progress-sm">
+                            <div class="progress-bar progress-bar-indeterminate"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        fetch('/v1/reports/package-freshness?limit=100')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('freshness-body').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    return;
+                }
+
+                // Update summary
+                document.getElementById('avg-age').textContent = data.average_age_days ? Math.round(data.average_age_days) + ' days' : 'N/A';
+
+                if (data.oldest_package) {
+                    const oldPkg = data.oldest_package;
+                    document.getElementById('oldest-pkg').innerHTML = `
+                        <strong>${oldPkg.package}</strong>
+                        <span class="text-muted ms-1">(${oldPkg.age_in_days} days)</span>
+                    `;
+                } else {
+                    document.getElementById('oldest-pkg').textContent = 'N/A';
+                }
+
+                if (data.newest_package) {
+                    const newPkg = data.newest_package;
+                    document.getElementById('newest-pkg').innerHTML = `
+                        <strong>${newPkg.package}</strong>
+                        <span class="text-muted ms-1">(${newPkg.age_in_days} days)</span>
+                    `;
+                } else {
+                    document.getElementById('newest-pkg').textContent = 'N/A';
+                }
+
+                // Build table
+                if (data.packages && data.packages.length > 0) {
+                    let html = `<div class="table-responsive"><table class="table table-sm table-striped">
+          <thead><tr><th>Package</th><th>Version</th><th>Age (days)</th><th>Assets</th><th>First Seen</th></tr></thead><tbody>`;
+
+                    data.packages.forEach(pkg => {
+                        const ageClass = pkg.age_in_days > 365 ? 'text-danger' : (pkg.age_in_days > 180 ? 'text-warning' : 'text-success');
+                        const firstSeen = new Date(pkg.first_seen_at).toLocaleDateString();
+                        html += `<tr>
+            <td><kbd>${pkg.package}</kbd></td>
+            <td>${pkg.version}-${pkg.release}</td>
+            <td class="${ageClass}">${pkg.age_in_days}</td>
+            <td>${pkg.asset_count}</td>
+            <td>${firstSeen}</td>
+          </tr>`;
+                    });
+
+                    html += '</tbody></table></div>';
+                    document.getElementById('freshness-body').innerHTML = html;
+                } else {
+                    document.getElementById('freshness-body').innerHTML = '<div class="empty"><p class="empty-title">No freshness data available</p></div>';
+                }
+            })
+            .catch(error => {
+                document.getElementById('freshness-body').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            });
+    });
+</script>
+{{ template "footer.html" . }}

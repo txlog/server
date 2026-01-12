@@ -176,6 +176,13 @@ func main() {
 	r.GET("/api/packages-by-month", controllers.GetPackagesByMonth(database.Db))
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 	r.GET("/sponsor", controllers.GetSponsorIndex)
+
+	// Analytics pages
+	r.GET("/analytics/compare", controllers.GetAnalyticsCompare(database.Db))
+	r.GET("/analytics/freshness", controllers.GetAnalyticsFreshness(database.Db))
+	r.GET("/analytics/adoption", controllers.GetAnalyticsAdoption(database.Db))
+	r.GET("/analytics/anomalies", controllers.GetAnalyticsAnomalies(database.Db))
+
 	r.GET("/web/machines", v1API.GetMachinesWeb(database.Db))
 	r.GET("/web/packages/:name/:version/:release/assets", v1API.GetAssetsUsingPackageVersionWeb(database.Db))
 	r.GET("/web/items", v1API.GetItems(database.Db))
@@ -207,8 +214,12 @@ func main() {
 		// Package listing
 		v1Group.GET("/packages/:name/:version/:release/assets", v1API.GetAssetsUsingPackageVersion(database.Db))
 
-		// Reports
+		// Reports endpoints
 		v1Group.GET("/reports/monthly", v1API.GetMonthlyReport(database.Db))
+		v1Group.GET("/reports/compare-packages", v1API.ComparePackages(database.Db))
+		v1Group.GET("/reports/package-freshness", v1API.GetPackageFreshness(database.Db))
+		v1Group.GET("/reports/package-adoption", v1API.GetPackageAdoption(database.Db))
+		v1Group.GET("/reports/anomalies", v1API.GetAnomalies(database.Db))
 
 		// Endpoints for agent pre-v1.6.0
 		v1Group.GET("/machines/ids", v1API.GetMachineIDs(database.Db))

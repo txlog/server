@@ -9,14 +9,30 @@
           {{ .hostname }}
         </h2>
       </div>
+      <div class="col-auto ms-auto">
+        <a href="/analytics/compare?preselect={{ .machine_id }}" class="btn btn-outline-light">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h3" />
+            <path d="M15 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-3" />
+            <path d="M12 5v14" />
+          </svg>
+          Compare with...
+        </a>
+      </div>
       {{ if .needs_restarting }}
       <div class="col-auto ms-auto">
         <div class="alert alert-important alert-warning alert-dismissible" role="alert">
           <div class="alert-icon">
             <!-- Download SVG icon from http://tabler.io/icons/icon/alert-triangle -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon icon-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="icon alert-icon icon-2">
               <path d="M12 9v4"></path>
-              <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path>
+              <path
+                d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z">
+              </path>
               <path d="M12 16h.01"></path>
             </svg>
           </div>
@@ -42,7 +58,16 @@
             <div class="row align-items-center">
               <div class="col-auto">
                 <span class="text-black avatar">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-id-badge-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 12h3v4h-3z" /><path d="M10 6h-6a1 1 0 0 0 -1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1h-6" /><path d="M10 3m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M14 16h2" /><path d="M14 12h4" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-id-badge-2">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M7 12h3v4h-3z" />
+                    <path d="M10 6h-6a1 1 0 0 0 -1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1h-6" />
+                    <path d="M10 3m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" />
+                    <path d="M14 16h2" />
+                    <path d="M14 12h4" />
+                  </svg>
                 </span>
               </div>
               <div class="col">
@@ -58,7 +83,8 @@
           <div class="card-body">
             <div class="row align-items-center">
               <div class="col-auto">
-                <span class="text-black avatar" style="background-image: url(/images/{{ with index .executions 0 }}{{ brand .OS }}{{ end }})"></span>
+                <span class="text-black avatar"
+                  style="background-image: url(/images/{{ with index .executions 0 }}{{ brand .OS }}{{ end }})"></span>
               </div>
               <div class="col">
                 <div class="font-weight-medium">{{ with index .executions 0 }}{{ .OS }}{{ end }}</div>
@@ -74,7 +100,16 @@
             <div class="row align-items-center">
               <div class="col-auto">
                 <span class="text-black avatar">
-                  <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-git-merge"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M7 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M7 8l0 8" /><path d="M7 8a4 4 0 0 0 4 4h4" /></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="icon icon-tabler icons-tabler-outline icon-tabler-git-merge">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M7 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                    <path d="M7 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                    <path d="M17 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                    <path d="M7 8l0 8" />
+                    <path d="M7 8a4 4 0 0 0 4 4h4" />
+                  </svg>
                 </span>
               </div>
               <div class="col">
@@ -93,8 +128,9 @@
           {{ if eq (len .transactions) 0 }}
           <div class="empty">
             <div class="empty-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <circle cx="12" cy="12" r="9" />
                 <line x1="9" y1="10" x2="9.01" y2="10" />
                 <line x1="15" y1="10" x2="15.01" y2="10" />
@@ -102,7 +138,8 @@
               </svg>
             </div>
             <p class="empty-title">No transactions found for this asset</p>
-            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
+            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent"
+                target="_blank">Txlog Agent</a> in one of your servers.</p>
           </div>
           {{ else }}
           <div class="table-responsive">
@@ -122,47 +159,102 @@
               </thead>
               <tbody>
                 {{ with .transactions }}
-                  {{ range . }}
-                    <tr>
-                      <td><kbd data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ .Actions }}">{{ .TransactionID }}</kbd></td>
-                      <td>{{ formatDateTime .BeginTime }}</td>
-                      <td>{{ dnfUser .User }}</td>
-                      <td>
-                        <div class="avatar-list">
-                          <span class="avatar avatar-xs{{ if hasAction .Actions "Install" }} bg-green text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Install">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
-                          </span>
-                          <span class="avatar avatar-xs{{ if hasAction .Actions "Upgrade" }} bg-green text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Upgrade">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-badge-up"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 11v6l-5 -4l-5 4v-6l5 -4z" /></svg>
-                          </span>
-                          <span class="avatar avatar-xs{{ if hasAction .Actions "Reinstall" }} bg-yellow text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reinstall">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-rotate-clockwise"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4.05 11a8 8 0 1 1 .5 4m-.5 5v-5h5" /></svg>
-                          </span>
-                          <span class="avatar avatar-xs{{ if hasAction .Actions "Downgrade" }} bg-red text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Downgrade">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-badge-down"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 13v-6l-5 4l-5 -4v6l5 4z" /></svg>
-                          </span>
-                          <span class="avatar avatar-xs{{ if hasAction .Actions "Removed" }} bg-red text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Removed">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-minus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /></svg>
-                          </span>
-                          <span class="avatar avatar-xs{{ if hasAction .Actions "Obsolete" }} bg-purple text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Obsolete">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-circle-dashed-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8.56 3.69a9 9 0 0 0 -2.92 1.95" /><path d="M3.69 8.56a9 9 0 0 0 -.69 3.44" /><path d="M3.69 15.44a9 9 0 0 0 1.95 2.92" /><path d="M8.56 20.31a9 9 0 0 0 3.44 .69" /><path d="M15.44 20.31a9 9 0 0 0 2.92 -1.95" /><path d="M20.31 15.44a9 9 0 0 0 .69 -3.44" /><path d="M20.31 8.56a9 9 0 0 0 -1.95 -2.92" /><path d="M15.44 3.69a9 9 0 0 0 -3.44 -.69" /><path d="M9 12l2 2l4 -4" /></svg>
-                          </span>
-                          <span class="avatar avatar-xs{{ if hasAction .Actions "Reason Change" }} bg-purple text-white{{ end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reason Change">
-                            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-replace"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 3m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M15 15m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3" /><path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3" /></svg>
-                          </span>
-                        </div>
-                      </td>
-                      <td>{{ .Altered }}</td>
-                      {{ if .CommandLine }}
-                        <td class="text-truncate" style="max-width: 300px;" title="{{ .CommandLine }}">{{ .CommandLine }}</td>
-                      {{ else }}
-                        <td class="text-truncate text-secondary" style="max-width: 300px;" >No command recorded</td>
-                      {{ end }}
-                      <td>
-                        <a class="btn align-text-top" href="#" onclick="showModal('{{ .TransactionID }}')">Details</a>
-                      </td>
-                    </tr>
+                {{ range . }}
+                <tr>
+                  <td><kbd data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ .Actions }}">{{
+                      .TransactionID }}</kbd></td>
+                  <td>{{ formatDateTime .BeginTime }}</td>
+                  <td>{{ dnfUser .User }}</td>
+                  <td>
+                    <div class="avatar-list">
+                      <span class="avatar avatar-xs{{ if hasAction .Actions " Install" }} bg-green text-white{{ end }}"
+                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Install">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M12 5l0 14" />
+                          <path d="M5 12l14 0" />
+                        </svg>
+                      </span>
+                      <span class="avatar avatar-xs{{ if hasAction .Actions " Upgrade" }} bg-green text-white{{ end }}"
+                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Upgrade">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-badge-up">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M17 11v6l-5 -4l-5 4v-6l5 -4z" />
+                        </svg>
+                      </span>
+                      <span class="avatar avatar-xs{{ if hasAction .Actions " Reinstall" }} bg-yellow text-white{{ end
+                        }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reinstall">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-rotate-clockwise">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M4.05 11a8 8 0 1 1 .5 4m-.5 5v-5h5" />
+                        </svg>
+                      </span>
+                      <span class="avatar avatar-xs{{ if hasAction .Actions " Downgrade" }} bg-red text-white{{ end }}"
+                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Downgrade">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-badge-down">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M17 13v-6l-5 4l-5 -4v6l5 4z" />
+                        </svg>
+                      </span>
+                      <span class="avatar avatar-xs{{ if hasAction .Actions " Removed" }} bg-red text-white{{ end }}"
+                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Removed">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-minus">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M5 12l14 0" />
+                        </svg>
+                      </span>
+                      <span class="avatar avatar-xs{{ if hasAction .Actions " Obsolete" }} bg-purple text-white{{ end
+                        }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Obsolete">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-circle-dashed-check">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M8.56 3.69a9 9 0 0 0 -2.92 1.95" />
+                          <path d="M3.69 8.56a9 9 0 0 0 -.69 3.44" />
+                          <path d="M3.69 15.44a9 9 0 0 0 1.95 2.92" />
+                          <path d="M8.56 20.31a9 9 0 0 0 3.44 .69" />
+                          <path d="M15.44 20.31a9 9 0 0 0 2.92 -1.95" />
+                          <path d="M20.31 15.44a9 9 0 0 0 .69 -3.44" />
+                          <path d="M20.31 8.56a9 9 0 0 0 -1.95 -2.92" />
+                          <path d="M15.44 3.69a9 9 0 0 0 -3.44 -.69" />
+                          <path d="M9 12l2 2l4 -4" />
+                        </svg>
+                      </span>
+                      <span class="avatar avatar-xs{{ if hasAction .Actions " Reason Change" }} bg-purple text-white{{
+                        end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reason Change">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-replace">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M3 3m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                          <path d="M15 15m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                          <path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3" />
+                          <path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3" />
+                        </svg>
+                      </span>
+                    </div>
+                  </td>
+                  <td>{{ .Altered }}</td>
+                  {{ if .CommandLine }}
+                  <td class="text-truncate" style="max-width: 300px;" title="{{ .CommandLine }}">{{ .CommandLine }}</td>
+                  {{ else }}
+                  <td class="text-truncate text-secondary" style="max-width: 300px;">No command recorded</td>
                   {{ end }}
+                  <td>
+                    <a class="btn align-text-top" href="#" onclick="showModal('{{ .TransactionID }}')">Details</a>
+                  </td>
+                </tr>
+                {{ end }}
                 {{ end }}
               </tbody>
             </table>
@@ -178,8 +270,9 @@
           {{ if eq (len .executions) 0 }}
           <div class="empty">
             <div class="empty-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <circle cx="12" cy="12" r="9" />
                 <line x1="9" y1="10" x2="9.01" y2="10" />
                 <line x1="15" y1="10" x2="15.01" y2="10" />
@@ -187,7 +280,8 @@
               </svg>
             </div>
             <p class="empty-title">No executions found for this asset</p>
-            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
+            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent"
+                target="_blank">Txlog Agent</a> in one of your servers.</p>
           </div>
           {{ else }}
           <div class="table-responsive">
@@ -206,23 +300,23 @@
               </thead>
               <tbody>
                 {{ with .executions }}
-                  {{ range . }}
-                    <tr>
-                      <td>
-                        <span class="badge bg-default text-default-fg">
-                          <span class="badge {{ if eq .Success true }}bg-success{{ else }}bg-danger{{ end }} me-1"></span>
-                          {{ .ExecutionID }}
-                        </span>
-                      </td>
-                      <td><kbd>{{ .Hostname }}</kbd></td>
-                      <td>{{ formatDateTime .ExecutedAt }}</td>
-                      <td>{{ .TransactionsProcessed }}</td>
-                      <td>{{ .TransactionsSent }}</td>
-                      <td>
-                        <a class="btn align-text-top" href="/executions/{{ .ExecutionID }}">Details</a>
-                      </td>
-                    </tr>
-                  {{ end }}
+                {{ range . }}
+                <tr>
+                  <td>
+                    <span class="badge bg-default text-default-fg">
+                      <span class="badge {{ if eq .Success true }}bg-success{{ else }}bg-danger{{ end }} me-1"></span>
+                      {{ .ExecutionID }}
+                    </span>
+                  </td>
+                  <td><kbd>{{ .Hostname }}</kbd></td>
+                  <td>{{ formatDateTime .ExecutedAt }}</td>
+                  <td>{{ .TransactionsProcessed }}</td>
+                  <td>{{ .TransactionsSent }}</td>
+                  <td>
+                    <a class="btn align-text-top" href="/executions/{{ .ExecutionID }}">Details</a>
+                  </td>
+                </tr>
+                {{ end }}
                 {{ end }}
               </tbody>
             </table>
@@ -238,7 +332,15 @@
           {{ if eq (len .other_assets) 0 }}
           <div class="empty">
             <div class="empty-icon">
-              <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24" viewBox="0 0 24 24"  fill="none"  stroke="currentColor" stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-mood-wink"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M15 10h.01" /><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/><path d="M8.5 8.5l1.5 1.5l-1.5 1.5" /></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-mood-wink">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                <path d="M15 10h.01" />
+                <path d="M9.5 15a3.5 3.5 0 0 0 5 0" />
+                <path d="M8.5 8.5l1.5 1.5l-1.5 1.5" />
+              </svg>
             </div>
             <p class="empty-title">Great! No other assets are sharing this hostname.</p>
           </div>
@@ -258,15 +360,15 @@
               </thead>
               <tbody>
                 {{ with .other_assets }}
-                  {{ range . }}
-                    <tr>
-                      <td><a href="/assets/{{ .MachineID }}"><kbd>{{ .MachineID }}</kbd></a></td>
-                      <td><kbd>{{ .Hostname }}</kbd></td>
-                      <td>{{ formatDateTime .ExecutedAt }}</td>
-                      <td>{{ .AgentVersion }}</td>
-                      <td>{{ .OS }}</td>
-                    </tr>
-                  {{ end }}
+                {{ range . }}
+                <tr>
+                  <td><a href="/assets/{{ .MachineID }}"><kbd>{{ .MachineID }}</kbd></a></td>
+                  <td><kbd>{{ .Hostname }}</kbd></td>
+                  <td>{{ formatDateTime .ExecutedAt }}</td>
+                  <td>{{ .AgentVersion }}</td>
+                  <td>{{ .OS }}</td>
+                </tr>
+                {{ end }}
                 {{ end }}
               </tbody>
             </table>
@@ -285,7 +387,8 @@
           </div>
           <div class="card-body">
             <div>
-              <button type="button" class="btn btn-danger-lt btn-4 w-100" data-bs-toggle="modal" data-bs-target="#modal-delete">
+              <button type="button" class="btn btn-danger-lt btn-4 w-100" data-bs-toggle="modal"
+                data-bs-target="#modal-delete">
                 Delete all asset data...
               </button>
             </div>
@@ -340,13 +443,13 @@
       })
       .catch(error => console.error('Error:', error));
 
-      document.getElementById('modal-title').textContent = "Details of transaction #" + transactionId;
+    document.getElementById('modal-title').textContent = "Details of transaction #" + transactionId;
 
-      var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
-        keyboard: true,
-        backdrop: 'static'
-      });
-      myModal.show();
+    var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
+      keyboard: true,
+      backdrop: 'static'
+    });
+    myModal.show();
   }
 </script>
 <div class="modal modal-blur fade" id="modal-scrollable" tabindex="-1" style="display: none;" aria-hidden="true">
@@ -435,30 +538,19 @@
       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       <div class="modal-status bg-danger"></div>
       <div class="modal-body text-center py-4">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon mb-2 text-danger icon-lg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24"
+          viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+          stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
           <path d="M12 9v2m0 4v.01" />
-          <path
-            d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75"
-          />
+          <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />
         </svg>
         <h3>Are you sure?</h3>
         <div class="text-secondary">
-            Do you really want to remove all data for this asset ID? <strong>What you do cannot be undone.</strong>
+          Do you really want to remove all data for this asset ID? <strong>What you do cannot be undone.</strong>
         </div>
         <div class="text-secondary">
-            &nbsp;
+          &nbsp;
         </div>
         <code>{{ .machine_id }}</code>
       </div>
@@ -471,7 +563,8 @@
             <div class="col">
               <button id="delete-asset-btn" class="btn btn-danger w-100" onclick="deleteAsset('{{ .machine_id }}')">
                 <span id="delete-btn-text">Delete all asset data</span>
-                <div id="delete-btn-spinner" class="spinner-border spinner-border-sm ms-2" style="display: none;" role="status"></div>
+                <div id="delete-btn-spinner" class="spinner-border spinner-border-sm ms-2" style="display: none;"
+                  role="status"></div>
               </button>
             </div>
           </div>
@@ -481,43 +574,43 @@
   </div>
 </div>
 <script>
-function deleteAsset(assetId) {
-  const btn = document.getElementById('delete-asset-btn');
-  const btnText = document.getElementById('delete-btn-text');
-  const btnSpinner = document.getElementById('delete-btn-spinner');
-  const closeBtn = document.querySelector('#modal-delete .btn-close');
-  const cancelBtn = document.querySelector('#modal-delete .btn[data-bs-dismiss="modal"]');
+  function deleteAsset(assetId) {
+    const btn = document.getElementById('delete-asset-btn');
+    const btnText = document.getElementById('delete-btn-text');
+    const btnSpinner = document.getElementById('delete-btn-spinner');
+    const closeBtn = document.querySelector('#modal-delete .btn-close');
+    const cancelBtn = document.querySelector('#modal-delete .btn[data-bs-dismiss="modal"]');
 
-  // Disable button and show loading
-  btn.disabled = true;
-  btnSpinner.style.display = 'inline-block';
-  closeBtn.disabled = true;
-  cancelBtn.classList.add('disabled');
+    // Disable button and show loading
+    btn.disabled = true;
+    btnSpinner.style.display = 'inline-block';
+    closeBtn.disabled = true;
+    cancelBtn.classList.add('disabled');
 
-  fetch(`/assets/${assetId}`, { method: 'DELETE' })
-    .then(response => {
-      if (response.ok || response.redirected) {
-        // Store success message in sessionStorage
-        sessionStorage.setItem('assetDeleted', assetId);
-        // Redirect to assets page
-        window.location.href = "/assets";
-      } else {
+    fetch(`/assets/${assetId}`, { method: 'DELETE' })
+      .then(response => {
+        if (response.ok || response.redirected) {
+          // Store success message in sessionStorage
+          sessionStorage.setItem('assetDeleted', assetId);
+          // Redirect to assets page
+          window.location.href = "/assets";
+        } else {
+          // Re-enable button on error
+          btn.disabled = false;
+          btnSpinner.style.display = 'none';
+          closeBtn.disabled = false;
+          cancelBtn.classList.remove('disabled');
+          alert('Failed to delete asset.');
+        }
+      })
+      .catch(() => {
         // Re-enable button on error
         btn.disabled = false;
         btnSpinner.style.display = 'none';
         closeBtn.disabled = false;
         cancelBtn.classList.remove('disabled');
         alert('Failed to delete asset.');
-      }
-    })
-    .catch(() => {
-      // Re-enable button on error
-      btn.disabled = false;
-      btnSpinner.style.display = 'none';
-      closeBtn.disabled = false;
-      cancelBtn.classList.remove('disabled');
-      alert('Failed to delete asset.');
-    });
-}
+      });
+  }
 </script>
 {{ template "footer.html" . }}

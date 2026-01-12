@@ -1,4 +1,62 @@
 definitions:
+  models.AnomalyReport:
+    properties:
+      anomalies:
+        items:
+          $ref: '#/definitions/models.TransactionAnomaly'
+        type: array
+      summary:
+        $ref: '#/definitions/models.AnomalySummary'
+      time_window:
+        type: string
+    type: object
+  models.AnomalySeverity:
+    enum:
+    - low
+    - medium
+    - high
+    type: string
+    x-enum-varnames:
+    - SeverityLow
+    - SeverityMedium
+    - SeverityHigh
+  models.AnomalySummary:
+    properties:
+      affected_hosts:
+        type: integer
+      by_severity:
+        additionalProperties:
+          type: integer
+        type: object
+      by_type:
+        additionalProperties:
+          type: integer
+        type: object
+      total_count:
+        type: integer
+    type: object
+  models.AnomalyType:
+    enum:
+    - high_volume
+    - rapid_change
+    - downgrade
+    type: string
+    x-enum-varnames:
+    - AnomalyHighVolume
+    - AnomalyRapidChange
+    - AnomalyDowngrade
+  models.AssetPackageSet:
+    properties:
+      hostname:
+        type: string
+      machine_id:
+        type: string
+      packages:
+        additionalProperties:
+          type: string
+        description: package_name -> version-release
+        type: object
+    type: object
   models.Execution:
     properties:
       agent_version:
@@ -43,6 +101,98 @@ definitions:
     required:
     - name
     type: object
+  models.PackageAdoptionInfo:
+    properties:
+      active_assets:
+        type: integer
+      package:
+        type: string
+      percentage:
+        type: number
+      total_assets:
+        type: integer
+      update_count_30d:
+        description: updates in last 30 days
+        type: integer
+    type: object
+  models.PackageAdoptionReport:
+    properties:
+      packages:
+        items:
+          $ref: '#/definitions/models.PackageAdoptionInfo'
+        type: array
+      total_active_assets:
+        type: integer
+    type: object
+  models.PackageComparisonResult:
+    properties:
+      assets:
+        items:
+          $ref: '#/definitions/models.AssetPackageSet'
+        type: array
+      common:
+        description: packages present in all assets with same version
+        items:
+          type: string
+        type: array
+      different:
+        additionalProperties:
+          items:
+            $ref: '#/definitions/models.PackageVersionDiff'
+          type: array
+        description: package_name -> version differences across assets
+        type: object
+      only_in:
+        additionalProperties:
+          items:
+            type: string
+          type: array
+        description: machine_id -> []package_names unique to that asset
+        type: object
+    type: object
+  models.PackageFreshnessInfo:
+    properties:
+      age_in_days:
+        type: integer
+      asset_count:
+        type: integer
+      first_seen_at:
+        type: string
+      package:
+        type: string
+      release:
+        type: string
+      version:
+        type: string
+    type: object
+  models.PackageFreshnessReport:
+    properties:
+      average_age_days:
+        type: number
+      hostname:
+        type: string
+      machine_id:
+        type: string
+      newest_package:
+        $ref: '#/definitions/models.PackageFreshnessInfo'
+      oldest_package:
+        $ref: '#/definitions/models.PackageFreshnessInfo'
+      packages:
+        items:
+          $ref: '#/definitions/models.PackageFreshnessInfo'
+        type: array
+    type: object
+  models.PackageVersionDiff:
+    properties:
+      hostname:
+        type: string
+      machine_id:
+        type: string
+      release:
+        type: string
+      version:
+        type: string
+    type: object
   models.Transaction:
     properties:
       actions:
@@ -75,6 +225,22 @@ definitions:
         type: string
       user:
         type: string
+    type: object
+  models.TransactionAnomaly:
+    properties:
+      description:
+        type: string
+      details: {}
+      detected_at:
+        type: string
+      hostname:
+        type: string
+      machine_id:
+        type: string
+      severity:
+        $ref: '#/definitions/models.AnomalySeverity'
+      type:
+        $ref: '#/definitions/models.AnomalyType'
     type: object
   models.TransactionItem:
     properties:
@@ -365,6 +531,77 @@ paths:
       summary: Get assets that are using a specific package version
       tags:
       - packages
+  /v1/reports/anomalies:
+    get:
+      description: Detects unusual transaction patterns like high volume, rapid changes,
+        or downgrades
+      parameters:
+      - description: Number of days to analyze (default 7)
+        in: query
+        name: days
+        type: integer
+      - description: Minimum severity filter (low, medium, high)
+        in: query
+        name: severity
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AnomalyReport'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get transaction anomalies
+      tags:
+      - reports
+  /v1/reports/compare-packages:
+    get:
+      description: Compares the installed packages across 2-20 assets, highlighting
+        differences
+      parameters:
+      - description: Comma-separated list of machine IDs (2-20)
+        in: query
+        name: machine_ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PackageComparisonResult'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Compare packages between assets
+      tags:
+      - reports
   /v1/reports/monthly:
     get:
       description: Returns a list of package updates for a specific month/year, including
@@ -403,6 +640,78 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get monthly package update report
+      tags:
+      - reports
+  /v1/reports/package-adoption:
+    get:
+      description: Returns how widely packages have been adopted across active assets
+      parameters:
+      - description: Number of packages to return (default 50)
+        in: query
+        name: limit
+        type: integer
+      - description: Minimum number of assets (default 1)
+        in: query
+        name: min_assets
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PackageAdoptionReport'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get package adoption report
+      tags:
+      - reports
+  /v1/reports/package-freshness:
+    get:
+      description: Returns analysis of how current the deployed package versions are
+      parameters:
+      - description: Optional machine ID for specific asset analysis
+        in: query
+        name: machine_id
+        type: string
+      - description: Number of packages to return (default 50)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PackageFreshnessReport'
+        "400":
+          description: Bad request - invalid parameters
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get package freshness analysis
       tags:
       - reports
   /v1/transactions:

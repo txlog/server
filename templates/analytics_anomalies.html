@@ -1,0 +1,170 @@
+{{ template "header.html" . }}
+<div class="page-header d-print-none text-white">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <div class="page-pretitle">Analytics</div>
+                <h2 class="page-title">{{ .title }}</h2>
+                <p class="text-white-50 mt-1 mb-0">Detect unusual patterns in package transactions such as high-volume
+                    changes, rapid package updates, or version downgrades.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row row-cards">
+            <div class="col-12 col-lg-4">
+                <div class="row row-cards">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Filters</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Time Period</label>
+                                    <select id="days-filter" class="form-select" onchange="loadAnomalies()">
+                                        <option value="7">Last 7 days</option>
+                                        <option value="14">Last 14 days</option>
+                                        <option value="30">Last 30 days</option>
+                                        <option value="60">Last 60 days</option>
+                                        <option value="90">Last 90 days</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Minimum Severity</label>
+                                    <select id="severity-filter" class="form-select" onchange="loadAnomalies()">
+                                        <option value="">All Severities</option>
+                                        <option value="low">Low+</option>
+                                        <option value="medium">Medium+</option>
+                                        <option value="high">High Only</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Summary</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="datagrid">
+                                    <div class="datagrid-item">
+                                        <div class="datagrid-title">Total Anomalies</div>
+                                        <div class="datagrid-content h2" id="total-anomalies">-</div>
+                                    </div>
+                                    <div class="datagrid-item">
+                                        <div class="datagrid-title">Affected Hosts</div>
+                                        <div class="datagrid-content" id="affected-hosts">-</div>
+                                    </div>
+                                    <div class="datagrid-item">
+                                        <div class="datagrid-title">High Severity</div>
+                                        <div class="datagrid-content text-danger" id="high-count">-</div>
+                                    </div>
+                                    <div class="datagrid-item">
+                                        <div class="datagrid-title">Medium Severity</div>
+                                        <div class="datagrid-content text-warning" id="medium-count">-</div>
+                                    </div>
+                                    <div class="datagrid-item">
+                                        <div class="datagrid-title">Low Severity</div>
+                                        <div class="datagrid-content text-info" id="low-count">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Detected Anomalies <span class="card-subtitle" id="time-window"></span>
+                        </h3>
+                    </div>
+                    <div class="card-body" id="anomalies-body">
+                        <div class="progress progress-sm">
+                            <div class="progress-bar progress-bar-indeterminate"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function loadAnomalies() {
+        const days = document.getElementById('days-filter').value;
+        const severity = document.getElementById('severity-filter').value;
+
+        let url = `/v1/reports/anomalies?days=${days}`;
+        if (severity) url += `&severity=${severity}`;
+
+        document.getElementById('anomalies-body').innerHTML = '<div class="progress progress-sm"><div class="progress-bar progress-bar-indeterminate"></div></div>';
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('anomalies-body').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    return;
+                }
+
+                // Update summary
+                document.getElementById('time-window').textContent = data.time_window;
+                document.getElementById('total-anomalies').textContent = data.summary.total_count || 0;
+                document.getElementById('affected-hosts').textContent = data.summary.affected_hosts || 0;
+                document.getElementById('high-count').textContent = data.summary.by_severity?.high || 0;
+                document.getElementById('medium-count').textContent = data.summary.by_severity?.medium || 0;
+                document.getElementById('low-count').textContent = data.summary.by_severity?.low || 0;
+
+                if (data.anomalies && data.anomalies.length > 0) {
+                    let html = '';
+
+                    data.anomalies.forEach(anomaly => {
+                        const severityClass = anomaly.severity === 'high' ? 'danger' : (anomaly.severity === 'medium' ? 'warning' : 'info');
+                        const typeIcon = anomaly.type === 'high_volume' ? 'stack-2' : (anomaly.type === 'rapid_change' ? 'refresh' : 'arrow-badge-down');
+                        const typeName = anomaly.type === 'high_volume' ? 'High Volume' : (anomaly.type === 'rapid_change' ? 'Rapid Change' : 'Downgrade');
+                        const detectedAt = new Date(anomaly.detected_at).toLocaleString();
+
+                        html += `
+          <div class="alert alert-${severityClass} mb-2" role="alert">
+            <div class="d-flex">
+              <div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
+              </div>
+              <div>
+                <h4 class="alert-title mb-1">${anomaly.hostname} - ${typeName}</h4>
+                <div class="text-secondary">${anomaly.description}</div>
+                <div class="mt-1">
+                  <small class="text-muted">Detected: ${detectedAt}</small>
+                  <span class="badge bg-${severityClass} ms-2">${anomaly.severity}</span>
+                </div>
+              </div>
+            </div>
+          </div>`;
+                    });
+
+                    document.getElementById('anomalies-body').innerHTML = html;
+                } else {
+                    document.getElementById('anomalies-body').innerHTML = `
+          <div class="empty">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
+            </div>
+            <p class="empty-title">No anomalies detected</p>
+            <p class="empty-subtitle text-muted">No unusual activity found in the selected time period.</p>
+          </div>`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('anomalies-body').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadAnomalies);
+</script>
+{{ template "footer.html" . }}

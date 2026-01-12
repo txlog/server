@@ -29,9 +29,9 @@ Welcome to the Txlog Server documentation. This documentation is divided into fo
 - **[Run Database Migrations](how-to/run-migrations.md)**: Apply schema changes safely.
 - **[Deploy to Kubernetes](how-to/deploy-kubernetes.md)**: Production deployment manifest.
 
-#### Analytics
+#### Reports
 
-- **[Use Analytics Features](how-to/use-analytics.md)**: Compare packages, analyze freshness, track adoption, detect anomalies.
+- **[Use Reports Features](how-to/use-reports.md)**: Compare packages, analyze freshness, track adoption, detect anomalies.
 
 #### Development
 

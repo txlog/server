@@ -107,6 +107,35 @@ spec:
 If you want to use a production (stable) version, replace `main` by the version
 number (e.g. `v1.0`) in the Docker commands and Kubernetes configuration.
 
+## Image Signature Verification
+
+All Docker images from v1.19.1 and above published to `ghcr.io/txlog/server` are
+digitally signed using [Cosign](https://github.com/sigstore/cosign) from the
+[Sigstore](https://www.sigstore.dev/) project. This ensures the authenticity and
+integrity of the images you pull.
+
+### Verifying an Image
+
+To verify the signature of an image, you need to have `cosign` installed. Then,
+use the public key included in this repository:
+
+```bash
+cosign verify \
+  --key https://raw.githubusercontent.com/txlog/server/main/cosign.pub \
+  ghcr.io/txlog/server:latest
+```
+
+Or, if you have cloned this repository:
+
+```bash
+cosign verify \
+  --key cosign.pub \
+  ghcr.io/txlog/server:latest
+```
+
+A successful verification will display the image digest and signature details.
+If the signature is invalid or missing, `cosign` will return an error.
+
 ## 🪴 Project Activity
 
 ![Alt](https://repobeats.axiom.co/api/embed/e7072dd27ed7e95ffffdca0b6b8b1b9b8a9687ed.svg "Repobeats analytics image")

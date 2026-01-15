@@ -349,7 +349,7 @@
       agentVersion = "with undefined version";
     }
 
-    fetch(`/web/machines?agent_version=${agentVersion}`)
+    fetch(`/v1/machines?agent_version=${agentVersion}`)
       .then(response => response.json())
       .then(data => {
         const result = data;
@@ -391,7 +391,7 @@
       os = "Undefined OS";
     }
 
-    fetch(`/web/machines?os=${os}`)
+    fetch(`/v1/machines?os=${os}`)
       .then(response => response.json())
       .then(data => {
         const result = data;

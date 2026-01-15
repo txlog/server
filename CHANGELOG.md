@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix package comparison (`/analytics/compare`) incorrectly showing packages as
   "Version Differences" when all assets have the same version. The comparison
   now uses original version strings instead of re-constructed values.
+- Fix package comparison displaying only version without release, making it
+  appear that packages with different releases had the same version. Now
+  displays full `version-release` format (e.g., `3.1.5-1.el9`).
+- Fix anomaly badges text color for better readability by adding explicit
+  white text color.
 
 ### Changed
 

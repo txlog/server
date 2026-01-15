@@ -206,7 +206,8 @@
             data.assets.forEach(asset => {
               const diff = diffs.find(d => d.machine_id === asset.machine_id);
               if (diff) {
-                html += `<td class="text-center"><code>${diff.version}</code></td>`;
+                const fullVersion = diff.release ? `${diff.version}-${diff.release}` : diff.version;
+                html += `<td class="text-center"><code>${fullVersion}</code></td>`;
               } else {
                 html += `<td class="text-center text-muted">—</td>`;
               }

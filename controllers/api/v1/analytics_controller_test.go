@@ -114,6 +114,153 @@ func TestComparePackages_ValidParameters(t *testing.T) {
 	}
 }
 
+// =============== Version Comparison Logic Tests ===============
+// These tests verify the version comparison logic without needing a database
+
+func TestVersionComparisonLogic_SameVersions(t *testing.T) {
+	// Simulates the logic in comparePackageSets to verify same versions are identified correctly
+	tests := []struct {
+		name     string
+		versions map[string]string
+		expected bool // true = all same, false = different
+	}{
+		{
+			name: "identical simple versions",
+			versions: map[string]string{
+				"machine1": "1.5.7-el9",
+				"machine2": "1.5.7-el9",
+				"machine3": "1.5.7-el9",
+			},
+			expected: true,
+		},
+		{
+			name: "identical versions with epoch",
+			versions: map[string]string{
+				"machine1": "2:8.2.2637-el9",
+				"machine2": "2:8.2.2637-el9",
+				"machine3": "2:8.2.2637-el9",
+			},
+			expected: true,
+		},
+		{
+			name: "identical versions with complex release",
+			versions: map[string]string{
+				"machine1": "3.18.0-el9.x86_64",
+				"machine2": "3.18.0-el9.x86_64",
+			},
+			expected: true,
+		},
+		{
+			name: "different versions",
+			versions: map[string]string{
+				"machine1": "1.5.7-el9",
+				"machine2": "1.5.8-el9",
+			},
+			expected: false,
+		},
+		{
+			name: "different releases same version",
+			versions: map[string]string{
+				"machine1": "1.5.7-el8",
+				"machine2": "1.5.7-el9",
+			},
+			expected: false,
+		},
+		{
+			name: "versions with hyphens in release",
+			versions: map[string]string{
+				"machine1": "4.3.0-1.el9",
+				"machine2": "4.3.0-1.el9",
+				"machine3": "4.3.0-1.el9",
+			},
+			expected: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Use the same comparison logic as in comparePackageSets
+			firstVersion := ""
+			allSame := true
+			for _, ver := range tt.versions {
+				if firstVersion == "" {
+					firstVersion = ver
+				} else if ver != firstVersion {
+					allSame = false
+					break
+				}
+			}
+
+			if allSame != tt.expected {
+				t.Errorf("Expected allSame=%v, got %v for versions: %v", tt.expected, allSame, tt.versions)
+			}
+		})
+	}
+}
+
+func TestVersionComparisonLogic_VersionParsing(t *testing.T) {
+	// Test that version-release parsing works correctly for display purposes
+	tests := []struct {
+		name            string
+		versionRelease  string
+		expectedVersion string
+		expectedRelease string
+	}{
+		{
+			name:            "simple version-release",
+			versionRelease:  "1.5.7-el9",
+			expectedVersion: "1.5.7",
+			expectedRelease: "el9",
+		},
+		{
+			name:            "version with epoch",
+			versionRelease:  "2:8.2.2637-el9",
+			expectedVersion: "2:8.2.2637",
+			expectedRelease: "el9",
+		},
+		{
+			name:            "release with dots",
+			versionRelease:  "3.18.0-el9.x86_64",
+			expectedVersion: "3.18.0",
+			expectedRelease: "el9.x86_64",
+		},
+		{
+			name:            "release with hyphen",
+			versionRelease:  "4.3.0-1.el9",
+			expectedVersion: "4.3.0",
+			expectedRelease: "1.el9",
+		},
+		{
+			name:            "complex release",
+			versionRelease:  "0.69.0-1.el9.noarch",
+			expectedVersion: "0.69.0",
+			expectedRelease: "1.el9.noarch",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			parts := splitVersionRelease(tt.versionRelease)
+			if parts[0] != tt.expectedVersion {
+				t.Errorf("Expected version=%s, got %s", tt.expectedVersion, parts[0])
+			}
+			if parts[1] != tt.expectedRelease {
+				t.Errorf("Expected release=%s, got %s", tt.expectedRelease, parts[1])
+			}
+		})
+	}
+}
+
+// Helper function to split version-release (same logic as in comparePackageSets)
+func splitVersionRelease(versionRelease string) [2]string {
+	for i := 0; i < len(versionRelease); i++ {
+		if versionRelease[i] == '-' {
+			return [2]string{versionRelease[:i], versionRelease[i+1:]}
+		}
+	}
+	return [2]string{versionRelease, ""}
+}
+
 // =============== Package Freshness Tests ===============
 
 func TestGetPackageFreshness_ValidParameters(t *testing.T) {

@@ -128,10 +128,12 @@ func comparePackageSets(database *sql.DB, machineIDs []string) (*models.PackageC
 	for pkg := range allPackages {
 		presentIn := make([]string, 0)
 		versions := make(map[string]models.PackageVersionDiff)
+		versionStrings := make(map[string]string) // Store original version string for comparison
 
 		for machineID, asset := range assetPackages {
 			if ver, exists := asset.Packages[pkg]; exists {
 				presentIn = append(presentIn, machineID)
+				versionStrings[machineID] = ver // Store original for comparison
 				parts := strings.SplitN(ver, "-", 2)
 				version := parts[0]
 				release := ""
@@ -155,14 +157,13 @@ func comparePackageSets(database *sql.DB, machineIDs []string) (*models.PackageC
 			continue
 		}
 
-		// Check if versions differ
+		// Check if versions differ using original stored strings
 		firstVersion := ""
 		allSame := true
-		for _, v := range versions {
-			fullVer := v.Version + "-" + v.Release
+		for machineID := range versions {
 			if firstVersion == "" {
-				firstVersion = fullVer
-			} else if fullVer != firstVersion {
+				firstVersion = versionStrings[machineID]
+			} else if versionStrings[machineID] != firstVersion {
 				allSame = false
 				break
 			}

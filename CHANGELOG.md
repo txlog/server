@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (e.g., `feat/advanced-analysis`) by changing branch pattern from `*` to `**`.
 - Fix Docker image tags containing invalid characters by sanitizing branch names
   (replacing `/` with `-`) before using them as tags.
+- Fix package comparison (`/analytics/compare`) incorrectly showing packages as
+  "Version Differences" when all assets have the same version. The comparison
+  now uses original version strings instead of re-constructed values.
 
 ### Changed
 

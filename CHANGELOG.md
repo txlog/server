@@ -17,6 +17,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.19.2] - 2026-01-15
+
+### Fixed
+
+- Fix GitHub Actions build workflow not triggering for branches with slashes
+  (e.g., `feat/advanced-analysis`) by changing branch pattern from `*` to `**`.
+- Fix Docker image tags containing invalid characters by sanitizing branch names
+  (replacing `/` with `-`) before using them as tags.
+
+### Changed
+
+- Allow session-authenticated users to access `/v1` API endpoints directly,
+  enabling UI pages to call API endpoints without requiring an API key header.
+- Optimize API key middleware to check for API key header before session cookie,
+  avoiding unnecessary database queries for API requests that include an API key.
+- Consolidate duplicate `/web/*` endpoints into `/v1/*` endpoints:
+  - `/web/machines` → `/v1/machines`
+  - `/web/packages/:name/:version/:release/assets` → `/v1/packages/:name/:version/:release/assets`
+  - `/web/items` → `/v1/items`
+
+### Removed
+
+- Remove duplicate `/web/*` routes and their corresponding `*Web` controller
+  functions (`GetMachinesWeb`, `GetAssetsUsingPackageVersionWeb`).
+
 ## [1.19.1] - 2026-01-11
 
 ### Changed

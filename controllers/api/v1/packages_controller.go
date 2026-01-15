@@ -83,76 +83,9 @@ ORDER BY
 			return
 		}
 
-		if len(assets) == 0 {
-			c.JSON(http.StatusNotFound, gin.H{"error": "No assets found using this package version"})
-			return
-		}
-
-		c.JSON(http.StatusOK, assets)
-	}
-}
-
-func GetAssetsUsingPackageVersionWeb(database *sql.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var pkg models.Package
-		if err := c.ShouldBindUri(&pkg); err != nil {
-			c.JSON(400, gin.H{"msg": err.Error()})
-			return
-		}
-
-		query := `
-WITH LatestPackageVersion AS (
-  SELECT
-    machine_id,
-    version,
-    release,
-    action,
-    ROW_NUMBER() OVER (
-      PARTITION BY machine_id
-      ORDER BY
-        version DESC,
-        release DESC,
-        transaction_id DESC
-    ) AS rn
-  FROM
-    public.transaction_items
-  WHERE
-    package = $1
-)
-SELECT
-  DISTINCT t.hostname,
-  lpv.machine_id
-FROM
-  LatestPackageVersion AS lpv
-  INNER JOIN public.transactions AS t ON lpv.machine_id = t.machine_id
-WHERE
-  lpv.rn = 1
-  AND lpv.version = $2
-  AND lpv.release = $3
-  AND lpv.action IN ('Install', 'Upgrade', 'Downgrade')
-ORDER BY
-  t.hostname ASC;`
-
-		rows, err := database.Query(query, pkg.Name, pkg.Version, pkg.Release)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query database"})
-			return
-		}
-		defer rows.Close()
-
-		assets := make([]models.AssetInfo, 0)
-		for rows.Next() {
-			var asset models.AssetInfo
-			if err := rows.Scan(&asset.Hostname, &asset.MachineID); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan row"})
-				return
-			}
-			assets = append(assets, asset)
-		}
-
-		if err := rows.Err(); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error iterating rows"})
-			return
+		// Return empty array instead of 404 to allow UI to handle empty state
+		if assets == nil {
+			assets = []models.AssetInfo{}
 		}
 
 		c.JSON(http.StatusOK, assets)

@@ -207,7 +207,7 @@
             document.getElementById('table-placeholder').style.display = 'block';
 
             // Fetch data from API
-            const response = await fetch(`/web/packages/${encodeURIComponent(packageName)}/${encodeURIComponent(version)}/${encodeURIComponent(release)}/assets`);
+            const response = await fetch(`/v1/packages/${encodeURIComponent(packageName)}/${encodeURIComponent(version)}/${encodeURIComponent(release)}/assets`);
 
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);

@@ -183,9 +183,6 @@ func main() {
 	r.GET("/analytics/adoption", controllers.GetAnalyticsAdoption(database.Db))
 	r.GET("/analytics/anomalies", controllers.GetAnalyticsAnomalies(database.Db))
 
-	r.GET("/web/machines", v1API.GetMachinesWeb(database.Db))
-	r.GET("/web/packages/:name/:version/:release/assets", v1API.GetAssetsUsingPackageVersionWeb(database.Db))
-	r.GET("/web/items", v1API.GetItems(database.Db))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
 		ginSwagger.PersistAuthorization(true),

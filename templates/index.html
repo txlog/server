@@ -328,7 +328,7 @@
         let html = '<div class="list-group list-group-flush">';
         data.anomalies.slice(0, 5).forEach(a => {
           const sev = a.severity === 'high' ? 'danger' : (a.severity === 'medium' ? 'warning' : 'info');
-          html += `<div class="list-group-item"><span class="badge bg-${sev} me-2">${a.severity}</span><strong>${a.hostname}</strong>: ${a.description}</div>`;
+          html += `<div class="list-group-item"><span class="badge bg-${sev} text-white me-2">${a.severity}</span><strong>${a.hostname}</strong>: ${a.description}</div>`;
         });
         if (data.anomalies.length > 5) {
           html += `<div class="list-group-item text-muted">... and ${data.anomalies.length - 5} more</div>`;

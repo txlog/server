@@ -17,7 +17,7 @@
     <script>
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('migration_success')) {
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
           const alertDiv = document.createElement('div');
           alertDiv.className = 'alert alert-success alert-dismissible mb-3';
           alertDiv.innerHTML = `
@@ -47,7 +47,7 @@
           <div class="card-header">
             <h3 class="card-title">Server Configuration</h3>
             <div class="card-actions">
-              <span class="badge bg-gray">Read-only</span>
+              <span class="badge bg-gray text-white">Read-only</span>
             </div>
           </div>
 
@@ -208,9 +208,12 @@
                   <div class="card-body">
                     <div class="empty">
                       <div class="empty-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                          <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                          stroke-linejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path
+                            d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
                           <path d="M9 12l2 2l4 -4" />
                         </svg>
                       </div>
@@ -219,9 +222,12 @@
                         OpenID Connect authentication is not enabled.
                       </p>
                       <div class="empty-action">
-                        <a href="https://txlog.rda.run/docs/server#authentication" target="_blank" class="btn btn-primary" rel="noopener">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <a href="https://txlog.rda.run/docs/server#authentication" target="_blank"
+                          class="btn btn-primary" rel="noopener">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                             <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
                             <path d="M12 9h.01" />
                             <path d="M11 12h1v4h1" />
@@ -354,9 +360,12 @@
                   <div class="card-body">
                     <div class="empty">
                       <div class="empty-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                          <path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                          stroke-linejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path
+                            d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
                           <path d="M9 12l2 2l4 -4" />
                         </svg>
                       </div>
@@ -365,9 +374,12 @@
                         LDAP authentication is not enabled.
                       </p>
                       <div class="empty-action">
-                        <a href="https://txlog.rda.run/docs/server#ldap-authentication" target="_blank" class="btn btn-primary" rel="noopener">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                        <a href="https://txlog.rda.run/docs/server#ldap-authentication" target="_blank"
+                          class="btn btn-primary" rel="noopener">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                             <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
                             <path d="M12 9h.01" />
                             <path d="M11 12h1v4h1" />
@@ -471,16 +483,16 @@
                   </td>
                   <td data-label="Status">
                     {{ if .IsActive }}
-                      <span class="badge bg-success me-1"></span> Active
+                    <span class="badge bg-success me-1"></span> Active
                     {{ else }}
-                      <span class="badge bg-danger me-1"></span> Inactive
+                    <span class="badge bg-danger me-1"></span> Inactive
                     {{ end }}
                   </td>
                   <td data-label="Role">
                     {{ if .IsAdmin }}
-                      <span class="badge bg-purple text-white">Administrator</span>
+                    <span class="badge bg-purple text-white">Administrator</span>
                     {{ else }}
-                      <span class="badge bg-secondary text-white">User</span>
+                    <span class="badge bg-secondary text-white">User</span>
                     {{ end }}
                   </td>
                   <td data-label="Last Login">
@@ -492,9 +504,12 @@
                   <td>
                     <div class="btn-list flex-nowrap">
                       <!-- Edit User Button -->
-                      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ .ID }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-edit">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#editModal{{ .ID }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-edit">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                           <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
                           <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
                           <path d="M16 5l3 3" />
@@ -504,9 +519,12 @@
 
                       {{ if .IsActive }}
                       <!-- Deactivate User Button -->
-                      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deactivateModal{{ .ID }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-user-x">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#deactivateModal{{ .ID }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon icon-tabler icons-tabler-outline icon-tabler-user-x">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                           <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
                           <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" />
                           <path d="M22 22l-5 -5" />
@@ -520,7 +538,8 @@
                 </tr>
 
                 <!-- Edit User Modal -->
-                <div class="modal modal-blur fade" id="editModal{{ .ID }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal modal-blur fade" id="editModal{{ .ID }}" tabindex="-1" role="dialog"
+                  aria-hidden="true">
                   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <form action="/admin/update" method="post">
@@ -541,14 +560,16 @@
 
                           <div class="mb-3">
                             <label class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" name="is_active" {{ if .IsActive }}checked{{ end }}>
+                              <input class="form-check-input" type="checkbox" name="is_active" {{ if .IsActive
+                                }}checked{{ end }}>
                               <span class="form-check-label">Active User</span>
                             </label>
                           </div>
 
                           <div class="mb-3">
                             <label class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" name="is_admin" {{ if .IsAdmin }}checked{{ end }}>
+                              <input class="form-check-input" type="checkbox" name="is_admin" {{ if .IsAdmin }}checked{{
+                                end }}>
                               <span class="form-check-label">Administrator</span>
                             </label>
                           </div>
@@ -563,7 +584,8 @@
                 </div>
 
                 <!-- Deactivate User Modal -->
-                <div class="modal modal-blur fade" id="deactivateModal{{ .ID }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal modal-blur fade" id="deactivateModal{{ .ID }}" tabindex="-1" role="dialog"
+                  aria-hidden="true">
                   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <form action="/admin/delete" method="post">
@@ -574,7 +596,8 @@
                         <div class="modal-body">
                           <input type="hidden" name="user_id" value="{{ .ID }}">
                           <p>Are you sure you want to deactivate <strong>{{ .Name }}</strong> ({{ .Email }})?</p>
-                          <p class="text-muted">This will prevent the user from logging in, but their data will be preserved.</p>
+                          <p class="text-muted">This will prevent the user from logging in, but their data will be
+                            preserved.</p>
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -612,9 +635,11 @@
           <div class="card-header">
             <h3 class="card-title">API Keys</h3>
             <div class="card-actions">
-              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createAPIKeyModal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                data-bs-target="#createAPIKeyModal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                   <path d="M12 5l0 14" />
                   <path d="M5 12l14 0" />
                 </svg>
@@ -638,7 +663,7 @@
                 </tr>
               </thead>
               <tbody>
-              {{ range .apiKeys }}
+                {{ range .apiKeys }}
                 <tr>
                   <td data-label="Name">
                     <div class="font-weight-medium">{{ .Name }}</div>
@@ -655,33 +680,39 @@
                   </td>
                   <td data-label="Last Used">
                     {{ if .LastUsedAt }}
-                      <div>{{ formatDateTime .LastUsedAt }}</div>
+                    <div>{{ formatDateTime .LastUsedAt }}</div>
                     {{ else }}
-                      <span class="text-muted">Never</span>
+                    <span class="text-muted">Never</span>
                     {{ end }}
                   </td>
                   <td data-label="Status">
                     {{ if .IsActive }}
-                      <span class="badge bg-success text-white">Active</span>
+                    <span class="badge bg-success text-white">Active</span>
                     {{ else }}
-                      <span class="badge bg-danger text-white">Revoked</span>
+                    <span class="badge bg-danger text-white">Revoked</span>
                     {{ end }}
                   </td>
                   <td>
                     <div class="btn-list flex-nowrap">
                       {{ if .IsActive }}
-                      <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#revokeAPIKeyModal{{ .ID }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#revokeAPIKeyModal{{ .ID }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                           <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
                           <path d="M10 10l4 4m0 -4l-4 4" />
                         </svg>
                         Revoke
                       </button>
                       {{ end }}
-                      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAPIKeyModal{{ .ID }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#deleteAPIKeyModal{{ .ID }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                           <path d="M4 7l16 0" />
                           <path d="M10 11l0 6" />
                           <path d="M14 11l0 6" />
@@ -695,7 +726,8 @@
                 </tr>
 
                 <!-- Revoke API Key Modal -->
-                <div class="modal modal-blur fade" id="revokeAPIKeyModal{{ .ID }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal modal-blur fade" id="revokeAPIKeyModal{{ .ID }}" tabindex="-1" role="dialog"
+                  aria-hidden="true">
                   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <form action="/admin/apikeys/revoke" method="post">
@@ -706,7 +738,8 @@
                         <div class="modal-body">
                           <input type="hidden" name="key_id" value="{{ .ID }}">
                           <p>Are you sure you want to revoke the API key <strong>{{ .Name }}</strong>?</p>
-                          <p class="text-muted">This will prevent the key from authenticating any API requests. This action can be reversed by creating a new key.</p>
+                          <p class="text-muted">This will prevent the key from authenticating any API requests. This
+                            action can be reversed by creating a new key.</p>
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -718,7 +751,8 @@
                 </div>
 
                 <!-- Delete API Key Modal -->
-                <div class="modal modal-blur fade" id="deleteAPIKeyModal{{ .ID }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal modal-blur fade" id="deleteAPIKeyModal{{ .ID }}" tabindex="-1" role="dialog"
+                  aria-hidden="true">
                   <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <form action="/admin/apikeys/delete" method="post">
@@ -730,7 +764,8 @@
                           <input type="hidden" name="key_id" value="{{ .ID }}">
                           <p>Are you sure you want to permanently delete the API key <strong>{{ .Name }}</strong>?</p>
                           <div class="alert alert-danger">
-                            <strong>Warning:</strong> This action cannot be undone. The key will be permanently removed from the database.
+                            <strong>Warning:</strong> This action cannot be undone. The key will be permanently removed
+                            from the database.
                           </div>
                         </div>
                         <div class="modal-footer">
@@ -750,9 +785,11 @@
           <div class="card-body">
             <div class="empty">
               <div class="empty-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" />
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
+                  stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path
+                    d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" />
                   <path d="M15 9h.01" />
                 </svg>
               </div>
@@ -761,9 +798,11 @@
                 Generate your first API key to start authenticating API requests. Click the button below to get started.
               </p>
               <div class="empty-action">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAPIKeyModal">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                  data-bs-target="#createAPIKeyModal">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M12 5l0 14" />
                     <path d="M5 12l14 0" />
                   </svg>
@@ -772,7 +811,7 @@
               </div>
             </div>
           </div>
-                {{ end }}
+          {{ end }}
 
           <div class="card-footer">
             <p class="m-0 text-secondary">
@@ -791,12 +830,12 @@
             <div class="card-actions">
               {{ if .migrations }}
               {{ if gt (len .migrations.Pending) 0 }}
-                <span class="badge bg-orange text-white">{{ len .migrations.Pending }} pending</span>
+              <span class="badge bg-orange text-white">{{ len .migrations.Pending }} pending</span>
               {{ else }}
-                <span class="badge bg-green text-white">Up to date</span>
+              <span class="badge bg-green text-white">Up to date</span>
               {{ end }}
               {{ if .migrations.IsDirty }}
-                <span class="badge bg-red text-white">Dirty state</span>
+              <span class="badge bg-red text-white">Dirty state</span>
               {{ end }}
               {{ end }}
             </div>
@@ -808,9 +847,11 @@
               <div class="col-md-4">
                 <div class="d-flex align-items-center">
                   <span class="me-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon text-blue">
-                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
-                      <path d="m7 11V7a5 5 0 0 1 10 0v4"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="icon text-blue">
+                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                      <path d="m7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                   </span>
                   <div>
@@ -821,8 +862,10 @@
               <div class="col-md-4">
                 <div class="d-flex align-items-center">
                   <span class="me-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon text-green">
-                      <path d="M20 6 9 17l-5-5"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="icon text-green">
+                      <path d="M20 6 9 17l-5-5" />
                     </svg>
                   </span>
                   <div>
@@ -833,9 +876,11 @@
               <div class="col-md-4">
                 <div class="d-flex align-items-center">
                   <span class="me-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon text-orange">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="m9 12 2 2 4-4"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                      class="icon text-orange">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="m9 12 2 2 4-4" />
                     </svg>
                   </span>
                   <div>
@@ -849,9 +894,12 @@
             <div class="alert alert-warning">
               <div class="d-flex">
                 <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
+                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path
+                      d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
                     <path d="M12 9v4" />
                     <path d="M12 17h.01" />
                   </svg>
@@ -868,8 +916,9 @@
 
             <div class="mb-3">
               <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#migrationsModal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                  <path d="M5 12l5 5l10 -10"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                  <path d="M5 12l5 5l10 -10" />
                 </svg>
                 Run All Migrations ({{ len .migrations.Pending }})
               </button>
@@ -878,14 +927,17 @@
             <div class="alert alert-success">
               <div class="d-flex">
                 <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                    <path d="M5 12l5 5l10 -10"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
+                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M5 12l5 5l10 -10" />
                   </svg>
                 </div>
                 <div>
                   <h4>Database Up to Date</h4>
-                  <div class="text-secondary">All migrations have been applied successfully. The database is current.</div>
+                  <div class="text-secondary">All migrations have been applied successfully. The database is current.
+                  </div>
                 </div>
               </div>
             </div>
@@ -948,7 +1000,8 @@
         <div id="createAPIKeyForm">
           <div class="mb-3">
             <label class="form-label required">Key Name</label>
-            <input type="text" class="form-control" name="name" id="apiKeyName" placeholder="e.g., Production Server, Development Agent" required minlength="3">
+            <input type="text" class="form-control" name="name" id="apiKeyName"
+              placeholder="e.g., Production Server, Development Agent" required minlength="3">
             <div class="form-text">Enter a descriptive name to identify this API key (minimum 3 characters)</div>
           </div>
         </div>
@@ -957,9 +1010,11 @@
           <div class="alert alert-success">
             <div class="d-flex">
               <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M5 12l5 5l10 -10"/>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
+                  viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M5 12l5 5l10 -10" />
                 </svg>
               </div>
               <div>
@@ -976,9 +1031,10 @@
             <div class="input-group">
               <input type="text" class="form-control font-monospace" id="apiKeyValue" readonly>
               <button class="btn btn-primary" type="button" id="copyAPIKeyBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                 </svg>
                 Copy
               </button>
@@ -988,8 +1044,10 @@
           <div class="alert alert-info mb-0">
             <div class="d-flex">
               <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
+                  viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                   <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
                   <path d="M12 9h.01" />
                   <path d="M11 12h1v4h1" />
@@ -1013,9 +1071,11 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeModalBtn">Close</button>
         <button type="button" class="btn btn-primary" id="generateAPIKeyBtn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-            <path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path
+              d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" />
             <path d="M15 9h.01" />
           </svg>
           Generate Key
@@ -1037,9 +1097,11 @@
         <div class="alert alert-warning">
           <div class="d-flex">
             <div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <path d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
+              <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24"
+                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path
+                  d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
                 <path d="M12 9v4" />
                 <path d="M12 17h.01" />
               </svg>
@@ -1089,8 +1151,9 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         <form action="/admin/migrations/run" method="post" style="display: inline;">
           <button type="submit" class="btn btn-primary" id="runMigrationsBtn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-              <path d="M5 12l5 5l10 -10"/>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+              <path d="M5 12l5 5l10 -10" />
             </svg>
             Run All Migrations
           </button>
@@ -1102,10 +1165,10 @@
 
 <script>
   // Handle migration button click
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     const runMigrationsBtn = document.getElementById('runMigrationsBtn');
     if (runMigrationsBtn) {
-      runMigrationsBtn.addEventListener('click', function() {
+      runMigrationsBtn.addEventListener('click', function () {
         this.disabled = true;
         this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Running...';
         this.form.submit();
@@ -1121,7 +1184,7 @@
     const modal = document.getElementById('createAPIKeyModal');
 
     if (generateBtn) {
-      generateBtn.addEventListener('click', async function() {
+      generateBtn.addEventListener('click', async function () {
         const nameInput = document.getElementById('apiKeyName');
         const name = nameInput.value.trim();
 
@@ -1173,7 +1236,7 @@
     }
 
     if (copyBtn) {
-      copyBtn.addEventListener('click', function() {
+      copyBtn.addEventListener('click', function () {
         const apiKeyInput = document.getElementById('apiKeyValue');
         apiKeyInput.select();
         document.execCommand('copy');
@@ -1184,7 +1247,7 @@
         copyBtn.classList.add('btn-success');
         copyBtn.classList.remove('btn-primary');
 
-        setTimeout(function() {
+        setTimeout(function () {
           copyBtn.innerHTML = originalHTML;
           copyBtn.classList.remove('btn-success');
           copyBtn.classList.add('btn-primary');
@@ -1194,7 +1257,7 @@
 
     // Reset modal when closed
     if (modal) {
-      modal.addEventListener('hidden.bs.modal', function() {
+      modal.addEventListener('hidden.bs.modal', function () {
         // Check if a key was created (result is visible)
         const wasKeyCreated = resultDiv.style.display === 'block';
 

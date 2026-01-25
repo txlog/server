@@ -17,7 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
-## [1.19.2] - 2026-01-15
+## [1.20.0] - 2026-01-25
+
+### Added
+
+- Add Reports UI pages (`/reports/anomalies`, `/reports/compare`,
+  `/reports/progression`) and consolidate all analytics API endpoints under
+  `/v1/reports/*` for consistent naming.
+- Update Contributor Covenant badge to version 3.0.
 
 ### Fixed
 

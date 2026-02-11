@@ -212,32 +212,18 @@ func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
 	return assetsByOS, nil
 }
 
-// getAssetsByAgentVersion retrieves statistics about agent versions and their distribution across machines.
-// It queries the database to count the number of unique machines per agent version,
-// considering only the most recent execution for each hostname.
-//
-// Parameters:
-//   - database: A pointer to sql.DB representing the database connection
-//
-// Returns:
-//   - []AgentStats: A slice of AgentStats containing agent version and number of machines
-//   - error: An error if the database query or scan fails, nil otherwise
-//
-// The function returns results ordered by number of machines in descending order.
+// getAssetsByAgentVersion retrieves statistics about agent versions and their
+// distribution across active machines from the assets table. Returns a slice
+// of AgentStats containing agent version and number of machines, or an error
+// if the query fails.
 func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
 	rows, err := database.Query(`
   SELECT
-    e.agent_version,
-    COUNT(DISTINCT a.hostname) AS num_machines
-  FROM assets a
-  INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
-  WHERE a.is_active = TRUE
-  AND e.executed_at = (
-    SELECT MAX(e2.executed_at)
-    FROM executions e2
-    WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
-  )
-  GROUP BY e.agent_version
+    agent_version,
+    COUNT(*) AS num_machines
+  FROM assets
+  WHERE is_active = TRUE AND agent_version IS NOT NULL
+  GROUP BY agent_version
   ORDER BY num_machines DESC;`)
 
 	if err != nil {

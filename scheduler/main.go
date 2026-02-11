@@ -88,7 +88,22 @@ func refreshMaterializedViewsJob() {
 			// View might not exist yet (migration not applied)
 			// This is expected on first deployment, so we only log at debug level
 			logger.Debug("Could not refresh mv_package_listing: " + err.Error())
-			return
+		}
+	}
+
+	// Refresh dashboard materialized views
+	dashboardViews := []string{
+		"mv_dashboard_os_stats",
+		"mv_dashboard_agent_stats",
+		"mv_dashboard_most_updated",
+	}
+	for _, view := range dashboardViews {
+		_, err = database.Db.Exec(`REFRESH MATERIALIZED VIEW CONCURRENTLY ` + view)
+		if err != nil {
+			_, err = database.Db.Exec(`REFRESH MATERIALIZED VIEW ` + view)
+			if err != nil {
+				logger.Debug("Could not refresh " + view + ": " + err.Error())
+			}
 		}
 	}
 

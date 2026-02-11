@@ -29,7 +29,7 @@ func TestMultipleAssetReplacements(t *testing.T) {
 		defer tx.Rollback()
 
 		timestamp := time.Now().Add(time.Duration(i) * time.Hour)
-		err := am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{}, "")
+		err := am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			t.Fatalf("Failed to create asset %d: %v", i, err)
 		}
@@ -80,7 +80,7 @@ func TestConcurrentAssetUpdates(t *testing.T) {
 		tx, _ := db.Begin()
 
 		timestamp := time.Now().Add(time.Duration(i) * time.Minute)
-		err := am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{}, "")
+		err := am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			tx.Rollback()
 			t.Fatalf("Failed to upsert asset iteration %d: %v", i, err)
@@ -121,7 +121,7 @@ func TestAssetReactivation(t *testing.T) {
 		tx, _ := db.Begin()
 		defer tx.Rollback()
 
-		err := am.UpsertAsset(tx, hostname1, machineID, time.Now(), sql.NullBool{}, sql.NullString{}, "")
+		err := am.UpsertAsset(tx, hostname1, machineID, time.Now(), sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			t.Fatalf("Failed to create initial asset: %v", err)
 		}
@@ -135,7 +135,7 @@ func TestAssetReactivation(t *testing.T) {
 		tx, _ := db.Begin()
 		defer tx.Rollback()
 
-		err := am.UpsertAsset(tx, hostname2, machineID, time.Now(), sql.NullBool{}, sql.NullString{}, "")
+		err := am.UpsertAsset(tx, hostname2, machineID, time.Now(), sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			t.Fatalf("Failed to move asset: %v", err)
 		}
@@ -167,7 +167,7 @@ func TestAssetReactivation(t *testing.T) {
 		tx, _ := db.Begin()
 		defer tx.Rollback()
 
-		err := am.UpsertAsset(tx, hostname1, machineID, time.Now(), sql.NullBool{}, sql.NullString{}, "")
+		err := am.UpsertAsset(tx, hostname1, machineID, time.Now(), sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			t.Fatalf("Failed to reactivate asset: %v", err)
 		}
@@ -212,7 +212,7 @@ func TestAssetHistoryPreservation(t *testing.T) {
 	// Create all assets
 	for _, m := range machines {
 		tx, _ := db.Begin()
-		err := am.UpsertAsset(tx, hostname, m.id, m.timestamp, sql.NullBool{}, sql.NullString{}, "")
+		err := am.UpsertAsset(tx, hostname, m.id, m.timestamp, sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			tx.Rollback()
 			t.Fatalf("Failed to create asset %s: %v", m.id, err)
@@ -277,7 +277,7 @@ func TestAssetDatabaseConstraints(t *testing.T) {
 		// Create first asset
 		am := models.NewAssetManager(db)
 		tx, _ := db.Begin()
-		err := am.UpsertAsset(tx, hostname, machineID1, time.Now(), sql.NullBool{}, sql.NullString{}, "")
+		err := am.UpsertAsset(tx, hostname, machineID1, time.Now(), sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			tx.Rollback()
 			t.Fatalf("Failed to create first asset: %v", err)
@@ -286,7 +286,7 @@ func TestAssetDatabaseConstraints(t *testing.T) {
 
 		// Create second asset (should deactivate first)
 		tx, _ = db.Begin()
-		err = am.UpsertAsset(tx, hostname, machineID2, time.Now(), sql.NullBool{}, sql.NullString{}, "")
+		err = am.UpsertAsset(tx, hostname, machineID2, time.Now(), sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			tx.Rollback()
 			t.Fatalf("Failed to create second asset: %v", err)
@@ -356,7 +356,7 @@ func TestAssetTimestampEdgeCases(t *testing.T) {
 		// Create with current time
 		tx, _ := db.Begin()
 		now := time.Now()
-		err := am.UpsertAsset(tx, hostname, machineID, now, sql.NullBool{}, sql.NullString{}, "")
+		err := am.UpsertAsset(tx, hostname, machineID, now, sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			tx.Rollback()
 			t.Fatalf("Failed to create asset: %v", err)
@@ -366,7 +366,7 @@ func TestAssetTimestampEdgeCases(t *testing.T) {
 		// Update with older timestamp (should still update last_seen)
 		tx, _ = db.Begin()
 		older := now.Add(-1 * time.Hour)
-		err = am.UpsertAsset(tx, hostname, machineID, older, sql.NullBool{}, sql.NullString{}, "")
+		err = am.UpsertAsset(tx, hostname, machineID, older, sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			tx.Rollback()
 			t.Fatalf("Failed to update asset: %v", err)

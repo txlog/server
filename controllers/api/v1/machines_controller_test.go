@@ -61,7 +61,7 @@ func createTestAssetWithExecution(t *testing.T, db *sql.DB, hostname, machineID,
 
 	// Insert asset
 	am := models.NewAssetManager(db)
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{}, "")
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{}, "", "")
 	if err != nil {
 		t.Fatalf("Failed to insert asset: %v", err)
 	}

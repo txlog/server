@@ -46,13 +46,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
       a.hostname,
       a.machine_id
     FROM assets a
-    INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
-    WHERE a.is_active = TRUE
-    AND e.executed_at = (
-      SELECT MAX(e2.executed_at)
-      FROM executions e2
-      WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
-    )`
+    WHERE a.is_active = TRUE`
 
 		var params []interface{}
 		var paramCount int
@@ -63,7 +57,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 				os = ""
 			}
 			paramCount++
-			query += ` AND e.os = $` + strconv.Itoa(paramCount)
+			query += ` AND a.os = $` + strconv.Itoa(paramCount)
 			params = append(params, os)
 		}
 
@@ -73,7 +67,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 				agentVersion = ""
 			}
 			paramCount++
-			query += ` AND e.agent_version = $` + strconv.Itoa(paramCount)
+			query += ` AND a.agent_version = $` + strconv.Itoa(paramCount)
 			params = append(params, agentVersion)
 		}
 

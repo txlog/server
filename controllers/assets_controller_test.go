@@ -70,7 +70,7 @@ func createTestAssetWithData(t *testing.T, db *sql.DB, hostname, machineID, os s
 	if needsRestart {
 		needsRestartingNull = sql.NullBool{Bool: needsRestart, Valid: true}
 	}
-	err = am.UpsertAsset(tx, hostname, machineID, lastSeen, needsRestartingNull, sql.NullString{}, "")
+	err = am.UpsertAsset(tx, hostname, machineID, lastSeen, needsRestartingNull, sql.NullString{}, "", "")
 	if err != nil {
 		t.Fatalf("Failed to insert asset: %v", err)
 	}

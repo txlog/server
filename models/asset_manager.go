@@ -15,7 +15,7 @@ func NewAssetManager(db *sql.DB) *AssetManager {
 	return &AssetManager{db: db}
 }
 
-func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID string, timestamp time.Time, needsRestarting sql.NullBool, restartingReason sql.NullString, os string) error {
+func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID string, timestamp time.Time, needsRestarting sql.NullBool, restartingReason sql.NullString, os string, agentVersion string) error {
 	var existingAssetID int
 	var existingIsActive bool
 
@@ -32,9 +32,9 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 		}
 
 		_, err = tx.Exec(`
-			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os)
-			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6)
-		`, hostname, machineID, timestamp, needsRestarting, restartingReason, os)
+			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os, agent_version)
+			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6, $7)
+		`, hostname, machineID, timestamp, needsRestarting, restartingReason, os, agentVersion)
 
 		if err != nil {
 			logger.Error("Error inserting asset: " + err.Error())
@@ -50,9 +50,9 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 
 	_, err = tx.Exec(`
 		UPDATE assets
-		SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4
-		WHERE asset_id = $5
-	`, timestamp, needsRestarting, restartingReason, os, existingAssetID)
+		SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4, agent_version = $5
+		WHERE asset_id = $6
+	`, timestamp, needsRestarting, restartingReason, os, agentVersion, existingAssetID)
 
 	if err != nil {
 		logger.Error("Error updating asset last_seen: " + err.Error())

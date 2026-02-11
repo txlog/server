@@ -159,6 +159,16 @@ func deactivateUser(db *sql.DB, userID int) error {
 // PostAdminRunMigrations runs all pending migrations
 func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// First check if database is dirty and force clean if needed
+		if err := database.ForceCleanIfDirty(); err != nil {
+			logger.Error("Failed to clean dirty state: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Migration Error",
+				"error": "Failed to clean dirty state: " + err.Error(),
+			})
+			return
+		}
+
 		// Apply all pending migrations using database package function
 		err := database.RunAllMigrations()
 		if err != nil {
@@ -171,6 +181,24 @@ func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 		}
 
 		logger.Info("All pending migrations applied successfully via admin panel")
+		c.Redirect(http.StatusSeeOther, "/admin?migration_success=1")
+	}
+}
+
+// PostAdminForceCleanMigration forces the database migration state to clean
+func PostAdminForceCleanMigration(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		err := database.ForceCleanIfDirty()
+		if err != nil {
+			logger.Error("Failed to force clean migration state: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Migration Error",
+				"error": "Failed to force clean migration state: " + err.Error(),
+			})
+			return
+		}
+
+		logger.Info("Database migration forced to clean state via admin panel")
 		c.Redirect(http.StatusSeeOther, "/admin?migration_success=1")
 	}
 }

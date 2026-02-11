@@ -890,6 +890,56 @@
               </div>
             </div>
 
+            {{ if .migrations.IsDirty }}
+            <div class="alert alert-danger">
+              <div class="d-flex">
+                <div>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
+                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M12 9v4" />
+                    <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
+                    <path d="M12 16h.01" />
+                  </svg>
+                </div>
+                <div>
+                  <h4>Database Migration in Dirty State</h4>
+                  <div class="text-secondary">
+                    The database is stuck at version <strong>{{ .migrations.CurrentVersion }}</strong> in a dirty state.
+                    This means a migration failed mid-execution. No pending migrations can be applied until this is resolved.
+                  </div>
+                  <div class="mt-2">
+                    <form action="/admin/migrations/force-clean" method="post" style="display:inline;">
+                      <button type="submit" class="btn btn-danger btn-sm"
+                        onclick="return confirm('This will force the database to clean state at version {{ .migrations.CurrentVersion }}. Are you sure?')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                          <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                        </svg>
+                        Force Clean State
+                      </button>
+                    </form>
+                    <form action="/admin/migrations/run" method="post" style="display:inline;" class="ms-2">
+                      <button type="submit" class="btn btn-primary btn-sm"
+                        onclick="return confirm('This will force clean the dirty state and then run all pending migrations. Continue?')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          class="icon">
+                          <path d="M5 12l5 5l10 -10" />
+                        </svg>
+                        Force Clean &amp; Run Migrations
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {{ end }}
+
             {{ if gt (len .migrations.Pending) 0 }}
             <div class="alert alert-warning">
               <div class="d-flex">
@@ -914,6 +964,7 @@
               </div>
             </div>
 
+            {{ if not .migrations.IsDirty }}
             <div class="mb-3">
               <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#migrationsModal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -923,7 +974,9 @@
                 Run All Migrations ({{ len .migrations.Pending }})
               </button>
             </div>
+            {{ end }}
             {{ else }}
+            {{ if not .migrations.IsDirty }}
             <div class="alert alert-success">
               <div class="d-flex">
                 <div>
@@ -941,6 +994,7 @@
                 </div>
               </div>
             </div>
+            {{ end }}
             {{ end }}
             {{ else }}
             <div class="alert alert-info">

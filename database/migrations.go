@@ -103,6 +103,38 @@ func RunAllMigrations() error {
 	return nil
 }
 
+// ForceCleanIfDirty checks if the database is in a dirty state and forces it to clean
+func ForceCleanIfDirty() error {
+	driver, err := postgres.WithInstance(Db, &postgres.Config{})
+	if err != nil {
+		return fmt.Errorf("failed to create database driver: %w", err)
+	}
+
+	source, err := iofs.New(migrationsFS, "migrations")
+	if err != nil {
+		return fmt.Errorf("failed to create migration source: %w", err)
+	}
+
+	m, err := migrate.NewWithInstance("iofs", source, "postgres", driver)
+	if err != nil {
+		return fmt.Errorf("failed to create migration instance: %w", err)
+	}
+	defer m.Close()
+
+	version, dirty, err := m.Version()
+	if err != nil && err != migrate.ErrNilVersion {
+		return fmt.Errorf("failed to get migration version: %w", err)
+	}
+
+	if dirty {
+		if err := m.Force(int(version)); err != nil {
+			return fmt.Errorf("failed to force migration version %d: %w", version, err)
+		}
+	}
+
+	return nil
+}
+
 // toTitle converts a string to title case (first letter of each word capitalized)
 // This is a simple replacement for the deprecated strings.Title function
 func toTitle(s string) string {

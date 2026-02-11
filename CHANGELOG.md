@@ -17,6 +17,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- Implement detection and force-cleaning of dirty database migration states via the admin panel.
+- Add `agent_version` to assets and create dashboard materialized views.
+- Add pagination to `GetTransactions` endpoint.
+- Add pagination to `GetExecutions` endpoint.
+- Add `golang.org/x/sync` as a direct dependency.
+
+### Changed
+
+- Update Go version to 1.25.6.
+- Bump `golang.org/x/oauth2` from 0.34.0 to 0.35.0.
+- Bump `github.com/lib/pq` to 1.11.2.
+- Bump `github.com/tavsec/gin-healthcheck`.
+- **Performance**: Batch insert transaction items in `PostTransactions`.
+- **Performance**: Add `LIMIT 50` to transactions query in `GetMachineID`.
+- **Performance**: Simplify `getAssetsByOS` to query assets table directly.
+- **Performance**: Execute dashboard queries in parallel.
+- **Performance**: Add composite indexes for critical query patterns.
+- **Performance**: Configure connection pool limits.
+
+### Fixed
+
+- Fix concurrent map write panic in `EnvironmentVariablesMiddleware` by creating a per-request copy of the environment map.
+- Fix backward compatibility for `agent_version` column in models.
+
 ## [1.20.0] - 2026-01-25
 
 ### Added

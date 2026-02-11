@@ -171,14 +171,10 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 		var err error
 
 		rows, err = database.Query(`
-      SELECT hostname, machine_id, begin_time
-      FROM transactions
-      WHERE transaction_id IN (
-        SELECT MIN(transaction_id)
-        FROM transactions
-        GROUP BY machine_id
-      ) AND hostname = $1
-      ORDER BY begin_time DESC`,
+      SELECT hostname, machine_id, first_seen
+      FROM assets
+      WHERE hostname = $1
+      ORDER BY last_seen DESC`,
 			hostname,
 		)
 
@@ -192,19 +188,19 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 		machines := []MachineID{}
 		for rows.Next() {
 			var machine MachineID
-			var beginTime sql.NullTime
+			var firstSeen sql.NullTime
 			err := rows.Scan(
 				&machine.Hostname,
 				&machine.MachineID,
-				&beginTime,
+				&firstSeen,
 			)
 			if err != nil {
 				logger.Error("Error iterating machine_id: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if beginTime.Valid {
-				machine.BeginTime = &beginTime.Time
+			if firstSeen.Valid {
+				machine.BeginTime = &firstSeen.Time
 			}
 			machines = append(machines, machine)
 		}

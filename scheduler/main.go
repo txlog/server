@@ -13,6 +13,9 @@ import (
 	"github.com/txlog/server/statistics"
 )
 
+// numericRegex is precompiled at package level to avoid recompilation on each housekeeping invocation
+var numericRegex = regexp.MustCompile(`^[0-9]+$`)
+
 // StartScheduler initializes and starts the scheduler system with periodic jobs:
 //   - A housekeeping job that runs according to CRON_RETENTION_EXPRESSION
 //     environment variable
@@ -171,8 +174,37 @@ func housekeepingJob() {
 	if retentionDays == "" {
 		retentionDays = "7" // default to 7 days if not set
 	}
-	if regexp.MustCompile(`^[0-9]+$`).MatchString(retentionDays) {
+	if numericRegex.MatchString(retentionDays) {
 		_, _ = database.Db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL $1 day", retentionDays)
+	}
+
+	// D11: Cleanup orphan transaction_items and transactions from inactive assets
+	_, err = database.Db.Exec(`
+		DELETE FROM transaction_items ti
+		WHERE NOT EXISTS (
+			SELECT 1 FROM assets a
+			WHERE a.machine_id = ti.machine_id AND a.is_active = TRUE
+		)
+		AND ti.machine_id IN (
+			SELECT machine_id FROM assets WHERE is_active = FALSE AND deactivated_at < NOW() - INTERVAL '90 days'
+		)
+	`)
+	if err != nil {
+		logger.Error("Housekeeping: error cleaning orphan transaction_items: " + err.Error())
+	}
+
+	_, err = database.Db.Exec(`
+		DELETE FROM transactions t
+		WHERE NOT EXISTS (
+			SELECT 1 FROM assets a
+			WHERE a.machine_id = t.machine_id AND a.is_active = TRUE
+		)
+		AND t.machine_id IN (
+			SELECT machine_id FROM assets WHERE is_active = FALSE AND deactivated_at < NOW() - INTERVAL '90 days'
+		)
+	`)
+	if err != nil {
+		logger.Error("Housekeeping: error cleaning orphan transactions: " + err.Error())
 	}
 
 	logger.Info("Housekeeping: executions older than " + retentionDays + " days are deleted.")

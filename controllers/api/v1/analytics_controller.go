@@ -575,13 +575,13 @@ func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models
 			COUNT(*) as package_count
 		FROM transactions t
 		JOIN transaction_items ti ON t.transaction_id = ti.transaction_id AND t.machine_id = ti.machine_id
-		WHERE t.begin_time >= NOW() - INTERVAL '%d days'
+		WHERE t.begin_time >= NOW() - make_interval(days => $1)
 		GROUP BY t.transaction_id, t.machine_id, t.hostname, t.begin_time
 		HAVING COUNT(*) > 50
 		ORDER BY package_count DESC
 	`
 
-	rows, err := database.Query(fmt.Sprintf(highVolumeQuery, days))
+	rows, err := database.Query(highVolumeQuery, days)
 	if err != nil {
 		return nil, err
 	}
@@ -631,7 +631,7 @@ func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models
 				ti.machine_id,
 				t.hostname,
 				CASE
-					WHEN ti.package LIKE 'Change %%' THEN SUBSTRING(ti.package FROM 8)
+					WHEN ti.package LIKE 'Change %' THEN SUBSTRING(ti.package FROM 8)
 					ELSE ti.package
 				END AS package,
 				ti.action,
@@ -639,7 +639,7 @@ func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models
 				DATE_TRUNC('day', t.begin_time) as change_day
 			FROM transaction_items ti
 			JOIN transactions t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
-			WHERE t.begin_time >= NOW() - INTERVAL '%d days'
+			WHERE t.begin_time >= NOW() - make_interval(days => $1)
 				AND ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Erase', 'Reinstall')
 		)
 		SELECT
@@ -655,7 +655,7 @@ func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models
 		ORDER BY change_count DESC
 	`
 
-	rows2, err := database.Query(fmt.Sprintf(rapidChangeQuery, days))
+	rows2, err := database.Query(rapidChangeQuery, days)
 	if err != nil {
 		return nil, err
 	}
@@ -706,19 +706,19 @@ func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models
 			ti.machine_id,
 			t.hostname,
 			CASE
-				WHEN ti.package LIKE 'Change %%' THEN SUBSTRING(ti.package FROM 8)
+				WHEN ti.package LIKE 'Change %' THEN SUBSTRING(ti.package FROM 8)
 				ELSE ti.package
 			END AS package,
 			ti.version as to_version,
 			t.begin_time
 		FROM transaction_items ti
 		JOIN transactions t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
-		WHERE t.begin_time >= NOW() - INTERVAL '%d days'
+		WHERE t.begin_time >= NOW() - make_interval(days => $1)
 			AND ti.action = 'Downgrade'
 		ORDER BY t.begin_time DESC
 	`
 
-	rows3, err := database.Query(fmt.Sprintf(downgradeQuery, days))
+	rows3, err := database.Query(downgradeQuery, days)
 	if err != nil {
 		return nil, err
 	}

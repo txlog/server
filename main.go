@@ -231,40 +231,42 @@ func main() {
 }
 
 func EnvironmentVariablesMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		envVars := map[string]string{
-			"instance":                 os.Getenv("INSTANCE"),
-			"logLevel":                 os.Getenv("LOG_LEVEL"),
-			"ginMode":                  os.Getenv("GIN_MODE"),
-			"port":                     os.Getenv("PORT"),
-			"pgsqlHost":                os.Getenv("PGSQL_HOST"),
-			"pgsqlPort":                os.Getenv("PGSQL_PORT"),
-			"pgsqlUser":                os.Getenv("PGSQL_USER"),
-			"pgsqlDb":                  os.Getenv("PGSQL_DB"),
-			"pgsqlPassword":            util.MaskString(os.Getenv("PGSQL_PASSWORD")),
-			"pgsqlSslmode":             os.Getenv("PGSQL_SSLMODE"),
-			"cronRetentionDays":        os.Getenv("CRON_RETENTION_DAYS"),
-			"cronRetentionExpression":  os.Getenv("CRON_RETENTION_EXPRESSION"),
-			"cronStatisticsExpression": os.Getenv("CRON_STATS_EXPRESSION"),
-			"latestVersion":            os.Getenv("LATEST_VERSION"),
-			"oidcIssuerUrl":            os.Getenv("OIDC_ISSUER_URL"),
-			"oidcClientId":             os.Getenv("OIDC_CLIENT_ID"),
-			"oidcClientSecret":         util.MaskString(os.Getenv("OIDC_CLIENT_SECRET")),
-			"oidcRedirectUrl":          os.Getenv("OIDC_REDIRECT_URL"),
-			"oidcSkipTlsVerify":        os.Getenv("OIDC_SKIP_TLS_VERIFY"),
-			"ldapHost":                 os.Getenv("LDAP_HOST"),
-			"ldapPort":                 os.Getenv("LDAP_PORT"),
-			"ldapUseTls":               os.Getenv("LDAP_USE_TLS"),
-			"ldapSkipTlsVerify":        os.Getenv("LDAP_SKIP_TLS_VERIFY"),
-			"ldapBindDn":               os.Getenv("LDAP_BIND_DN"),
-			"ldapBindPassword":         util.MaskString(os.Getenv("LDAP_BIND_PASSWORD")),
-			"ldapBaseDn":               os.Getenv("LDAP_BASE_DN"),
-			"ldapUserFilter":           os.Getenv("LDAP_USER_FILTER"),
-			"ldapAdminGroup":           os.Getenv("LDAP_ADMIN_GROUP"),
-			"ldapViewerGroup":          os.Getenv("LDAP_VIEWER_GROUP"),
-			"ldapGroupFilter":          os.Getenv("LDAP_GROUP_FILTER"),
-		}
+	// Snapshot env vars once at middleware creation, not per-request
+	envVars := map[string]string{
+		"instance":                 os.Getenv("INSTANCE"),
+		"logLevel":                 os.Getenv("LOG_LEVEL"),
+		"ginMode":                  os.Getenv("GIN_MODE"),
+		"port":                     os.Getenv("PORT"),
+		"pgsqlHost":                os.Getenv("PGSQL_HOST"),
+		"pgsqlPort":                os.Getenv("PGSQL_PORT"),
+		"pgsqlUser":                os.Getenv("PGSQL_USER"),
+		"pgsqlDb":                  os.Getenv("PGSQL_DB"),
+		"pgsqlPassword":            util.MaskString(os.Getenv("PGSQL_PASSWORD")),
+		"pgsqlSslmode":             os.Getenv("PGSQL_SSLMODE"),
+		"cronRetentionDays":        os.Getenv("CRON_RETENTION_DAYS"),
+		"cronRetentionExpression":  os.Getenv("CRON_RETENTION_EXPRESSION"),
+		"cronStatisticsExpression": os.Getenv("CRON_STATS_EXPRESSION"),
+		"oidcIssuerUrl":            os.Getenv("OIDC_ISSUER_URL"),
+		"oidcClientId":             os.Getenv("OIDC_CLIENT_ID"),
+		"oidcClientSecret":         util.MaskString(os.Getenv("OIDC_CLIENT_SECRET")),
+		"oidcRedirectUrl":          os.Getenv("OIDC_REDIRECT_URL"),
+		"oidcSkipTlsVerify":        os.Getenv("OIDC_SKIP_TLS_VERIFY"),
+		"ldapHost":                 os.Getenv("LDAP_HOST"),
+		"ldapPort":                 os.Getenv("LDAP_PORT"),
+		"ldapUseTls":               os.Getenv("LDAP_USE_TLS"),
+		"ldapSkipTlsVerify":        os.Getenv("LDAP_SKIP_TLS_VERIFY"),
+		"ldapBindDn":               os.Getenv("LDAP_BIND_DN"),
+		"ldapBindPassword":         util.MaskString(os.Getenv("LDAP_BIND_PASSWORD")),
+		"ldapBaseDn":               os.Getenv("LDAP_BASE_DN"),
+		"ldapUserFilter":           os.Getenv("LDAP_USER_FILTER"),
+		"ldapAdminGroup":           os.Getenv("LDAP_ADMIN_GROUP"),
+		"ldapViewerGroup":          os.Getenv("LDAP_VIEWER_GROUP"),
+		"ldapGroupFilter":          os.Getenv("LDAP_GROUP_FILTER"),
+	}
 
+	return func(c *gin.Context) {
+		// latestVersion is dynamic (updated by scheduler), read per-request
+		envVars["latestVersion"] = os.Getenv("LATEST_VERSION")
 		c.Set("env", envVars)
 
 		// Add user to template context if available

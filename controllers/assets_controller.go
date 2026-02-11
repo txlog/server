@@ -411,7 +411,8 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
         command_line
       FROM public.transactions
       WHERE machine_id = $1
-      ORDER BY transaction_id DESC`,
+      ORDER BY transaction_id DESC
+      LIMIT 50`,
 			machineID)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{

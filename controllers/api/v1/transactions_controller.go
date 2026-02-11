@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/txlog/server/models"
 
@@ -80,6 +81,8 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 //	@Accept			json
 //	@Produce		json
 //	@Param			machine_id	query		string	false	"Machine ID"
+//	@Param			limit		query		int		false	"Limit (default 100, max 500)"
+//	@Param			offset		query		int		false	"Offset (default 0)"
 //	@Success		200			{object}	interface{}
 //	@Security		ApiKeyAuth
 //	@Router			/v1/transactions [get]
@@ -92,6 +95,19 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		limit := 100
+		if l, err := strconv.Atoi(c.Query("limit")); err == nil && l > 0 {
+			limit = l
+			if limit > 500 {
+				limit = 500
+			}
+		}
+
+		offset := 0
+		if o, err := strconv.Atoi(c.Query("offset")); err == nil && o > 0 {
+			offset = o
+		}
+
 		var rows *sql.Rows
 		var err error
 
@@ -100,8 +116,9 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
            release_version, command_line, comment, scriptlet_output
       FROM public.transactions
       WHERE machine_id = $1
-      ORDER BY transaction_id DESC`,
-			machineID,
+      ORDER BY transaction_id DESC
+      LIMIT $2 OFFSET $3`,
+			machineID, limit, offset,
 		)
 
 		if err != nil {

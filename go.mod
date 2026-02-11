@@ -12,6 +12,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	golang.org/x/oauth2 v0.35.0
+	golang.org/x/sync v0.19.0
 )
 
 require (
@@ -47,7 +48,6 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	go.mongodb.org/mongo-driver v1.17.7 // indirect
 	golang.org/x/mod v0.29.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
 )
 

@@ -31,14 +31,25 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 			return err
 		}
 
+		// Try INSERT with agent_version, fallback without if column doesn't exist
+		tx.Exec("SAVEPOINT upsert_agent_version")
 		_, err = tx.Exec(`
 			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os, agent_version)
 			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6, $7)
 		`, hostname, machineID, timestamp, needsRestarting, restartingReason, os, agentVersion)
 
 		if err != nil {
-			logger.Error("Error inserting asset: " + err.Error())
-			return err
+			tx.Exec("ROLLBACK TO SAVEPOINT upsert_agent_version")
+			_, err = tx.Exec(`
+				INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os)
+				VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6)
+			`, hostname, machineID, timestamp, needsRestarting, restartingReason, os)
+			if err != nil {
+				logger.Error("Error inserting asset: " + err.Error())
+				return err
+			}
+		} else {
+			tx.Exec("RELEASE SAVEPOINT upsert_agent_version")
 		}
 
 		logger.Debug("Created new asset: hostname=" + hostname + " machine_id=" + machineID)
@@ -48,6 +59,8 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 		return err
 	}
 
+	// Try UPDATE with agent_version, fallback without if column doesn't exist
+	tx.Exec("SAVEPOINT upsert_agent_version")
 	_, err = tx.Exec(`
 		UPDATE assets
 		SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4, agent_version = $5
@@ -55,8 +68,18 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 	`, timestamp, needsRestarting, restartingReason, os, agentVersion, existingAssetID)
 
 	if err != nil {
-		logger.Error("Error updating asset last_seen: " + err.Error())
-		return err
+		tx.Exec("ROLLBACK TO SAVEPOINT upsert_agent_version")
+		_, err = tx.Exec(`
+			UPDATE assets
+			SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4
+			WHERE asset_id = $5
+		`, timestamp, needsRestarting, restartingReason, os, existingAssetID)
+		if err != nil {
+			logger.Error("Error updating asset last_seen: " + err.Error())
+			return err
+		}
+	} else {
+		tx.Exec("RELEASE SAVEPOINT upsert_agent_version")
 	}
 
 	if !existingIsActive {

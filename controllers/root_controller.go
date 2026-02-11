@@ -216,6 +216,7 @@ func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
 // distribution across active machines from the assets table. Returns a slice
 // of AgentStats containing agent version and number of machines, or an error
 // if the query fails.
+// Falls back to querying executions table if agent_version column doesn't exist yet.
 func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
 	rows, err := database.Query(`
   SELECT
@@ -227,7 +228,24 @@ func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
   ORDER BY num_machines DESC;`)
 
 	if err != nil {
-		return nil, err
+		// Fallback: agent_version column may not exist yet (migration not applied)
+		rows, err = database.Query(`
+  SELECT
+    e.agent_version,
+    COUNT(DISTINCT a.hostname) AS num_machines
+  FROM assets a
+  INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
+  WHERE a.is_active = TRUE
+  AND e.executed_at = (
+    SELECT MAX(e2.executed_at)
+    FROM executions e2
+    WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
+  )
+  GROUP BY e.agent_version
+  ORDER BY num_machines DESC;`)
+		if err != nil {
+			return nil, err
+		}
 	}
 	defer rows.Close()
 

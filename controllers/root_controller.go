@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
+	"golang.org/x/sync/errgroup"
 )
 
 type OSStats struct {
@@ -32,12 +33,11 @@ type UpdatedPackage struct {
 
 // GetRootIndex returns a Gin handler function that serves the root index page.
 // It takes a database connection as parameter and returns HTML content with:
-//   - A paginated list of executions from the database
 //   - Statistics data
-//   - Pagination information
+//   - Asset counts by OS and agent version
+//   - Duplicated assets and most updated packages
 //
-// The handler supports query parameter "page" for pagination.
-// Each page shows up to 10 records.
+// All dashboard queries are executed in parallel to minimize response time.
 //
 // Parameters:
 //   - database: *sql.DB - The database connection to query data from
@@ -45,60 +45,58 @@ type UpdatedPackage struct {
 // Returns:
 //   - gin.HandlerFunc - A handler that renders the index.html template with execution and statistics data
 //
-// The handler will return HTTP 500 if there are any database errors during:
-//   - Counting total executions
-//   - Querying executions data
-//   - Querying statistics data
+// The handler will return HTTP 500 if there are any database errors.
 func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		statistics, err := getStatistics(database)
-		if err != nil {
-			logger.Error("Error getting statistics:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+		var (
+			statistics           []models.Statistic
+			totalActiveAssets    int
+			assetsByOS           []OSStats
+			assetsByAgentVersion []AgentStats
+			duplicatedAssets     []DuplicatedAsset
+			mostUpdatedPackages  []UpdatedPackage
+		)
 
-		totalActiveAssets, err := getTotalActiveAssets(database)
-		if err != nil {
-			logger.Error("Error getting total active assets:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+		g := new(errgroup.Group)
 
-		assetsByOS, err := getAssetsByOS(database)
-		if err != nil {
-			logger.Error("Error getting assets by OS:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+		g.Go(func() error {
+			var err error
+			statistics, err = getStatistics(database)
+			return err
+		})
 
-		assetsByAgentVersion, err := getAssetsByAgentVersion(database)
-		if err != nil {
-			logger.Error("Error getting assets by agent version:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+		g.Go(func() error {
+			var err error
+			totalActiveAssets, err = getTotalActiveAssets(database)
+			return err
+		})
 
-		duplicatedAssets, err := getDuplicatedAssets(database)
-		if err != nil {
-			logger.Error("Error getting duplicated assets:" + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"error": err.Error(),
-			})
-			return
-		}
+		g.Go(func() error {
+			var err error
+			assetsByOS, err = getAssetsByOS(database)
+			return err
+		})
 
-		mostUpdatedPackages, err := getMostUpdatedPackages(database)
-		if err != nil {
-			logger.Error("Error getting most updated packages:" + err.Error())
+		g.Go(func() error {
+			var err error
+			assetsByAgentVersion, err = getAssetsByAgentVersion(database)
+			return err
+		})
+
+		g.Go(func() error {
+			var err error
+			duplicatedAssets, err = getDuplicatedAssets(database)
+			return err
+		})
+
+		g.Go(func() error {
+			var err error
+			mostUpdatedPackages, err = getMostUpdatedPackages(database)
+			return err
+		})
+
+		if err := g.Wait(); err != nil {
+			logger.Error("Error loading dashboard data: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})

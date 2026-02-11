@@ -181,25 +181,18 @@ func getTotalActiveAssets(database *sql.DB) (int, error) {
 	return count, nil
 }
 
-// getAssetsByOS retrieves statistics about the number of unique machines per
-// operating system from the database. It considers only the most recent
-// execution per hostname to avoid duplicates. Returns a slice of OSStats
+// getAssetsByOS retrieves statistics about the number of active machines per
+// operating system from the assets table. Returns a slice of OSStats
 // containing the OS name and the corresponding machine count, or an error if
 // the query fails.
 func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
 	rows, err := database.Query(`
   SELECT
-    e.os,
-    COUNT(DISTINCT a.hostname) AS num_machines
-  FROM assets a
-  INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
-  WHERE a.is_active = TRUE
-  AND e.executed_at = (
-    SELECT MAX(e2.executed_at)
-    FROM executions e2
-    WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
-  )
-  GROUP BY e.os
+    os,
+    COUNT(*) AS num_machines
+  FROM assets
+  WHERE is_active = TRUE AND os IS NOT NULL
+  GROUP BY os
   ORDER BY num_machines DESC;`)
 
 	if err != nil {

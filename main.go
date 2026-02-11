@@ -232,7 +232,8 @@ func main() {
 
 func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 	// Snapshot env vars once at middleware creation, not per-request
-	envVars := map[string]string{
+	// This serves as a template for per-request maps
+	staticEnvVars := map[string]string{
 		"instance":                 os.Getenv("INSTANCE"),
 		"logLevel":                 os.Getenv("LOG_LEVEL"),
 		"ginMode":                  os.Getenv("GIN_MODE"),
@@ -265,6 +266,12 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
+		// Create a copy of the map for this request to avoid concurrent map writes
+		envVars := make(map[string]string, len(staticEnvVars)+1)
+		for k, v := range staticEnvVars {
+			envVars[k] = v
+		}
+
 		// latestVersion is dynamic (updated by scheduler), read per-request
 		envVars["latestVersion"] = os.Getenv("LATEST_VERSION")
 		c.Set("env", envVars)

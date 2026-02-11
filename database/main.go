@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -30,7 +31,7 @@ var migrationsFS embed.FS
 //   - PGSQL_PASSWORD: Database password
 //   - PGSQL_SSLMODE: SSL mode for connection
 //
-// 2. Establishes connection to the database
+// 2. Establishes connection to the database and configures connection pool
 //
 // 3. Sets up database migrations:
 //   - Creates a postgres driver instance
@@ -59,6 +60,13 @@ func ConnectDatabase() {
 		Db = db
 		logger.Info("Database: connection established.")
 	}
+
+	// Configure connection pool to prevent unbounded connection growth
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(10)
+	db.SetConnMaxLifetime(5 * time.Minute)
+	db.SetConnMaxIdleTime(1 * time.Minute)
+	logger.Info("Database: connection pool configured (max_open=25, max_idle=10).")
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {

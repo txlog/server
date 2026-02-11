@@ -3,8 +3,10 @@ package v1
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/txlog/server/models"
 
@@ -260,28 +262,29 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Insert rpm transaction items
-		for _, item := range body.Items {
-			_, err = tx.Exec(`
-      INSERT INTO transaction_items (
-        transaction_id, machine_id, action, package, version, release, epoch, arch, repo, from_repo
-      ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
-      )`,
-				body.TransactionID,
-				body.MachineID,
-				item.Action,
-				item.Name,
-				item.Version,
-				item.Release,
-				item.Epoch,
-				item.Arch,
-				item.Repo,
-				item.FromRepo)
-
+		// Batch insert rpm transaction items
+		if len(body.Items) > 0 {
+			valueStrings := make([]string, 0, len(body.Items))
+			valueArgs := make([]interface{}, 0, len(body.Items)*10)
+			for i, item := range body.Items {
+				base := i * 10
+				valueStrings = append(valueStrings, fmt.Sprintf(
+					"($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)",
+					base+1, base+2, base+3, base+4, base+5,
+					base+6, base+7, base+8, base+9, base+10))
+				valueArgs = append(valueArgs,
+					body.TransactionID, body.MachineID,
+					item.Action, item.Name, item.Version,
+					item.Release, item.Epoch, item.Arch,
+					item.Repo, item.FromRepo)
+			}
+			query := `INSERT INTO transaction_items (
+				transaction_id, machine_id, action, package, version, release, epoch, arch, repo, from_repo
+			) VALUES ` + strings.Join(valueStrings, ",")
+			_, err = tx.Exec(query, valueArgs...)
 			if err != nil {
 				tx.Rollback()
-				logger.Error("Error inserting transaction item: " + err.Error())
+				logger.Error("Error inserting transaction items: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}

@@ -24,7 +24,7 @@ entire fleet of machines.
 
 ### 2.1 High-Level Flow
 
-```
+```text
 ┌──────────────┐     POST /v1/transactions     ┌────────────────┐
 │  Txlog Agent │ ──────────────────────────────▶│                │
 │  (on server) │     POST /v1/executions        │  Txlog Server  │
@@ -48,7 +48,7 @@ exposes a web dashboard, analytics pages, and a Swagger-documented REST API.
 
 ### 2.2 Package Structure
 
-```
+```text
 txlog/server/
 ├── main.go              # Entry point: routing, middleware, template setup
 ├── auth/                # OIDC and LDAP authentication services

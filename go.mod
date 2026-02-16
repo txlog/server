@@ -1,6 +1,6 @@
 module github.com/txlog/server
 
-go 1.25.6
+go 1.26.6
 
 require (
 	github.com/coreos/go-oidc/v3 v3.17.0

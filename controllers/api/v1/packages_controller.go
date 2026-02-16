@@ -11,15 +11,16 @@ import (
 )
 
 // GetAssetsUsingPackageVersion Get assets that are using a specific package version
-// @summary		Get assets that are using a specific package version
-// @description	Get assets that are using a specific package version
-// @tags			packages
-// @produce		json
-// @param			name	path		string	true	"Package name"
-// @param			version	path		string	true	"Package version"
-// @param			release	path		string	true	"Package release"
-// @success		200		{object}	models.Package
-// @router			/v1/packages/{name}/{version}/{release}/assets [get]
+//
+//	@summary		Get assets that are using a specific package version
+//	@description	Get assets that are using a specific package version
+//	@tags			packages
+//	@produce		json
+//	@param			name	path		string	true	"Package name"
+//	@param			version	path		string	true	"Package version"
+//	@param			release	path		string	true	"Package release"
+//	@success		200		{object}	models.Package
+//	@router			/v1/packages/{name}/{version}/{release}/assets [get]
 func GetAssetsUsingPackageVersion(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var pkg models.Package

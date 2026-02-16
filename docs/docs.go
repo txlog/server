@@ -91,6 +91,18 @@ const docTemplate = `{
                         "description": "Success",
                         "name": "success",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit (default 100, max 500)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset (default 0)",
+                        "name": "offset",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -277,52 +289,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Agent Version",
                         "name": "agent_version",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {}
-                    },
-                    "400": {
-                        "description": "Invalid JSON input",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Database error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/machines/ids": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "List machine IDs",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "assets"
-                ],
-                "summary": "List machine IDs",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Hostname",
-                        "name": "hostname",
                         "in": "query"
                     }
                 ],
@@ -694,6 +660,18 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Machine ID",
                         "name": "machine_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit (default 100, max 500)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset (default 0)",
+                        "name": "offset",
                         "in": "query"
                     }
                 ],

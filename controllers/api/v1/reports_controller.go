@@ -26,17 +26,18 @@ type MonthlyReportResponse struct {
 }
 
 // GetMonthlyReport Get monthly package update report for management
-// @summary		Get monthly package update report
-// @description	Returns a list of package updates for a specific month/year, including the number of assets in the period, OS version, package RPM, servers affected, and total updates
-// @tags			reports
-// @produce		json
-// @param			month	query		int	true	"Month (1-12)"
-// @param			year	query		int	true	"Year (e.g., 2024)"
-// @success		200		{object}	MonthlyReportResponse
-// @failure		400		{object}	map[string]string	"Bad request - invalid parameters"
-// @failure		500		{object}	map[string]string	"Internal server error"
-// @router			/v1/reports/monthly [get]
-// @security		ApiKeyAuth
+//
+//	@summary		Get monthly package update report
+//	@description	Returns a list of package updates for a specific month/year, including the number of assets in the period, OS version, package RPM, servers affected, and total updates
+//	@tags			reports
+//	@produce		json
+//	@param			month	query		int	true	"Month (1-12)"
+//	@param			year	query		int	true	"Year (e.g., 2024)"
+//	@success		200		{object}	MonthlyReportResponse
+//	@failure		400		{object}	map[string]string	"Bad request - invalid parameters"
+//	@failure		500		{object}	map[string]string	"Internal server error"
+//	@router			/v1/reports/monthly [get]
+//	@security		ApiKeyAuth
 func GetMonthlyReport(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		monthStr := c.Query("month")

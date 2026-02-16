@@ -17,6 +17,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [1.22.0] - 2026-02-16
+
+### Added
+
+- Add pagination (`limit` and `offset` parameters) to `GET /v1/machines` endpoint.
+- Add pagination (`limit` and `offset` parameters) to `GET /v1/transactions` endpoint.
+
+### Changed
+
+- Update Go version to 1.26.0.
+- Update Swagger/OpenAPI documentation with improved comment formatting.
+- Bump `github.com/quic-go/quic-go` from 0.57.0 to 0.59.0.
+- Bump `golang.org/x/crypto` from 0.45.0 to 0.48.0.
+- Bump `golang.org/x/net` from 0.47.0 to 0.50.0.
+- Bump `github.com/go-playground/validator/v10` from 10.27.0 to 10.30.1.
+- Bump `github.com/klauspost/compress` from 1.18.0 to 1.18.4.
+- Bump `github.com/redis/go-redis/v9` from 9.17.2 to 9.18.0.
+- Bump `github.com/bytedance/sonic` from 1.14.0 to 1.15.0.
+- Bump `github.com/gabriel-vasile/mimetype` from 1.4.8 to 1.4.13.
+- Bump `go.mongodb.org/mongo-driver` from 1.17.7 to 1.17.9.
+
+### Removed
+
+- Remove `GET /v1/machines/ids` endpoint.
+
 ## [1.21.0] - 2026-02-11
 
 ### Added

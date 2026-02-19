@@ -1,461 +1,372 @@
 {{ template "header.html" . }}
-<div class="page-header d-print-none text-white">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <h2 class="page-title">
-          {{ .title }}
-        </h2>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="bg-white rounded-2xl shadow-soft p-5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider">Assets</span>
+        <span class="text-xs text-txlog-indigo/40">Total</span>
+      </div>
+      <div class="font-display font-bold text-3xl">{{ printf "%s" (formatInteger .totalActiveAssets) }}</div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-soft p-5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider">Executions</span>
+        <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{
+          printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name " executions-30-days" }}{{ if gt .Percentage 0.0
+          }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end
+          }}{{ end }} text-sm font-medium flex items-center gap-1">
+          {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatPercentage .Percentage)
+          }}{{ end }}{{ end }}%
+          <i data-lucide="{{ range .statistics }}{{ if eq .Name " executions-30-days" }}{{ if gt .Percentage 0.0
+            }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"
+            class="w-4 h-4"></i>
+        </span>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-soft p-5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider">Installed packages</span>
+        <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days"
+          }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name " installed-packages-30-days" }}{{ if gt .Percentage 0.0
+          }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end
+          }}{{ end }} text-sm font-medium flex items-center gap-1">
+          {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatPercentage
+          .Percentage) }}{{ end }}{{ end }}%
+          <i data-lucide="{{ range .statistics }}{{ if eq .Name " installed-packages-30-days" }}{{ if gt .Percentage 0.0
+            }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"
+            class="w-4 h-4"></i>
+        </span>
+      </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-soft p-5">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider">Upgraded Packages</span>
+        <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
+      </div>
+      <div class="flex items-baseline gap-2">
+        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days"
+          }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name " upgraded-packages-30-days" }}{{ if gt .Percentage 0.0
+          }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end
+          }}{{ end }} text-sm font-medium flex items-center gap-1">
+          {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatPercentage
+          .Percentage) }}{{ end }}{{ end }}%
+          <i data-lucide="{{ range .statistics }}{{ if eq .Name " upgraded-packages-30-days" }}{{ if gt .Percentage 0.0
+            }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"
+            class="w-4 h-4"></i>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+      <div class="border-b border-txlog-lavender px-6 py-4">
+        <h3 class="font-display font-semibold text-lg">OS distribution</h3>
+      </div>
+      {{ if eq (len .assetsByOS) 0 }}
+      <div class="py-12 text-center">
+        <p class="font-semibold mb-1">No assets found</p>
+        <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
+            target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+      </div>
+      {{ else }}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-txlog-lavender/50 text-left">
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">OS name</th>
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-txlog-lavender/30">
+            {{ with .assetsByOS }}
+            {{ range . }}
+            <tr class="hover:bg-txlog-lavender/10 transition-colors">
+              <td class="px-6 py-3 font-medium">{{ if eq .OS "" }}Undefined OS{{ else }}{{ .OS }}{{ end }}</td>
+              <td class="px-6 py-3 whitespace-nowrap">
+                <a href="#" class="text-txlog-sky hover:underline flex items-center gap-1"
+                  onclick="showOSModal('{{ .OS }}')">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> {{ .NumMachines }}
+                </a>
+              </td>
+            </tr>
+            {{ end }}
+            {{ end }}
+          </tbody>
+        </table>
+      </div>
+      {{ end }}
+    </div>
+    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+      <div class="border-b border-txlog-lavender px-6 py-4">
+        <h3 class="font-display font-semibold text-lg">Agent distribution</h3>
+      </div>
+      {{ if eq (len .assetsByAgentVersion) 0 }}
+      <div class="py-12 text-center">
+        <p class="font-semibold mb-1">No assets found</p>
+        <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
+            target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+      </div>
+      {{ else }}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-txlog-lavender/50 text-left">
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Agent version
+              </th>
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-txlog-lavender/30">
+            {{ with .assetsByAgentVersion }}
+            {{ range . }}
+            <tr class="hover:bg-txlog-lavender/10 transition-colors">
+              <td class="px-6 py-3 font-medium">{{ if eq .AgentVersion "" }}Undefined Agent Version{{ else }}{{
+                .AgentVersion }}{{ end }}</td>
+              <td class="px-6 py-3 whitespace-nowrap">
+                <a href="#" class="text-txlog-sky hover:underline flex items-center gap-1"
+                  onclick="showAgentModal('{{ .AgentVersion }}')">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> {{ .NumMachines }}
+                </a>
+              </td>
+            </tr>
+            {{ end }}
+            {{ end }}
+          </tbody>
+        </table>
+      </div>
+      {{ end }}
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+      <div class="border-b border-txlog-lavender px-6 py-4">
+        <h3 class="font-display font-semibold text-lg">Replaced assets <span
+            class="text-sm text-txlog-indigo/50 font-normal ml-1">last 30 days</span></h3>
+      </div>
+      {{ if eq (len .duplicatedAssets) 0 }}
+      <div class="py-12 text-center">
+        <p class="font-semibold mb-1">No replaced assets</p>
+        <p class="text-sm text-txlog-indigo/50">in the last 30 days.</p>
+      </div>
+      {{ else }}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-txlog-lavender/50 text-left">
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Hostname</th>
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-txlog-lavender/30">
+            {{ with .duplicatedAssets }}
+            {{ range . }}
+            <tr class="hover:bg-txlog-lavender/10 transition-colors">
+              <td class="px-6 py-3 font-medium">{{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}</td>
+              <td class="px-6 py-3 whitespace-nowrap">
+                <a href="/assets?search={{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}"
+                  class="text-txlog-sky hover:underline flex items-center gap-1">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> {{ .NumMachines }}
+                </a>
+              </td>
+            </tr>
+            {{ end }}
+            {{ end }}
+          </tbody>
+        </table>
+      </div>
+      {{ end }}
+    </div>
+    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+      <div class="border-b border-txlog-lavender px-6 py-4">
+        <h3 class="font-display font-semibold text-lg">Most updated packages <span
+            class="text-sm text-txlog-indigo/50 font-normal ml-1">last 30 days</span></h3>
+      </div>
+      {{ if eq (len .mostUpdatedPackages) 0 }}
+      <div class="py-12 text-center">
+        <p class="font-semibold mb-1">No packages to list</p>
+        <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
+            target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+      </div>
+      {{ else }}
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-txlog-lavender/50 text-left">
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Package</th>
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Times Updated
+              </th>
+              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets Affected
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-txlog-lavender/30">
+            {{ with .mostUpdatedPackages }}
+            {{ range . }}
+            <tr class="hover:bg-txlog-lavender/10 transition-colors">
+              <td class="px-6 py-3"><kbd
+                  class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .Package
+                  }}</kbd></td>
+              <td class="px-6 py-3">{{ .TotalUpdates }}</td>
+              <td class="px-6 py-3 text-txlog-indigo/60">{{ .DistinctHostsUpdated }}</td>
+            </tr>
+            {{ end }}
+            {{ end }}
+          </tbody>
+        </table>
+      </div>
+      {{ end }}
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">Recent Anomalies <span
+          class="text-sm text-txlog-indigo/50 font-normal ml-1">last 7 days</span></h3>
+      <a href="/analytics/anomalies"
+        class="border-2 border-txlog-sky text-txlog-sky text-sm font-medium px-4 py-1.5 rounded-xl hover:bg-txlog-sky hover:text-white transition-all">View
+        All</a>
+    </div>
+    <div class="p-6" id="anomalies-panel">
+      <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
+        <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="page-body">
-  <div class="container-xl">
-    <div class="row row-deck row-cards">
-      <div class="col-sm-6 col-lg-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Assets</div>
-              <div class="ms-auto lh-1 text-secondary">
-                Total
+<div id="modal-scrollable" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="if(event.target===this)closeModal('modal-scrollable')">
+  <div data-modal-panel
+    class="bg-white rounded-3xl shadow-soft max-w-lg w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between flex-shrink-0">
+      <h5 class="font-display font-semibold text-lg" id="modal-title">Loading...</h5>
+      <button onclick="closeModal('modal-scrollable')"
+        class="text-txlog-indigo/40 hover:text-txlog-indigo transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="overflow-y-auto flex-1 p-6">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Hostname</th>
+            <th class="pb-3">&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody id="modal-table-body" class="divide-y divide-txlog-lavender/30">
+          <tr>
+            <td colspan="2" class="py-4">
+              <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
+                <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
               </div>
-            </div>
-            <div class="h1 mb-0">{{ printf "%s" (formatInteger .totalActiveAssets) }}</div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Executions</div>
-              <div class="ms-auto lh-1 text-secondary">
-                Last 30 days
-              </div>
-            </div>
-            <div class="d-flex align-items-baseline">
-              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s"
-                (formatInteger .Value) }}{{ end }}{{ end }}</div>
-              <div class="me-auto">
-                <span class="{{ range .statistics }}{{ if eq .Name " executions-30-days" }}{{ if gt .Percentage 0.0
-                  }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end }}
-                  d-inline-flex align-items-center lh-1">
-                  {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatPercentage
-                  .Percentage) }}{{ end }}{{ end }}%
-                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name " executions-30-days" }}{{ if gt .Percentage 0.0
-                    }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end
-                    }}"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Installed packages</div>
-              <div class="ms-auto lh-1 text-secondary">
-                Last 30 days
-              </div>
-            </div>
-            <div class="d-flex align-items-baseline">
-              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf
-                "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-              <div class="me-auto">
-                <span class="{{ range .statistics }}{{ if eq .Name " installed-packages-30-days" }}{{ if gt .Percentage
-                  0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end
-                  }} d-inline-flex align-items-center lh-1">
-                  {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatPercentage
-                  .Percentage) }}{{ end }}{{ end }}%
-                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name " installed-packages-30-days" }}{{ if gt
-                    .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{
-                    end }}{{ end }}"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-6 col-lg-3">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex align-items-center">
-              <div class="subheader">Upgraded Packages</div>
-              <div class="ms-auto lh-1 text-secondary">
-                Last 30 days
-              </div>
-            </div>
-            <div class="d-flex align-items-baseline">
-              <div class="h1 mb-0 me-2">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf
-                "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-              <div class="me-auto">
-                <span class="{{ range .statistics }}{{ if eq .Name " upgraded-packages-30-days" }}{{ if gt .Percentage
-                  0.0 }}text-green{{ else if lt .Percentage 0.0 }}text-red{{ else }}text-yellow{{ end }}{{ end }}{{ end
-                  }} d-inline-flex align-items-center lh-1">
-                  {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatPercentage
-                  .Percentage) }}{{ end }}{{ end }}%
-                  <i class="ti ti-{{ range .statistics }}{{ if eq .Name " upgraded-packages-30-days" }}{{ if gt
-                    .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{
-                    end }}{{ end }}"></i>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="col-6">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">OS distribution</h3>
-          </div>
-          {{ if eq (len .assetsByOS) 0 }}
-          <div class="empty">
-            <div class="empty-img"></div>
-            <p class="empty-title">No assets found</p>
-            <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent"
-                target="_blank">Txlog Agent</a> in one of your servers.</p>
-          </div>
-          {{ else }}
-          <div class="card-table table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>OS name</th>
-                  <th>Assets</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .assetsByOS }}
-                {{ range . }}
-                <tr>
-                  <td>{{ if eq .OS "" }}Undefined OS{{ else }}{{ .OS }}{{ end }}</td>
-                  <td class="text-nowrap">
-                    <a href="#" class="text-secondary" onclick="showOSModal('{{ .OS }}')">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
-                        <path d="M11 13l9 -9" />
-                        <path d="M15 4h5v5" />
-                      </svg>
-                      {{ .NumMachines }}</a>
-                  </td>
-                </tr>
-                {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
-          {{ end }}
-        </div>
-      </div>
-      <div class="col-6">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Agent distribution</h3>
-          </div>
-          {{ if eq (len .assetsByAgentVersion) 0 }}
-          <div class="empty">
-            <div class="empty-img"></div>
-            <p class="empty-title">No assets found</p>
-            <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent"
-                target="_blank">Txlog Agent</a> in one of your servers.</p>
-          </div>
-          {{ else }}
-          <div class="card-table table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Agent version</th>
-                  <th>Assets</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .assetsByAgentVersion }}
-                {{ range . }}
-                <tr>
-                  <td>{{ if eq .AgentVersion "" }}Undefined Agent Version{{ else }}{{ .AgentVersion }}{{ end }}</td>
-                  <td class="text-nowrap">
-                    <a href="#" class="text-secondary" onclick="showAgentModal('{{ .AgentVersion }}')">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
-                        <path d="M11 13l9 -9" />
-                        <path d="M15 4h5v5" />
-                      </svg>
-                      {{ .NumMachines }}</a>
-                  </td>
-                </tr>
-                {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
-          {{ end }}
-        </div>
-      </div>
-      <div class="col-6">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Replaced assets <span class="card-subtitle">last 30 days</span></h3>
-          </div>
-          {{ if eq (len .duplicatedAssets) 0 }}
-          <div class="empty">
-            <div class="empty-img"></div>
-            <p class="empty-title">No replaced assets</p>
-            <p class="empty-subtitle text-secondary">in the last 30 days.</p>
-          </div>
-          {{ else }}
-          <div class="card-table table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Hostname</th>
-                  <th>Assets</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .duplicatedAssets }}
-                {{ range . }}
-                <tr>
-                  <td>{{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}</td>
-                  <td class="text-nowrap">
-                    <a href="/assets?search={{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}"
-                      class="text-secondary">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                        <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
-                        <path d="M11 13l9 -9" />
-                        <path d="M15 4h5v5" />
-                      </svg>
-                      {{ .NumMachines }}</a>
-                  </td>
-                </tr>
-                {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
-          {{ end }}
-        </div>
-      </div>
-      <div class="col-6">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Most updated packages <span class="card-subtitle">last 30 days</span></h3>
-          </div>
-          {{ if eq (len .mostUpdatedPackages) 0 }}
-          <div class="empty">
-            <div class="empty-img"></div>
-            <p class="empty-title">No packages to list</p>
-            <p class="empty-subtitle text-secondary">Start by running <a href="https://txlog.rda.run/docs/agent"
-                target="_blank">Txlog Agent</a> in one of your servers.</p>
-          </div>
-          {{ else }}
-          <div class="card-table table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Package</th>
-                  <th>Times Updated</th>
-                  <th>Assets Affected</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .mostUpdatedPackages }}
-                {{ range . }}
-                <tr>
-                  <td><kbd>{{ .Package }}</kbd></td>
-                  <td>{{ .TotalUpdates }}</td>
-                  <td class="text-nowrap text-secondary">
-                    {{ .DistinctHostsUpdated }}
-                  </td>
-                </tr>
-                {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
-          {{ end }}
-        </div>
-      </div>
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Recent Anomalies <span class="card-subtitle">last 7 days</span></h3>
-            <div class="card-actions">
-              <a href="/analytics/anomalies" class="btn btn-sm btn-outline-primary">View All</a>
-            </div>
-          </div>
-          <div class="card-body" id="anomalies-panel">
-            <div class="progress progress-sm">
-              <div class="progress-bar progress-bar-indeterminate"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-4 flex-shrink-0">
+      <button onclick="closeModal('modal-scrollable')"
+        class="w-full bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Close</button>
     </div>
   </div>
 </div>
 
 <script>
-  // Load anomalies panel
   document.addEventListener('DOMContentLoaded', function () {
     fetch('/v1/reports/anomalies?days=7')
-      .then(response => response.json())
-      .then(data => {
-        const panel = document.getElementById('anomalies-panel');
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        var panel = document.getElementById('anomalies-panel');
         if (data.error) {
-          panel.innerHTML = '<p class="text-muted">Unable to load anomalies.</p>';
+          panel.innerHTML = '<p class="text-txlog-indigo/50 text-sm">Unable to load anomalies.</p>';
           return;
         }
-
         if (!data.anomalies || data.anomalies.length === 0) {
-          panel.innerHTML = '<div class="d-flex align-items-center text-success"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg> No anomalies detected in the last 7 days</div>';
+          panel.innerHTML = '<div class="flex items-center gap-2 text-txlog-leaf"><i data-lucide="check" class="w-5 h-5"></i> No anomalies detected in the last 7 days</div>';
+          lucide.createIcons();
           return;
         }
-
-        let html = '<div class="list-group list-group-flush">';
-        data.anomalies.slice(0, 5).forEach(a => {
-          const sev = a.severity === 'high' ? 'danger' : (a.severity === 'medium' ? 'warning' : 'info');
-          html += `<div class="list-group-item"><span class="badge bg-${sev} text-white me-2">${a.severity}</span><strong>${a.hostname}</strong>: ${a.description}</div>`;
+        var html = '<div class="divide-y divide-txlog-lavender/30">';
+        data.anomalies.slice(0, 5).forEach(function (a) {
+          var color = a.severity === 'high' ? 'txlog-coral' : (a.severity === 'medium' ? 'txlog-golden' : 'txlog-sky');
+          html += '<div class="py-3 flex items-center gap-3"><span class="bg-' + color + '/10 text-' + color + ' text-xs font-bold px-2.5 py-1 rounded-md">' + a.severity + '</span><span><strong>' + a.hostname + '</strong>: ' + a.description + '</span></div>';
         });
         if (data.anomalies.length > 5) {
-          html += `<div class="list-group-item text-muted">... and ${data.anomalies.length - 5} more</div>`;
+          html += '<div class="py-3 text-sm text-txlog-indigo/50">... and ' + (data.anomalies.length - 5) + ' more</div>';
         }
         html += '</div>';
         panel.innerHTML = html;
       })
-      .catch(() => {
-        document.getElementById('anomalies-panel').innerHTML = '<p class="text-muted">Unable to load anomalies.</p>';
+      .catch(function () {
+        document.getElementById('anomalies-panel').innerHTML = '<p class="text-txlog-indigo/50 text-sm">Unable to load anomalies.</p>';
       });
   });
 
   function showAgentModal(agentVersion) {
-    const tableBody = document.getElementById('modal-table-body');
-    tableBody.innerHTML = '<tr><td colspan="2"><div class="progress progress-sm"><div class="progress-bar progress-bar-indeterminate"></div></div></td></tr>';
-
-    if (agentVersion == "") {
-      agentVersion = "with undefined version";
-    }
-
-    fetch(`/v1/machines?agent_version=${agentVersion}`)
-      .then(response => response.json())
-      .then(data => {
-        const result = data;
-
-        if (result && result.length != 0) {
-          const tableBody = document.getElementById('modal-table-body');
-          tableBody.innerHTML = ''; // Clear previous rows
-          result.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${item.hostname}</td>
-              <td class="text-end">
-                <a class="btn align-text-top" href="/assets/${item.machine_id}">Details</a>
-              </td>
-            `;
-            tableBody.appendChild(row);
+    var tableBody = document.getElementById('modal-table-body');
+    tableBody.innerHTML = '<tr><td colspan="2" class="py-4"><div class="h-2 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div></div></td></tr>';
+    if (agentVersion == "") agentVersion = "with undefined version";
+    fetch('/v1/machines?agent_version=' + agentVersion)
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        var tb = document.getElementById('modal-table-body');
+        if (data && data.length != 0) {
+          tb.innerHTML = '';
+          data.forEach(function (item) {
+            var row = document.createElement('tr');
+            row.className = 'hover:bg-txlog-lavender/10 transition-colors';
+            row.innerHTML = '<td class="py-3">' + item.hostname + '</td><td class="py-3 text-right"><a class="text-txlog-sky hover:underline text-sm font-medium" href="/assets/' + item.machine_id + '">Details</a></td>';
+            tb.appendChild(row);
           });
         } else {
-          const tableBody = document.getElementById('modal-table-body');
-          tableBody.innerHTML = '<tr><td colspan="2">No assets found using this agent version.</td></tr>';
+          tb.innerHTML = '<tr><td colspan="2" class="py-4 text-txlog-indigo/50">No assets found using this agent version.</td></tr>';
         }
       })
-      .catch(error => console.error('Error:', error));
-
+      .catch(function (error) { console.error('Error:', error); });
     document.getElementById('modal-title').textContent = "Assets using Agent " + agentVersion;
-
-    var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
-      keyboard: true,
-      backdrop: 'static'
-    });
-    myModal.show();
+    openModal('modal-scrollable');
   }
 
   function showOSModal(os) {
-    const tableBody = document.getElementById('modal-table-body');
-    tableBody.innerHTML = '<tr><td colspan="2"><div class="progress progress-sm"><div class="progress-bar progress-bar-indeterminate"></div></div></td></tr>';
-
-    if (os == "") {
-      os = "Undefined OS";
-    }
-
-    fetch(`/v1/machines?os=${os}`)
-      .then(response => response.json())
-      .then(data => {
-        const result = data;
-        if (result && result.length != 0) {
-          const tableBody = document.getElementById('modal-table-body');
-          tableBody.innerHTML = ''; // Clear previous rows
-          result.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${item.hostname}</td>
-              <td class="text-end">
-                <a class="btn align-text-top" href="/assets/${item.machine_id}">Details</a>
-              </td>
-            `;
-            tableBody.appendChild(row);
+    var tableBody = document.getElementById('modal-table-body');
+    tableBody.innerHTML = '<tr><td colspan="2" class="py-4"><div class="h-2 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div></div></td></tr>';
+    if (os == "") os = "Undefined OS";
+    fetch('/v1/machines?os=' + os)
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
+        var tb = document.getElementById('modal-table-body');
+        if (data && data.length != 0) {
+          tb.innerHTML = '';
+          data.forEach(function (item) {
+            var row = document.createElement('tr');
+            row.className = 'hover:bg-txlog-lavender/10 transition-colors';
+            row.innerHTML = '<td class="py-3">' + item.hostname + '</td><td class="py-3 text-right"><a class="text-txlog-sky hover:underline text-sm font-medium" href="/assets/' + item.machine_id + '">Details</a></td>';
+            tb.appendChild(row);
           });
         } else {
-          const tableBody = document.getElementById('modal-table-body');
-          tableBody.innerHTML = '<tr><td colspan="2">No assets found using this operating system.</td></tr>';
+          tb.innerHTML = '<tr><td colspan="2" class="py-4 text-txlog-indigo/50">No assets found using this operating system.</td></tr>';
         }
       })
-      .catch(error => console.error('Error:', error));
-
+      .catch(function (error) { console.error('Error:', error); });
     document.getElementById('modal-title').textContent = "Assets using " + os;
-
-    var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
-      keyboard: true,
-      backdrop: 'static'
-    });
-    myModal.show();
+    openModal('modal-scrollable');
   }
 </script>
-<div class="modal modal-blur fade" id="modal-scrollable" tabindex="-1" style="display: none;" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modal-title">
-          <div class="placeholder placeholder-xs col-11"></div>
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <table class="table table-vcenter table-striped">
-          <thead>
-            <tr>
-              <th>Hostname</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody id="modal-table-body">
-            <tr>
-              <td colspan="2">
-                <div class="progress progress-sm">
-                  <div class="progress-bar progress-bar-indeterminate"></div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 {{ template "footer.html" . }}

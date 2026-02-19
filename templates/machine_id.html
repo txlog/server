@@ -1,418 +1,363 @@
 {{ template "header.html" . }}
-<!-- Page header -->
-<div class="page-header d-print-none text-white">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <div class="page-pretitle">Asset Details</div>
-        <h2 class="page-title">
-          {{ .hostname }}
-        </h2>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <p class="text-white/60 text-sm mb-1">Asset Details</p>
+        <h2 class="font-display font-bold text-2xl text-white">{{ .hostname }}</h2>
       </div>
-      <div class="col-auto ms-auto">
-        <a href="/analytics/compare?preselect={{ .machine_id }}" class="btn btn-outline-light">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h3" />
-            <path d="M15 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-3" />
-            <path d="M12 5v14" />
-          </svg>
-          Compare with...
+      <div class="flex items-center gap-3">
+        <a href="/analytics/compare?preselect={{ .machine_id }}"
+          class="inline-flex items-center gap-2 border-2 border-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/10 transition-all">
+          <i data-lucide="columns-2" class="w-4 h-4"></i> Compare with...
         </a>
-      </div>
-      {{ if .needs_restarting }}
-      <div class="col-auto ms-auto">
-        <div class="alert alert-important alert-warning alert-dismissible" role="alert">
-          <div class="alert-icon">
-            <!-- Download SVG icon from http://tabler.io/icons/icon/alert-triangle -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="icon alert-icon icon-2">
-              <path d="M12 9v4"></path>
-              <path
-                d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z">
-              </path>
-              <path d="M12 16h.01"></path>
-            </svg>
-          </div>
-          <div>
-            <div class="alert-description">
-              This asset must be restarted to apply the latest security updates.
-              <span class="form-help"><a href="#" onclick="showReason()">?</a></span>
-            </div>
-          </div>
+        {{ if .needs_restarting }}
+        <div
+          class="bg-txlog-golden/20 border border-txlog-golden/40 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm">
+          <i data-lucide="triangle-alert" class="w-4 h-4 text-txlog-golden"></i>
+          Asset must be restarted
+          <a href="#" onclick="openModal('modal-reason')" class="underline text-txlog-golden ml-1">Why?</a>
         </div>
+        {{ end }}
       </div>
-      {{ end }}
     </div>
   </div>
 </div>
 
-<div class="page-body">
-  <div class="container-xl">
-    <div class="row row-deck row-cards">
-      <div class="col-sm-9 col-lg-5">
-        <div class="card card-sm">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-auto">
-                <span class="text-black avatar">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-id-badge-2">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M7 12h3v4h-3z" />
-                    <path d="M10 6h-6a1 1 0 0 0 -1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1h-6" />
-                    <path d="M10 3m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" />
-                    <path d="M14 16h2" />
-                    <path d="M14 12h4" />
-                  </svg>
-                </span>
-              </div>
-              <div class="col">
-                <div class="font-weight-medium">{{ .machine_id }}</div>
-                <div class="text-secondary">Asset ID</div>
-              </div>
-            </div>
-          </div>
-        </div>
+<div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-white rounded-2xl shadow-soft p-5 flex items-center gap-4">
+      <span class="w-10 h-10 bg-txlog-sky/10 rounded-xl flex items-center justify-center flex-shrink-0">
+        <i data-lucide="id-card" class="w-5 h-5 text-txlog-sky"></i>
+      </span>
+      <div class="min-w-0">
+        <div class="font-medium truncate">{{ .machine_id }}</div>
+        <div class="text-xs text-txlog-indigo/50">Asset ID</div>
       </div>
-      <div class="col-sm-8 col-lg-5">
-        <div class="card card-sm">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-auto">
-                <span class="text-black avatar"
-                  style="background-image: url(/images/{{ with index .executions 0 }}{{ brand .OS }}{{ end }})"></span>
-              </div>
-              <div class="col">
-                <div class="font-weight-medium">{{ with index .executions 0 }}{{ .OS }}{{ end }}</div>
-                <div class="text-secondary">OS version</div>
-              </div>
-            </div>
-          </div>
-        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-soft p-5 flex items-center gap-4">
+      <span class="w-10 h-10 rounded-xl overflow-hidden bg-txlog-lavender flex-shrink-0">
+        <img src="/images/{{ with index .executions 0 }}{{ brand .OS }}{{ end }}" class="w-full h-full object-cover"
+          alt="">
+      </span>
+      <div>
+        <div class="font-medium">{{ with index .executions 0 }}{{ .OS }}{{ end }}</div>
+        <div class="text-xs text-txlog-indigo/50">OS version</div>
       </div>
-      <div class="col-sm-3 col-lg-2">
-        <div class="card card-sm">
-          <div class="card-body">
-            <div class="row align-items-center">
-              <div class="col-auto">
-                <span class="text-black avatar">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-git-merge">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M7 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                    <path d="M7 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                    <path d="M17 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                    <path d="M7 8l0 8" />
-                    <path d="M7 8a4 4 0 0 0 4 4h4" />
-                  </svg>
-                </span>
-              </div>
-              <div class="col">
-                <div class="font-weight-medium">{{ with index .executions 0 }}{{ .AgentVersion }}{{ end }}</div>
-                <div class="text-secondary">Agent version</div>
-              </div>
-            </div>
-          </div>
-        </div>
+    </div>
+    <div class="bg-white rounded-2xl shadow-soft p-5 flex items-center gap-4">
+      <span class="w-10 h-10 bg-txlog-leaf/10 rounded-xl flex items-center justify-center flex-shrink-0">
+        <i data-lucide="git-merge" class="w-5 h-5 text-txlog-leaf"></i>
+      </span>
+      <div>
+        <div class="font-medium">{{ with index .executions 0 }}{{ .AgentVersion }}{{ end }}</div>
+        <div class="text-xs text-txlog-indigo/50">Agent version</div>
       </div>
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Transactions</h3>
-          </div>
-          {{ if eq (len .transactions) 0 }}
-          <div class="empty">
-            <div class="empty-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <circle cx="12" cy="12" r="9" />
-                <line x1="9" y1="10" x2="9.01" y2="10" />
-                <line x1="15" y1="10" x2="15.01" y2="10" />
-                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
-              </svg>
-            </div>
-            <p class="empty-title">No transactions found for this asset</p>
-            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent"
-                target="_blank">Txlog Agent</a> in one of your servers.</p>
-          </div>
-          {{ else }}
-          <div class="table-responsive">
-            <table class="table card-table table-vcenter text-nowrap datatable table-striped">
-              <thead>
-                <tr>
-                  <th class="w-1">ID
-                    <i class="ti ti-chevron-up"></i>
-                  </th>
-                  <th>Execution Time</th>
-                  <th>User</th>
-                  <th>Actions</th>
-                  <th>Packages Altered</th>
-                  <th>Command</th>
-                  <th class="w-1">&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .transactions }}
-                {{ range . }}
-                <tr>
-                  <td><kbd data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="{{ .Actions }}">{{
-                      .TransactionID }}</kbd></td>
-                  <td>{{ formatDateTime .BeginTime }}</td>
-                  <td>{{ dnfUser .User }}</td>
-                  <td>
-                    <div class="avatar-list">
-                      <span class="avatar avatar-xs{{ if hasAction .Actions " Install" }} bg-green text-white{{ end }}"
-                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Install">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-plus">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M12 5l0 14" />
-                          <path d="M5 12l14 0" />
-                        </svg>
-                      </span>
-                      <span class="avatar avatar-xs{{ if hasAction .Actions " Upgrade" }} bg-green text-white{{ end }}"
-                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Upgrade">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-badge-up">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M17 11v6l-5 -4l-5 4v-6l5 -4z" />
-                        </svg>
-                      </span>
-                      <span class="avatar avatar-xs{{ if hasAction .Actions " Reinstall" }} bg-yellow text-white{{ end
-                        }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reinstall">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-rotate-clockwise">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M4.05 11a8 8 0 1 1 .5 4m-.5 5v-5h5" />
-                        </svg>
-                      </span>
-                      <span class="avatar avatar-xs{{ if hasAction .Actions " Downgrade" }} bg-red text-white{{ end }}"
-                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Downgrade">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-badge-down">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M17 13v-6l-5 4l-5 -4v6l5 4z" />
-                        </svg>
-                      </span>
-                      <span class="avatar avatar-xs{{ if hasAction .Actions " Removed" }} bg-red text-white{{ end }}"
-                        data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Removed">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-minus">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M5 12l14 0" />
-                        </svg>
-                      </span>
-                      <span class="avatar avatar-xs{{ if hasAction .Actions " Obsolete" }} bg-purple text-white{{ end
-                        }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Obsolete">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-circle-dashed-check">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M8.56 3.69a9 9 0 0 0 -2.92 1.95" />
-                          <path d="M3.69 8.56a9 9 0 0 0 -.69 3.44" />
-                          <path d="M3.69 15.44a9 9 0 0 0 1.95 2.92" />
-                          <path d="M8.56 20.31a9 9 0 0 0 3.44 .69" />
-                          <path d="M15.44 20.31a9 9 0 0 0 2.92 -1.95" />
-                          <path d="M20.31 15.44a9 9 0 0 0 .69 -3.44" />
-                          <path d="M20.31 8.56a9 9 0 0 0 -1.95 -2.92" />
-                          <path d="M15.44 3.69a9 9 0 0 0 -3.44 -.69" />
-                          <path d="M9 12l2 2l4 -4" />
-                        </svg>
-                      </span>
-                      <span class="avatar avatar-xs{{ if hasAction .Actions " Reason Change" }} bg-purple text-white{{
-                        end }}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reason Change">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-replace">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M3 3m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-                          <path d="M15 15m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
-                          <path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3" />
-                          <path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3" />
-                        </svg>
-                      </span>
-                    </div>
-                  </td>
-                  <td>{{ .Altered }}</td>
-                  {{ if .CommandLine }}
-                  <td class="text-truncate" style="max-width: 300px;" title="{{ .CommandLine }}">{{ .CommandLine }}</td>
-                  {{ else }}
-                  <td class="text-truncate text-secondary" style="max-width: 300px;">No command recorded</td>
-                  {{ end }}
-                  <td>
-                    <a class="btn align-text-top" href="#" onclick="showModal('{{ .TransactionID }}')">Details</a>
-                  </td>
-                </tr>
-                {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">Transactions</h3>
+    </div>
+    {{ if eq (len .transactions) 0 }}
+    <div class="py-12 text-center">
+      <i data-lucide="frown" class="w-12 h-12 text-txlog-indigo/20 mx-auto mb-4"></i>
+      <p class="font-semibold mb-1">No transactions found for this asset</p>
+      <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
+          target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+    </div>
+    {{ else }}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">ID <i
+                data-lucide="chevron-up" class="w-3 h-3 inline-block"></i></th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Execution Time
+            </th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">User</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Actions</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Packages Altered
+            </th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Command</th>
+            <th class="px-6 py-3 w-1">&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-txlog-lavender/30">
+          {{ with .transactions }}
+          {{ range . }}
+          <tr class="hover:bg-txlog-lavender/10 transition-colors">
+            <td class="px-6 py-3">
+              <div class="relative group inline-block">
+                <kbd class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{
+                  .TransactionID }}</kbd>
+                <div
+                  class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-txlog-indigo text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">
+                  {{ .Actions }}</div>
+              </div>
+            </td>
+            <td class="px-6 py-3">{{ formatDateTime .BeginTime }}</td>
+            <td class="px-6 py-3">{{ dnfUser .User }}</td>
+            <td class="px-6 py-3">
+              <div class="flex items-center gap-1">
+                <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions " Install" }}bg-txlog-leaf text-white{{ else }}bg-txlog-indigo/5 text-txlog-indigo/30{{ end }}" title="Install"><i data-lucide="plus" class="w-3 h-3"></i></span>
+                <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions " Upgrade" }}bg-txlog-leaf text-white{{ else }}bg-txlog-indigo/5 text-txlog-indigo/30{{ end }}" title="Upgrade"><i data-lucide="arrow-up" class="w-3 h-3"></i></span>
+                <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions " Reinstall" }}bg-txlog-golden text-white{{ else }}bg-txlog-indigo/5 text-txlog-indigo/30{{ end }}" title="Reinstall"><i data-lucide="refresh-cw" class="w-3 h-3"></i></span>
+                <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions " Downgrade" }}bg-txlog-coral text-white{{ else }}bg-txlog-indigo/5 text-txlog-indigo/30{{ end }}" title="Downgrade"><i data-lucide="arrow-down" class="w-3 h-3"></i></span>
+                <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions " Removed" }}bg-txlog-coral text-white{{ else }}bg-txlog-indigo/5 text-txlog-indigo/30{{ end }}" title="Removed"><i data-lucide="minus" class="w-3 h-3"></i></span>
+                <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions " Obsolete" }}bg-purple-500 text-white{{ else }}bg-txlog-indigo/5 text-txlog-indigo/30{{ end }}" title="Obsolete"><i data-lucide="circle-check" class="w-3 h-3"></i></span>
+                <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions " Reason Change" }}bg-purple-500 text-white{{ else }}bg-txlog-indigo/5 text-txlog-indigo/30{{ end }}" title="Reason Change"><i data-lucide="replace" class="w-3 h-3"></i></span>
+              </div>
+            </td>
+            <td class="px-6 py-3">{{ .Altered }}</td>
+            {{ if .CommandLine }}
+            <td class="px-6 py-3 max-w-[300px] truncate" title="{{ .CommandLine }}">{{ .CommandLine }}</td>
+            {{ else }}
+            <td class="px-6 py-3 text-txlog-indigo/40 max-w-[300px]">No command recorded</td>
+            {{ end }}
+            <td class="px-6 py-3">
+              <a class="text-txlog-sky hover:underline text-sm font-medium" href="#"
+                onclick="showModal('{{ .TransactionID }}')">Details</a>
+            </td>
+          </tr>
           {{ end }}
-        </div>
-      </div>
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Last 100 executions <span class="card-subtitle">with transactions</span></h3>
-          </div>
-          {{ if eq (len .executions) 0 }}
-          <div class="empty">
-            <div class="empty-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <circle cx="12" cy="12" r="9" />
-                <line x1="9" y1="10" x2="9.01" y2="10" />
-                <line x1="15" y1="10" x2="15.01" y2="10" />
-                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
-              </svg>
-            </div>
-            <p class="empty-title">No executions found for this asset</p>
-            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent"
-                target="_blank">Txlog Agent</a> in one of your servers.</p>
-          </div>
-          {{ else }}
-          <div class="table-responsive">
-            <table class="table card-table table-vcenter text-nowrap datatable table-striped">
-              <thead>
-                <tr>
-                  <th class="w-1">Execution ID
-                    <i class="ti ti-chevron-up"></i>
-                  </th>
-                  <th>Hostname</th>
-                  <th>Execution Time</th>
-                  <th>Transactions Processed</th>
-                  <th>Transactions Sent</th>
-                  <th class="w-1">&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .executions }}
-                {{ range . }}
-                <tr>
-                  <td>
-                    <span class="badge bg-default text-default-fg">
-                      <span class="badge {{ if eq .Success true }}bg-success{{ else }}bg-danger{{ end }} me-1"></span>
-                      {{ .ExecutionID }}
-                    </span>
-                  </td>
-                  <td><kbd>{{ .Hostname }}</kbd></td>
-                  <td>{{ formatDateTime .ExecutedAt }}</td>
-                  <td>{{ .TransactionsProcessed }}</td>
-                  <td>{{ .TransactionsSent }}</td>
-                  <td>
-                    <a class="btn align-text-top" href="/executions/{{ .ExecutionID }}">Details</a>
-                  </td>
-                </tr>
-                {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
           {{ end }}
-        </div>
-      </div>
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Other assets <span class="card-subtitle">sharing the same hostname</span></h3>
-          </div>
-          {{ if eq (len .other_assets) 0 }}
-          <div class="empty">
-            <div class="empty-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-mood-wink">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-                <path d="M15 10h.01" />
-                <path d="M9.5 15a3.5 3.5 0 0 0 5 0" />
-                <path d="M8.5 8.5l1.5 1.5l-1.5 1.5" />
-              </svg>
-            </div>
-            <p class="empty-title">Great! No other assets are sharing this hostname.</p>
-          </div>
-          {{ else }}
-          <div class="table-responsive">
-            <table class="table card-table table-vcenter text-nowrap datatable table-striped">
-              <thead>
-                <tr>
-                  <th class="w-1">Asset ID</th>
-                  <th>Hostname</th>
-                  <th>Last seen
-                    <i class="ti ti-chevron-up"></i>
-                  </th>
-                  <th>Agent version</th>
-                  <th>OS version</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .other_assets }}
-                {{ range . }}
-                <tr>
-                  <td><a href="/assets/{{ .MachineID }}"><kbd>{{ .MachineID }}</kbd></a></td>
-                  <td><kbd>{{ .Hostname }}</kbd></td>
-                  <td>{{ formatDateTime .ExecutedAt }}</td>
-                  <td>{{ .AgentVersion }}</td>
-                  <td>{{ .OS }}</td>
-                </tr>
-                {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">Last 100 executions <span
+          class="text-sm text-txlog-indigo/50 font-normal ml-1">with transactions</span></h3>
+    </div>
+    {{ if eq (len .executions) 0 }}
+    <div class="py-12 text-center">
+      <i data-lucide="frown" class="w-12 h-12 text-txlog-indigo/20 mx-auto mb-4"></i>
+      <p class="font-semibold mb-1">No executions found for this asset</p>
+      <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
+          target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+    </div>
+    {{ else }}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Execution ID <i
+                data-lucide="chevron-up" class="w-3 h-3 inline-block"></i></th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Hostname</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Execution Time
+            </th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Transactions
+              Processed</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Transactions Sent
+            </th>
+            <th class="px-6 py-3 w-1">&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-txlog-lavender/30">
+          {{ with .executions }}
+          {{ range . }}
+          <tr class="hover:bg-txlog-lavender/10 transition-colors">
+            <td class="px-6 py-3">
+              <span
+                class="inline-flex items-center gap-1.5 bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">
+                <span
+                  class="w-2 h-2 rounded-full {{ if eq .Success true }}bg-txlog-leaf{{ else }}bg-txlog-coral{{ end }}"></span>
+                {{ .ExecutionID }}
+              </span>
+            </td>
+            <td class="px-6 py-3"><kbd
+                class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .Hostname }}</kbd>
+            </td>
+            <td class="px-6 py-3">{{ formatDateTime .ExecutedAt }}</td>
+            <td class="px-6 py-3">{{ .TransactionsProcessed }}</td>
+            <td class="px-6 py-3">{{ .TransactionsSent }}</td>
+            <td class="px-6 py-3">
+              <a class="text-txlog-sky hover:underline text-sm font-medium"
+                href="/executions/{{ .ExecutionID }}">Details</a>
+            </td>
+          </tr>
           {{ end }}
-          <div class="card-footer text-muted">
-            These assets may belong to previous versions of this hostname, which
-            is common in cases where the VM is replaced by a new one.
-          </div>
-        </div>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+  </div>
+
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">Other assets <span
+          class="text-sm text-txlog-indigo/50 font-normal ml-1">sharing the same hostname</span></h3>
+    </div>
+    {{ if eq (len .other_assets) 0 }}
+    <div class="py-12 text-center">
+      <i data-lucide="smile" class="w-12 h-12 text-txlog-leaf/40 mx-auto mb-4"></i>
+      <p class="font-semibold">Great! No other assets are sharing this hostname.</p>
+    </div>
+    {{ else }}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Asset ID</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Hostname</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last seen <i
+                data-lucide="chevron-up" class="w-3 h-3 inline-block"></i></th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Agent version</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">OS version</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-txlog-lavender/30">
+          {{ with .other_assets }}
+          {{ range . }}
+          <tr class="hover:bg-txlog-lavender/10 transition-colors">
+            <td class="px-6 py-3"><a href="/assets/{{ .MachineID }}" class="text-txlog-sky hover:underline"><kbd
+                  class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .MachineID
+                  }}</kbd></a></td>
+            <td class="px-6 py-3"><kbd
+                class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .Hostname }}</kbd>
+            </td>
+            <td class="px-6 py-3">{{ formatDateTime .ExecutedAt }}</td>
+            <td class="px-6 py-3">{{ .AgentVersion }}</td>
+            <td class="px-6 py-3">{{ .OS }}</td>
+          </tr>
+          {{ end }}
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
+    <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">
+      These assets may belong to previous versions of this hostname, which is common in cases where the VM is replaced
+      by a new one.
+    </div>
+  </div>
+
+  <div class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-3xl overflow-hidden">
+    <div class="border-b border-txlog-coral/20 px-6 py-4">
+      <h3 class="font-display font-semibold text-lg text-txlog-coral">Danger Zone</h3>
+    </div>
+    <div class="p-6">
+      <button type="button" onclick="openModal('modal-delete')"
+        class="w-full border-2 border-txlog-coral text-txlog-coral font-medium py-3 rounded-xl hover:bg-txlog-coral hover:text-white transition-all">
+        Delete all asset data...
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-scrollable" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="if(event.target===this)closeModal('modal-scrollable')">
+  <div data-modal-panel
+    class="bg-white rounded-3xl shadow-soft max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between flex-shrink-0">
+      <h5 class="font-display font-semibold text-lg" id="modal-title">Loading...</h5>
+      <button onclick="closeModal('modal-scrollable')"
+        class="text-txlog-indigo/40 hover:text-txlog-indigo transition-colors"><i data-lucide="x"
+          class="w-5 h-5"></i></button>
+    </div>
+    <div class="overflow-y-auto flex-1 p-6">
+      <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-6">
+        <p><strong>Begin Time:</strong> <span id="modal-begin-time">...</span></p>
+        <p><strong>End Time:</strong> <span id="modal-end-time">...</span></p>
+        <p><strong>User:</strong> <span id="modal-user">...</span></p>
+        <p><strong>Return Code:</strong> <span id="modal-return-code">...</span></p>
+        <p><strong>Release Version:</strong> <span id="modal-release-version">...</span></p>
+        <p><strong>Command Line:</strong> <code id="modal-command"
+            class="bg-txlog-indigo/5 text-xs font-mono px-2 py-1 rounded-md">...</code></p>
+        <p><strong>Actions:</strong> <span id="modal-actions">...</span></p>
+        <p><strong>Packages altered:</strong> <span id="modal-altered">...</span></p>
       </div>
-      <div class="col-md-12">
-        <div class="card bg-danger-lt">
-          <div class="card-header">
-            <h3 class="card-title">Danger Zone</h3>
-          </div>
-          <div class="card-body">
-            <div>
-              <button type="button" class="btn btn-danger-lt btn-4 w-100" data-bs-toggle="modal"
-                data-bs-target="#modal-delete">
-                Delete all asset data...
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Action</th>
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Name</th>
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Version</th>
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Release</th>
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Repo</th>
+          </tr>
+        </thead>
+        <tbody id="modal-table-body" class="divide-y divide-txlog-lavender/30">
+          <tr>
+            <td colspan="5" class="py-4">
+              <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
+                <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-4 flex-shrink-0">
+      <button onclick="closeModal('modal-scrollable')"
+        class="w-full bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-reason" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="if(event.target===this)closeModal('modal-reason')">
+  <div data-modal-panel
+    class="bg-white rounded-3xl shadow-soft max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between flex-shrink-0">
+      <h5 class="font-display font-semibold text-lg">Reason to restart the asset</h5>
+      <button onclick="closeModal('modal-reason')"
+        class="text-txlog-indigo/40 hover:text-txlog-indigo transition-colors"><i data-lucide="x"
+          class="w-5 h-5"></i></button>
+    </div>
+    <div class="overflow-y-auto flex-1 p-6 text-sm leading-relaxed">
+      {{ .restarting_reason | text2html }}
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-4 flex-shrink-0">
+      <button onclick="closeModal('modal-reason')"
+        class="w-full bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-delete" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="if(event.target===this)closeModal('modal-delete')">
+  <div data-modal-panel
+    class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+    <div class="h-1 bg-txlog-coral rounded-t-3xl"></div>
+    <div class="p-6 text-center">
+      <i data-lucide="triangle-alert" class="w-12 h-12 text-txlog-coral mx-auto mb-3"></i>
+      <h3 class="font-display font-semibold text-lg mb-2">Are you sure?</h3>
+      <p class="text-sm text-txlog-indigo/60 mb-2">Do you really want to remove all data for this asset ID? <strong>What
+          you do cannot be undone.</strong></p>
+      <code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-1 rounded-md">{{ .machine_id }}</code>
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3">
+      <button onclick="closeModal('modal-delete')"
+        class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button>
+      <button id="delete-asset-btn" onclick="deleteAsset('{{ .machine_id }}')"
+        class="bg-txlog-coral text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-coral/30 transition-all flex items-center justify-center gap-2">
+        <span id="delete-btn-text">Delete all asset data</span>
+        <svg id="delete-btn-spinner" class="animate-spin w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+      </button>
     </div>
   </div>
 </div>
 
 <script>
   function showReason() {
-    var myModal = new bootstrap.Modal(document.getElementById('modal-reason'), {
-      keyboard: true,
-      backdrop: 'static'
-    });
-    myModal.show();
+    openModal('modal-reason');
   }
 
   function showModal(transactionId) {
-    fetch(`/v1/items?machine_id={{ .machine_id }}&transaction_id=${transactionId}`)
-      .then(response => response.json())
-      .then(data => {
-        const result = data;
+    fetch('/v1/items?machine_id={{ .machine_id }}&transaction_id=' + transactionId)
+      .then(function (response) { return response.json(); })
+      .then(function (result) {
         document.getElementById('modal-begin-time').textContent = result.begin_time;
         document.getElementById('modal-end-time').textContent = result.end_time;
         document.getElementById('modal-user').textContent = result.user;
@@ -421,194 +366,43 @@
         document.getElementById('modal-command').textContent = result.command_line || "No command recorded";
         document.getElementById('modal-actions').textContent = result.actions;
         document.getElementById('modal-altered').textContent = result.altered;
-        // if result.items is empty, show a message
         if (result.items && result.items.length != 0) {
-          const tableBody = document.getElementById('modal-table-body');
-          tableBody.innerHTML = ''; // Clear previous rows
-          result.items.forEach(item => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-              <td>${item.action}</td>
-              <td>${item.name}</td>
-              <td>${item.version}</td>
-              <td>${item.release}</td>
-              <td>${item.repo}</td>
-            `;
+          var tableBody = document.getElementById('modal-table-body');
+          tableBody.innerHTML = '';
+          result.items.forEach(function (item) {
+            var row = document.createElement('tr');
+            row.className = 'hover:bg-txlog-lavender/10 transition-colors';
+            row.innerHTML = '<td class="py-2">' + item.action + '</td><td class="py-2">' + item.name + '</td><td class="py-2">' + item.version + '</td><td class="py-2">' + item.release + '</td><td class="py-2">' + item.repo + '</td>';
             tableBody.appendChild(row);
           });
         } else {
-          const tableBody = document.getElementById('modal-table-body');
-          tableBody.innerHTML = '<tr><td colspan="5">No items recorded.</td></tr>';
+          document.getElementById('modal-table-body').innerHTML = '<tr><td colspan="5" class="py-4 text-txlog-indigo/50">No items recorded.</td></tr>';
         }
       })
-      .catch(error => console.error('Error:', error));
-
+      .catch(function (error) { console.error('Error:', error); });
     document.getElementById('modal-title').textContent = "Details of transaction #" + transactionId;
-
-    var myModal = new bootstrap.Modal(document.getElementById('modal-scrollable'), {
-      keyboard: true,
-      backdrop: 'static'
-    });
-    myModal.show();
+    openModal('modal-scrollable');
   }
-</script>
-<div class="modal modal-blur fade" id="modal-scrollable" tabindex="-1" style="display: none;" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modal-title">
-          <div class="placeholder placeholder-xs col-11"></div>
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>
-          <b>Begin Time:</b> <span id="modal-begin-time">...</span>
-        </p>
-        <p>
-          <b>End Time:</b> <span id="modal-end-time">...</span>
-        </p>
-        <p>
-          <b>User:</b> <span id="modal-user">...</span>
-        </p>
-        <p>
-          <b>Return Code:</b> <span id="modal-return-code">...</span>
-        </p>
-        <p>
-          <b>Release Version:</b> <span id="modal-release-version">...</span>
-        </p>
-        <p>
-          <b>Command Line:</b> <code id="modal-command">...</code>
-        </p>
-        <p>
-          <b>Actions:</b> <span id="modal-actions">...</span>
-        </p>
-        <p>
-          <b>Packages altered:</b> <span id="modal-altered">...</span>
-        </p>
-        <table class="table table-vcenter table-striped">
-          <thead>
-            <tr>
-              <th>Action</th>
-              <th>Name</th>
-              <th>Version</th>
-              <th>Release</th>
-              <th>Repo</th>
-            </tr>
-          </thead>
-          <tbody id="modal-table-body">
-            <tr>
-              <td colspan="5">
-                <div class="progress progress-sm">
-                  <div class="progress-bar progress-bar-indeterminate"></div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="modal modal-blur fade" id="modal-reason" tabindex="-1" style="display: none;" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modal-title">
-          Reason to restart the asset
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        {{ .restarting_reason | text2html }}
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div class="modal modal-blur fade" id="modal-delete" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      <div class="modal-status bg-danger"></div>
-      <div class="modal-body text-center py-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-danger icon-lg" width="24" height="24"
-          viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-          stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path d="M12 9v2m0 4v.01" />
-          <path d="M5 19h14a2 2 0 0 0 1.84 -2.75l-7.1 -12.25a2 2 0 0 0 -3.5 0l-7.1 12.25a2 2 0 0 0 1.75 2.75" />
-        </svg>
-        <h3>Are you sure?</h3>
-        <div class="text-secondary">
-          Do you really want to remove all data for this asset ID? <strong>What you do cannot be undone.</strong>
-        </div>
-        <div class="text-secondary">
-          &nbsp;
-        </div>
-        <code>{{ .machine_id }}</code>
-      </div>
-      <div class="modal-footer">
-        <div class="w-100">
-          <div class="row">
-            <div class="col">
-              <a href="#" class="btn w-100" data-bs-dismiss="modal"> Cancel </a>
-            </div>
-            <div class="col">
-              <button id="delete-asset-btn" class="btn btn-danger w-100" onclick="deleteAsset('{{ .machine_id }}')">
-                <span id="delete-btn-text">Delete all asset data</span>
-                <div id="delete-btn-spinner" class="spinner-border spinner-border-sm ms-2" style="display: none;"
-                  role="status"></div>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<script>
   function deleteAsset(assetId) {
-    const btn = document.getElementById('delete-asset-btn');
-    const btnText = document.getElementById('delete-btn-text');
-    const btnSpinner = document.getElementById('delete-btn-spinner');
-    const closeBtn = document.querySelector('#modal-delete .btn-close');
-    const cancelBtn = document.querySelector('#modal-delete .btn[data-bs-dismiss="modal"]');
-
-    // Disable button and show loading
+    var btn = document.getElementById('delete-asset-btn');
+    var btnSpinner = document.getElementById('delete-btn-spinner');
     btn.disabled = true;
-    btnSpinner.style.display = 'inline-block';
-    closeBtn.disabled = true;
-    cancelBtn.classList.add('disabled');
-
-    fetch(`/assets/${assetId}`, { method: 'DELETE' })
-      .then(response => {
+    btnSpinner.classList.remove('hidden');
+    fetch('/assets/' + assetId, { method: 'DELETE' })
+      .then(function (response) {
         if (response.ok || response.redirected) {
-          // Store success message in sessionStorage
           sessionStorage.setItem('assetDeleted', assetId);
-          // Redirect to assets page
           window.location.href = "/assets";
         } else {
-          // Re-enable button on error
           btn.disabled = false;
-          btnSpinner.style.display = 'none';
-          closeBtn.disabled = false;
-          cancelBtn.classList.remove('disabled');
+          btnSpinner.classList.add('hidden');
           alert('Failed to delete asset.');
         }
       })
-      .catch(() => {
-        // Re-enable button on error
+      .catch(function () {
         btn.disabled = false;
-        btnSpinner.style.display = 'none';
-        closeBtn.disabled = false;
-        cancelBtn.classList.remove('disabled');
+        btnSpinner.classList.add('hidden');
         alert('Failed to delete asset.');
       });
   }

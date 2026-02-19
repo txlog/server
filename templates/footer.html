@@ -1,39 +1,71 @@
-<footer class="footer footer-transparent d-print-none">
-  <div class="container-xl">
-    <div class="row text-center align-items-center flex-row-reverse">
-      <div class="col-lg-auto ms-lg-auto">
-        <ul class="list-inline list-inline-dots mb-0">
-          <li class="list-inline-item">
-            <a href="/sponsor" class="link-secondary" rel="noopener">
-              <!-- Download SVG icon from http://tabler.io/icons/icon/heart -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon text-pink icon-inline icon-4">
-                <path d="M19.5 12.572l-7.5 7.428l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"></path>
-              </svg>
-              Sponsor
-            </a>
-          </li>
-          <li class="list-inline-item"><a href="/swagger/index.html" target="_blank" class="link-secondary" rel="noopener">API</a></li>
-          <li class="list-inline-item"><a href="https://txlog.rda.run/docs/server" target="_blank" class="link-secondary" rel="noopener">Documentation</a></li>
-          <li class="list-inline-item"><a href="/license" class="link-secondary">License</a></li>
-          <li class="list-inline-item"><a href="https://github.com/txlog/server/releases/tag/v{{ version }}" target="_blank" class="link-secondary" rel="noopener">v{{ version }}</a></li>
-        </ul>
-      </div>
-      <div class="col-12 col-lg-auto mt-3 mt-lg-0">
-        <ul class="list-inline list-inline-dots mb-0">
-          <li class="list-inline-item">
-            Handcrafted software from Porto Alegre, Brazil.
-          </li>
-        </ul>
-      </div>
+<footer class="border-t border-txlog-lavender print:hidden">
+  <div class="max-w-7xl mx-auto px-6 py-6 flex justify-center">
+    <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+      <a href="/swagger/index.html" target="_blank"
+        class="text-txlog-indigo/50 hover:text-txlog-indigo transition-colors" rel="noopener">API</a>
+      <span class="text-txlog-lavender">·</span>
+      <a href="https://txlog.rda.run/docs/server" target="_blank"
+        class="text-txlog-indigo/50 hover:text-txlog-indigo transition-colors" rel="noopener">Documentation</a>
+      <span class="text-txlog-lavender">·</span>
+      <a href="/license" class="text-txlog-indigo/50 hover:text-txlog-indigo transition-colors">License</a>
+      <span class="text-txlog-lavender">·</span>
+      <a href="https://github.com/txlog/server/releases/tag/v{{ version }}" target="_blank"
+        class="text-txlog-indigo/50 hover:text-txlog-indigo transition-colors" rel="noopener">v{{ version }}</a>
     </div>
   </div>
 </footer>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/js/tabler.min.js" integrity="sha256-tgx2Fg6XYkV027jPEKvmrummSTtgCW/fwV3R3SvZnrk=" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.js" integrity="sha384-mrR3K8Jvv+o9bZ6Yu9HWI0M8tuzo5VWNi4fWcmmbFq3NbB+WvjW/tF/wnELivEnc" crossorigin="anonymous"></script>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.js"
+  integrity="sha384-mrR3K8Jvv+o9bZ6Yu9HWI0M8tuzo5VWNi4fWcmmbFq3NbB+WvjW/tF/wnELivEnc" crossorigin="anonymous"></script>
+<script>
+  function toggleDropdown(menuId) {
+    var menu = document.getElementById(menuId);
+    var isHidden = menu.classList.contains('hidden');
+    document.querySelectorAll('[id$="-menu"]').forEach(function (m) { m.classList.add('hidden'); });
+    if (isHidden) menu.classList.remove('hidden');
+  }
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('[id$="-menu"]').forEach(function (menu) {
+      var parent = menu.parentElement;
+      if (parent && !parent.contains(e.target)) menu.classList.add('hidden');
+    });
+  });
+  function openModal(id) {
+    var modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    var panel = modal.querySelector('[data-modal-panel]');
+    if (panel) {
+      setTimeout(function () {
+        panel.classList.remove('scale-95', 'opacity-0');
+        panel.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+  }
+  function closeModal(id, callback) {
+    var modal = document.getElementById(id);
+    if (!modal) return;
+    var panel = modal.querySelector('[data-modal-panel]');
+    if (panel) {
+      panel.classList.remove('scale-100', 'opacity-100');
+      panel.classList.add('scale-95', 'opacity-0');
+    }
+    setTimeout(function () {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      if (callback) callback();
+    }, 200);
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.fixed.inset-0.z-50:not(.hidden)').forEach(function (modal) {
+        closeModal(modal.id);
+      });
+    }
+  });
+  lucide.createIcons();
+</script>
 
 </body>
 

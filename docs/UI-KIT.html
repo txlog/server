@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Txlog UI Kit</title>
+
+  <!-- Google Fonts: Poppins (Display) & Inter (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            txlog: {
+              indigo: '#424565',     // Primary Dark
+              lavender: '#E6E6FA',   // Primary Light
+              coral: '#D9556A',      // Action/Destructive
+              golden: '#F4B54B',     // Warning/Highlight
+              sky: '#6AA2FB',        // Info/Active
+              leaf: '#6DB865',       // Success
+              peach: '#F1A994',      // Tertiary/Subtle
+              bg: '#F8F9FE',         // Soft background for the app
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Poppins', 'sans-serif'],
+          },
+          boxShadow: {
+            'soft': '0 8px 24px rgba(66, 69, 101, 0.08)',
+            'glow-sky': '0 0 0 4px rgba(106, 162, 251, 0.2)',
+          },
+          borderRadius: {
+            'xl': '12px',
+            '2xl': '16px',
+            '3xl': '24px',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Smooth scrolling and base styling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: #F8F9FE;
+      color: #424565;
+    }
+
+    .tab-active {
+      transform: translateY(-4px);
+    }
+  </style>
+</head>
+
+<body class="font-sans antialiased min-h-screen pb-20">
+
+  <!-- Sidebar / Nav -->
+  <nav class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md shadow-sm z-50 border-b border-txlog-lavender">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- Txlog Logo Mock -->
+        <div class="w-10 h-12 bg-txlog-lavender rounded-xl flex items-center justify-center relative overflow-hidden">
+          <div class="absolute top-0 right-2 w-3 h-6 bg-txlog-coral rounded-b-md"></div>
+          <i data-lucide="book" class="text-txlog-indigo w-5 h-5 mt-2"></i>
+        </div>
+        <h1 class="font-display font-bold text-2xl text-txlog-indigo tracking-tight">Txlog<span
+            class="text-txlog-coral">.</span></h1>
+      </div>
+      <div class="hidden md:flex gap-6 font-medium text-sm text-txlog-indigo/70">
+        <a href="#colors" class="hover:text-txlog-indigo transition-colors">Cores</a>
+        <a href="#typography" class="hover:text-txlog-indigo transition-colors">Tipografia</a>
+        <a href="#components" class="hover:text-txlog-indigo transition-colors">Componentes</a>
+        <a href="#layouts" class="hover:text-txlog-indigo transition-colors">Layouts</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto px-6 pt-32 space-y-24">
+
+    <!-- HEADER -->
+    <header class="max-w-3xl">
+      <span class="text-txlog-sky font-bold tracking-wider uppercase text-sm mb-2 block">Design System</span>
+      <h2 class="font-display font-bold text-5xl md:text-6xl text-txlog-indigo leading-tight mb-6">
+        UI Kit & <br> Guia de Estilos
+      </h2>
+      <p class="text-lg text-txlog-indigo/80 font-medium leading-relaxed">
+        Este documento contém os fundamentos de design, componentes de interface e padrões de layout baseados na
+        identidade visual do Txlog. Inspirado em cadernos de anotações e organização amigável.
+      </p>
+    </header>
+
+    <!-- SECTION: COLORS -->
+    <section id="colors" class="scroll-mt-32">
+      <h3 class="font-display font-bold text-3xl mb-8 flex items-center gap-3">
+        <i data-lucide="palette" class="text-txlog-coral"></i> 1. Cores
+      </h3>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <!-- Color Swatch -->
+        <div class="space-y-3">
+          <div class="h-24 rounded-2xl bg-txlog-indigo shadow-sm border border-black/5"></div>
+          <div>
+            <p class="font-bold text-sm">Indigo Slate</p>
+            <p class="text-xs text-txlog-indigo/60 uppercase">#424565</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="h-24 rounded-2xl bg-txlog-lavender shadow-sm border border-black/5"></div>
+          <div>
+            <p class="font-bold text-sm">Lavender Frost</p>
+            <p class="text-xs text-txlog-indigo/60 uppercase">#E6E6FA</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="h-24 rounded-2xl bg-txlog-coral shadow-sm border border-black/5"></div>
+          <div>
+            <p class="font-bold text-sm">Coral Bookmark</p>
+            <p class="text-xs text-txlog-indigo/60 uppercase">#D9556A</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="h-24 rounded-2xl bg-txlog-sky shadow-sm border border-black/5"></div>
+          <div>
+            <p class="font-bold text-sm">Sky Blue</p>
+            <p class="text-xs text-txlog-indigo/60 uppercase">#6AA2FB</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="h-24 rounded-2xl bg-txlog-leaf shadow-sm border border-black/5"></div>
+          <div>
+            <p class="font-bold text-sm">Leaf Green</p>
+            <p class="text-xs text-txlog-indigo/60 uppercase">#6DB865</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="h-24 rounded-2xl bg-txlog-golden shadow-sm border border-black/5"></div>
+          <div>
+            <p class="font-bold text-sm">Golden Label</p>
+            <p class="text-xs text-txlog-indigo/60 uppercase">#F4B54B</p>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <div class="h-24 rounded-2xl bg-txlog-peach shadow-sm border border-black/5"></div>
+          <div>
+            <p class="font-bold text-sm">Peach Wood</p>
+            <p class="text-xs text-txlog-indigo/60 uppercase">#F1A994</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: TYPOGRAPHY -->
+    <section id="typography" class="scroll-mt-32">
+      <h3 class="font-display font-bold text-3xl mb-8 flex items-center gap-3">
+        <i data-lucide="type" class="text-txlog-sky"></i> 2. Tipografia
+      </h3>
+
+      <div class="grid md:grid-cols-2 gap-12 bg-white p-8 rounded-3xl shadow-soft">
+        <!-- Headings -->
+        <div>
+          <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-widest mb-4 block">Headings
+            (Poppins)</span>
+          <div class="space-y-6">
+            <div>
+              <p class="font-display font-bold text-5xl">H1 Título</p>
+              <span class="text-xs text-txlog-indigo/50">Poppins Bold - 48px</span>
+            </div>
+            <div>
+              <p class="font-display font-semibold text-4xl">H2 Subtítulo</p>
+              <span class="text-xs text-txlog-indigo/50">Poppins SemiBold - 36px</span>
+            </div>
+            <div>
+              <p class="font-display font-semibold text-2xl">H3 Destaque</p>
+              <span class="text-xs text-txlog-indigo/50">Poppins SemiBold - 24px</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div>
+          <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-widest mb-4 block">Body & UI
+            (Inter)</span>
+          <div class="space-y-6">
+            <div>
+              <p class="font-sans font-medium text-lg">Texto base para descrições longas e parágrafos. A fonte Inter
+                garante alta legibilidade mesmo em tamanhos menores.</p>
+              <span class="text-xs text-txlog-indigo/50 mt-2 block">Inter Medium - 18px</span>
+            </div>
+            <div>
+              <p class="font-sans font-normal text-base text-txlog-indigo/80">Texto secundário usado na maioria das
+                interfaces, campos de formulário e elementos de lista.</p>
+              <span class="text-xs text-txlog-indigo/50 mt-2 block">Inter Regular - 16px</span>
+            </div>
+            <div>
+              <p class="font-sans font-medium text-sm text-txlog-indigo/60">Texto pequeno para metadados, legendas e
+                dicas (hints).</p>
+              <span class="text-xs text-txlog-indigo/50 mt-2 block">Inter Medium - 14px</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: COMPONENTS -->
+    <section id="components" class="scroll-mt-32">
+      <h3 class="font-display font-bold text-3xl mb-8 flex items-center gap-3">
+        <i data-lucide="box" class="text-txlog-golden"></i> 3. Componentes
+      </h3>
+
+      <div class="grid lg:grid-cols-2 gap-8">
+
+        <!-- Buttons -->
+        <div class="bg-white p-8 rounded-3xl shadow-soft space-y-8">
+          <h4 class="font-display font-semibold text-xl border-b border-txlog-lavender pb-4">Botões</h4>
+
+          <div class="space-y-4">
+            <p class="text-sm font-medium text-txlog-indigo/60">Primário (Ação Principal)</p>
+            <div class="flex flex-wrap gap-4">
+              <button
+                class="bg-txlog-coral text-white font-medium px-6 py-3 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-coral/30 transition-all flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Novo Registro
+              </button>
+              <button
+                class="bg-txlog-sky text-white font-medium px-6 py-3 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">
+                Salvar Alterações
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <p class="text-sm font-medium text-txlog-indigo/60">Secundário (Apoio)</p>
+            <div class="flex flex-wrap gap-4">
+              <button
+                class="border-2 border-txlog-indigo text-txlog-indigo font-medium px-6 py-2.5 rounded-xl hover:bg-txlog-lavender/30 transition-all">
+                Cancelar
+              </button>
+              <button
+                class="border-2 border-txlog-lavender text-txlog-indigo/70 font-medium px-6 py-2.5 rounded-xl hover:border-txlog-indigo transition-all flex items-center gap-2">
+                <i data-lucide="filter" class="w-4 h-4"></i> Filtrar
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <p class="text-sm font-medium text-txlog-indigo/60">Ghost (Ações discretas)</p>
+            <div class="flex flex-wrap gap-4">
+              <button
+                class="text-txlog-coral font-medium px-4 py-2 rounded-xl hover:bg-txlog-coral/10 transition-all flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inputs & Controls -->
+        <div class="bg-white p-8 rounded-3xl shadow-soft space-y-8">
+          <h4 class="font-display font-semibold text-xl border-b border-txlog-lavender pb-4">Inputs & Formulários</h4>
+
+          <div class="space-y-6">
+            <!-- Standard Input -->
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm pl-1">Título da Anotação</label>
+              <input type="text" placeholder="Ex: Reunião de Pauta"
+                class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-3 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all placeholder:text-txlog-indigo/30 text-txlog-indigo font-medium">
+            </div>
+
+            <!-- Textarea -->
+            <div class="flex flex-col gap-2">
+              <label class="font-medium text-sm pl-1">Detalhes (Opcional)</label>
+              <textarea rows="3" placeholder="Escreva os detalhes aqui..."
+                class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-3 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all placeholder:text-txlog-indigo/30 text-txlog-indigo font-medium resize-none"></textarea>
+            </div>
+
+            <!-- Checkbox / Toggle mock -->
+            <div class="flex items-center gap-3">
+              <div
+                class="w-6 h-6 rounded-md border-2 border-txlog-sky bg-txlog-sky text-white flex items-center justify-center">
+                <i data-lucide="check" class="w-4 h-4"></i>
+              </div>
+              <span class="font-medium text-sm">Marcar como urgente</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards & Status -->
+        <div class="bg-white p-8 rounded-3xl shadow-soft space-y-8 lg:col-span-2">
+          <h4 class="font-display font-semibold text-xl border-b border-txlog-lavender pb-4">Cards & Marcadores (Tabs)
+          </h4>
+
+          <div class="grid md:grid-cols-2 gap-8">
+            <!-- Task Card -->
+            <div
+              class="border-2 border-txlog-lavender rounded-2xl p-5 hover:border-txlog-sky transition-colors cursor-pointer group relative overflow-hidden bg-white">
+              <!-- Visual Notebook Tab indicator -->
+              <div
+                class="absolute top-4 -right-1 w-3 h-8 bg-txlog-golden rounded-l-md transition-transform group-hover:-translate-x-1">
+              </div>
+
+              <div class="flex justify-between items-start mb-3 pr-4">
+                <h5 class="font-display font-semibold text-lg">Revisar Design System</h5>
+                <span
+                  class="bg-txlog-golden/20 text-txlog-golden text-xs font-bold px-2.5 py-1 rounded-md">Pendente</span>
+              </div>
+              <p class="text-sm text-txlog-indigo/70 mb-4 line-clamp-2">Verificar contrastes de cores e garantir que a
+                tipografia esteja aplicada corretamente em todos os botões e inputs.</p>
+              <div class="flex items-center gap-3 text-xs font-medium text-txlog-indigo/50">
+                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-3.5 h-3.5"></i> Hoje</span>
+                <span class="flex items-center gap-1"><i data-lucide="paperclip" class="w-3.5 h-3.5"></i> 2
+                  Anexos</span>
+              </div>
+            </div>
+
+            <!-- Badges/Tags -->
+            <div class="space-y-4">
+              <p class="text-sm font-medium text-txlog-indigo/60">Marcadores (Categorias)</p>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="bg-txlog-sky/10 text-txlog-sky border border-txlog-sky/20 font-medium px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 cursor-pointer hover:bg-txlog-sky hover:text-white transition-colors">
+                  <div class="w-2 h-2 rounded-full bg-txlog-sky"></div> Trabalho
+                </span>
+                <span
+                  class="bg-txlog-leaf/10 text-txlog-leaf border border-txlog-leaf/20 font-medium px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 cursor-pointer hover:bg-txlog-leaf hover:text-white transition-colors">
+                  <div class="w-2 h-2 rounded-full bg-txlog-leaf"></div> Pessoal
+                </span>
+                <span
+                  class="bg-txlog-coral/10 text-txlog-coral border border-txlog-coral/20 font-medium px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 cursor-pointer hover:bg-txlog-coral hover:text-white transition-colors">
+                  <div class="w-2 h-2 rounded-full bg-txlog-coral"></div> Urgente
+                </span>
+                <span
+                  class="bg-txlog-peach/20 text-txlog-indigo border border-txlog-peach/40 font-medium px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 cursor-pointer hover:bg-txlog-peach transition-colors">
+                  <div class="w-2 h-2 rounded-full bg-txlog-peach"></div> Ideias
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION: LAYOUT EXAMPLES -->
+    <section id="layouts" class="scroll-mt-32">
+      <h3 class="font-display font-bold text-3xl mb-8 flex items-center gap-3">
+        <i data-lucide="layout-template" class="text-txlog-leaf"></i> 4. Exemplo de Aplicação
+      </h3>
+
+      <!-- Dashboard Mockup -->
+      <div
+        class="bg-txlog-lavender/30 rounded-[32px] p-6 md:p-10 border-4 border-white shadow-soft relative overflow-hidden">
+        <!-- Decorative Notebook Binding Mockup -->
+        <div
+          class="absolute left-0 top-0 bottom-0 w-8 border-r-2 border-txlog-indigo/10 flex flex-col justify-evenly py-10 opacity-50 hidden md:flex">
+          <div class="w-4 h-2 bg-txlog-indigo/20 rounded-r-full"></div>
+          <div class="w-4 h-2 bg-txlog-indigo/20 rounded-r-full"></div>
+          <div class="w-4 h-2 bg-txlog-indigo/20 rounded-r-full"></div>
+          <div class="w-4 h-2 bg-txlog-indigo/20 rounded-r-full"></div>
+          <div class="w-4 h-2 bg-txlog-indigo/20 rounded-r-full"></div>
+          <div class="w-4 h-2 bg-txlog-indigo/20 rounded-r-full"></div>
+          <div class="w-4 h-2 bg-txlog-indigo/20 rounded-r-full"></div>
+        </div>
+
+        <div class="max-w-4xl mx-auto md:pl-8">
+
+          <!-- Top Bar -->
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+            <div>
+              <h2 class="font-display font-bold text-2xl">Meus Registros</h2>
+              <p class="text-txlog-indigo/60 text-sm">Organize suas notas e tarefas diárias.</p>
+            </div>
+            <button
+              class="bg-txlog-coral text-white font-medium px-5 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-coral/30 transition-all flex items-center gap-2">
+              <i data-lucide="pen-tool" class="w-4 h-4"></i> Nova Anotação
+            </button>
+          </div>
+
+          <!-- Main Content Grid -->
+          <div class="grid md:grid-cols-3 gap-6">
+
+            <!-- Filter Sidebar -->
+            <div class="space-y-2">
+              <div
+                class="bg-white rounded-xl p-3 flex items-center gap-3 cursor-pointer shadow-sm border border-txlog-sky tab-active">
+                <div class="w-2 h-8 bg-txlog-sky rounded-full"></div>
+                <span class="font-semibold text-txlog-indigo">Todas as notas</span>
+              </div>
+              <div
+                class="bg-transparent hover:bg-white/50 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-colors opacity-70 hover:opacity-100">
+                <div class="w-2 h-6 bg-txlog-golden rounded-full"></div>
+                <span class="font-medium text-txlog-indigo">Lembretes</span>
+              </div>
+              <div
+                class="bg-transparent hover:bg-white/50 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-colors opacity-70 hover:opacity-100">
+                <div class="w-2 h-6 bg-txlog-leaf rounded-full"></div>
+                <span class="font-medium text-txlog-indigo">Concluídos</span>
+              </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="md:col-span-2 space-y-4">
+              <!-- Entry 1 -->
+              <div class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group relative">
+                <div class="absolute top-0 right-6 w-8 h-3 bg-txlog-coral rounded-b-md"></div>
+                <h3 class="font-display font-semibold text-lg mb-1">Briefing do Projeto Alpha</h3>
+                <p class="text-sm text-txlog-indigo/70 mb-4">Revisar os requisitos enviados pelo cliente hoje de manhã e
+                  preparar o cronograma inicial.</p>
+                <div class="flex justify-between items-center pt-3 border-t border-txlog-lavender/50">
+                  <span class="text-xs font-medium text-txlog-indigo/50">14 Fev, 2026</span>
+                  <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button class="p-1.5 text-txlog-sky hover:bg-txlog-sky/10 rounded-md"><i data-lucide="edit-2"
+                        class="w-4 h-4"></i></button>
+                    <button class="p-1.5 text-txlog-coral hover:bg-txlog-coral/10 rounded-md"><i data-lucide="trash"
+                        class="w-4 h-4"></i></button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Entry 2 -->
+              <div
+                class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group relative opacity-80">
+                <div class="absolute top-0 right-6 w-8 h-3 bg-txlog-sky rounded-b-md"></div>
+                <div class="flex items-center gap-2 mb-1">
+                  <i data-lucide="check-circle" class="w-4 h-4 text-txlog-leaf"></i>
+                  <h3 class="font-display font-semibold text-lg line-through text-txlog-indigo/60">Lista de Compras</h3>
+                </div>
+                <p class="text-sm text-txlog-indigo/50 mb-4">Café, leite, cadernos novos, post-its.</p>
+                <div class="flex justify-between items-center pt-3 border-t border-txlog-lavender/50">
+                  <span class="text-xs font-medium text-txlog-indigo/40">13 Fev, 2026</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="mt-24 py-8 text-center border-t border-txlog-lavender">
+    <p class="text-sm text-txlog-indigo/50 font-medium">Txlog UI Kit &copy; 2026. Design inspirado em organização.</p>
+  </footer>
+
+  <!-- Initialize Icons -->
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>

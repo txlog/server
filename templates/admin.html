@@ -1,1366 +1,811 @@
 {{ template "header.html" . }}
-<div class="page-header d-print-none text-white">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <h2 class="page-title">
-          Administration
-        </h2>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="font-display font-bold text-2xl text-white">Administration</h2>
+  </div>
+</div>
+<div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
+  <script>
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('migration_success')) {
+      document.addEventListener('DOMContentLoaded', function () {
+        var d = document.createElement('div');
+        d.className = 'bg-txlog-leaf/10 border border-txlog-leaf/30 text-txlog-leaf px-4 py-3 rounded-xl mb-4 flex items-center gap-2';
+        d.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i><span>All pending database migrations have been applied successfully.</span>';
+        document.querySelector('.space-y-6').insertBefore(d, document.querySelector('.space-y-6').firstChild);
+        lucide.createIcons();
+      });
+    }
+  </script>
+
+  <!-- Server Configuration -->
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">Server Configuration</h3>
+      <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
+    </div>
+    <div class="p-6 grid md:grid-cols-2 gap-6">
+      <!-- Server -->
+      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
+        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Server</div>
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-txlog-lavender/30">
+            <tr>
+              <td class="px-4 py-2 w-1/2 font-medium">Instance</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.instance }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.instance }}</code>{{
+                else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Server Mode</td>
+              <td class="px-4 py-2">{{ if eq .Context.Keys.env.ginMode "release" }}<span
+                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Release</span>{{
+                else if eq .Context.Keys.env.ginMode "debug" }}<span
+                  class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Debug</span>{{
+                else if eq .Context.Keys.env.ginMode "test" }}<span
+                  class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Test</span>{{
+                else }}<span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Default
+                  (Release)</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Log Level</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.logLevel }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.logLevel }}</code>{{
+                else }}<span class="text-txlog-indigo/40">Default (INFO)</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">HTTP Port</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.port }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.port }}</code>{{
+                else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">8080</code> <span
+                  class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Latest Version</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.latestVersion }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.latestVersion }}</code>{{
+                else }}<span class="text-txlog-indigo/40">Not checked</span>{{ end }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Database Server -->
+      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
+        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Database Server
+        </div>
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-txlog-lavender/30">
+            <tr>
+              <td class="px-4 py-2 w-1/2 font-medium">Hostname</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlHost }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Port</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlPort }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Database</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlDb }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Username</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlUser }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Password</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.pgsqlPassword }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">SSL Mode</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlSslmode }}</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Auth OIDC -->
+      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
+        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Authentication -
+          OIDC</div>
+        {{ if .Context.Keys.oidc_enabled }}
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-txlog-lavender/30">
+            <tr>
+              <td class="px-4 py-2 w-1/2 font-medium">OIDC Status</td>
+              <td class="px-4 py-2"><span
+                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Issuer URL</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcIssuerUrl }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Client ID</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.oidcClientId }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Client Secret</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.oidcClientSecret }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Redirect URL</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcRedirectUrl }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Skip TLS Verify</td>
+              <td class="px-4 py-2">{{ if eq .Context.Keys.env.oidcSkipTlsVerify "true" }}<span
+                  class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
+                  (Insecure)</span>{{ else }}<span
+                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No (Secure)</span>{{
+                end }}</td>
+            </tr>
+          </tbody>
+        </table>
+        {{ else }}
+        <div class="p-8 text-center"><i data-lucide="shield-check"
+            class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+          <p class="font-semibold mb-1">OIDC Not Configured</p>
+          <p class="text-sm text-txlog-indigo/50 mb-3">OpenID Connect authentication is not enabled.</p><a
+            href="https://txlog.rda.run/docs/server#authentication" target="_blank"
+            class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
+              data-lucide="info" class="w-4 h-4"></i> Learn How to Configure OIDC</a>
+        </div>
+        {{ end }}
+      </div>
+      <!-- Auth LDAP -->
+      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
+        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Authentication -
+          LDAP</div>
+        {{ if .Context.Keys.ldap_enabled }}
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-txlog-lavender/30">
+            <tr>
+              <td class="px-4 py-2 w-1/2 font-medium">LDAP Status</td>
+              <td class="px-4 py-2"><span
+                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Host</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapHost }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Port</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapPort }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapPort }}</code>{{
+                else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">389</code> <span
+                  class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Use TLS</td>
+              <td class="px-4 py-2">{{ if eq .Context.Keys.env.ldapUseTls "true" }}<span
+                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Yes
+                  (Secure)</span>{{ else }}<span
+                  class="bg-txlog-indigo/10 text-txlog-indigo/50 text-xs font-bold px-2 py-0.5 rounded-md">No</span>{{
+                end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Skip TLS Verify</td>
+              <td class="px-4 py-2">{{ if eq .Context.Keys.env.ldapSkipTlsVerify "true" }}<span
+                  class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
+                  (Insecure)</span>{{ else }}<span
+                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No (Secure)</span>{{
+                end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Base DN</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBaseDn }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Bind DN</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapBindDn }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBindDn }}</code>{{
+                else }}<span class="text-txlog-indigo/40">Anonymous bind</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Bind Password</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapBindPassword }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.ldapBindPassword }}</code>{{
+                else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">User Filter</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapUserFilter }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapUserFilter }}</code>{{
+                else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(uid=%s)</code> <span
+                  class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Admin Group</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapAdminGroup }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapAdminGroup }}</code>{{
+                else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Viewer Group</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapViewerGroup }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapViewerGroup }}</code>{{
+                else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Group Filter</td>
+              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapGroupFilter }}<code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapGroupFilter }}</code>{{
+                else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(member=%s)</code> <span
+                  class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+            </tr>
+          </tbody>
+        </table>
+        {{ else }}
+        <div class="p-8 text-center"><i data-lucide="shield-check"
+            class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+          <p class="font-semibold mb-1">LDAP Not Configured</p>
+          <p class="text-sm text-txlog-indigo/50 mb-3">LDAP authentication is not enabled.</p><a
+            href="https://txlog.rda.run/docs/server#ldap-authentication" target="_blank"
+            class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
+              data-lucide="info" class="w-4 h-4"></i> Learn How to Configure LDAP</a>
+        </div>
+        {{ end }}
+      </div>
+      <!-- Housekeeping -->
+      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
+        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Housekeeping</div>
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-txlog-lavender/30">
+            <tr>
+              <td class="px-4 py-2 w-1/2 font-medium">Retention Days</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionDays }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">Schedule Expression</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionExpression }}</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Statistics -->
+      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
+        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Statistics</div>
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-txlog-lavender/30">
+            <tr>
+              <td class="px-4 py-2 w-1/2 font-medium">Schedule Expression</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronStatisticsExpression }}</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
-</div>
 
-<div class="page-body">
-  <div class="container-xl">
-    <!-- Success Message -->
-    <script>
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('migration_success')) {
-        document.addEventListener('DOMContentLoaded', function () {
-          const alertDiv = document.createElement('div');
-          alertDiv.className = 'alert alert-success alert-dismissible mb-3';
-          alertDiv.innerHTML = `
-            <div class="d-flex">
-              <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                  <path d="M5 12l5 5l10 -10"/>
-                </svg>
-              </div>
-              <div>
-                <h4>Success!</h4>
-                <div class="text-secondary">All pending database migrations have been applied successfully.</div>
-              </div>
-            </div>
-            <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
-          `;
-          document.querySelector('.container-xl').insertBefore(alertDiv, document.querySelector('.row'));
-        });
-      }
-    </script>
-
-    <div class="row row-deck row-cards">
-      <!-- Server Settings Card -->
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Server Configuration</h3>
-            <div class="card-actions">
-              <span class="badge bg-gray text-white">Read-only</span>
-            </div>
-          </div>
-
-          <div class="card-body">
-            <div class="row g-3">
-              <!-- Server -->
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header">
-                    <h4 class="card-title">Server</h4>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table table-sm table-vcenter card-table">
-                      <tbody>
-                        <tr>
-                          <td class="w-50 fw-bold">Instance</td>
-                          <td>
-                            {{ if .Context.Keys.env.instance }}
-                            <code>{{ .Context.Keys.env.instance }}</code>
-                            {{ else }}
-                            <span class="text-muted">Not set</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Server Mode</td>
-                          <td>
-                            {{ if eq .Context.Keys.env.ginMode "release" }}
-                            <span class="badge bg-success text-white">Release</span>
-                            {{ else if eq .Context.Keys.env.ginMode "debug" }}
-                            <span class="badge bg-warning text-white">Debug</span>
-                            {{ else if eq .Context.Keys.env.ginMode "test" }}
-                            <span class="badge bg-warning text-white">Test</span>
-                            {{ else }}
-                            <span class="badge bg-success text-white">Default (Release)</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Log Level</td>
-                          <td>
-                            {{ if .Context.Keys.env.logLevel }}
-                            <code>{{ .Context.Keys.env.logLevel }}</code>
-                            {{ else }}
-                            <span class="text-muted">Default (INFO)</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">HTTP Port</td>
-                          <td>
-                            {{ if .Context.Keys.env.port }}
-                            <code>{{ .Context.Keys.env.port }}</code>
-                            {{ else }}
-                            <code>8080</code> <span class="text-muted">(default)</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Latest Version</td>
-                          <td>
-                            {{ if .Context.Keys.env.latestVersion }}
-                            <code>{{ .Context.Keys.env.latestVersion }}</code>
-                            {{ else }}
-                            <span class="text-muted">Not checked</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+  <!-- System Users -->
+  {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">System Users</h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">User</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Email</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Role</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last Login</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created</th>
+            <th class="px-6 py-3 w-1">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-txlog-lavender/30">
+          {{ if .users }}{{ range .users }}
+          <tr class="hover:bg-txlog-lavender/10 transition-colors">
+            <td class="px-6 py-3">
+              <div class="flex items-center gap-3">
+                {{ if .Picture }}<img src="{{ .Picture }}" class="w-8 h-8 rounded-full object-cover">{{ else }}<span
+                  class="w-8 h-8 rounded-full bg-txlog-sky/10 text-txlog-sky text-xs font-bold flex items-center justify-center">{{
+                  initial .Name }}</span>{{ end }}
+                <div>
+                  <div class="font-medium">{{ .Name }}</div>
+                  <div class="text-xs text-txlog-indigo/40">ID: {{ .ID }}</div>
                 </div>
               </div>
-
-              <!-- Database Server -->
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header">
-                    <h4 class="card-title">Database Server</h4>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table table-sm table-vcenter card-table">
-                      <tbody>
-                        <tr>
-                          <td class="w-50 fw-bold">Hostname</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlHost }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Port</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlPort }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Database</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlDb }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Username</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlUser }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Password</td>
-                          <td><code>{{ maskString .Context.Keys.env.pgsqlPassword }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">SSL Mode</td>
-                          <td><code>{{ .Context.Keys.env.pgsqlSslmode }}</code></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+            </td>
+            <td class="px-6 py-3">{{ .Email }}</td>
+            <td class="px-6 py-3">{{ if .IsActive }}<span class="flex items-center gap-1.5"><span
+                  class="w-2 h-2 rounded-full bg-txlog-leaf"></span> Active</span>{{ else }}<span
+                class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-txlog-coral"></span>
+                Inactive</span>{{ end }}</td>
+            <td class="px-6 py-3">{{ if .IsAdmin }}<span
+                class="bg-purple-500/10 text-purple-600 text-xs font-bold px-2 py-0.5 rounded-md">Administrator</span>{{
+              else }}<span
+                class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-2 py-0.5 rounded-md">User</span>{{
+              end }}</td>
+            <td class="px-6 py-3">{{ formatDateTime .LastLoginAt }}</td>
+            <td class="px-6 py-3">{{ formatDateTime .CreatedAt }}</td>
+            <td class="px-6 py-3">
+              <div class="flex gap-2">
+                <button type="button" onclick="openModal('editModal{{ .ID }}')"
+                  class="bg-txlog-sky text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
+                    data-lucide="pencil" class="w-3 h-3"></i> Edit</button>
+                {{ if .IsActive }}<button type="button" onclick="openModal('deactivateModal{{ .ID }}')"
+                  class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
+                    data-lucide="user-x" class="w-3 h-3"></i> Deactivate</button>{{ end }}
               </div>
-
-              <!-- Authentication (OIDC) -->
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header">
-                    <h4 class="card-title">Authentication - OIDC</h4>
-                  </div>
-                  {{ if .Context.Keys.oidc_enabled }}
-                  <div class="table-responsive">
-                    <table class="table table-sm table-vcenter card-table">
-                      <tbody>
-                        <tr>
-                          <td class="w-50 fw-bold">OIDC Status</td>
-                          <td><span class="badge bg-success text-white">Enabled</span></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Issuer URL</td>
-                          <td><code>{{ .Context.Keys.env.oidcIssuerUrl }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Client ID</td>
-                          <td><code>{{ .Context.Keys.env.oidcClientId }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Client Secret</td>
-                          <td><code>{{ maskString .Context.Keys.env.oidcClientSecret }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Redirect URL</td>
-                          <td><code>{{ .Context.Keys.env.oidcRedirectUrl }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Skip TLS Verify</td>
-                          <td>
-                            {{ if eq .Context.Keys.env.oidcSkipTlsVerify "true" }}
-                            <span class="badge bg-warning text-white">Yes (Insecure)</span>
-                            {{ else }}
-                            <span class="badge bg-success text-white">No (Secure)</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  {{ else }}
-                  <div class="card-body">
-                    <div class="empty">
-                      <div class="empty-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                          stroke-linejoin="round">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path
-                            d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
-                          <path d="M9 12l2 2l4 -4" />
-                        </svg>
+            </td>
+          </tr>
+          <!-- Edit Modal -->
+          <div id="editModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+            onclick="if(event.target===this)closeModal('editModal{{ .ID }}')">
+            <div data-modal-panel
+              class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+              <form action="/admin/update" method="post">
+                <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+                  <h5 class="font-display font-semibold">Edit User: {{ .Name }}</h5><button type="button"
+                    onclick="closeModal('editModal{{ .ID }}')" class="text-txlog-indigo/40 hover:text-txlog-indigo"><i
+                      data-lucide="x" class="w-5 h-5"></i></button>
+                </div>
+                <div class="p-6 space-y-4">
+                  <input type="hidden" name="user_id" value="{{ .ID }}">
+                  <div class="text-sm"><strong>Name:</strong> {{ .Name }}<br><strong>Email:</strong> {{ .Email }}</div>
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <div class="relative"><input type="checkbox" name="is_active" class="sr-only peer" {{ if .IsActive
+                        }}checked{{ end }}>
+                      <div class="w-10 h-6 bg-txlog-lavender rounded-full peer-checked:bg-txlog-sky transition-colors">
                       </div>
-                      <p class="empty-title">OIDC Not Configured</p>
-                      <p class="empty-subtitle text-muted">
-                        OpenID Connect authentication is not enabled.
-                      </p>
-                      <div class="empty-action">
-                        <a href="https://txlog.rda.run/docs/server#authentication" target="_blank"
-                          class="btn btn-primary" rel="noopener">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="icon">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                            <path d="M12 9h.01" />
-                            <path d="M11 12h1v4h1" />
-                          </svg>
-                          Learn How to Configure OIDC
-                        </a>
+                      <div
+                        class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-4 transition-transform">
                       </div>
-                    </div>
-                  </div>
-                  {{ end }}
-                </div>
-              </div>
-
-              <!-- Authentication (LDAP) -->
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header">
-                    <h4 class="card-title">Authentication - LDAP</h4>
-                  </div>
-                  {{ if .Context.Keys.ldap_enabled }}
-                  <div class="table-responsive">
-                    <table class="table table-sm table-vcenter card-table">
-                      <tbody>
-                        <tr>
-                          <td class="w-50 fw-bold">LDAP Status</td>
-                          <td><span class="badge bg-success text-white">Enabled</span></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Host</td>
-                          <td><code>{{ .Context.Keys.env.ldapHost }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Port</td>
-                          <td>
-                            {{ if .Context.Keys.env.ldapPort }}
-                            <code>{{ .Context.Keys.env.ldapPort }}</code>
-                            {{ else }}
-                            <code>389</code> <span class="text-muted">(default)</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Use TLS</td>
-                          <td>
-                            {{ if eq .Context.Keys.env.ldapUseTls "true" }}
-                            <span class="badge bg-success text-white">Yes (Secure)</span>
-                            {{ else }}
-                            <span class="badge bg-secondary text-white">No</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Skip TLS Verify</td>
-                          <td>
-                            {{ if eq .Context.Keys.env.ldapSkipTlsVerify "true" }}
-                            <span class="badge bg-warning text-white">Yes (Insecure)</span>
-                            {{ else }}
-                            <span class="badge bg-success text-white">No (Secure)</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Base DN</td>
-                          <td><code>{{ .Context.Keys.env.ldapBaseDn }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Bind DN</td>
-                          <td>
-                            {{ if .Context.Keys.env.ldapBindDn }}
-                            <code>{{ .Context.Keys.env.ldapBindDn }}</code>
-                            {{ else }}
-                            <span class="text-muted">Anonymous bind</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Bind Password</td>
-                          <td>
-                            {{ if .Context.Keys.env.ldapBindPassword }}
-                            <code>{{ maskString .Context.Keys.env.ldapBindPassword }}</code>
-                            {{ else }}
-                            <span class="text-muted">Not set</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">User Filter</td>
-                          <td>
-                            {{ if .Context.Keys.env.ldapUserFilter }}
-                            <code>{{ .Context.Keys.env.ldapUserFilter }}</code>
-                            {{ else }}
-                            <code>(uid=%s)</code> <span class="text-muted">(default)</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Admin Group</td>
-                          <td>
-                            {{ if .Context.Keys.env.ldapAdminGroup }}
-                            <code>{{ .Context.Keys.env.ldapAdminGroup }}</code>
-                            {{ else }}
-                            <span class="text-muted">Not configured</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Viewer Group</td>
-                          <td>
-                            {{ if .Context.Keys.env.ldapViewerGroup }}
-                            <code>{{ .Context.Keys.env.ldapViewerGroup }}</code>
-                            {{ else }}
-                            <span class="text-muted">Not configured</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Group Filter</td>
-                          <td>
-                            {{ if .Context.Keys.env.ldapGroupFilter }}
-                            <code>{{ .Context.Keys.env.ldapGroupFilter }}</code>
-                            {{ else }}
-                            <code>(member=%s)</code> <span class="text-muted">(default)</span>
-                            {{ end }}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  {{ else }}
-                  <div class="card-body">
-                    <div class="empty">
-                      <div class="empty-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                          stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                          stroke-linejoin="round">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path
-                            d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" />
-                          <path d="M9 12l2 2l4 -4" />
-                        </svg>
+                    </div><span class="text-sm font-medium">Active User</span>
+                  </label>
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <div class="relative"><input type="checkbox" name="is_admin" class="sr-only peer" {{ if .IsAdmin
+                        }}checked{{ end }}>
+                      <div class="w-10 h-6 bg-txlog-lavender rounded-full peer-checked:bg-txlog-sky transition-colors">
                       </div>
-                      <p class="empty-title">LDAP Not Configured</p>
-                      <p class="empty-subtitle text-muted">
-                        LDAP authentication is not enabled.
-                      </p>
-                      <div class="empty-action">
-                        <a href="https://txlog.rda.run/docs/server#ldap-authentication" target="_blank"
-                          class="btn btn-primary" rel="noopener">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="icon">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                            <path d="M12 9h.01" />
-                            <path d="M11 12h1v4h1" />
-                          </svg>
-                          Learn How to Configure LDAP
-                        </a>
+                      <div
+                        class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-4 transition-transform">
                       </div>
-                    </div>
-                  </div>
-                  {{ end }}
+                    </div><span class="text-sm font-medium">Administrator</span>
+                  </label>
                 </div>
-              </div>
-
-              <!-- Housekeeping -->
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header">
-                    <h4 class="card-title">Housekeeping</h4>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table table-sm table-vcenter card-table">
-                      <tbody>
-                        <tr>
-                          <td class="w-50 fw-bold">Retention Days</td>
-                          <td><code>{{ .Context.Keys.env.cronRetentionDays }}</code></td>
-                        </tr>
-                        <tr>
-                          <td class="fw-bold">Schedule Expression</td>
-                          <td><code>{{ .Context.Keys.env.cronRetentionExpression }}</code></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3">
+                  <button type="button" onclick="closeModal('editModal{{ .ID }}')"
+                    class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button>
+                  <button type="submit"
+                    class="bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Save
+                    Changes</button>
                 </div>
-              </div>
-
-              <!-- Statistics -->
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-header">
-                    <h4 class="card-title">Statistics</h4>
-                  </div>
-                  <div class="table-responsive">
-                    <table class="table table-sm table-vcenter card-table">
-                      <tbody>
-                        <tr>
-                          <td class="w-50 fw-bold">Schedule Expression</td>
-                          <td><code>{{ .Context.Keys.env.cronStatisticsExpression }}</code></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
+              </form>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- System Users Management Card -->
-      {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">System Users</h3>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table table-vcenter table-mobile-md card-table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Email</th>
-                  <th>Status</th>
-                  <th>Role</th>
-                  <th>Last Login</th>
-                  <th>Created</th>
-                  <th class="w-1">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ if .users }}
-                {{ range .users }}
-                <tr>
-                  <td data-label="User">
-                    <div class="d-flex py-1 align-items-center">
-                      {{ if .Picture }}
-                      <span class="avatar me-2" style="background-image: url({{ .Picture }})"></span>
-                      {{ else }}
-                      <span class="avatar me-2">{{ initial .Name }}</span>
-                      {{ end }}
-                      <div class="flex-fill">
-                        <div class="font-weight-medium">{{ .Name }}</div>
-                        <div class="text-muted">ID: {{ .ID }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td data-label="Email">
-                    <div>{{ .Email }}</div>
-                  </td>
-                  <td data-label="Status">
-                    {{ if .IsActive }}
-                    <span class="badge bg-success me-1"></span> Active
-                    {{ else }}
-                    <span class="badge bg-danger me-1"></span> Inactive
-                    {{ end }}
-                  </td>
-                  <td data-label="Role">
-                    {{ if .IsAdmin }}
-                    <span class="badge bg-purple text-white">Administrator</span>
-                    {{ else }}
-                    <span class="badge bg-secondary text-white">User</span>
-                    {{ end }}
-                  </td>
-                  <td data-label="Last Login">
-                    <div>{{ formatDateTime .LastLoginAt }}</div>
-                  </td>
-                  <td data-label="Created">
-                    <div>{{ formatDateTime .CreatedAt }}</div>
-                  </td>
-                  <td>
-                    <div class="btn-list flex-nowrap">
-                      <!-- Edit User Button -->
-                      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#editModal{{ .ID }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-edit">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
-                          <path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
-                          <path d="M16 5l3 3" />
-                        </svg>
-                        Edit
-                      </button>
-
-                      {{ if .IsActive }}
-                      <!-- Deactivate User Button -->
-                      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#deactivateModal{{ .ID }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon icon-tabler icons-tabler-outline icon-tabler-user-x">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-                          <path d="M6 21v-2a4 4 0 0 1 4 -4h3.5" />
-                          <path d="M22 22l-5 -5" />
-                          <path d="M17 22l5 -5" />
-                        </svg>
-                        Deactivate
-                      </button>
-                      {{ end }}
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Edit User Modal -->
-                <div class="modal modal-blur fade" id="editModal{{ .ID }}" tabindex="-1" role="dialog"
-                  aria-hidden="true">
-                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <form action="/admin/update" method="post">
-                        <div class="modal-header">
-                          <h5 class="modal-title">Edit User: {{ .Name }}</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          <input type="hidden" name="user_id" value="{{ .ID }}">
-
-                          <div class="mb-3">
-                            <label class="form-label">User Information</label>
-                            <div class="form-text">
-                              <strong>Name:</strong> {{ .Name }}<br>
-                              <strong>Email:</strong> {{ .Email }}
-                            </div>
-                          </div>
-
-                          <div class="mb-3">
-                            <label class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" name="is_active" {{ if .IsActive
-                                }}checked{{ end }}>
-                              <span class="form-check-label">Active User</span>
-                            </label>
-                          </div>
-
-                          <div class="mb-3">
-                            <label class="form-check form-switch">
-                              <input class="form-check-input" type="checkbox" name="is_admin" {{ if .IsAdmin }}checked{{
-                                end }}>
-                              <span class="form-check-label">Administrator</span>
-                            </label>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
+          <!-- Deactivate Modal -->
+          <div id="deactivateModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+            onclick="if(event.target===this)closeModal('deactivateModal{{ .ID }}')">
+            <div data-modal-panel
+              class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+              <form action="/admin/delete" method="post">
+                <div class="h-1 bg-txlog-coral rounded-t-3xl"></div>
+                <div class="p-6 text-center"><i data-lucide="user-x"
+                    class="w-12 h-12 text-txlog-coral mx-auto mb-3"></i>
+                  <h3 class="font-display font-semibold text-lg mb-2">Deactivate User</h3><input type="hidden"
+                    name="user_id" value="{{ .ID }}">
+                  <p class="text-sm text-txlog-indigo/60 mb-1">Are you sure you want to deactivate <strong>{{ .Name
+                      }}</strong> ({{ .Email }})?</p>
+                  <p class="text-xs text-txlog-indigo/40">This will prevent the user from logging in, but their data
+                    will be preserved.</p>
                 </div>
-
-                <!-- Deactivate User Modal -->
-                <div class="modal modal-blur fade" id="deactivateModal{{ .ID }}" tabindex="-1" role="dialog"
-                  aria-hidden="true">
-                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <form action="/admin/delete" method="post">
-                        <div class="modal-header">
-                          <h5 class="modal-title">Deactivate User</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          <input type="hidden" name="user_id" value="{{ .ID }}">
-                          <p>Are you sure you want to deactivate <strong>{{ .Name }}</strong> ({{ .Email }})?</p>
-                          <p class="text-muted">This will prevent the user from logging in, but their data will be
-                            preserved.</p>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          <button type="submit" class="btn btn-danger">Deactivate User</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
+                <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3">
+                  <button type="button" onclick="closeModal('deactivateModal{{ .ID }}')"
+                    class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button>
+                  <button type="submit"
+                    class="bg-txlog-coral text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-coral/30 transition-all">Deactivate
+                    User</button>
                 </div>
-                {{ end }}
-                {{ else }}
-                <tr>
-                  <td colspan="7" class="text-center text-muted">
-                    No users found in the system.
-                  </td>
-                </tr>
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card-footer">
-            <p class="m-0 text-secondary">
-              Showing <span>{{ len .users }}</span> total user{{ if ne (len .users) 1 }}s{{ end }}
-            </p>
-          </div>
-        </div>
-      </div>
-      {{ end }}
-
-      <!-- API Keys Management Card -->
-      {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">API Keys</h3>
-            <div class="card-actions">
-              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
-                data-bs-target="#createAPIKeyModal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M12 5l0 14" />
-                  <path d="M5 12l14 0" />
-                </svg>
-                Generate New Key
-              </button>
+              </form>
             </div>
           </div>
+          {{ end }}{{ else }}
+          <tr>
+            <td colspan="7" class="px-6 py-8 text-center text-txlog-indigo/50">No users found in the system.</td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">Showing {{ len .users }} total
+      user{{ if ne (len .users) 1 }}s{{ end }}</div>
+  </div>
+  {{ end }}
 
-          {{ if .apiKeys }}
-          <div class="table-responsive">
-            <table class="table table-vcenter table-mobile-md card-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Key Prefix</th>
-                  <th>Created</th>
-                  <th>Created By</th>
-                  <th>Last Used</th>
-                  <th>Status</th>
-                  <th class="w-1">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ range .apiKeys }}
-                <tr>
-                  <td data-label="Name">
-                    <div class="font-weight-medium">{{ .Name }}</div>
-                    <div class="text-muted">ID: {{ .ID }}</div>
-                  </td>
-                  <td data-label="Key Prefix">
-                    <code>{{ .KeyPrefix }}</code>
-                  </td>
-                  <td data-label="Created">
-                    <div>{{ formatDateTime .CreatedAt }}</div>
-                  </td>
-                  <td data-label="Created By">
-                    {{ .CreatorName }}
-                  </td>
-                  <td data-label="Last Used">
-                    {{ if .LastUsedAt }}
-                    <div>{{ formatDateTime .LastUsedAt }}</div>
-                    {{ else }}
-                    <span class="text-muted">Never</span>
-                    {{ end }}
-                  </td>
-                  <td data-label="Status">
-                    {{ if .IsActive }}
-                    <span class="badge bg-success text-white">Active</span>
-                    {{ else }}
-                    <span class="badge bg-danger text-white">Revoked</span>
-                    {{ end }}
-                  </td>
-                  <td>
-                    <div class="btn-list flex-nowrap">
-                      {{ if .IsActive }}
-                      <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#revokeAPIKeyModal{{ .ID }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                          <path d="M10 10l4 4m0 -4l-4 4" />
-                        </svg>
-                        Revoke
-                      </button>
-                      {{ end }}
-                      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                        data-bs-target="#deleteAPIKeyModal{{ .ID }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M4 7l16 0" />
-                          <path d="M10 11l0 6" />
-                          <path d="M14 11l0 6" />
-                          <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />
-                          <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" />
-                        </svg>
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-
-                <!-- Revoke API Key Modal -->
-                <div class="modal modal-blur fade" id="revokeAPIKeyModal{{ .ID }}" tabindex="-1" role="dialog"
-                  aria-hidden="true">
-                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <form action="/admin/apikeys/revoke" method="post">
-                        <div class="modal-header">
-                          <h5 class="modal-title">Revoke API Key</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          <input type="hidden" name="key_id" value="{{ .ID }}">
-                          <p>Are you sure you want to revoke the API key <strong>{{ .Name }}</strong>?</p>
-                          <p class="text-muted">This will prevent the key from authenticating any API requests. This
-                            action can be reversed by creating a new key.</p>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          <button type="submit" class="btn btn-warning">Revoke Key</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
+  <!-- API Keys -->
+  {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">API Keys</h3>
+      <button type="button" onclick="openModal('createAPIKeyModal')"
+        class="bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2"><i
+          data-lucide="plus" class="w-4 h-4"></i> Generate New Key</button>
+    </div>
+    {{ if .apiKeys }}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Name</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Key Prefix</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created By</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last Used</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 w-1">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-txlog-lavender/30">
+          {{ range .apiKeys }}
+          <tr class="hover:bg-txlog-lavender/10 transition-colors">
+            <td class="px-6 py-3">
+              <div class="font-medium">{{ .Name }}</div>
+              <div class="text-xs text-txlog-indigo/40">ID: {{ .ID }}</div>
+            </td>
+            <td class="px-6 py-3"><code
+                class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .KeyPrefix }}</code></td>
+            <td class="px-6 py-3">{{ formatDateTime .CreatedAt }}</td>
+            <td class="px-6 py-3">{{ .CreatorName }}</td>
+            <td class="px-6 py-3">{{ if .LastUsedAt }}{{ formatDateTime .LastUsedAt }}{{ else }}<span
+                class="text-txlog-indigo/40">Never</span>{{ end }}</td>
+            <td class="px-6 py-3">{{ if .IsActive }}<span
+                class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Active</span>{{ else
+              }}<span
+                class="bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2 py-0.5 rounded-md">Revoked</span>{{ end
+              }}</td>
+            <td class="px-6 py-3">
+              <div class="flex gap-2">
+                {{ if .IsActive }}<button type="button" onclick="openModal('revokeAPIKeyModal{{ .ID }}')"
+                  class="bg-txlog-golden text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all">Revoke</button>{{
+                end }}
+                <button type="button" onclick="openModal('deleteAPIKeyModal{{ .ID }}')"
+                  class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all">Delete</button>
+              </div>
+            </td>
+          </tr>
+          <!-- Revoke Modal -->
+          <div id="revokeAPIKeyModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+            onclick="if(event.target===this)closeModal('revokeAPIKeyModal{{ .ID }}')">
+            <div data-modal-panel
+              class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+              <form action="/admin/apikeys/revoke" method="post">
+                <div class="p-6 text-center"><i data-lucide="circle-x"
+                    class="w-12 h-12 text-txlog-golden mx-auto mb-3"></i>
+                  <h3 class="font-display font-semibold text-lg mb-2">Revoke API Key</h3><input type="hidden"
+                    name="key_id" value="{{ .ID }}">
+                  <p class="text-sm text-txlog-indigo/60 mb-1">Are you sure you want to revoke <strong>{{ .Name
+                      }}</strong>?</p>
+                  <p class="text-xs text-txlog-indigo/40">This will prevent the key from authenticating any API
+                    requests.</p>
                 </div>
-
-                <!-- Delete API Key Modal -->
-                <div class="modal modal-blur fade" id="deleteAPIKeyModal{{ .ID }}" tabindex="-1" role="dialog"
-                  aria-hidden="true">
-                  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <form action="/admin/apikeys/delete" method="post">
-                        <div class="modal-header">
-                          <h5 class="modal-title">Delete API Key</h5>
-                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                          <input type="hidden" name="key_id" value="{{ .ID }}">
-                          <p>Are you sure you want to permanently delete the API key <strong>{{ .Name }}</strong>?</p>
-                          <div class="alert alert-danger">
-                            <strong>Warning:</strong> This action cannot be undone. The key will be permanently removed
-                            from the database.
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                          <button type="submit" class="btn btn-danger">Delete Permanently</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-                {{ end }}
-              </tbody>
-            </table>
+                <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3"><button type="button"
+                    onclick="closeModal('revokeAPIKeyModal{{ .ID }}')"
+                    class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button><button
+                    type="submit"
+                    class="bg-txlog-golden text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 transition-all">Revoke
+                    Key</button></div>
+              </form>
+            </div>
           </div>
-
-          {{ else }}
-          <div class="card-body">
-            <div class="empty">
-              <div class="empty-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24"
-                  stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path
-                    d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" />
-                  <path d="M15 9h.01" />
-                </svg>
-              </div>
-              <p class="empty-title">No API keys found</p>
-              <p class="empty-subtitle text-muted">
-                Generate your first API key to start authenticating API requests. Click the button below to get started.
-              </p>
-              <div class="empty-action">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                  data-bs-target="#createAPIKeyModal">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M12 5l0 14" />
-                    <path d="M5 12l14 0" />
-                  </svg>
-                  Generate Your First API Key
-                </button>
-              </div>
+          <!-- Delete Modal -->
+          <div id="deleteAPIKeyModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+            onclick="if(event.target===this)closeModal('deleteAPIKeyModal{{ .ID }}')">
+            <div data-modal-panel
+              class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+              <form action="/admin/apikeys/delete" method="post">
+                <div class="h-1 bg-txlog-coral rounded-t-3xl"></div>
+                <div class="p-6 text-center"><i data-lucide="trash-2"
+                    class="w-12 h-12 text-txlog-coral mx-auto mb-3"></i>
+                  <h3 class="font-display font-semibold text-lg mb-2">Delete API Key</h3><input type="hidden"
+                    name="key_id" value="{{ .ID }}">
+                  <p class="text-sm text-txlog-indigo/60 mb-1">Permanently delete <strong>{{ .Name }}</strong>?</p>
+                  <div
+                    class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-xl p-3 text-xs text-txlog-coral mt-2">
+                    <strong>Warning:</strong> This action cannot be undone.</div>
+                </div>
+                <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3"><button type="button"
+                    onclick="closeModal('deleteAPIKeyModal{{ .ID }}')"
+                    class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button><button
+                    type="submit"
+                    class="bg-txlog-coral text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 transition-all">Delete
+                    Permanently</button></div>
+              </form>
             </div>
           </div>
           {{ end }}
+        </tbody>
+      </table>
+    </div>
+    {{ else }}
+    <div class="p-8 text-center"><i data-lucide="key-round" class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+      <p class="font-semibold mb-1">No API keys found</p>
+      <p class="text-sm text-txlog-indigo/50 mb-3">Generate your first API key to start authenticating API requests.</p>
+      <button type="button" onclick="openModal('createAPIKeyModal')"
+        class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
+          data-lucide="plus" class="w-4 h-4"></i> Generate Your First API Key</button>
+    </div>
+    {{ end }}
+    <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">Showing {{ len .apiKeys }} total
+      key{{ if ne (len .apiKeys) 1 }}s{{ end }}</div>
+  </div>
+  {{ end }}
 
-          <div class="card-footer">
-            <p class="m-0 text-secondary">
-              Showing <span>{{ len .apiKeys }}</span> total key{{ if ne (len .apiKeys) 1 }}s{{ end }}
-            </p>
-          </div>
-        </div>
-      </div>
-      {{ end }}
-
-      <!-- Database Migrations Card -->
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Database Migrations</h3>
-            <div class="card-actions">
-              {{ if .migrations }}
-              {{ if gt (len .migrations.Pending) 0 }}
-              <span class="badge bg-orange text-white">{{ len .migrations.Pending }} pending</span>
-              {{ else }}
-              <span class="badge bg-green text-white">Up to date</span>
-              {{ end }}
-              {{ if .migrations.IsDirty }}
-              <span class="badge bg-red text-white">Dirty state</span>
-              {{ end }}
-              {{ end }}
-            </div>
-          </div>
-
-          <div class="card-body">
-            {{ if .migrations }}
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <div class="d-flex align-items-center">
-                  <span class="me-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                      class="icon text-blue">
-                      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                      <path d="m7 11V7a5 5 0 0 1 10 0v4" />
-                    </svg>
-                  </span>
-                  <div>
-                    <strong>Current Version:</strong> {{ .migrations.CurrentVersion }}
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="d-flex align-items-center">
-                  <span class="me-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                      class="icon text-green">
-                      <path d="M20 6 9 17l-5-5" />
-                    </svg>
-                  </span>
-                  <div>
-                    <strong>Applied:</strong> {{ len .migrations.Applied }}
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="d-flex align-items-center">
-                  <span class="me-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                      class="icon text-orange">
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="m9 12 2 2 4-4" />
-                    </svg>
-                  </span>
-                  <div>
-                    <strong>Pending:</strong> {{ len .migrations.Pending }}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {{ if .migrations.IsDirty }}
-            <div class="alert alert-danger">
-              <div class="d-flex">
-                <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
-                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M12 9v4" />
-                    <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" />
-                    <path d="M12 16h.01" />
-                  </svg>
-                </div>
-                <div>
-                  <h4>Database Migration in Dirty State</h4>
-                  <div class="text-secondary">
-                    The database is stuck at version <strong>{{ .migrations.CurrentVersion }}</strong> in a dirty state.
-                    This means a migration failed mid-execution. No pending migrations can be applied until this is resolved.
-                  </div>
-                  <div class="mt-2">
-                    <form action="/admin/migrations/force-clean" method="post" style="display:inline;">
-                      <button type="submit" class="btn btn-danger btn-sm"
-                        onclick="return confirm('This will force the database to clean state at version {{ .migrations.CurrentVersion }}. Are you sure?')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon">
-                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                          <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
-                          <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
-                        </svg>
-                        Force Clean State
-                      </button>
-                    </form>
-                    <form action="/admin/migrations/run" method="post" style="display:inline;" class="ms-2">
-                      <button type="submit" class="btn btn-primary btn-sm"
-                        onclick="return confirm('This will force clean the dirty state and then run all pending migrations. Continue?')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          class="icon">
-                          <path d="M5 12l5 5l10 -10" />
-                        </svg>
-                        Force Clean &amp; Run Migrations
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {{ end }}
-
-            {{ if gt (len .migrations.Pending) 0 }}
-            <div class="alert alert-warning">
-              <div class="d-flex">
-                <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
-                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path
-                      d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
-                    <path d="M12 9v4" />
-                    <path d="M12 17h.01" />
-                  </svg>
-                </div>
-                <div>
-                  <h4>Pending Migrations</h4>
-                  <div class="text-secondary">
-                    There are {{ len .migrations.Pending }} pending migrations that need to be applied to the database.
-                    Click the button below to run all pending migrations.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {{ if not .migrations.IsDirty }}
-            <div class="mb-3">
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#migrationsModal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                  <path d="M5 12l5 5l10 -10" />
-                </svg>
-                Run All Migrations ({{ len .migrations.Pending }})
-              </button>
-            </div>
-            {{ end }}
-            {{ else }}
-            {{ if not .migrations.IsDirty }}
-            <div class="alert alert-success">
-              <div class="d-flex">
-                <div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
-                    viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M5 12l5 5l10 -10" />
-                  </svg>
-                </div>
-                <div>
-                  <h4>Database Up to Date</h4>
-                  <div class="text-secondary">All migrations have been applied successfully. The database is current.
-                  </div>
-                </div>
-              </div>
-            </div>
-            {{ end }}
-            {{ end }}
-            {{ else }}
-            <div class="alert alert-info">
-              <div class="text-secondary">Unable to load migration status.</div>
-            </div>
-            {{ end }}
-          </div>
-
-          <!-- Migration Details -->
-          {{ if .migrations }}
-          <div class="table-responsive">
-            <table class="table table-vcenter card-table">
-              <thead>
-                <tr>
-                  <th>Version</th>
-                  <th>Description</th>
-                  <th>Status</th>
-                  <th>Filename</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ range .migrations.Applied }}
-                <tr>
-                  <td><code>{{ .Version }}</code></td>
-                  <td>{{ .Description }}</td>
-                  <td><span class="badge bg-success text-white">Applied</span></td>
-                  <td class="text-muted">{{ .Filename }}</td>
-                </tr>
-                {{ end }}
-                {{ range .migrations.Pending }}
-                <tr>
-                  <td><code>{{ .Version }}</code></td>
-                  <td>{{ .Description }}</td>
-                  <td><span class="badge bg-orange text-white">Pending</span></td>
-                  <td class="text-muted">{{ .Filename }}</td>
-                </tr>
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
-          {{ end }}
-        </div>
+  <!-- Database Migrations -->
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">Database Migrations</h3>
+      <div class="flex gap-2">
+        {{ if .migrations }}{{ if gt (len .migrations.Pending) 0 }}<span
+          class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-3 py-1 rounded-lg">{{ len .migrations.Pending
+          }} pending</span>{{ else }}<span
+          class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-3 py-1 rounded-lg">Up to date</span>{{ end }}{{
+        if .migrations.IsDirty }}<span
+          class="bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-3 py-1 rounded-lg">Dirty state</span>{{ end
+        }}{{ end }}
       </div>
     </div>
+    <div class="p-6">
+      {{ if .migrations }}
+      <div class="grid md:grid-cols-3 gap-4 mb-4">
+        <div class="flex items-center gap-3"><i data-lucide="lock" class="w-5 h-5 text-txlog-sky"></i>
+          <div><strong>Current Version:</strong> {{ .migrations.CurrentVersion }}</div>
+        </div>
+        <div class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-txlog-leaf"></i>
+          <div><strong>Applied:</strong> {{ len .migrations.Applied }}</div>
+        </div>
+        <div class="flex items-center gap-3"><i data-lucide="circle-check" class="w-5 h-5 text-txlog-golden"></i>
+          <div><strong>Pending:</strong> {{ len .migrations.Pending }}</div>
+        </div>
+      </div>
+      {{ if .migrations.IsDirty }}
+      <div class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-2xl p-4 mb-4">
+        <div class="flex gap-3"><i data-lucide="triangle-alert"
+            class="w-5 h-5 text-txlog-coral flex-shrink-0 mt-0.5"></i>
+          <div>
+            <h4 class="font-semibold text-sm mb-1">Database Migration in Dirty State</h4>
+            <p class="text-sm text-txlog-indigo/60 mb-3">The database is stuck at version <strong>{{
+                .migrations.CurrentVersion }}</strong> in a dirty state.</p>
+            <div class="flex gap-2">
+              <form action="/admin/migrations/force-clean" method="post" class="inline"><button type="submit"
+                  onclick="return confirm('This will force the database to clean state. Are you sure?')"
+                  class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
+                    data-lucide="refresh-cw" class="w-3 h-3"></i> Force Clean State</button></form>
+              <form action="/admin/migrations/run" method="post" class="inline"><button type="submit"
+                  onclick="return confirm('Force clean and run all pending migrations?')"
+                  class="bg-txlog-sky text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
+                    data-lucide="check" class="w-3 h-3"></i> Force Clean &amp; Run</button></form>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ end }}
+      {{ if gt (len .migrations.Pending) 0 }}
+      <div class="bg-txlog-golden/5 border border-txlog-golden/20 rounded-2xl p-4 mb-4">
+        <div class="flex gap-3"><i data-lucide="triangle-alert"
+            class="w-5 h-5 text-txlog-golden flex-shrink-0 mt-0.5"></i>
+          <div>
+            <h4 class="font-semibold text-sm mb-1">Pending Migrations</h4>
+            <p class="text-sm text-txlog-indigo/60">There are {{ len .migrations.Pending }} pending migrations.</p>
+          </div>
+        </div>
+      </div>
+      {{ if not .migrations.IsDirty }}
+      <button type="button" onclick="openModal('migrationsModal')"
+        class="bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2 mb-4"><i
+          data-lucide="check" class="w-4 h-4"></i> Run All Migrations ({{ len .migrations.Pending }})</button>
+      {{ end }}
+      {{ else }}{{ if not .migrations.IsDirty }}
+      <div class="bg-txlog-leaf/5 border border-txlog-leaf/20 rounded-2xl p-4 mb-4 flex gap-3"><i
+          data-lucide="check-circle" class="w-5 h-5 text-txlog-leaf flex-shrink-0 mt-0.5"></i>
+        <div>
+          <h4 class="font-semibold text-sm mb-1">Database Up to Date</h4>
+          <p class="text-sm text-txlog-indigo/60">All migrations have been applied successfully.</p>
+        </div>
+      </div>
+      {{ end }}{{ end }}
+      {{ else }}
+      <div class="bg-txlog-sky/5 border border-txlog-sky/20 rounded-2xl p-4">
+        <p class="text-sm text-txlog-indigo/60">Unable to load migration status.</p>
+      </div>
+      {{ end }}
+    </div>
+    {{ if .migrations }}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Version</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Description</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Filename</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-txlog-lavender/30">
+          {{ range .migrations.Applied }}<tr class="hover:bg-txlog-lavender/10 transition-colors">
+            <td class="px-6 py-3"><code
+                class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code></td>
+            <td class="px-6 py-3">{{ .Description }}</td>
+            <td class="px-6 py-3"><span
+                class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Applied</span></td>
+            <td class="px-6 py-3 text-txlog-indigo/40">{{ .Filename }}</td>
+          </tr>{{ end }}
+          {{ range .migrations.Pending }}<tr class="hover:bg-txlog-lavender/10 transition-colors">
+            <td class="px-6 py-3"><code
+                class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code></td>
+            <td class="px-6 py-3">{{ .Description }}</td>
+            <td class="px-6 py-3"><span
+                class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Pending</span>
+            </td>
+            <td class="px-6 py-3 text-txlog-indigo/40">{{ .Filename }}</td>
+          </tr>{{ end }}
+        </tbody>
+      </table>
+    </div>
+    {{ end }}
   </div>
 </div>
 
 <!-- Create API Key Modal -->
-<div class="modal modal-blur fade" id="createAPIKeyModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Generate New API Key</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div id="createAPIKeyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="if(event.target===this)closeModal('createAPIKeyModal')">
+  <div data-modal-panel
+    class="bg-white rounded-3xl shadow-soft max-w-lg w-full mx-4 transform transition-all scale-95 opacity-0">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h5 class="font-display font-semibold text-lg">Generate New API Key</h5><button type="button"
+        onclick="closeModal('createAPIKeyModal')" class="text-txlog-indigo/40 hover:text-txlog-indigo"><i
+          data-lucide="x" class="w-5 h-5"></i></button>
+    </div>
+    <div class="p-6">
+      <div id="createAPIKeyForm">
+        <label class="font-medium text-sm pl-1 block mb-1.5">Key Name <span class="text-txlog-coral">*</span></label>
+        <input type="text" id="apiKeyName" placeholder="e.g., Production Server"
+          class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-3 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all"
+          required minlength="3">
+        <p class="text-xs text-txlog-indigo/40 mt-1 pl-1">Enter a descriptive name (minimum 3 characters)</p>
       </div>
-      <div class="modal-body">
-        <div id="createAPIKeyForm">
-          <div class="mb-3">
-            <label class="form-label required">Key Name</label>
-            <input type="text" class="form-control" name="name" id="apiKeyName"
-              placeholder="e.g., Production Server, Development Agent" required minlength="3">
-            <div class="form-text">Enter a descriptive name to identify this API key (minimum 3 characters)</div>
+      <div id="apiKeyResult" class="hidden">
+        <div class="bg-txlog-leaf/10 border border-txlog-leaf/30 rounded-xl p-4 mb-4">
+          <div class="flex gap-2 items-center"><i data-lucide="check-circle" class="w-5 h-5 text-txlog-leaf"></i>
+            <div><strong>API Key Created!</strong>
+              <p class="text-sm text-txlog-indigo/60">Save this key now. It won't be shown again.</p>
+            </div>
           </div>
         </div>
-
-        <div id="apiKeyResult" style="display: none;">
-          <div class="alert alert-success">
-            <div class="d-flex">
-              <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
-                  viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M5 12l5 5l10 -10" />
-                </svg>
-              </div>
-              <div>
-                <h4>API Key Created Successfully!</h4>
-                <div class="text-secondary mb-3">
-                  <strong>Important:</strong> Save this key now. For security reasons, it won't be shown again.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label">Your API Key</label>
-            <div class="input-group">
-              <input type="text" class="form-control font-monospace" id="apiKeyValue" readonly>
-              <button class="btn btn-primary" type="button" id="copyAPIKeyBtn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
-                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
-                </svg>
-                Copy
-              </button>
-            </div>
-          </div>
-
-          <div class="alert alert-info mb-0">
-            <div class="d-flex">
-              <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24"
-                  viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-                  <path d="M12 9h.01" />
-                  <path d="M11 12h1v4h1" />
-                </svg>
-              </div>
-              <div class="flex-fill">
-                <h4 class="alert-title">How to use this API key</h4>
-                <div class="text-secondary">
-                  Include this key in your API requests using the <code>X-API-Key</code> header:
-                </div>
-                <div class="mt-3">
-                  <strong>Example:</strong>
-                  <pre class="bg-dark text-white p-3 rounded mt-2 mb-0" style="overflow-x: auto;"><code>curl -H "X-API-Key: <span id="apiKeyExample"></span>" \
+        <label class="font-medium text-sm pl-1 block mb-1.5">Your API Key</label>
+        <div class="flex gap-2 mb-4"><input type="text" id="apiKeyValue" readonly
+            class="flex-1 border-2 border-txlog-lavender bg-txlog-indigo/5 px-4 py-3 rounded-xl font-mono text-sm"><button
+            type="button" id="copyAPIKeyBtn"
+            class="bg-txlog-sky text-white font-medium px-4 py-3 rounded-xl hover:-translate-y-0.5 transition-all flex items-center gap-2"><i
+              data-lucide="copy" class="w-4 h-4"></i> Copy</button></div>
+        <div class="bg-txlog-sky/5 border border-txlog-sky/20 rounded-xl p-4">
+          <h4 class="font-semibold text-sm mb-2">How to use this API key</h4>
+          <p class="text-sm text-txlog-indigo/60 mb-2">Include this key in your API requests using the <code
+              class="bg-txlog-indigo/5 text-xs font-mono px-1.5 py-0.5 rounded">X-API-Key</code> header:</p>
+          <pre class="bg-txlog-indigo text-white text-xs font-mono p-3 rounded-xl overflow-x-auto"><code>curl -H "X-API-Key: <span id="apiKeyExample"></span>" \
      https://your-server/v1/transactions</code></pre>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeModalBtn">Close</button>
-        <button type="button" class="btn btn-primary" id="generateAPIKeyBtn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path
-              d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" />
-            <path d="M15 9h.01" />
-          </svg>
-          Generate Key
-        </button>
-      </div>
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-4 flex justify-end gap-3">
+      <button type="button" onclick="closeModal('createAPIKeyModal')" id="closeModalBtn"
+        class="border-2 border-txlog-lavender text-txlog-indigo font-medium px-4 py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Close</button>
+      <button type="button" id="generateAPIKeyBtn"
+        class="bg-txlog-sky text-white font-medium px-4 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2"><i
+          data-lucide="key-round" class="w-4 h-4"></i> Generate Key</button>
     </div>
   </div>
 </div>
 
 <!-- Run Migrations Modal -->
-<div class="modal modal-blur fade" id="migrationsModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Run Database Migrations</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert alert-warning">
-          <div class="d-flex">
-            <div>
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24"
-                stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M10.24 3.957l-8.422 14.06a1.989 1.989 0 0 0 1.7 2.983h16.845a1.989 1.989 0 0 0 1.7 -2.983l-8.423 -14.06a1.989 1.989 0 0 0 -3.4 0z" />
-                <path d="M12 9v4" />
-                <path d="M12 17h.01" />
-              </svg>
-            </div>
-            <div>
-              <h4>Important Notice</h4>
-              <div class="text-secondary">
-                This action will apply all pending database migrations. This operation:
-                <ul class="mt-2 mb-0">
-                  <li>Cannot be easily undone</li>
-                  <li>May take several minutes to complete</li>
-                  <li>Should not be interrupted once started</li>
-                  <li>Will modify the database structure</li>
-                </ul>
-              </div>
-            </div>
+<div id="migrationsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="if(event.target===this)closeModal('migrationsModal')">
+  <div data-modal-panel
+    class="bg-white rounded-3xl shadow-soft max-w-lg w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between flex-shrink-0">
+      <h5 class="font-display font-semibold text-lg">Run Database Migrations</h5><button type="button"
+        onclick="closeModal('migrationsModal')" class="text-txlog-indigo/40 hover:text-txlog-indigo"><i data-lucide="x"
+          class="w-5 h-5"></i></button>
+    </div>
+    <div class="overflow-y-auto flex-1 p-6">
+      <div class="bg-txlog-golden/5 border border-txlog-golden/20 rounded-2xl p-4 mb-4">
+        <div class="flex gap-3"><i data-lucide="triangle-alert"
+            class="w-5 h-5 text-txlog-golden flex-shrink-0 mt-0.5"></i>
+          <div>
+            <h4 class="font-semibold text-sm mb-1">Important Notice</h4>
+            <p class="text-sm text-txlog-indigo/60">This will apply all pending migrations. Cannot be easily undone, may
+              take several minutes, and should not be interrupted.</p>
           </div>
         </div>
-
-        {{ if .migrations }}
-        <p><strong>The following {{ len .migrations.Pending }} migrations will be applied:</strong></p>
-        <div class="list-group list-group-flush">
-          {{ range .migrations.Pending }}
-          <div class="list-group-item">
-            <div class="row align-items-center">
-              <div class="col-auto">
-                <code>{{ .Version }}</code>
-              </div>
-              <div class="col">
-                <strong>{{ .Description }}</strong>
-                <div class="text-muted">{{ .Filename }}</div>
-              </div>
-            </div>
+      </div>
+      {{ if .migrations }}<p class="font-semibold text-sm mb-2">The following {{ len .migrations.Pending }} migrations
+        will be applied:</p>
+      <div class="space-y-2">{{ range .migrations.Pending }}<div
+          class="flex items-center gap-3 border border-txlog-lavender/50 rounded-xl p-3"><code
+            class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code>
+          <div><strong class="text-sm">{{ .Description }}</strong>
+            <div class="text-xs text-txlog-indigo/40">{{ .Filename }}</div>
           </div>
-          {{ end }}
-        </div>
-        {{ end }}
-
-        <div class="mt-3">
-          <p class="text-muted">
-            <strong>Recommendation:</strong> Ensure you have a database backup before proceeding.
-            This operation is typically safe but should be done during maintenance windows in production.
-          </p>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <form action="/admin/migrations/run" method="post" style="display: inline;">
-          <button type="submit" class="btn btn-primary" id="runMigrationsBtn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-              <path d="M5 12l5 5l10 -10" />
-            </svg>
-            Run All Migrations
-          </button>
-        </form>
-      </div>
+        </div>{{ end }}</div>{{ end }}
+      <p class="text-xs text-txlog-indigo/40 mt-3"><strong>Recommendation:</strong> Ensure you have a database backup
+        before proceeding.</p>
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-4 flex justify-end gap-3 flex-shrink-0">
+      <button type="button" onclick="closeModal('migrationsModal')"
+        class="border-2 border-txlog-lavender text-txlog-indigo font-medium px-4 py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button>
+      <form action="/admin/migrations/run" method="post" class="inline"><button type="submit" id="runMigrationsBtn"
+          class="bg-txlog-sky text-white font-medium px-4 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2"><i
+            data-lucide="check" class="w-4 h-4"></i> Run All Migrations</button></form>
     </div>
   </div>
 </div>
 
 <script>
-  // Handle migration button click
   document.addEventListener('DOMContentLoaded', function () {
-    const runMigrationsBtn = document.getElementById('runMigrationsBtn');
-    if (runMigrationsBtn) {
-      runMigrationsBtn.addEventListener('click', function () {
-        this.disabled = true;
-        this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Running...';
-        this.form.submit();
-      });
-    }
-
-    // Handle API key generation
-    const generateBtn = document.getElementById('generateAPIKeyBtn');
-    const copyBtn = document.getElementById('copyAPIKeyBtn');
-    const createForm = document.getElementById('createAPIKeyForm');
-    const resultDiv = document.getElementById('apiKeyResult');
-    const closeBtn = document.getElementById('closeModalBtn');
-    const modal = document.getElementById('createAPIKeyModal');
-
-    if (generateBtn) {
-      generateBtn.addEventListener('click', async function () {
-        const nameInput = document.getElementById('apiKeyName');
-        const name = nameInput.value.trim();
-
-        if (name.length < 3) {
-          alert('Please enter a name with at least 3 characters');
-          return;
-        }
-
-        // Disable button and show loading
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
-
-        try {
-          const formData = new FormData();
-          formData.append('name', name);
-
-          const response = await fetch('/admin/apikeys/create', {
-            method: 'POST',
-            body: formData
-          });
-
-          const data = await response.json();
-
-          if (response.ok && data.success) {
-            // Hide form, show result
-            createForm.style.display = 'none';
-            resultDiv.style.display = 'block';
-            generateBtn.style.display = 'none';
-
-            // Set the API key value
-            document.getElementById('apiKeyValue').value = data.key;
-            document.getElementById('apiKeyExample').textContent = data.key;
-
-            // Change close button text
-            closeBtn.textContent = 'Done';
-            closeBtn.classList.remove('btn-secondary');
-            closeBtn.classList.add('btn-success');
-          } else {
-            alert('Error: ' + (data.error || 'Failed to create API key'));
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" /><path d="M15 9h.01" /></svg> Generate Key';
-          }
-        } catch (error) {
-          alert('Network error: ' + error.message);
-          generateBtn.disabled = false;
-          generateBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" /><path d="M15 9h.01" /></svg> Generate Key';
-        }
-      });
-    }
-
-    if (copyBtn) {
-      copyBtn.addEventListener('click', function () {
-        const apiKeyInput = document.getElementById('apiKeyValue');
-        apiKeyInput.select();
-        document.execCommand('copy');
-
-        // Change button text temporarily
-        const originalHTML = copyBtn.innerHTML;
-        copyBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10"/></svg> Copied!';
-        copyBtn.classList.add('btn-success');
-        copyBtn.classList.remove('btn-primary');
-
-        setTimeout(function () {
-          copyBtn.innerHTML = originalHTML;
-          copyBtn.classList.remove('btn-success');
-          copyBtn.classList.add('btn-primary');
-        }, 2000);
-      });
-    }
-
-    // Reset modal when closed
-    if (modal) {
-      modal.addEventListener('hidden.bs.modal', function () {
-        // Check if a key was created (result is visible)
-        const wasKeyCreated = resultDiv.style.display === 'block';
-
-        // Reset form
-        createForm.style.display = 'block';
-        resultDiv.style.display = 'none';
-        generateBtn.style.display = 'inline-block';
-        generateBtn.disabled = false;
-        generateBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1 -4.069 0l-.301 -.301l-6.558 6.558a2 2 0 0 1 -1.239 .578l-.175 .008h-1.172a1 1 0 0 1 -.993 -.883l-.007 -.117v-1.172a2 2 0 0 1 .467 -1.284l.119 -.13l.414 -.414h2v-2h2v-2l2.144 -2.144l-.301 -.301a2.877 2.877 0 0 1 0 -4.069l2.643 -2.643a2.877 2.877 0 0 1 4.069 0z" /><path d="M15 9h.01" /></svg> Generate Key';
-        closeBtn.textContent = 'Close';
-        closeBtn.classList.add('btn-secondary');
-        closeBtn.classList.remove('btn-success');
-        document.getElementById('apiKeyName').value = '';
-        document.getElementById('apiKeyValue').value = '';
-
-        // Reload page if key was created
-        if (wasKeyCreated) {
-          window.location.reload();
-        }
-      });
-    }
-
-    // Show success messages for API key operations
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('apikey_revoked')) {
-      showAlert('success', 'API key revoked successfully');
-    }
-    if (urlParams.get('apikey_deleted')) {
-      showAlert('success', 'API key deleted successfully');
-    }
+    var runBtn = document.getElementById('runMigrationsBtn');
+    if (runBtn) runBtn.addEventListener('click', function () { this.disabled = true; this.innerHTML = '<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Running...'; });
+    var generateBtn = document.getElementById('generateAPIKeyBtn');
+    var copyBtn = document.getElementById('copyAPIKeyBtn');
+    var createForm = document.getElementById('createAPIKeyForm');
+    var resultDiv = document.getElementById('apiKeyResult');
+    var closeBtn = document.getElementById('closeModalBtn');
+    if (generateBtn) generateBtn.addEventListener('click', function () {
+      var name = document.getElementById('apiKeyName').value.trim();
+      if (name.length < 3) { alert('Please enter a name with at least 3 characters'); return; }
+      generateBtn.disabled = true; generateBtn.innerHTML = '<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Generating...';
+      var formData = new FormData(); formData.append('name', name);
+      fetch('/admin/apikeys/create', { method: 'POST', body: formData }).then(function (r) { return r.json(); }).then(function (data) {
+        if (data.success) { createForm.classList.add('hidden'); resultDiv.classList.remove('hidden'); generateBtn.classList.add('hidden'); document.getElementById('apiKeyValue').value = data.key; document.getElementById('apiKeyExample').textContent = data.key; closeBtn.textContent = 'Done'; closeBtn.classList.remove('border-txlog-lavender', 'text-txlog-indigo', 'hover:bg-txlog-lavender/20'); closeBtn.classList.add('bg-txlog-leaf', 'text-white', 'hover:-translate-y-0.5'); }
+        else { alert('Error: ' + (data.error || 'Failed')); generateBtn.disabled = false; generateBtn.innerHTML = '<i data-lucide="key-round" class="w-4 h-4"></i> Generate Key'; lucide.createIcons(); }
+      }).catch(function (e) { alert('Error: ' + e.message); generateBtn.disabled = false; generateBtn.innerHTML = '<i data-lucide="key-round" class="w-4 h-4"></i> Generate Key'; lucide.createIcons(); });
+    });
+    if (copyBtn) copyBtn.addEventListener('click', function () {
+      var input = document.getElementById('apiKeyValue'); input.select(); document.execCommand('copy');
+      copyBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Copied!'; lucide.createIcons();
+      setTimeout(function () { copyBtn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i> Copy'; lucide.createIcons(); }, 2000);
+    });
+    var urlP = new URLSearchParams(window.location.search);
+    if (urlP.get('apikey_revoked')) showAdminAlert('API key revoked successfully');
+    if (urlP.get('apikey_deleted')) showAdminAlert('API key deleted successfully');
   });
-
-  function showAlert(type, message) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = 'alert alert-' + type + ' alert-dismissible mb-3';
-    alertDiv.innerHTML = `
-      <div class="d-flex">
-        <div>
-          <svg xmlns="http://www.w3.org/2000/svg" class="icon alert-icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-            <path d="M5 12l5 5l10 -10"/>
-          </svg>
-        </div>
-        <div>` + message + `</div>
-      </div>
-      <a class="btn-close" data-bs-dismiss="alert" aria-label="close"></a>
-    `;
-    document.querySelector('.container-xl').insertBefore(alertDiv, document.querySelector('.row'));
+  function showAdminAlert(msg) {
+    var d = document.createElement('div');
+    d.className = 'bg-txlog-leaf/10 border border-txlog-leaf/30 text-txlog-leaf px-4 py-3 rounded-xl mb-4 flex items-center gap-2';
+    d.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i><span>' + msg + '</span>';
+    var c = document.querySelector('.space-y-6'); c.insertBefore(d, c.firstChild); lucide.createIcons();
   }
 </script>
-
 {{ template "footer.html" . }}

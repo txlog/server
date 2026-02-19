@@ -3,3 +3,4 @@
 tmp/main
 tmp/build-errors.log
 server
+tools/

@@ -1,258 +1,179 @@
 {{ template "header.html" . }}
-<div class="page-header d-print-none text-white">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <h2 class="page-title">
-          {{ .title }}
-        </h2>
-      </div>
-    </div>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
   </div>
 </div>
 
-<div class="page-body">
-  <div class="container-xl">
-    <div class="row row-deck row-cards">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">
-              {{ if .search }}
-                Assets
-                {{ if eq .restart "true" }}that need to be restarted{{ end }}
-                {{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}
-                {{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
-                containing <kbd>{{ .search }}</kbd>
-              {{ else }}
-                Registered assets
-                {{ if eq .restart "true" }}that need to be restarted{{ end }}
-                {{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}
-                {{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
-              {{ end }}
-            </h3>
-            <div class="card-actions">
-              <div class="ms-auto text-secondary">
-                <div class="row g-2">
-                  <div class="col">
-                    <input type="text" class="form-control" autocomplete="off" aria-label="Search assets" placeholder="Search by hostname or id" value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)">
-                  </div>
-                  <div class="col-auto">
-                    <label class="form-selectgroup-item" id="restart-label" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-trigger="hover" data-bs-original-title="Show only assets that need to be restarted">
-                      <input type="checkbox" id="restart" name="restart" value="true" class="form-selectgroup-input"{{ if eq .restart "true" }} checked{{ end }}>
-                      <span class="form-selectgroup-label">
-                        <!-- Download SVG icon from http://tabler.io/icons/icon/refresh-alert -->
-                        <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-refresh-alert"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" /><path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" /><path d="M12 9l0 3" /><path d="M12 15l.01 0" /></svg>
-                      </span>
-                    </label>
-                  </div>
-                  <div class="col-auto">
-                    <label class="form-selectgroup-item" id="inactive-label" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-trigger="hover" data-bs-original-title="Show only assets that have not sent data in the last 15 days">
-                      <input type="checkbox" id="inactive" name="inactive" value="true" class="form-selectgroup-input"{{ if eq .inactive "true" }} checked{{ end }}>
-                      <span class="form-selectgroup-label">
-                        <!-- Download SVG icon from http://tabler.io/icons/icon/power -->
-                        <svg  xmlns="http://www.w.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-power"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 6a7.75 7.75 0 1 0 10 0" /><path d="M12 4l0 8" /></svg>
-                      </span>
-                    </label>
-                  </div>
-                  <div class="col-auto">
-                    <a href="javascript:search();" class="btn btn-2 btn-icon" aria-label="Button">
-                      <!-- Download SVG icon from http://tabler.io/icons/icon/search -->
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-2">
-                        <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
-                        <path d="M21 21l-6 -6"></path>
-                      </svg>
-                    </a>
-                  </div>
+<div class="max-w-7xl mx-auto px-6 pb-8">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div
+      class="border-b border-txlog-lavender px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <h3 class="font-display font-semibold text-lg">
+        {{ if .search }}
+        Assets
+        {{ if eq .restart "true" }}that need to be restarted{{ end }}
+        {{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}
+        {{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
+        containing <kbd class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .search
+          }}</kbd>
+        {{ else }}
+        Registered assets
+        {{ if eq .restart "true" }}that need to be restarted{{ end }}
+        {{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}
+        {{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
+        {{ end }}
+      </h3>
+      <div class="flex items-center gap-2">
+        <input type="text" autocomplete="off" aria-label="Search assets" placeholder="Search by hostname or id"
+          value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)"
+          class="border-2 border-txlog-lavender bg-white/50 px-3 py-2 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all placeholder:text-txlog-indigo/30 text-txlog-indigo text-sm font-medium w-48 sm:w-64">
+        <div class="relative group">
+          <label class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-xl border-2 transition-all"
+            id="restart-label">
+            <input type="checkbox" id="restart" name="restart" value="true" class="sr-only peer" {{ if eq
+              .restart "true" }} checked{{ end }}>
+            <i data-lucide="refresh-cw-off" class="w-4 h-4 text-txlog-indigo/50 peer-checked:text-txlog-golden"></i>
+          </label>
+          <div
+            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-txlog-indigo text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">
+            Show only assets that need to be restarted</div>
+        </div>
+        <div class="relative group">
+          <label class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-xl border-2 transition-all"
+            id="inactive-label">
+            <input type="checkbox" id="inactive" name="inactive" value="true" class="sr-only peer" {{ if eq
+              .inactive "true" }} checked{{ end }}>
+            <i data-lucide="power" class="w-4 h-4 text-txlog-indigo/50 peer-checked:text-txlog-coral"></i>
+          </label>
+          <div
+            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-txlog-indigo text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">
+            Show only inactive assets (15+ days)</div>
+        </div>
+        <button onclick="search()"
+          class="bg-txlog-sky text-white p-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"
+          aria-label="Search">
+          <i data-lucide="search" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+
+    {{ if eq (len .assets) 0 }}
+    <div class="py-16 text-center">
+      <i data-lucide="frown" class="w-12 h-12 text-txlog-indigo/20 mx-auto mb-4"></i>
+      <p class="font-display font-semibold text-lg mb-2">No assets found{{ if .search }} containing <kbd
+          class="bg-txlog-indigo/5 text-xs font-mono px-2 py-1 rounded-md">{{ .search }}</kbd>{{ end }}</p>
+      <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
+          target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+    </div>
+    {{ else }}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">
+              Hostname <i data-lucide="chevron-up" class="w-3 h-3 inline-block"></i>
+            </th>
+            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last Seen</th>
+            <th class="px-6 py-3 w-1">&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-txlog-lavender/30">
+          {{ with .assets }}
+          {{ range . }}
+          <tr class="hover:bg-txlog-lavender/10 transition-colors">
+            <td class="px-6 py-3">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-lg overflow-hidden bg-txlog-lavender flex-shrink-0 relative">
+                  <img src="/images/{{ brand .OS }}" class="w-full h-full object-cover" alt="">
+                  {{ if derefBool .NeedsRestarting }}
+                  <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-txlog-golden rounded-full animate-pulse"
+                    title="Asset must be restarted"></span>
+                  {{ end }}
+                </span>
+                <div>
+                  <div class="font-medium">{{ .Hostname }}</div>
+                  <div class="text-txlog-indigo/50 text-xs">{{ .MachineID }}</div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {{ if eq (len .assets) 0 }}
-          <div class="empty">
-            <div class="empty-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                <circle cx="12" cy="12" r="9" />
-                <line x1="9" y1="10" x2="9.01" y2="10" />
-                <line x1="15" y1="10" x2="15.01" y2="10" />
-                <path d="M9.5 15.25a3.5 3.5 0 0 1 5 0" />
-              </svg>
-            </div>
-            <p class="empty-title">No assets found{{ if .search }} containing <kbd>{{ .search }}</kbd>{{ end }}</p>
-            <p class="empty-subtitle text-muted">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank">Txlog Agent</a> in one of your servers.</p>
-          </div>
-          {{ else }}
-          <div class="table-responsive">
-            <table class="table table-vcenter table-mobile-md card-table">
-              <thead>
-                <tr>
-                  <th>Hostname
-                    <i class="ti ti-chevron-up"></i>
-                  </th>
-                  <th>Last Seen</th>
-                  <th class="w-1">&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{ with .assets }}
-                  {{ range . }}
-                    <tr>
-                      <td data-label="Name">
-                        <div class="d-flex py-1 align-items-center">
-                          <span class="avatar avatar-2 me-2" style="background-image: url(/images/{{ brand .OS }})">
-                            {{ if derefBool .NeedsRestarting }}
-                              <span class="badge badge-dot bg-yellow badge-notification badge-blink" title="Asset must be restarted"></span>
-                            {{ end }}
-                          </span>
-                          <div class="flex-fill">
-                            <div class="font-weight-medium">{{ .Hostname }}</div>
-                            <div class="text-secondary">{{ .MachineID }}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td data-label="Title">
-                        <div class="d-flex align-items-center">
-                          <span class="{{ timeStatusClass .ExecutedAt }}"></span>
-                          <div class="text-secondary ms-2">{{ formatDateTime .ExecutedAt }}</div>
-                        </div>
-                      </td>
-                      <td>
-                        <a class="btn align-text-top" href="/assets/{{ .MachineID }}">Details</a>
-                      </td>
-                    </tr>
-                  {{ end }}
-                {{ end }}
-              </tbody>
-            </table>
-          </div>
-
-          <div class="card-footer d-flex align-items-center">
-            <p class="m-0 text-secondary">Showing <span>{{ add $.offset 1 }}</span> to <span>{{ min (add $.offset $.limit) $.totalRecords }}</span> of <span>{{ .totalRecords }}</span> entries</p>
-            <ul class="pagination m-0 ms-auto">
-              <li class="page-item {{ if eq $.page 1 }}disabled{{ end }}">
-                <a class="page-link" href="?page={{ .page | add -1 }}" tabindex="-1" aria-disabled="true">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-1">
-                    <path d="M15 6l-6 6l6 6"></path>
-                  </svg>
-                  prev
-                </a>
-              </li>
-              {{ range $i := iterate 1 .totalPages }}
-              <li class="page-item{{ if eq $.page $i }} active{{ end }}">
-                <a class="page-link" href="?page={{ $i }}">{{ $i }}</a>
-              </li>
-              {{ end }}
-              <li class="page-item {{ if eq $.page $.totalPages }}disabled{{ end }}">
-                <a class="page-link" href="?page={{ .page | add 1 }}" aria-disabled="true">
-                  next
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-1">
-                    <path d="M9 6l6 6l-6 6"></path>
-                  </svg>
-                </a>
-              </li>
-            </ul>
-          </div>
+            </td>
+            <td class="px-6 py-3">
+              <div class="flex items-center gap-2">
+                <span class="{{ timeStatusClass .ExecutedAt }}"></span>
+                <span class="text-txlog-indigo/60">{{ formatDateTime .ExecutedAt }}</span>
+              </div>
+            </td>
+            <td class="px-6 py-3">
+              <a class="text-txlog-sky hover:underline text-sm font-medium" href="/assets/{{ .MachineID }}">Details</a>
+            </td>
+          </tr>
           {{ end }}
-        </div>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="border-t border-txlog-lavender/50 px-6 py-4 flex items-center justify-between">
+      <p class="text-sm text-txlog-indigo/50">Showing <span>{{ add $.offset 1 }}</span> to <span>{{ min (add $.offset
+          $.limit) $.totalRecords }}</span> of <span>{{ .totalRecords }}</span> entries</p>
+      <div class="flex items-center gap-1">
+        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page 1 }}text-txlog-indigo/30 pointer-events-none{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
+          href="?page={{ .page | add -1 }}">
+          <i data-lucide="chevron-left" class="w-4 h-4 inline-block"></i> prev
+        </a>
+        {{ range $i := iterate 1 .totalPages }}
+        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page $i }}bg-txlog-sky text-white{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
+          href="?page={{ $i }}">{{ $i }}</a>
+        {{ end }}
+        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page $.totalPages }}text-txlog-indigo/30 pointer-events-none{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
+          href="?page={{ .page | add 1 }}">
+          next <i data-lucide="chevron-right" class="w-4 h-4 inline-block"></i>
+        </a>
       </div>
+    </div>
+    {{ end }}
+  </div>
+</div>
+
+<div id="modal-success" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="if(event.target===this)closeModal('modal-success')">
+  <div data-modal-panel
+    class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+    <div class="h-1 bg-txlog-leaf rounded-t-3xl"></div>
+    <div class="p-6 text-center">
+      <i data-lucide="check-circle" class="w-12 h-12 text-txlog-leaf mx-auto mb-3"></i>
+      <h3 class="font-display font-semibold text-lg mb-2">Asset deleted successfully</h3>
+      <p class="text-sm text-txlog-indigo/60">All data for asset <code id="deleted-asset-id"
+          class="bg-txlog-indigo/5 text-xs font-mono px-2 py-1 rounded-md"></code> has been permanently removed.</p>
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-4">
+      <button onclick="closeModal('modal-success')"
+        class="w-full bg-txlog-leaf text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-leaf/30 transition-all">Close</button>
     </div>
   </div>
 </div>
 
 <script>
   function search() {
-    const searchValue = document.getElementById('search').value;
-    const restartValue = document.getElementById('restart').checked;
-    const inactiveValue = document.getElementById('inactive').checked;
-    const hasQueryParams = window.location.search.includes('?');
-    const url = new URL(window.location.href);
+    var searchValue = document.getElementById('search').value;
+    var restartValue = document.getElementById('restart').checked;
+    var inactiveValue = document.getElementById('inactive').checked;
+    var url = new URL(window.location.href);
     url.searchParams.set('search', searchValue);
     url.searchParams.set('restart', restartValue);
     url.searchParams.set('inactive', inactiveValue);
     window.location.href = url.toString();
   }
-
   function handleSearch(event) {
-    if (event.key === 'Enter') {
-      search();
-    }
+    if (event.key === 'Enter') search();
   }
-
-  document.addEventListener('DOMContentLoaded', function() {
-    const restartCheckbox = document.getElementById('restart');
-    const inactiveCheckbox = document.getElementById('inactive');
-    const restartLabel = document.getElementById('restart-label');
-    const inactiveLabel = document.getElementById('inactive-label');
-
-    [restartCheckbox, inactiveCheckbox].forEach((checkbox, index) => {
-      const label = index === 0 ? restartLabel : inactiveLabel;
-
-      checkbox.addEventListener('change', function() {
-        const tooltip = bootstrap.Tooltip.getInstance(label);
-        if (tooltip) {
-          tooltip.hide();
-        }
-        label.blur();
-        checkbox.blur();
-      });
-    });
-  });
-</script>
-
-<!-- Success Modal -->
-<div class="modal modal-blur fade" id="modal-success" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      <div class="modal-status bg-success"></div>
-      <div class="modal-body text-center py-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon mb-2 text-success icon-lg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-          <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-          <path d="M9 12l2 2l4 -4" />
-        </svg>
-        <h3>Asset deleted successfully</h3>
-        <div class="text-secondary">
-          All data for asset <code id="deleted-asset-id"></code> has been permanently removed.
-        </div>
-      </div>
-      <div class="modal-footer">
-        <div class="w-100">
-          <button class="btn btn-success w-100" data-bs-dismiss="modal">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  // Check if asset was deleted and show success modal
-  document.addEventListener('DOMContentLoaded', function() {
-    const deletedAssetId = sessionStorage.getItem('assetDeleted');
+  document.addEventListener('DOMContentLoaded', function () {
+    var deletedAssetId = sessionStorage.getItem('assetDeleted');
     if (deletedAssetId) {
-      // Remove from sessionStorage
       sessionStorage.removeItem('assetDeleted');
-
-      // Show success modal
       document.getElementById('deleted-asset-id').textContent = deletedAssetId;
-      const successModal = new bootstrap.Modal(document.getElementById('modal-success'));
-      successModal.show();
+      openModal('modal-success');
     }
-
-    // Force reflow to ensure animations start immediately
-    const animatedDots = document.querySelectorAll('.status-dot-animated');
-    animatedDots.forEach(dot => {
-      // Trigger reflow by accessing offsetHeight
-      void dot.offsetHeight;
-      // Ensure animation class is properly applied
-      dot.classList.add('status-dot-animated');
-    });
   });
 </script>
 

@@ -1,93 +1,88 @@
 {{ template "header.html" . }}
-<div class="page-header d-print-none text-white">
-    <div class="container-xl">
-        <div class="row g-2 align-items-center">
-            <div class="col">
-                <div class="page-pretitle">Analytics</div>
-                <h2 class="page-title">{{ .title }}</h2>
-                <p class="text-white-50 mt-1 mb-0">Detect unusual patterns in package transactions such as high-volume
-                    changes, rapid package updates, or version downgrades.</p>
-            </div>
-        </div>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+    <div class="max-w-7xl mx-auto px-6">
+        <p class="text-white/60 text-sm mb-1">Analytics</p>
+        <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
+        <p class="text-white/50 text-sm mt-1">Detect unusual patterns in package transactions such as high-volume
+            changes, rapid package updates, or version downgrades.</p>
     </div>
 </div>
 
-<div class="page-body">
-    <div class="container-xl">
-        <div class="row row-cards">
-            <div class="col-12 col-lg-4">
-                <div class="row row-cards">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Filters</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Time Period</label>
-                                    <select id="days-filter" class="form-select" onchange="loadAnomalies()">
-                                        <option value="7">Last 7 days</option>
-                                        <option value="14">Last 14 days</option>
-                                        <option value="30">Last 30 days</option>
-                                        <option value="60">Last 60 days</option>
-                                        <option value="90">Last 90 days</option>
-                                    </select>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">Minimum Severity</label>
-                                    <select id="severity-filter" class="form-select" onchange="loadAnomalies()">
-                                        <option value="">All Severities</option>
-                                        <option value="low">Low+</option>
-                                        <option value="medium">Medium+</option>
-                                        <option value="high">High Only</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+<div class="max-w-7xl mx-auto px-6 pb-8">
+    <div class="grid lg:grid-cols-3 gap-6">
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+                <div class="border-b border-txlog-lavender px-6 py-4">
+                    <h3 class="font-display font-semibold text-lg">Filters</h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="font-medium text-sm pl-1 block mb-1.5">Time Period</label>
+                        <select id="days-filter" onchange="loadAnomalies()"
+                            class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-3 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all text-txlog-indigo font-medium">
+                            <option value="7">Last 7 days</option>
+                            <option value="14">Last 14 days</option>
+                            <option value="30">Last 30 days</option>
+                            <option value="60">Last 60 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
                     </div>
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Summary</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="datagrid">
-                                    <div class="datagrid-item">
-                                        <div class="datagrid-title">Total Anomalies</div>
-                                        <div class="datagrid-content h2" id="total-anomalies">-</div>
-                                    </div>
-                                    <div class="datagrid-item">
-                                        <div class="datagrid-title">Affected Hosts</div>
-                                        <div class="datagrid-content" id="affected-hosts">-</div>
-                                    </div>
-                                    <div class="datagrid-item">
-                                        <div class="datagrid-title">High Severity</div>
-                                        <div class="datagrid-content text-danger" id="high-count">-</div>
-                                    </div>
-                                    <div class="datagrid-item">
-                                        <div class="datagrid-title">Medium Severity</div>
-                                        <div class="datagrid-content text-warning" id="medium-count">-</div>
-                                    </div>
-                                    <div class="datagrid-item">
-                                        <div class="datagrid-title">Low Severity</div>
-                                        <div class="datagrid-content text-info" id="low-count">-</div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div>
+                        <label class="font-medium text-sm pl-1 block mb-1.5">Minimum Severity</label>
+                        <select id="severity-filter" onchange="loadAnomalies()"
+                            class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-3 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all text-txlog-indigo font-medium">
+                            <option value="">All Severities</option>
+                            <option value="low">Low+</option>
+                            <option value="medium">Medium+</option>
+                            <option value="high">High Only</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+                <div class="border-b border-txlog-lavender px-6 py-4">
+                    <h3 class="font-display font-semibold text-lg">Summary</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Total
+                                Anomalies</div>
+                            <div class="font-display font-bold text-2xl" id="total-anomalies">-</div>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Affected
+                                Hosts</div>
+                            <div class="font-display font-bold text-2xl" id="affected-hosts">-</div>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">High
+                                Severity</div>
+                            <div class="font-display font-bold text-2xl text-txlog-coral" id="high-count">-</div>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Medium
+                                Severity</div>
+                            <div class="font-display font-bold text-2xl text-txlog-golden" id="medium-count">-</div>
+                        </div>
+                        <div class="col-span-2">
+                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Low
+                                Severity</div>
+                            <div class="font-display font-bold text-2xl text-txlog-sky" id="low-count">-</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Detected Anomalies <span class="card-subtitle" id="time-window"></span>
-                        </h3>
-                    </div>
-                    <div class="card-body" id="anomalies-body">
-                        <div class="progress progress-sm">
-                            <div class="progress-bar progress-bar-indeterminate"></div>
-                        </div>
+        </div>
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+                <div class="border-b border-txlog-lavender px-6 py-4">
+                    <h3 class="font-display font-semibold text-lg">Detected Anomalies <span
+                            class="text-sm text-txlog-indigo/50 font-normal ml-1" id="time-window"></span></h3>
+                </div>
+                <div class="p-6" id="anomalies-body">
+                    <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
+                        <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
                     </div>
                 </div>
             </div>
@@ -97,74 +92,44 @@
 
 <script>
     function loadAnomalies() {
-        const days = document.getElementById('days-filter').value;
-        const severity = document.getElementById('severity-filter').value;
-
-        let url = `/v1/reports/anomalies?days=${days}`;
-        if (severity) url += `&severity=${severity}`;
-
-        document.getElementById('anomalies-body').innerHTML = '<div class="progress progress-sm"><div class="progress-bar progress-bar-indeterminate"></div></div>';
-
+        var days = document.getElementById('days-filter').value;
+        var severity = document.getElementById('severity-filter').value;
+        var url = '/v1/reports/anomalies?days=' + days;
+        if (severity) url += '&severity=' + severity;
+        document.getElementById('anomalies-body').innerHTML = '<div class="h-2 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div></div>';
         fetch(url)
-            .then(response => response.json())
-            .then(data => {
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
                 if (data.error) {
-                    document.getElementById('anomalies-body').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    document.getElementById('anomalies-body').innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">' + data.error + '</div>';
                     return;
                 }
-
-                // Update summary
                 document.getElementById('time-window').textContent = data.time_window;
                 document.getElementById('total-anomalies').textContent = data.summary.total_count || 0;
                 document.getElementById('affected-hosts').textContent = data.summary.affected_hosts || 0;
-                document.getElementById('high-count').textContent = data.summary.by_severity?.high || 0;
-                document.getElementById('medium-count').textContent = data.summary.by_severity?.medium || 0;
-                document.getElementById('low-count').textContent = data.summary.by_severity?.low || 0;
-
+                document.getElementById('high-count').textContent = (data.summary.by_severity && data.summary.by_severity.high) || 0;
+                document.getElementById('medium-count').textContent = (data.summary.by_severity && data.summary.by_severity.medium) || 0;
+                document.getElementById('low-count').textContent = (data.summary.by_severity && data.summary.by_severity.low) || 0;
                 if (data.anomalies && data.anomalies.length > 0) {
-                    let html = '';
-
-                    data.anomalies.forEach(anomaly => {
-                        const severityClass = anomaly.severity === 'high' ? 'danger' : (anomaly.severity === 'medium' ? 'warning' : 'info');
-                        const typeIcon = anomaly.type === 'high_volume' ? 'stack-2' : (anomaly.type === 'rapid_change' ? 'refresh' : 'arrow-badge-down');
-                        const typeName = anomaly.type === 'high_volume' ? 'High Volume' : (anomaly.type === 'rapid_change' ? 'Rapid Change' : 'Downgrade');
-                        const detectedAt = new Date(anomaly.detected_at).toLocaleString();
-
-                        html += `
-          <div class="alert alert-${severityClass} mb-2" role="alert">
-            <div class="d-flex">
-              <div>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon alert-icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
-              </div>
-              <div>
-                <h4 class="alert-title mb-1">${anomaly.hostname} - ${typeName}</h4>
-                <div class="text-secondary">${anomaly.description}</div>
-                <div class="mt-1">
-                  <small class="text-muted">Detected: ${detectedAt}</small>
-                  <span class="badge bg-${severityClass} text-white ms-2">${anomaly.severity}</span>
-                </div>
-              </div>
-            </div>
-          </div>`;
+                    var html = '<div class="space-y-3">';
+                    data.anomalies.forEach(function (anomaly) {
+                        var color = anomaly.severity === 'high' ? 'txlog-coral' : (anomaly.severity === 'medium' ? 'txlog-golden' : 'txlog-sky');
+                        var typeName = anomaly.type === 'high_volume' ? 'High Volume' : (anomaly.type === 'rapid_change' ? 'Rapid Change' : 'Downgrade');
+                        var detectedAt = new Date(anomaly.detected_at).toLocaleString();
+                        html += '<div class="bg-' + color + '/5 border border-' + color + '/20 rounded-2xl p-4"><div class="flex items-start gap-3"><i data-lucide="triangle-alert" class="w-5 h-5 text-' + color + ' flex-shrink-0 mt-0.5"></i><div><h4 class="font-semibold text-sm mb-1">' + anomaly.hostname + ' - ' + typeName + '</h4><p class="text-sm text-txlog-indigo/60">' + anomaly.description + '</p><div class="flex items-center gap-2 mt-2"><span class="text-xs text-txlog-indigo/40">Detected: ' + detectedAt + '</span><span class="bg-' + color + '/10 text-' + color + ' text-xs font-bold px-2 py-0.5 rounded-md">' + anomaly.severity + '</span></div></div></div></div>';
                     });
-
+                    html += '</div>';
                     document.getElementById('anomalies-body').innerHTML = html;
+                    lucide.createIcons();
                 } else {
-                    document.getElementById('anomalies-body').innerHTML = `
-          <div class="empty">
-            <div class="empty-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-            </div>
-            <p class="empty-title">No anomalies detected</p>
-            <p class="empty-subtitle text-muted">No unusual activity found in the selected time period.</p>
-          </div>`;
+                    document.getElementById('anomalies-body').innerHTML = '<div class="py-12 text-center"><i data-lucide="check" class="w-12 h-12 text-txlog-leaf/40 mx-auto mb-4"></i><p class="font-semibold mb-1">No anomalies detected</p><p class="text-sm text-txlog-indigo/50">No unusual activity found in the selected time period.</p></div>';
+                    lucide.createIcons();
                 }
             })
-            .catch(error => {
-                document.getElementById('anomalies-body').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            .catch(function (error) {
+                document.getElementById('anomalies-body').innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">Error: ' + error.message + '</div>';
             });
     }
-
     document.addEventListener('DOMContentLoaded', loadAnomalies);
 </script>
 {{ template "footer.html" . }}

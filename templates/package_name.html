@@ -1,263 +1,176 @@
 {{ template "header.html" . }}
-<!-- Page header -->
-<div class="page-header d-print-none text-white">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <h2 class="page-title">
-          Package details
-        </h2>
-      </div>
-      <div class="col-auto ms-auto d-print-none">
-        <div class="btn-list">
-          <a class="btn btn-ghost btn-secondary" href="https://pkgs.org/search/?q={{ .name }}" target="_blank">Search for this package on pkgs.org&nbsp;
-            <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" /><path d="M11 13l9 -9" /><path d="M15 4h5v5" /></svg>
-          </a>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <h2 class="font-display font-bold text-2xl text-white">Package details</h2>
+    <a class="inline-flex items-center gap-2 border-2 border-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/10 transition-all"
+      href="https://pkgs.org/search/?q={{ .name }}" target="_blank">
+      Search for this package on pkgs.org
+      <i data-lucide="external-link" class="w-4 h-4"></i>
+    </a>
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">{{ .name }}</h3>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Architecture</div>
+          <div class="font-medium">
+            {{ range $index, $arch := .archList }}{{- if $index }}, {{ end -}}{{ $arch }}{{- end }}
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Repository</div>
+          <div class="font-medium">
+            {{ range $index, $repo := .repoList }}{{- if $index }}, {{ end -}}{{ $repo }}{{- end }}
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Last seen</div>
+          <div class="font-medium">
+            {{ if .packages }}{{ formatDateTime (index .packages 0).LastSeen }}{{ end }}
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="page-body">
-  <div class="container-xl">
-    <div class="row row-deck row-cards">
-
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">{{ .name }}</h3>
-          </div>
-          <div class="card-body">
-            <div class="datagrid">
-              <div class="datagrid-item">
-                <div class="datagrid-title">Architecture</div>
-                <div class="datagrid-content">
-                  {{ range $index, $arch := .archList }}
-                  {{- if $index }}, {{ end -}}{{ $arch }}
-                  {{- end }}
-                </div>
-              </div>
-              <div class="datagrid-item">
-                <div class="datagrid-title">Repository</div>
-                <div class="datagrid-content">
-                  {{ range $index, $repo := .repoList }}
-                  {{- if $index }}, {{ end -}}{{ $repo }}
-                  {{- end }}
-                </div>
-              </div>
-              <div class="datagrid-item">
-                <div class="datagrid-title">Last seen</div>
-                <div class="datagrid-content">
-                  {{ if .packages }}{{ formatDateTime (index .packages 0).LastSeen }}{{ end }}
-                </div>
-              </div>
-
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+      <div class="border-b border-txlog-lavender px-6 py-4">
+        <h3 class="font-display font-semibold text-lg">Version timeline</h3>
+      </div>
+      <div class="p-6">
+        <div class="relative pl-8 space-y-6">
+          <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-txlog-lavender"></div>
+          {{ range .packages }}
+          <div class="relative">
+            <div class="absolute -left-5 top-1 w-6 h-6 rounded-full bg-txlog-sky/10 flex items-center justify-center">
+              <i data-lucide="package" class="w-3 h-3 text-txlog-sky"></i>
             </div>
+            <div class="bg-txlog-bg rounded-2xl p-4 border border-txlog-lavender/30">
+              <div class="flex items-start justify-between gap-3">
+                <h4 class="font-semibold">{{ .Version }}<span class="text-txlog-indigo/50">-{{ .Release }}-{{ .Arch
+                    }}</span></h4>
+                <a href="javascript:loadPackageAssets('{{ $.name }}', '{{ .Version }}', '{{ .Release }}')"
+                  class="text-txlog-sky hover:underline text-sm font-medium flex items-center gap-1">
+                  List assets <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </a>
+              </div>
+              <p class="text-sm text-txlog-indigo/60 mt-1">
+                <strong>Repo:</strong> {{ .Repo }}<br />
+                <strong>Last seen:</strong> {{ formatDateTime .LastSeen }}
+              </p>
+            </div>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div id="table-placeholder" class="bg-white rounded-3xl shadow-soft p-6 hidden">
+        <div class="space-y-3 animate-pulse">
+          <div class="h-4 bg-txlog-lavender rounded w-3/4"></div>
+          <div class="h-4 bg-txlog-lavender rounded w-1/2"></div>
+          <div class="h-4 bg-txlog-lavender rounded w-2/3"></div>
+          <div class="h-4 bg-txlog-lavender rounded w-1/3"></div>
+        </div>
+      </div>
+
+      <div id="table-assets" class="bg-white rounded-3xl shadow-soft overflow-hidden hidden">
+        <div class="border-b border-txlog-lavender px-6 py-4">
+          <h3 class="font-display font-semibold text-lg">Assets running version <kbd id="version-display"
+              class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">loading...</kbd></h3>
+        </div>
+        <div id="assets-table-container">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-txlog-lavender/50 text-left">
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Hostname
+                  </th>
+                  <th class="px-6 py-3">&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody id="assets-table-body" class="divide-y divide-txlog-lavender/30">
+              </tbody>
+            </table>
+          </div>
+          <div class="border-t border-txlog-lavender/50 px-6 py-3 hidden" id="table-footer">
+            <p class="text-sm text-txlog-indigo/50">Showing <strong id="entries-count">0</strong> entries</p>
+          </div>
+        </div>
+        <div id="empty-state-container" class="hidden">
+          <div class="py-12 text-center">
+            <i data-lucide="package" class="w-12 h-12 text-txlog-indigo/20 mx-auto mb-4"></i>
+            <p class="font-semibold mb-1">No assets found</p>
+            <p class="text-sm text-txlog-indigo/50" id="empty-state-subtitle"></p>
           </div>
         </div>
       </div>
 
-      <div class="col-6">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Version timeline</h3>
-          </div>
-          <div class="card-body">
-            <ul class="timeline">
-            {{ range .packages }}
-            <li class="timeline-event">
-              <div class="timeline-event-icon">
-                <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-package"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" /><path d="M12 12l8 -4.5" /><path d="M12 12l0 9" /><path d="M12 12l-8 -4.5" /><path d="M16 5.25l-8 4.5" /></svg>
-              </div>
-              <div class="card timeline-event-card">
-                <div class="card-body">
-                  <div class="text-secondary float-end">
-                    <a href="javascript:loadPackageAssets('{{ $.name }}', '{{ .Version }}', '{{ .Release }}')">List assets
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-end icon-2"><path d="M9 6l6 6l-6 6"></path></svg>
-                    </a>
-                  </div>
-                  <h4>{{ .Version }}<span class="text-secondary">-{{ .Release }}-{{ .Arch }}</span></h4>
-                  <p class="text-secondary">
-                    <strong>Repo:</strong> {{ .Repo }}<br/>
-                    <strong>Last seen:</strong> {{ formatDateTime .LastSeen }}
-                  </p>
-                </div>
-              </div>
-            </li>
-            {{ end }}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-6">
-        <div id="table-placeholder" class="card" style="display: none;">
-          <ul class="list-group list-group-flush placeholder-glow">
-            <li class="list-group-item">
-              <div class="row align-items-center">
-                <div class="col-7">
-                  <div class="placeholder placeholder-xs col-9"></div>
-                </div>
-                <div class="col-2 ms-auto text-end">
-                  <div class="placeholder placeholder-xs col-8"></div>
-                </div>
-              </div>
-            </li>
-            <li class="list-group-item">
-              <div class="row align-items-center">
-                <div class="col-7">
-                  <div class="placeholder placeholder-xs col-9"></div>
-                </div>
-                <div class="col-2 ms-auto text-end">
-                  <div class="placeholder placeholder-xs col-8"></div>
-                </div>
-              </div>
-            </li>
-            <li class="list-group-item">
-              <div class="row align-items-center">
-                <div class="col-7">
-                  <div class="placeholder placeholder-xs col-9"></div>
-                </div>
-                <div class="col-2 ms-auto text-end">
-                  <div class="placeholder placeholder-xs col-8"></div>
-                </div>
-              </div>
-            </li>
-            <li class="list-group-item">
-              <div class="row align-items-center">
-                <div class="col-7">
-                  <div class="placeholder placeholder-xs col-9"></div>
-                </div>
-                <div class="col-2 ms-auto text-end">
-                  <div class="placeholder placeholder-xs col-8"></div>
-                </div>
-              </div>
-            </li>
-          </ul>
-        </div>
-
-        <div id="table-assets" class="card" style="display: none;">
-          <div class="card-header">
-            <h3 class="card-title">Assets running version <kbd id="version-display">loading...</kbd></h3>
-          </div>
-
-          <div id="assets-table-container">
-            <div class="table-responsive">
-              <table class="table table-selectable card-table table-vcenter text-nowrap datatable">
-                <thead>
-                  <tr>
-                    <th class="w-1">Hostname</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="assets-table-body">
-                  <!-- Dynamic content will be loaded here -->
-                </tbody>
-              </table>
-            </div>
-            <div class="card-footer" id="table-footer" style="display: none;">
-              <div class="row g-2 justify-content-center justify-content-sm-between">
-                <div class="col-auto d-flex align-items-center">
-                  <p class="m-0 text-secondary">Showing <strong id="entries-count">0</strong> entries</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="empty-state-container" style="display: none;">
-            <div class="card-body">
-              <div class="empty">
-                <div class="empty-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"></path><path d="M12 12l8 -4.5"></path><path d="M12 12l0 9"></path><path d="M12 12l-8 -4.5"></path><path d="M16 5.25l-8 4.5"></path></svg>
-                </div>
-                <p class="empty-title">No assets found</p>
-                <p class="empty-subtitle text-muted" id="empty-state-subtitle"></p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <script>
-        let isLoadingAssets = false;
-
-        async function loadPackageAssets(packageName, version, release) {
-          // Prevent multiple simultaneous calls
-          if (isLoadingAssets) {
-            return;
-          }
-
+      <script>
+        var isLoadingAssets = false;
+        function loadPackageAssets(packageName, version, release) {
+          if (isLoadingAssets) return;
           isLoadingAssets = true;
-
-          const tableCard = document.getElementById('table-assets');
-          const tableBody = document.getElementById('assets-table-body');
-          const versionDisplay = document.getElementById('version-display');
-          const entriesCount = document.getElementById('entries-count');
-          const assetsTableContainer = document.getElementById('assets-table-container');
-          const emptyStateContainer = document.getElementById('empty-state-container');
-          const emptyStateSubtitle = document.getElementById('empty-state-subtitle');
-
-          try {
-            // Show loading state
-            const displayVersion = version + '-' + release;
-            versionDisplay.textContent = displayVersion;
-            tableCard.style.display = 'block';
-            assetsTableContainer.style.display = 'none';
-            emptyStateContainer.style.display = 'none';
-            document.getElementById('table-placeholder').style.display = 'block';
-
-            // Fetch data from API
-            const response = await fetch(`/v1/packages/${encodeURIComponent(packageName)}/${encodeURIComponent(version)}/${encodeURIComponent(release)}/assets`);
-
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const assets = await response.json();
-
-            // Clear table body
-            tableBody.innerHTML = '';
-
-            if (assets && assets.length > 0) {
-              // Populate table with assets
-              assets.forEach(asset => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                  <td>${asset.hostname || 'Unknown'}</td>
-                  <td class="text-end">
-                    <a class="btn align-text-top" href="/assets/${asset.machine_id}">Details</a>
-                  </td>
-                `;
-                tableBody.appendChild(row);
-              });
-
-              // Update footer
-              entriesCount.textContent = assets.length;
-              assetsTableContainer.style.display = 'block';
-              emptyStateContainer.style.display = 'none';
-            } else {
-              emptyStateSubtitle.textContent = `No assets are currently using version ${displayVersion}`;
-              assetsTableContainer.style.display = 'none';
-              emptyStateContainer.style.display = 'block';
-            }
-
-          } catch (error) {
-            // Check if it's a 404 error (no assets found)
-            if (error.message.includes('404')) {
-              tableBody.innerHTML = '<tr><td colspan="2" class="text-center text-muted">No assets found for this version</td></tr>';
-            } else {
-              tableBody.innerHTML = '<tr><td colspan="2" class="text-center text-danger">Error loading assets data</td></tr>';
-            }
-            assetsTableContainer.style.display = 'block';
-            emptyStateContainer.style.display = 'none';
-          } finally {
-            // Hide placeholder and show table after data is loaded
-            document.getElementById('table-placeholder').style.display = 'none';
-            isLoadingAssets = false;
-          }
+          var tableCard = document.getElementById('table-assets');
+          var tableBody = document.getElementById('assets-table-body');
+          var versionDisplay = document.getElementById('version-display');
+          var entriesCount = document.getElementById('entries-count');
+          var assetsTableContainer = document.getElementById('assets-table-container');
+          var emptyStateContainer = document.getElementById('empty-state-container');
+          var emptyStateSubtitle = document.getElementById('empty-state-subtitle');
+          var displayVersion = version + '-' + release;
+          versionDisplay.textContent = displayVersion;
+          tableCard.classList.remove('hidden');
+          assetsTableContainer.classList.add('hidden');
+          emptyStateContainer.classList.add('hidden');
+          document.getElementById('table-placeholder').classList.remove('hidden');
+          fetch('/v1/packages/' + encodeURIComponent(packageName) + '/' + encodeURIComponent(version) + '/' + encodeURIComponent(release) + '/assets')
+            .then(function (response) {
+              if (!response.ok) throw new Error('HTTP error! status: ' + response.status);
+              return response.json();
+            })
+            .then(function (assets) {
+              tableBody.innerHTML = '';
+              if (assets && assets.length > 0) {
+                assets.forEach(function (asset) {
+                  var row = document.createElement('tr');
+                  row.className = 'hover:bg-txlog-lavender/10 transition-colors';
+                  row.innerHTML = '<td class="px-6 py-3">' + (asset.hostname || 'Unknown') + '</td><td class="px-6 py-3 text-right"><a class="text-txlog-sky hover:underline text-sm font-medium" href="/assets/' + asset.machine_id + '">Details</a></td>';
+                  tableBody.appendChild(row);
+                });
+                entriesCount.textContent = assets.length;
+                document.getElementById('table-footer').classList.remove('hidden');
+                assetsTableContainer.classList.remove('hidden');
+                emptyStateContainer.classList.add('hidden');
+              } else {
+                emptyStateSubtitle.textContent = 'No assets are currently using version ' + displayVersion;
+                assetsTableContainer.classList.add('hidden');
+                emptyStateContainer.classList.remove('hidden');
+              }
+            })
+            .catch(function (error) {
+              if (error.message.indexOf('404') !== -1) {
+                tableBody.innerHTML = '<tr><td colspan="2" class="px-6 py-4 text-center text-txlog-indigo/50">No assets found for this version</td></tr>';
+              } else {
+                tableBody.innerHTML = '<tr><td colspan="2" class="px-6 py-4 text-center text-txlog-coral">Error loading assets data</td></tr>';
+              }
+              assetsTableContainer.classList.remove('hidden');
+              emptyStateContainer.classList.add('hidden');
+            })
+            .finally(function () {
+              document.getElementById('table-placeholder').classList.add('hidden');
+              isLoadingAssets = false;
+            });
         }
-        </script>
-      </div>
+      </script>
     </div>
   </div>
 </div>

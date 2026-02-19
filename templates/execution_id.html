@@ -1,87 +1,70 @@
 {{ template "header.html" . }}
-<!-- Page header -->
-<div class="page-header d-print-none text-white">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <!-- Page pre-title -->
-        <h2 class="page-title">
-          {{ .title }}
-        </h2>
-      </div>
-      <!-- Page title actions -->
-      <!--
-      <div class="col-auto ms-auto d-print-none">
-        <div class="btn-list">
-          <span class="d-none d-sm-inline">
-            <a href="#" class="btn btn-primary btn-5 ">
-              New view
-            </a>
-          </span>
-        </div>
-      </div>
-      -->
-    </div>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
   </div>
 </div>
 
-<div class="page-body">
-  <div class="container-xl">
-    <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">Execution #{{ .execution.ExecutionID }}</h3>
-      </div>
-      <div class="card-body">
-        <div class="datagrid">
-          <div class="datagrid-item">
-            <div class="datagrid-title">Hostname</div>
-            <div class="datagrid-content">{{ .execution.Hostname }}</div>
+<div class="max-w-7xl mx-auto px-6 pb-8">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">Execution #{{ .execution.ExecutionID }}</h3>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Hostname</div>
+          <div class="font-medium">{{ .execution.Hostname }}</div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Machine ID</div>
+          <div><kbd class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{
+              .execution.MachineID }}</kbd></div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Executed at</div>
+          <div class="font-medium">
+            {{ if .execution.ExecutedAt }}{{ formatDateTime .execution.ExecutedAt }}{{ else }}–{{ end }}
           </div>
-          <div class="datagrid-item">
-            <div class="datagrid-title">Machine ID</div>
-            <div class="datagrid-content"><kbd>{{ .execution.MachineID }}</kbd></div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Execution status</div>
+          <div>
+            {{ if eq .execution.Success true }}<span class="inline-flex items-center gap-1.5 text-sm font-medium"><span
+                class="w-2 h-2 rounded-full bg-txlog-leaf"></span> Success</span>{{ else }}<span
+              class="inline-flex items-center gap-1.5 text-sm font-medium"><span
+                class="w-2 h-2 rounded-full bg-txlog-coral"></span> Fail</span>{{ end }}
           </div>
-          <div class="datagrid-item">
-            <div class="datagrid-title">Executed at</div>
-            <div class="datagrid-content">
-              {{ if .execution.ExecutedAt }}{{ formatDateTime .execution.ExecutedAt }}{{ else }}–{{ end }}
+        </div>
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Agent version</div>
+          <div>
+            {{ if .execution.AgentVersion }}<kbd
+              class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{
+              .execution.AgentVersion }}</kbd>{{ else }}–{{ end }}
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">OS version</div>
+          <div>
+            {{ if .execution.OS }}
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded overflow-hidden bg-txlog-lavender flex-shrink-0">
+                <img src="/images/{{ brand .execution.OS }}" class="w-full h-full object-cover" alt="">
+              </span>
+              <span class="font-medium">{{ .execution.OS }}</span>
             </div>
-          </div>
-          <div class="datagrid-item">
-            <div class="datagrid-title">Execution status</div>
-            <div class="datagrid-content">
-              {{ if eq .execution.Success true }}<span class="status status-green"> Success </span>{{ else }}<span class="status status-red"> Fail </span>{{ end }}
-            </div>
-          </div>
-          <div class="datagrid-item">
-            <div class="datagrid-title">Agent version</div>
-            <div class="datagrid-content">
-              {{ if .execution.AgentVersion }}<kbd>{{ .execution.AgentVersion }}</kbd>{{ else }}–{{ end }}
-            </div>
-          </div>
-          <div class="datagrid-item">
-            <div class="datagrid-title">OS version</div>
-            <div class="datagrid-content">
-              {{ if .execution.OS }}
-                <div class="d-flex align-items-center">
-                  <span class="avatar avatar-xs me-2 rounded" style="background-image: url(/images/{{ brand .execution.OS }})"></span>
-                  {{ .execution.OS }}
-                </div>
-              {{ else }}–{{ end }}
-            </div>
-          </div>
-          <div class="datagrid-item">
-            <div class="datagrid-title">&nbsp;</div>
-            <div class="datagrid-content">&nbsp;</div>
-          </div>
-          <div class="datagrid-item">
-            <div class="datagrid-title">{{ if eq .execution.Success false }}Execution log{{ else }}&nbsp;{{ end }}</div>
-            <div class="datagrid-content">
-              {{ if eq .execution.Success false }}<pre>{{ .execution.Details }}</pre>{{ else }}&nbsp;{{ end }}
-            </div>
+            {{ else }}–{{ end }}
           </div>
         </div>
       </div>
+      {{ if eq .execution.Success false }}
+      <div class="mt-6">
+        <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-2">Execution log</div>
+        <pre
+          class="bg-txlog-indigo text-white p-4 rounded-xl overflow-x-auto font-mono text-sm">{{ .execution.Details }}</pre>
+      </div>
+      {{ end }}
     </div>
   </div>
 </div>

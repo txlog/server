@@ -302,17 +302,35 @@ If not provided, the server will:
 - Use the authenticated user's session for group membership checks
 - Active Directory typically **requires** a service account
 
+### Tailwind CSS
+
+The UI uses [Tailwind CSS](https://tailwindcss.com/) compiled locally via the
+standalone CLI (no Node.js required). Download the CLI binary to the `tools/`
+directory:
+
+```bash
+mkdir -p tools
+curl -sL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 \
+  -o tools/tailwindcss
+chmod +x tools/tailwindcss
+```
+
+The configuration lives in `tailwind.config.js` and the source CSS in
+`static/css/input.css`. The compiled output is `static/css/style.css`.
+
 ### Development commands
 
 The `Makefile` contains all the necessary commands for development. You can run
 `make` to view all options.
 
-To create the binary and distribute
-
+- `make run`: start the development server with hot-reload (Air)
+- `make css`: build the Tailwind CSS (minified)
+- `make build`: build a production-ready binary (rebuilds CSS first)
 - `make clean`: remove compiled binaries and packages
-- `make run`: execute the server code
-- `make build`: build a production-ready binary on `./bin` directory
 - `make doc`: write the swagger documentation based on method comments
+
+Air is configured to rebuild the Tailwind CSS automatically before each Go build,
+so `make run` is all you need — CSS is regenerated whenever you change templates.
 
 The server will run at <http://localhost:8080> and the Swagger docs at
 <http://localhost:8080/swagger/index.html>.

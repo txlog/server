@@ -1,54 +1,45 @@
 {{ template "header.html" . }}
-<div class="page-header d-print-none text-white">
-    <div class="container-xl">
-        <div class="row g-2 align-items-center">
-            <div class="col">
-                <div class="page-pretitle">Analytics</div>
-                <h2 class="page-title">{{ .title }}</h2>
-                <p class="text-white-50 mt-1 mb-0">Analyze the age of package versions based on when they were first
-                    seen, helping identify outdated packages that may need updates.</p>
-            </div>
-        </div>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+    <div class="max-w-7xl mx-auto px-6">
+        <p class="text-white/60 text-sm mb-1">Analytics</p>
+        <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
+        <p class="text-white/50 text-sm mt-1">Analyze the age of package versions based on when they were first seen,
+            helping identify outdated packages that may need updates.</p>
     </div>
 </div>
 
-<div class="page-body">
-    <div class="container-xl">
-        <div class="row row-deck row-cards">
-            <div class="col-12 col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Summary</h3>
+<div class="max-w-7xl mx-auto px-6 pb-8">
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+            <div class="border-b border-txlog-lavender px-6 py-4">
+                <h3 class="font-display font-semibold text-lg">Summary</h3>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Average Package
+                        Age</div>
+                    <div class="font-display font-bold text-2xl" id="avg-age">Loading...</div>
+                </div>
+                <div>
+                    <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Oldest Package
                     </div>
-                    <div class="card-body">
-                        <div class="datagrid">
-                            <div class="datagrid-item">
-                                <div class="datagrid-title">Average Package Age</div>
-                                <div class="datagrid-content" id="avg-age">Loading...</div>
-                            </div>
-                            <div class="datagrid-item">
-                                <div class="datagrid-title">Oldest Package</div>
-                                <div class="datagrid-content" id="oldest-pkg">Loading...</div>
-                            </div>
-                            <div class="datagrid-item">
-                                <div class="datagrid-title">Newest Package</div>
-                                <div class="datagrid-content" id="newest-pkg">Loading...</div>
-                            </div>
-                        </div>
+                    <div id="oldest-pkg" class="text-sm">Loading...</div>
+                </div>
+                <div>
+                    <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Newest Package
                     </div>
+                    <div id="newest-pkg" class="text-sm">Loading...</div>
                 </div>
             </div>
-            <div class="col-12 col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Package Freshness <span class="card-subtitle">by first seen date</span>
-                        </h3>
-                    </div>
-                    <div class="card-body" id="freshness-body">
-                        <div class="progress progress-sm">
-                            <div class="progress-bar progress-bar-indeterminate"></div>
-                        </div>
-                    </div>
+        </div>
+        <div class="md:col-span-2 bg-white rounded-3xl shadow-soft overflow-hidden">
+            <div class="border-b border-txlog-lavender px-6 py-4">
+                <h3 class="font-display font-semibold text-lg">Package Freshness <span
+                        class="text-sm text-txlog-indigo/50 font-normal ml-1">by first seen date</span></h3>
+            </div>
+            <div class="p-6" id="freshness-body">
+                <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
+                    <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
                 </div>
             </div>
         </div>
@@ -58,61 +49,38 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         fetch('/v1/reports/package-freshness?limit=100')
-            .then(response => response.json())
-            .then(data => {
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
                 if (data.error) {
-                    document.getElementById('freshness-body').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    document.getElementById('freshness-body').innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">' + data.error + '</div>';
                     return;
                 }
-
-                // Update summary
                 document.getElementById('avg-age').textContent = data.average_age_days ? Math.round(data.average_age_days) + ' days' : 'N/A';
-
                 if (data.oldest_package) {
-                    const oldPkg = data.oldest_package;
-                    document.getElementById('oldest-pkg').innerHTML = `
-                        <strong>${oldPkg.package}</strong>
-                        <span class="text-muted ms-1">(${oldPkg.age_in_days} days)</span>
-                    `;
+                    document.getElementById('oldest-pkg').innerHTML = '<span class="font-semibold">' + data.oldest_package.package + '</span><span class="text-txlog-indigo/50 ml-1">(' + data.oldest_package.age_in_days + ' days)</span>';
                 } else {
                     document.getElementById('oldest-pkg').textContent = 'N/A';
                 }
-
                 if (data.newest_package) {
-                    const newPkg = data.newest_package;
-                    document.getElementById('newest-pkg').innerHTML = `
-                        <strong>${newPkg.package}</strong>
-                        <span class="text-muted ms-1">(${newPkg.age_in_days} days)</span>
-                    `;
+                    document.getElementById('newest-pkg').innerHTML = '<span class="font-semibold">' + data.newest_package.package + '</span><span class="text-txlog-indigo/50 ml-1">(' + data.newest_package.age_in_days + ' days)</span>';
                 } else {
                     document.getElementById('newest-pkg').textContent = 'N/A';
                 }
-
-                // Build table
                 if (data.packages && data.packages.length > 0) {
-                    let html = `<div class="table-responsive"><table class="table table-sm table-striped">
-          <thead><tr><th>Package</th><th>Version</th><th>Age (days)</th><th>Assets</th><th>First Seen</th></tr></thead><tbody>`;
-
-                    data.packages.forEach(pkg => {
-                        const ageClass = pkg.age_in_days > 365 ? 'text-danger' : (pkg.age_in_days > 180 ? 'text-warning' : 'text-success');
-                        const firstSeen = new Date(pkg.first_seen_at).toLocaleDateString();
-                        html += `<tr>
-            <td><kbd>${pkg.package}</kbd></td>
-            <td>${pkg.version}-${pkg.release}</td>
-            <td class="${ageClass}">${pkg.age_in_days}</td>
-            <td>${pkg.asset_count}</td>
-            <td>${firstSeen}</td>
-          </tr>`;
+                    var html = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-txlog-lavender/50 text-left"><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Package</th><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Version</th><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Age (days)</th><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">First Seen</th></tr></thead><tbody class="divide-y divide-txlog-lavender/30">';
+                    data.packages.forEach(function (pkg) {
+                        var ageColor = pkg.age_in_days > 365 ? 'text-txlog-coral' : (pkg.age_in_days > 180 ? 'text-txlog-golden' : 'text-txlog-leaf');
+                        var firstSeen = new Date(pkg.first_seen_at).toLocaleDateString();
+                        html += '<tr class="hover:bg-txlog-lavender/10 transition-colors"><td class="px-4 py-2"><kbd class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-0.5 rounded-md">' + pkg.package + '</kbd></td><td class="px-4 py-2">' + pkg.version + '-' + pkg.release + '</td><td class="px-4 py-2 font-semibold ' + ageColor + '">' + pkg.age_in_days + '</td><td class="px-4 py-2">' + pkg.asset_count + '</td><td class="px-4 py-2">' + firstSeen + '</td></tr>';
                     });
-
                     html += '</tbody></table></div>';
                     document.getElementById('freshness-body').innerHTML = html;
                 } else {
-                    document.getElementById('freshness-body').innerHTML = '<div class="empty"><p class="empty-title">No freshness data available</p></div>';
+                    document.getElementById('freshness-body').innerHTML = '<div class="py-8 text-center"><p class="font-semibold">No freshness data available</p></div>';
                 }
             })
-            .catch(error => {
-                document.getElementById('freshness-body').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            .catch(function (error) {
+                document.getElementById('freshness-body').innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">Error: ' + error.message + '</div>';
             });
     });
 </script>

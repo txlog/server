@@ -1,49 +1,38 @@
 {{ template "header.html" . }}
-<div class="page-header d-print-none text-white">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <div class="page-pretitle">Analytics</div>
-        <h2 class="page-title">{{ .title }}</h2>
-        <p class="text-white-50 mt-1 mb-0">View how widely packages are adopted across your fleet, showing
-          installation rates and recent update activity.</p>
-      </div>
-    </div>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    <p class="text-white/60 text-sm mb-1">Analytics</p>
+    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
+    <p class="text-white/50 text-sm mt-1">View how widely packages are adopted across your fleet, showing installation
+      rates and recent update activity.</p>
   </div>
 </div>
 
-<div class="page-body">
-  <div class="container-xl">
-    <div class="row row-deck row-cards">
-      <div class="col-12 col-md-4">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Summary</h3>
-          </div>
-          <div class="card-body">
-            <div class="datagrid">
-              <div class="datagrid-item">
-                <div class="datagrid-title">Total Active Assets</div>
-                <div class="datagrid-content h2" id="total-assets">-</div>
-              </div>
-              <div class="datagrid-item">
-                <div class="datagrid-title">Most Adopted Package</div>
-                <div class="datagrid-content" id="most-adopted">Loading...</div>
-              </div>
-            </div>
-          </div>
+<div class="max-w-7xl mx-auto px-6 pb-8">
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+      <div class="border-b border-txlog-lavender px-6 py-4">
+        <h3 class="font-display font-semibold text-lg">Summary</h3>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Total Active Assets</div>
+          <div class="font-display font-bold text-3xl" id="total-assets">-</div>
+        </div>
+        <div>
+          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Most Adopted Package</div>
+          <div id="most-adopted" class="text-sm">Loading...</div>
         </div>
       </div>
-      <div class="col-12 col-md-8">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Package Adoption <span class="card-subtitle">by active assets</span></h3>
-          </div>
-          <div class="card-body" id="adoption-body">
-            <div class="progress progress-sm">
-              <div class="progress-bar progress-bar-indeterminate"></div>
-            </div>
-          </div>
+    </div>
+    <div class="md:col-span-2 bg-white rounded-3xl shadow-soft overflow-hidden">
+      <div class="border-b border-txlog-lavender px-6 py-4">
+        <h3 class="font-display font-semibold text-lg">Package Adoption <span
+            class="text-sm text-txlog-indigo/50 font-normal ml-1">by active assets</span></h3>
+      </div>
+      <div class="p-6" id="adoption-body">
+        <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
+          <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
         </div>
       </div>
     </div>
@@ -53,58 +42,31 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     fetch('/v1/reports/package-adoption?limit=100')
-      .then(response => response.json())
-      .then(data => {
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
         if (data.error) {
-          document.getElementById('adoption-body').innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+          document.getElementById('adoption-body').innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">' + data.error + '</div>';
           return;
         }
-
-        // Update summary
         document.getElementById('total-assets').textContent = data.total_active_assets || 0;
-
         if (data.packages && data.packages.length > 0) {
-          const topPkg = data.packages[0];
-          const pct = topPkg.percentage.toFixed(1);
-          document.getElementById('most-adopted').innerHTML = `
-                        <div class="mb-1"><strong>${topPkg.package}</strong></div>
-                        <div class="d-flex align-items-center">
-                            <div class="progress progress-sm flex-grow-1 me-2" style="height: 6px;">
-                                <div class="progress-bar bg-primary" style="width: ${pct}%"></div>
-                            </div>
-                            <span class="text-muted small">${pct}%</span>
-                        </div>
-                        <div class="text-muted small mt-1">${topPkg.active_assets} of ${data.total_active_assets} assets</div>
-                    `;
-
-          // Build table
-          let html = `<div class="table-responsive"><table class="table table-sm table-striped">
-          <thead><tr><th>Package</th><th>Assets</th><th>Adoption</th><th>Updates (30d)</th></tr></thead><tbody>`;
-
-          data.packages.forEach(pkg => {
-            const pct = pkg.percentage.toFixed(1);
-            html += `<tr>
-            <td><kbd>${pkg.package}</kbd></td>
-            <td>${pkg.active_assets} / ${pkg.total_assets}</td>
-            <td>
-              <div class="progress progress-sm" style="min-width: 100px;">
-                <div class="progress-bar bg-primary" style="width: ${pct}%"></div>
-              </div>
-              <small class="text-muted">${pct}%</small>
-            </td>
-            <td>${pkg.update_count_30d}</td>
-          </tr>`;
+          var topPkg = data.packages[0];
+          var pct = topPkg.percentage.toFixed(1);
+          document.getElementById('most-adopted').innerHTML = '<div class="font-semibold mb-1">' + topPkg.package + '</div><div class="flex items-center gap-2"><div class="flex-1 h-1.5 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full" style="width:' + pct + '%"></div></div><span class="text-xs text-txlog-indigo/50">' + pct + '%</span></div><div class="text-xs text-txlog-indigo/50 mt-1">' + topPkg.active_assets + ' of ' + data.total_active_assets + ' assets</div>';
+          var html = '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-txlog-lavender/50 text-left"><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Package</th><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Adoption</th><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Updates (30d)</th></tr></thead><tbody class="divide-y divide-txlog-lavender/30">';
+          data.packages.forEach(function (pkg) {
+            var p = pkg.percentage.toFixed(1);
+            html += '<tr class="hover:bg-txlog-lavender/10 transition-colors"><td class="px-4 py-2"><kbd class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-0.5 rounded-md">' + pkg.package + '</kbd></td><td class="px-4 py-2">' + pkg.active_assets + ' / ' + pkg.total_assets + '</td><td class="px-4 py-2"><div class="flex items-center gap-2"><div class="w-24 h-1.5 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full" style="width:' + p + '%"></div></div><span class="text-xs text-txlog-indigo/50">' + p + '%</span></div></td><td class="px-4 py-2">' + pkg.update_count_30d + '</td></tr>';
           });
-
           html += '</tbody></table></div>';
           document.getElementById('adoption-body').innerHTML = html;
         } else {
           document.getElementById('most-adopted').textContent = 'N/A';
-          document.getElementById('adoption-body').innerHTML = '<div class="empty"><p class="empty-title">No adoption data available</p></div>';
+          document.getElementById('adoption-body').innerHTML = '<div class="py-8 text-center"><p class="font-semibold">No adoption data available</p></div>';
         }
       })
-      .catch(error => {
-        document.getElementById('adoption-body').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+      .catch(function (error) {
+        document.getElementById('adoption-body').innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">Error: ' + error.message + '</div>';
       });
   });
 </script>

@@ -7,249 +7,183 @@
   <link rel="icon" href="/images/favicon.ico">
   <link rel="shortcut icon" href="/images/favicon.ico">
   <title>Txlog Server</title>
-  <link rel="preconnect" href="https://rsms.me/">
-  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css"
-    integrity="sha256-fvdQvRBUamldCxJ2etgEi9jz7F3n2u+xBn+dDao9HJo=" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.35.0/dist/tabler-icons.min.css"
-    integrity="sha384-Kfn4a705BxuUiSCQoan8t2F0/qX2r5pJ5z3q0j5QvGwkKCb8xEPIaEeJNRhOLOCD" crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.css">
-  <style>
-    :root {
-      font-family: "Inter Var", sans-serif;
-      font-feature-settings: 'liga' 1, 'calt' 1;
-      /* fix for Chrome */
-      --tblr-font-sans-serif: "Inter Var", Inter, -apple-system, BlinkMacSystemFont, "San Francisco", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-    }
-
-    @supports (font-variation-settings: normal) {
-      :root {
-        font-family: InterVariable, sans-serif;
-      }
-    }
-
-    @media (min-width: 992px) {
-
-      :root,
-      :host {
-        margin-left: 0 !important;
-      }
-    }
-  </style>
 </head>
 
-<body>
-  <header class="navbar navbar-expand-md navbar-overlap d-print-none" data-bs-theme="dark">
-    <div class="container-xl">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu"
-        aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="navbar-brand d-none-navbar-horizontal pe-0 pe-md-3">
-        <a href="/">
-          <img src="/images/logbook.png" width="110" height="32" alt="Txlog Server" class="navbar-brand-image" />
-        </a>
-        Txlog Server
-      </div>
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="/">
-            <span class="nav-link-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-home">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
-                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-              </svg>
-            </span>
-            <span class="nav-link-title">
+<body class="font-sans antialiased">
+  <nav class="fixed top-0 left-0 right-0 bg-txlog-indigo z-50 print:hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center gap-6">
+          <a href="/" class="flex items-center gap-3">
+            <img src="/images/logbook.png" class="h-8 w-auto" alt="Txlog Server">
+            <span class="text-white font-display font-semibold text-lg hidden sm:inline">Txlog Server</span>
+          </a>
+          <div class="hidden md:flex items-center gap-1">
+            <a href="/"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+              <i data-lucide="home" class="w-4 h-4"></i>
               Home
-            </span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/assets">
-            <span class="nav-link-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-server">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M3 4m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" />
-                <path d="M3 12m0 3a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v2a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3z" />
-                <path d="M7 8l0 .01" />
-                <path d="M7 16l0 .01" />
-              </svg>
-            </span>
-            <span class="nav-link-title">
+            </a>
+            <a href="/assets"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+              <i data-lucide="server" class="w-4 h-4"></i>
               Assets
-            </span>
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link" href="/packages">
-            <span class="nav-link-icon d-md-none d-lg-inline-block">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-package">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5" />
-                <path d="M12 12l8 -4.5" />
-                <path d="M12 12l0 9" />
-                <path d="M12 12l-8 -4.5" />
-                <path d="M16 5.25l-8 4.5" />
-              </svg>
-            </span>
-            <span class="nav-link-title">Packages</span>
-          </a>
-        </li>
-
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#navbar-reports" data-bs-toggle="dropdown"
-            data-bs-auto-close="outside" role="button" aria-expanded="false">
-            <span class="nav-link-icon d-md-none d-lg-inline-block">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-chart-dots">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M3 3v18h18" />
-                <path d="M9 9m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                <path d="M19 7m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                <path d="M14 15m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                <path d="M10.16 10.62l2.34 2.88" />
-                <path d="M15.088 13.328l2.837 -4.586" />
-              </svg>
-            </span>
-            <span class="nav-link-title"> Reports </span>
-          </a>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="/package-progression"> Package Progression </a>
-            <a class="dropdown-item" href="/analytics/compare"> Package Comparison</a>
-            <a class="dropdown-item" href="/analytics/freshness"> Package Freshness</a>
-            <a class="dropdown-item" href="/analytics/adoption"> Package Adoption</a>
-            <a class="dropdown-item" href="/analytics/anomalies"> Anomaly Detection</a>
-          </div>
-        </li>
-
-        {{ if not (or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled) }}
-        <li class="nav-item">
-          <a class="nav-link" href="/admin">
-            <span class="nav-link-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94-1.543.826-3.31 2.37-2.37c1.042.617 2.334.015 2.572-1.065z" />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-              </svg>
-            </span>
-            <span class="nav-link-title">
-              Admin
-            </span>
-          </a>
-        </li>
-        {{ end }}
-
-      </ul>
-      <div class="navbar-nav flex-row order-md-last ms-auto">
-        {{ if not .Context.Keys.user }}
-        {{ $latestVersion := .Context.Keys.env.latestVersion }}
-        {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
-        <div class="nav-item dropdown">
-          <div class="d-none d-xl-block ps-2">
-            <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
-              class="badge bg-red text-red-fg">
-              New version available: {{ $latestVersion }}
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
-                <path d="M11 13l9 -9" />
-                <path d="M15 4h5v5" />
-              </svg>
             </a>
-          </div>
-        </div>
-        {{ end }}
-        <div class="nav-item dropdown">
-          <div class="d-none d-xl-block ps-2">
-            <span class="badge bg-light text-dark">{{ .Context.Keys.env.instance }}</span>
-          </div>
-        </div>
-        {{ end }}
-        {{ if .Context.Keys.user }}
-        <div class="nav-item dropdown">
-          <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown" aria-label="Open user menu">
-            {{ if .Context.Keys.user.Picture }}
-            <span class="avatar avatar-sm" style="background-image: url({{ .Context.Keys.user.Picture }})"></span>
-            {{ else }}
-            <span class="avatar avatar-sm">{{ initial .Context.Keys.user.Name }}</span>
-            {{ end }}
-            <div class="d-none d-xl-block ps-2">
-              <div>{{ .Context.Keys.user.Name }}</div>
-              <div class="mt-1 small text-muted">{{ .Context.Keys.user.Email }}</div>
-            </div>
-          </a>
-          <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-            {{ $latestVersion := .Context.Keys.env.latestVersion }}
-            {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
-            <div class="dropdown-item-text">
-              <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
-                class="badge bg-red text-red-fg">
-                New version available: {{ $latestVersion }}
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
-                  <path d="M11 13l9 -9" />
-                  <path d="M15 4h5v5" />
-                </svg>
-              </a>
-            </div>
-            {{ end }}
-            <div class="dropdown-divider"></div>
-            <div class="dropdown-header">{{ .Context.Keys.env.instance }}</div>
-            {{ if .Context.Keys.user.IsAdmin }}
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="/admin">
-              <span class="nav-link-icon d-md-none d-lg-inline-block">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path
-                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94-1.543.826-3.31 2.37-2.37c1.042.617 2.334.015 2.572-1.065z" />
-                  <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-                </svg>
-              </span>
-              Administration
+            <a href="/packages"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+              <i data-lucide="package" class="w-4 h-4"></i>
+              Packages
             </a>
-            {{ end }}
-            <div class="dropdown-divider"></div>
-            <form action="/auth/logout" method="post" style="display: inline;">
-              <button type="submit" class="dropdown-item">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="icon icon-tabler icons-tabler-outline icon-tabler-logout">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
-                    <path d="M9 12h12l-3 -3" />
-                    <path d="M18 15l3 -3" />
-                  </svg>
-                </span>
-                Logout
+            <div class="relative" id="reports-dropdown">
+              <button onclick="toggleDropdown('reports-menu')"
+                class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+                <i data-lucide="chart-no-axes-combined" class="w-4 h-4"></i>
+                Reports
+                <i data-lucide="chevron-down" class="w-3 h-3"></i>
               </button>
-            </form>
+              <div id="reports-menu"
+                class="hidden absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-soft border border-txlog-lavender/30 py-2 z-50">
+                <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                  href="/package-progression">Package Progression</a>
+                <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                  href="/analytics/compare">Package Comparison</a>
+                <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                  href="/analytics/freshness">Package Freshness</a>
+                <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                  href="/analytics/adoption">Package Adoption</a>
+                <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                  href="/analytics/anomalies">Anomaly Detection</a>
+              </div>
+            </div>
+            {{ if not (or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled) }}
+            <a href="/admin"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+              <i data-lucide="settings" class="w-4 h-4"></i>
+              Admin
+            </a>
+            {{ end }}
           </div>
         </div>
+        <div class="flex items-center gap-3">
+          {{ if not .Context.Keys.user }}
+          {{ $latestVersion := .Context.Keys.env.latestVersion }}
+          {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
+          <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
+            class="hidden xl:inline-flex items-center gap-1.5 bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2.5 py-1 rounded-md hover:bg-txlog-coral/20 transition-colors">
+            New version: {{ $latestVersion }}
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+          {{ end }}
+          <span class="hidden xl:inline-block bg-white/15 text-white/90 text-xs font-medium px-2.5 py-1 rounded-md">{{
+            .Context.Keys.env.instance }}</span>
+          {{ end }}
+          {{ if .Context.Keys.user }}
+          <div class="relative" id="user-dropdown">
+            <button onclick="toggleDropdown('user-menu')"
+              class="flex items-center gap-2 text-white p-0 hover:opacity-90 transition-opacity">
+              {{ if .Context.Keys.user.Picture }}
+              <span class="w-8 h-8 rounded-lg overflow-hidden bg-txlog-lavender">
+                <img src="{{ .Context.Keys.user.Picture }}" class="w-full h-full object-cover" alt="">
+              </span>
+              {{ else }}
+              <span
+                class="w-8 h-8 rounded-lg bg-txlog-lavender flex items-center justify-center text-xs font-bold text-txlog-indigo">{{
+                initial .Context.Keys.user.Name }}</span>
+              {{ end }}
+              <div class="hidden xl:block text-left">
+                <div class="text-sm font-medium leading-none">{{ .Context.Keys.user.Name }}</div>
+                <div class="text-xs text-white/60 mt-0.5">{{ .Context.Keys.user.Email }}</div>
+              </div>
+            </button>
+            <div id="user-menu"
+              class="hidden absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-soft border border-txlog-lavender/30 py-2 z-50">
+              {{ $latestVersion := .Context.Keys.env.latestVersion }}
+              {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
+              <div class="px-4 py-2">
+                <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
+                  class="inline-flex items-center gap-1.5 bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2.5 py-1 rounded-md hover:bg-txlog-coral/20 transition-colors">
+                  New version: {{ $latestVersion }}
+                  <i data-lucide="external-link" class="w-3 h-3"></i>
+                </a>
+              </div>
+              {{ end }}
+              <div class="border-t border-txlog-lavender/50 my-1"></div>
+              <div class="px-4 py-1 text-xs font-bold text-txlog-indigo/50 uppercase">{{ .Context.Keys.env.instance }}
+              </div>
+              {{ if .Context.Keys.user.IsAdmin }}
+              <div class="border-t border-txlog-lavender/50 my-1"></div>
+              <a class="flex items-center gap-2 px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                href="/admin">
+                <i data-lucide="settings" class="w-4 h-4"></i>
+                Administration
+              </a>
+              {{ end }}
+              <div class="border-t border-txlog-lavender/50 my-1"></div>
+              <form action="/auth/logout" method="post">
+                <button type="submit"
+                  class="flex items-center gap-2 px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors w-full text-left">
+                  <i data-lucide="log-out" class="w-4 h-4"></i>
+                  Logout
+                </button>
+              </form>
+            </div>
+          </div>
+          {{ end }}
+          <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
+            class="md:hidden text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            aria-label="Toggle navigation">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+      <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-white/10 mt-2 pt-3 space-y-1">
+        <a href="/"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+          <i data-lucide="home" class="w-4 h-4"></i> Home
+        </a>
+        <a href="/assets"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+          <i data-lucide="server" class="w-4 h-4"></i> Assets
+        </a>
+        <a href="/packages"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+          <i data-lucide="package" class="w-4 h-4"></i> Packages
+        </a>
+        <a href="/package-progression"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
+          Package Progression
+        </a>
+        <a href="/analytics/compare"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
+          Package Comparison
+        </a>
+        <a href="/analytics/freshness"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
+          Package Freshness
+        </a>
+        <a href="/analytics/adoption"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
+          Package Adoption
+        </a>
+        <a href="/analytics/anomalies"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
+          Anomaly Detection
+        </a>
+        {{ if not (or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled) }}
+        <a href="/admin"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+          <i data-lucide="settings" class="w-4 h-4"></i> Admin
+        </a>
         {{ end }}
       </div>
     </div>
-  </header>
-  <div class="page-wrapper">
+  </nav>
+  <main class="pt-20 min-h-screen">

@@ -1,111 +1,89 @@
 {{ template "header.html" . }}
-<div class="page-header d-print-none text-white">
-  <div class="container-xl">
-    <div class="row g-2 align-items-center">
-      <div class="col">
-        <div class="page-pretitle">Analytics</div>
-        <h2 class="page-title">{{ .title }}</h2>
-        <p class="text-white-50 mt-1 mb-0">Compare installed packages across multiple assets to identify configuration
-          drift, version differences, and unique packages.</p>
-      </div>
-    </div>
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    <p class="text-white/60 text-sm mb-1">Analytics</p>
+    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
+    <p class="text-white/50 text-sm mt-1">Compare installed packages across multiple assets to identify configuration
+      drift, version differences, and unique packages.</p>
   </div>
 </div>
 
-<div class="page-body">
-  <div class="container-xl">
-    <div class="row row-deck row-cards">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Select Assets to Compare</h3>
-          </div>
-          <div class="card-body">
-            <p class="text-secondary mb-3">Select 2 to 20 assets to compare their installed packages.</p>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Available Assets</label>
-                <select id="available-assets" class="form-select" size="10" multiple>
-                  {{ range .assets }}
-                  <option value="{{ .MachineID }}" data-hostname="{{ .Hostname }}">{{ .Hostname }}
-                  </option>
-                  {{ end }}
-                </select>
-              </div>
-              <div class="col-md-1 d-flex flex-column justify-content-center align-items-center gap-2">
-                <button type="button" class="btn btn-icon btn-outline-primary" onclick="addSelected()">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M9 6l6 6l-6 6" />
-                  </svg>
-                </button>
-                <button type="button" class="btn btn-icon btn-outline-secondary" onclick="removeSelected()">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M15 6l-6 6l6 6" />
-                  </svg>
-                </button>
-              </div>
-              <div class="col-md-5">
-                <label class="form-label">Selected Assets (<span id="selected-count">0</span>/20)</label>
-                <select id="selected-assets" class="form-select" size="10" multiple></select>
-              </div>
-            </div>
-            <button type="button" class="btn btn-primary" onclick="comparePackages()" id="compare-btn" disabled>
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h3" />
-                <path d="M15 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-3" />
-                <path d="M12 5v14" />
-              </svg>
-              Compare Packages
-            </button>
-          </div>
+<div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">Select Assets to Compare</h3>
+    </div>
+    <div class="p-6">
+      <p class="text-sm text-txlog-indigo/50 mb-4">Select 2 to 20 assets to compare their installed packages.</p>
+      <div class="grid md:grid-cols-11 gap-4 mb-4">
+        <div class="md:col-span-5">
+          <label class="font-medium text-sm pl-1 block mb-1.5">Available Assets</label>
+          <select id="available-assets"
+            class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-2 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all text-txlog-indigo text-sm"
+            size="10" multiple>
+            {{ range .assets }}
+            <option value="{{ .MachineID }}" data-hostname="{{ .Hostname }}">{{ .Hostname }}</option>
+            {{ end }}
+          </select>
+        </div>
+        <div class="md:col-span-1 flex md:flex-col items-center justify-center gap-2">
+          <button type="button" onclick="addSelected()"
+            class="w-10 h-10 rounded-xl border-2 border-txlog-sky text-txlog-sky hover:bg-txlog-sky hover:text-white transition-all flex items-center justify-center">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+          <button type="button" onclick="removeSelected()"
+            class="w-10 h-10 rounded-xl border-2 border-txlog-lavender text-txlog-indigo/40 hover:border-txlog-indigo/40 hover:text-txlog-indigo transition-all flex items-center justify-center">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+        </div>
+        <div class="md:col-span-5">
+          <label class="font-medium text-sm pl-1 block mb-1.5">Selected Assets (<span
+              id="selected-count">0</span>/20)</label>
+          <select id="selected-assets"
+            class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-2 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all text-txlog-indigo text-sm"
+            size="10" multiple></select>
         </div>
       </div>
+      <button type="button" onclick="comparePackages()" id="compare-btn" disabled
+        class="bg-txlog-sky text-white font-medium py-3 px-6 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center gap-2">
+        <i data-lucide="columns-2" class="w-4 h-4"></i> Compare Packages
+      </button>
+    </div>
+  </div>
 
-      <div class="col-12" id="results-section" style="display: none;">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Comparison Results</h3>
-          </div>
-          <div class="card-body" id="results-body">
-            <div class="progress progress-sm">
-              <div class="progress-bar progress-bar-indeterminate"></div>
-            </div>
-          </div>
-        </div>
+  <div id="results-section" class="bg-white rounded-3xl shadow-soft overflow-hidden hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">Comparison Results</h3>
+    </div>
+    <div class="p-6" id="results-body">
+      <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
+        <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  const selectedMachineIds = new Map();
+  var selectedMachineIds = new Map();
 
   function addSelected() {
-    const available = document.getElementById('available-assets');
-    const selected = document.getElementById('selected-assets');
-
-    Array.from(available.selectedOptions).forEach(opt => {
+    var available = document.getElementById('available-assets');
+    Array.from(available.selectedOptions).forEach(function (opt) {
       if (selectedMachineIds.size >= 20) return;
       if (!selectedMachineIds.has(opt.value)) {
         selectedMachineIds.set(opt.value, opt.dataset.hostname);
-        const newOpt = document.createElement('option');
+        var newOpt = document.createElement('option');
         newOpt.value = opt.value;
         newOpt.textContent = opt.textContent;
-        selected.appendChild(newOpt);
+        document.getElementById('selected-assets').appendChild(newOpt);
       }
     });
     updateCount();
   }
 
   function removeSelected() {
-    const selected = document.getElementById('selected-assets');
-    Array.from(selected.selectedOptions).forEach(opt => {
+    var selected = document.getElementById('selected-assets');
+    Array.from(selected.selectedOptions).forEach(function (opt) {
       selectedMachineIds.delete(opt.value);
       opt.remove();
     });
@@ -113,103 +91,48 @@
   }
 
   function updateCount() {
-    const count = selectedMachineIds.size;
+    var count = selectedMachineIds.size;
     document.getElementById('selected-count').textContent = count;
     document.getElementById('compare-btn').disabled = count < 2;
   }
 
   function comparePackages() {
-    const machineIds = Array.from(selectedMachineIds.keys()).join(',');
-    const resultsSection = document.getElementById('results-section');
-    const resultsBody = document.getElementById('results-body');
+    var machineIds = Array.from(selectedMachineIds.keys()).join(',');
+    var resultsSection = document.getElementById('results-section');
+    var resultsBody = document.getElementById('results-body');
+    resultsSection.classList.remove('hidden');
+    resultsBody.innerHTML = '<div class="h-2 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div></div>';
 
-    resultsSection.style.display = 'block';
-    resultsBody.innerHTML = '<div class="progress progress-sm"><div class="progress-bar progress-bar-indeterminate"></div></div>';
-
-    fetch(`/v1/reports/compare-packages?machine_ids=${machineIds}`)
-      .then(response => response.json())
-      .then(data => {
+    fetch('/v1/reports/compare-packages?machine_ids=' + machineIds)
+      .then(function (response) { return response.json(); })
+      .then(function (data) {
         if (data.error) {
-          resultsBody.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+          resultsBody.innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">' + data.error + '</div>';
           return;
         }
+        var commonCount = data.common ? data.common.length : 0;
+        var diffCount = data.different ? Object.keys(data.different).length : 0;
+        var uniqueCount = data.only_in ? Object.values(data.only_in).reduce(function (sum, arr) { return sum + (arr ? arr.length : 0); }, 0) : 0;
+        var html = '<div class="grid md:grid-cols-3 gap-4 mb-6">';
+        html += '<div class="bg-txlog-leaf/5 border border-txlog-leaf/20 rounded-2xl p-4"><div class="flex items-center gap-3"><div class="font-display font-bold text-3xl">' + commonCount + '</div><div><div class="font-semibold text-txlog-leaf">Common</div><div class="text-xs text-txlog-indigo/50">Same version on all assets</div></div></div></div>';
+        html += '<div class="bg-txlog-golden/5 border border-txlog-golden/20 rounded-2xl p-4"><div class="flex items-center gap-3"><div class="font-display font-bold text-3xl">' + diffCount + '</div><div><div class="font-semibold text-txlog-golden">Different Versions</div><div class="text-xs text-txlog-indigo/50">Present but versions differ</div></div></div></div>';
+        html += '<div class="bg-txlog-sky/5 border border-txlog-sky/20 rounded-2xl p-4"><div class="flex items-center gap-3"><div class="font-display font-bold text-3xl">' + uniqueCount + '</div><div><div class="font-semibold text-txlog-sky">Unique</div><div class="text-xs text-txlog-indigo/50">Only on specific assets</div></div></div></div>';
+        html += '</div>';
 
-        const commonCount = data.common ? data.common.length : 0;
-        const diffCount = data.different ? Object.keys(data.different).length : 0;
-        const uniqueCount = data.only_in ? Object.values(data.only_in).reduce((sum, arr) => sum + (arr ? arr.length : 0), 0) : 0;
-
-        let html = '';
-
-        // Summary row
-        html += `
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        <div class="card card-sm bg-success-lt">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="h1 mb-0 me-3">${commonCount}</div>
-                                    <div>
-                                        <div class="text-success fw-bold">Common</div>
-                                        <div class="text-muted small">Same version on all assets</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card card-sm bg-warning-lt">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="h1 mb-0 me-3">${diffCount}</div>
-                                    <div>
-                                        <div class="text-warning fw-bold">Different Versions</div>
-                                        <div class="text-muted small">Present but versions differ</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card card-sm bg-info-lt">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="h1 mb-0 me-3">${uniqueCount}</div>
-                                    <div>
-                                        <div class="text-info fw-bold">Unique</div>
-                                        <div class="text-muted small">Only on specific assets</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-
-        // Version Differences (most important - show first)
         if (data.different && Object.keys(data.different).length > 0) {
-          html += `
-                    <div class="card mb-3">
-                        <div class="card-header bg-warning-lt">
-                            <h3 class="card-title text-warning">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 9v4" /><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z" /><path d="M12 16h.01" /></svg>
-                                Version Differences (${Object.keys(data.different).length})
-                            </h3>
-                        </div>
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-vcenter card-table table-striped">
-                                <thead class="sticky-top bg-white">
-                                    <tr>
-                                        <th>Package</th>`;
-          data.assets.forEach(a => { html += `<th class="text-center">${a.hostname}</th>`; });
-          html += `</tr></thead><tbody>`;
-          Object.entries(data.different).forEach(([pkg, diffs]) => {
-            html += `<tr><td><strong>${pkg}</strong></td>`;
-            data.assets.forEach(asset => {
-              const diff = diffs.find(d => d.machine_id === asset.machine_id);
+          html += '<div class="bg-txlog-golden/5 border border-txlog-golden/20 rounded-2xl overflow-hidden mb-6"><div class="px-6 py-3 border-b border-txlog-golden/20 font-semibold text-txlog-golden flex items-center gap-2"><i data-lucide="triangle-alert" class="w-4 h-4"></i> Version Differences (' + Object.keys(data.different).length + ')</div><div class="overflow-x-auto" style="max-height:400px;overflow-y:auto"><table class="w-full text-sm"><thead class="sticky top-0 bg-white"><tr class="border-b border-txlog-lavender/50 text-left"><th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Package</th>';
+          data.assets.forEach(function (a) { html += '<th class="px-4 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider text-center">' + a.hostname + '</th>'; });
+          html += '</tr></thead><tbody class="divide-y divide-txlog-lavender/30">';
+          Object.entries(data.different).forEach(function (entry) {
+            var pkg = entry[0]; var diffs = entry[1];
+            html += '<tr class="hover:bg-txlog-lavender/10 transition-colors"><td class="px-4 py-2 font-semibold">' + pkg + '</td>';
+            data.assets.forEach(function (asset) {
+              var diff = diffs.find(function (d) { return d.machine_id === asset.machine_id; });
               if (diff) {
-                const fullVersion = diff.release ? `${diff.version}-${diff.release}` : diff.version;
-                html += `<td class="text-center"><code>${fullVersion}</code></td>`;
+                var fullVersion = diff.release ? diff.version + '-' + diff.release : diff.version;
+                html += '<td class="px-4 py-2 text-center"><code class="bg-txlog-indigo/5 text-xs font-mono px-1.5 py-0.5 rounded">' + fullVersion + '</code></td>';
               } else {
-                html += `<td class="text-center text-muted">—</td>`;
+                html += '<td class="px-4 py-2 text-center text-txlog-indigo/30">—</td>';
               }
             });
             html += '</tr>';
@@ -217,69 +140,28 @@
           html += '</tbody></table></div></div>';
         }
 
-        // Unique Packages
         if (data.only_in && Object.keys(data.only_in).length > 0) {
-          html += `
-                    <div class="card mb-3">
-                        <div class="card-header bg-info-lt">
-                            <h3 class="card-title text-info">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 8l0 4" /><path d="M12 16l.01 0" /></svg>
-                                Unique Packages
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">`;
-          Object.entries(data.only_in).forEach(([machineId, pkgs]) => {
-            const asset = data.assets.find(a => a.machine_id === machineId);
+          html += '<div class="bg-txlog-sky/5 border border-txlog-sky/20 rounded-2xl overflow-hidden mb-6"><div class="px-6 py-3 border-b border-txlog-sky/20 font-semibold text-txlog-sky flex items-center gap-2"><i data-lucide="info" class="w-4 h-4"></i> Unique Packages</div><div class="p-6"><div class="grid md:grid-cols-2 gap-4">';
+          Object.entries(data.only_in).forEach(function (entry) {
+            var machineId = entry[0]; var pkgs = entry[1];
+            var asset = data.assets.find(function (a) { return a.machine_id === machineId; });
             if (pkgs && pkgs.length > 0) {
-              html += `
-                            <div class="col-md-6 mb-3">
-                                <div class="card">
-                                    <div class="card-header py-2">
-                                        <h3 class="card-title mb-0">${asset ? asset.hostname : machineId}</h3>
-                                        <span class="badge bg-primary text-white ms-auto">${pkgs.length}</span>
-                                    </div>
-                                    <div class="card-body py-2" style="max-height: 200px; overflow-y: auto;">
-                                        <div class="d-flex flex-wrap gap-1">
-                                            ${pkgs.map(p => `<code class="small">${p}</code>`).join('')}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`;
+              html += '<div class="border border-txlog-lavender/30 rounded-xl overflow-hidden"><div class="px-4 py-2 bg-txlog-bg flex items-center justify-between"><span class="font-semibold text-sm">' + (asset ? asset.hostname : machineId) + '</span><span class="bg-txlog-sky/10 text-txlog-sky text-xs font-bold px-2 py-0.5 rounded-md">' + pkgs.length + '</span></div><div class="p-4 flex flex-wrap gap-1" style="max-height:200px;overflow-y:auto">' + pkgs.map(function (p) { return '<code class="bg-txlog-indigo/5 text-xs font-mono px-1.5 py-0.5 rounded">' + p + '</code>'; }).join('') + '</div></div>';
             }
           });
           html += '</div></div></div>';
         }
 
-        // Common packages (collapsible since it's usually long)
         if (data.common && data.common.length > 0) {
-          html += `
-                    <div class="card mb-3">
-                        <div class="card-header bg-success-lt" style="cursor: pointer;" onclick="document.getElementById('common-pkgs').classList.toggle('d-none')">
-                            <h3 class="card-title text-success">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon me-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg>
-                                Common Packages (${data.common.length})
-                            </h3>
-                            <div class="card-actions">
-                                <span class="text-muted small">Click to expand/collapse</span>
-                            </div>
-                        </div>
-                        <div class="card-body d-none" id="common-pkgs" style="max-height: 300px; overflow-y: auto;">
-                            <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-2">
-                                ${data.common.map(p => `<div class="col"><code class="d-block text-truncate small" title="${p}">${p}</code></div>`).join('')}
-                            </div>
-                        </div>
-                    </div>`;
+          html += '<div class="border border-txlog-leaf/20 rounded-2xl overflow-hidden"><div class="px-6 py-3 border-b border-txlog-leaf/20 font-semibold text-txlog-leaf flex items-center justify-between cursor-pointer" onclick="document.getElementById(\'common-pkgs\').classList.toggle(\'hidden\')"><span class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4"></i> Common Packages (' + data.common.length + ')</span><span class="text-xs text-txlog-indigo/40">Click to expand/collapse</span></div><div class="p-4 hidden" id="common-pkgs" style="max-height:300px;overflow-y:auto"><div class="flex flex-wrap gap-1">' + data.common.map(function (p) { return '<code class="bg-txlog-indigo/5 text-xs font-mono px-1.5 py-0.5 rounded" title="' + p + '">' + p + '</code>'; }).join('') + '</div></div></div>';
         }
 
-        if (!html) {
-          html = '<div class="empty"><p class="empty-title">No comparison data available</p></div>';
-        }
-
+        if (!html) html = '<div class="py-8 text-center"><p class="font-semibold">No comparison data available</p></div>';
         resultsBody.innerHTML = html;
+        lucide.createIcons();
       })
-      .catch(error => {
-        resultsBody.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+      .catch(function (error) {
+        resultsBody.innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">Error: ' + error.message + '</div>';
       });
   }
 </script>

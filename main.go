@@ -27,6 +27,9 @@ import (
 //go:embed images
 var staticFiles embed.FS
 
+//go:embed static
+var staticCSSFiles embed.FS
+
 //go:embed templates/*
 var templateFS embed.FS
 
@@ -115,10 +118,14 @@ func main() {
 
 		fsys, _ := fs.Sub(staticFiles, "images")
 		r.StaticFS("/images", http.FS(fsys))
+
+		cssFsys, _ := fs.Sub(staticCSSFiles, "static/css")
+		r.StaticFS("/css", http.FS(cssFsys))
 	} else {
 		r.SetFuncMap(funcMap)
 		r.LoadHTMLGlob("templates/*.html")
 		r.Static("/images", "./images")
+		r.Static("/css", "./static/css")
 	}
 
 	healthcheck.New(r, util.CheckConfig(), util.Check())
@@ -175,7 +182,6 @@ func main() {
 	r.GET("/package-progression", controllers.GetPackagesByWeekIndex(database.Db))
 	r.GET("/api/packages-by-month", controllers.GetPackagesByMonth(database.Db))
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
-	r.GET("/sponsor", controllers.GetSponsorIndex)
 
 	// Analytics pages
 	r.GET("/analytics/compare", controllers.GetAnalyticsCompare(database.Db))

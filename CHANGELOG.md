@@ -5,7 +5,8 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to [Semantic
+Versioning](https://semver.org/spec/v2.0.0.html).
 
 <!--
 
@@ -17,12 +18,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- Expand the migration status grid to four columns and display the database
+  migration state.
+- Introduce a fallback query for the agent version filter to handle cases where
+  the column is undefined in the assets table.
+- Configure the API key page to automatically reload after closing the API Key
+  creation modal.
+- Add hover tooltips to action icons in the machine ID view.
+- Add a new design document outlining an embedded database schema validation
+  system.
+
+### Changed
+
+- Convert the user interface to use Tailwind CSS and integrate the build step
+  into the CI workflow.
+- Replace legacy CSS classes with Tailwind utilities for elements such as status
+  indicators, UI components, and modals.
+- Standardize link styling across all HTML templates and compact Go template
+  expressions.
+- Increase the width of the API Key creation modal to prevent content overflow
+  and add a stronger shadow effect to dropdown menus.
+- Update the Visual Identity documentation with refined color palettes, UI
+  component specifications, and WCAG compliance details.
+- Update OIDC and LDAP configuration links in the admin panel and remove
+  outdated research documents.
+
+### Fixed
+
+- Adjust asset image styling by removing `overflow-hidden` from container and
+  applying rounded corners directly to the image.
+
 ## [1.22.0] - 2026-02-16
 
 ### Added
 
-- Add pagination (`limit` and `offset` parameters) to `GET /v1/machines` endpoint.
-- Add pagination (`limit` and `offset` parameters) to `GET /v1/transactions` endpoint.
+- Add pagination (`limit` and `offset` parameters) to `GET /v1/machines`
+  endpoint.
+- Add pagination (`limit` and `offset` parameters) to `GET /v1/transactions`
+  endpoint.
 
 ### Changed
 
@@ -46,7 +83,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Implement detection and force-cleaning of dirty database migration states via the admin panel.
+- Implement detection and force-cleaning of dirty database migration states via
+  the admin panel.
 - Add `agent_version` to assets and create dashboard materialized views.
 - Add pagination to `GetTransactions` endpoint.
 - Add pagination to `GetExecutions` endpoint.
@@ -67,7 +105,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Fix concurrent map write panic in `EnvironmentVariablesMiddleware` by creating a per-request copy of the environment map.
+- Fix concurrent map write panic in `EnvironmentVariablesMiddleware` by creating
+  a per-request copy of the environment map.
 - Fix backward compatibility for `agent_version` column in models.
 
 ## [1.20.0] - 2026-01-25
@@ -91,18 +130,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix package comparison displaying only version without release, making it
   appear that packages with different releases had the same version. Now
   displays full `version-release` format (e.g., `3.1.5-1.el9`).
-- Fix anomaly badges text color for better readability by adding explicit
-  white text color.
+- Fix anomaly badges text color for better readability by adding explicit white
+  text color.
 
 ### Changed
 
 - Allow session-authenticated users to access `/v1` API endpoints directly,
   enabling UI pages to call API endpoints without requiring an API key header.
 - Optimize API key middleware to check for API key header before session cookie,
-  avoiding unnecessary database queries for API requests that include an API key.
+  avoiding unnecessary database queries for API requests that include an API
+  key.
 - Consolidate duplicate `/web/*` endpoints into `/v1/*` endpoints:
   - `/web/machines` → `/v1/machines`
-  - `/web/packages/:name/:version/:release/assets` → `/v1/packages/:name/:version/:release/assets`
+  - `/web/packages/:name/:version/:release/assets` →
+    `/v1/packages/:name/:version/:release/assets`
   - `/web/items` → `/v1/items`
 
 ### Removed
@@ -122,8 +163,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `GET /v1/reports/monthly` API endpoint to expose management report data
-  in JSON format. Returns `month`, `year`, `asset_count`, and a `packages` array
+- Add `GET /v1/reports/monthly` API endpoint to expose management report data in
+  JSON format. Returns `month`, `year`, `asset_count`, and a `packages` array
   containing `os_version`, `package_rpm`, and `assets_affected` for each package
   updated in the specified period.
 - Add comprehensive unit tests for the new reports endpoint covering parameter
@@ -167,10 +208,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optimize `/packages` endpoint performance with materialized view for faster
   package listing queries. Previously, each request executed multiple complex
-  CTEs scanning the entire `transaction_items` table; now uses pre-computed
-  data refreshed every 5 minutes.
-- Add scheduled job to refresh `mv_package_listing` materialized view every
-  5 minutes for near real-time data with dramatically improved query performance.
+  CTEs scanning the entire `transaction_items` table; now uses pre-computed data
+  refreshed every 5 minutes.
+- Add scheduled job to refresh `mv_package_listing` materialized view every 5
+  minutes for near real-time data with dramatically improved query performance.
 - Optimize `/assets` endpoint performance by storing the `os` field directly in
   the `assets` table. Previously, each request executed expensive `LEFT JOIN
   LATERAL` subqueries to fetch the OS from the latest execution for each asset;
@@ -198,7 +239,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Update Go version to 1.25.5.
 - Change version definition to `.version` file.
-- Overhaul and expand documentation with new tutorials, how-to guides, and reference material.
+- Overhaul and expand documentation with new tutorials, how-to guides, and
+  reference material.
 - Translate LDAP documentation from Portuguese to English.
 - Update copyright year range in LICENSE.
 - Bump `github.com/golang-migrate/migrate/v4`.
@@ -248,8 +290,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for multiple AI assistants (ChatGPT, Claude, Gemini).
 - Modal dialogs for displaying prompts and error messages.
 - Assets table for centralized server identity and lifecycle management.
-- Automatic detection and tracking of replaced servers (same hostname,
-  different machine ID).
+- Automatic detection and tracking of replaced servers (same hostname, different
+  machine ID).
 - Real-time asset count throughout the application.
 - Comprehensive test coverage for assets, statistics, scheduler, and
   controllers.
@@ -355,8 +397,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- API key authentication is now only required when OIDC or LDAP authentication is
-  enabled. When both are disabled, /v1 endpoints are accessible without API key
+- API key authentication is now only required when OIDC or LDAP authentication
+  is enabled. When both are disabled, /v1 endpoints are accessible without API
+  key
 
 ## [1.15.0] - 2025-10-07
 
@@ -368,9 +411,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Enhanced login interface to support LDAP authentication with improved error handling
+- Enhanced login interface to support LDAP authentication with improved error
+  handling
 - Updated authentication controller to handle both OIDC and LDAP login requests
-- Modified authentication middleware to allow requests when neither OIDC nor LDAP is configured
+- Modified authentication middleware to allow requests when neither OIDC nor
+  LDAP is configured
 - Improved admin panel with LDAP-specific user management features
 - Updated header template with conditional LDAP/OIDC authentication state checks
 - Updated dependencies in `go.mod` and `go.sum` for LDAP functionality
@@ -418,7 +463,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Enhance database migration scripts with error handling and conditional index creation
+- Enhance database migration scripts with error handling and conditional index
+  creation
 
 ## [1.13.0] - 2025-10-01
 
@@ -467,10 +513,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump github.com/tavsec/gin-healthcheck from 1.7.8 to 1.7.9 by
-  @dependabot[bot] in <https://github.com/txlog/server/pull/62>
-- Bump github.com/swaggo/swag from 1.16.4 to 1.16.5 by
-  @dependabot[bot] in <https://github.com/txlog/server/pull/63>
+- Bump github.com/tavsec/gin-healthcheck from 1.7.8 to 1.7.9 by @dependabot[bot]
+  in <https://github.com/txlog/server/pull/62>
+- Bump github.com/swaggo/swag from 1.16.4 to 1.16.5 by @dependabot[bot] in
+  <https://github.com/txlog/server/pull/63>
 
 ## [1.10.1] - 2025-07-14
 
@@ -487,8 +533,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump github.com/tavsec/gin-healthcheck from 1.7.7 to 1.7.8 by
-  @dependabot in <https://github.com/txlog/server/pull/58>
+- Bump github.com/tavsec/gin-healthcheck from 1.7.7 to 1.7.8 by @dependabot in
+  <https://github.com/txlog/server/pull/58>
 - Show number of updated packages by week by @rdeavila in
   <https://github.com/txlog/server/pull/59>
 
@@ -502,10 +548,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Bump github.com/gin-gonic/gin from 1.10.0 to 1.10.1 by
-  @dependabot in <https://github.com/txlog/server/pull/55>
-- Bump github.com/tavsec/gin-healthcheck from 1.7.6 to 1.7.7 by
-  @dependabot in <https://github.com/txlog/server/pull/56>
+- Bump github.com/gin-gonic/gin from 1.10.0 to 1.10.1 by @dependabot in
+  <https://github.com/txlog/server/pull/55>
+- Bump github.com/tavsec/gin-healthcheck from 1.7.6 to 1.7.7 by @dependabot in
+  <https://github.com/txlog/server/pull/56>
 - Implement Restart Tracking for Assets (UI & API) by @rdeavila in
   <https://github.com/txlog/server/pull/57>
 
@@ -637,8 +683,8 @@ docker pull ghcr.io/txlog/server:v1.7.0
 
 ### Changed
 
-- Bump github.com/golang-migrate/migrate/v4 from 4.18.2 to 4.18.3
-  by @dependabot in <https://github.com/txlog/server/pull/37>
+- Bump github.com/golang-migrate/migrate/v4 from 4.18.2 to 4.18.3 by @dependabot
+  in <https://github.com/txlog/server/pull/37>
 
 ### Docker Image
 

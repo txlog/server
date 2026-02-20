@@ -682,12 +682,12 @@
 
 <!-- Create API Key Modal -->
 <div id="createAPIKeyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
-  onclick="if(event.target===this)closeModal('createAPIKeyModal')">
+  onclick="if(event.target===this)closeModal('createAPIKeyModal', function() { window.location.reload(); })">
   <div data-modal-panel
     class="bg-white rounded-3xl shadow-soft max-w-2xl w-full mx-4 transform transition-all scale-95 opacity-0 overflow-hidden">
     <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
       <h5 class="font-display font-semibold text-lg">Generate New API Key</h5><button type="button"
-        onclick="closeModal('createAPIKeyModal')" class="text-txlog-indigo/40 hover:text-txlog-indigo"><i
+        onclick="closeModal('createAPIKeyModal', function() { window.location.reload(); })" class="text-txlog-indigo/40 hover:text-txlog-indigo"><i
           data-lucide="x" class="w-5 h-5"></i></button>
     </div>
     <div class="p-6">
@@ -722,7 +722,7 @@
       </div>
     </div>
     <div class="border-t border-txlog-lavender px-6 py-4 flex justify-end gap-3">
-      <button type="button" onclick="closeModal('createAPIKeyModal')" id="closeModalBtn"
+      <button type="button" onclick="closeModal('createAPIKeyModal', function() { window.location.reload(); })" id="closeModalBtn"
         class="border-2 border-txlog-lavender text-txlog-indigo font-medium px-4 py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Close</button>
       <button type="button" id="generateAPIKeyBtn"
         class="bg-txlog-sky text-white font-medium px-4 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2"><i

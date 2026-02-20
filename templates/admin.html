@@ -581,7 +581,7 @@
     </div>
     <div class="p-6">
       {{ if .migrations }}
-      <div class="grid md:grid-cols-3 gap-4 mb-4">
+      <div class="grid md:grid-cols-4 gap-4 mb-4">
         <div class="flex items-center gap-3"><i data-lucide="lock" class="w-5 h-5 text-txlog-sky"></i>
           <div><strong>Current Version:</strong> {{ .migrations.CurrentVersion }}</div>
         </div>
@@ -590,6 +590,10 @@
         </div>
         <div class="flex items-center gap-3"><i data-lucide="circle-check" class="w-5 h-5 text-txlog-golden"></i>
           <div><strong>Pending:</strong> {{ len .migrations.Pending }}</div>
+        </div>
+        <div class="flex items-center gap-3">{{ if .migrations.IsDirty }}<i data-lucide="triangle-alert" class="w-5 h-5 text-txlog-coral"></i>
+          <div><strong>State:</strong> <span class="text-txlog-coral font-semibold">Dirty</span></div>{{ else }}<i data-lucide="shield-check" class="w-5 h-5 text-txlog-leaf"></i>
+          <div><strong>State:</strong> <span class="text-txlog-leaf font-semibold">Clean</span></div>{{ end }}
         </div>
       </div>
       {{ if .migrations.IsDirty }}

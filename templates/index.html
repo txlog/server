@@ -332,7 +332,7 @@
           data.forEach(function (item) {
             var row = document.createElement('tr');
             row.className = 'hover:bg-txlog-lavender/10 transition-colors';
-            row.innerHTML = '<td class="py-3">' + item.hostname + '</td><td class="py-3 text-right"><a class="text-txlog-sky hover:underline text-sm font-medium" href="/assets/' + item.machine_id + '">Details</a></td>';
+            row.innerHTML = '<td class="py-3">' + item.hostname + '</td><td class="py-3 text-right"><a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="/assets/' + item.machine_id + '">Details</a></td>';
             tb.appendChild(row);
           });
         } else {
@@ -357,7 +357,7 @@
           data.forEach(function (item) {
             var row = document.createElement('tr');
             row.className = 'hover:bg-txlog-lavender/10 transition-colors';
-            row.innerHTML = '<td class="py-3">' + item.hostname + '</td><td class="py-3 text-right"><a class="text-txlog-sky hover:underline text-sm font-medium" href="/assets/' + item.machine_id + '">Details</a></td>';
+            row.innerHTML = '<td class="py-3">' + item.hostname + '</td><td class="py-3 text-right"><a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="/assets/' + item.machine_id + '">Details</a></td>';
             tb.appendChild(row);
           });
         } else {

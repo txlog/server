@@ -138,7 +138,7 @@
             <td class="px-6 py-3 text-txlog-indigo/40 max-w-[300px]">No command recorded</td>
             {{ end }}
             <td class="px-6 py-3">
-              <a class="text-txlog-sky hover:underline text-sm font-medium" href="#"
+              <a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="#"
                 onclick="showModal('{{ .TransactionID }}')">Details</a>
             </td>
           </tr>
@@ -198,7 +198,7 @@
             <td class="px-6 py-3">{{ .TransactionsProcessed }}</td>
             <td class="px-6 py-3">{{ .TransactionsSent }}</td>
             <td class="px-6 py-3">
-              <a class="text-txlog-sky hover:underline text-sm font-medium"
+              <a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors"
                 href="/executions/{{ .ExecutionID }}">Details</a>
             </td>
           </tr>

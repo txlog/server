@@ -18,9 +18,9 @@ module.exports = {
           lavender: '#E6E6FA',
           coral: '#D9556A',
           golden: '#F4B54B',
-          sky: '#6AA2FB',
-          leaf: '#6DB865',
-          peach: '#F1A994',
+          sky: '#4A8AE8',
+          leaf: '#4A9E42',
+          purple: '#8B5CF6',
           bg: '#F8F9FE',
         }
       },

@@ -535,7 +535,8 @@
                   <p class="text-sm text-txlog-indigo/60 mb-1">Permanently delete <strong>{{ .Name }}</strong>?</p>
                   <div
                     class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-xl p-3 text-xs text-txlog-coral mt-2">
-                    <strong>Warning:</strong> This action cannot be undone.</div>
+                    <strong>Warning:</strong> This action cannot be undone.
+                  </div>
                 </div>
                 <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3"><button type="button"
                     onclick="closeModal('deleteAPIKeyModal{{ .ID }}')"
@@ -683,7 +684,7 @@
 <div id="createAPIKeyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
   onclick="if(event.target===this)closeModal('createAPIKeyModal')">
   <div data-modal-panel
-    class="bg-white rounded-3xl shadow-soft max-w-lg w-full mx-4 transform transition-all scale-95 opacity-0">
+    class="bg-white rounded-3xl shadow-soft max-w-2xl w-full mx-4 transform transition-all scale-95 opacity-0 overflow-hidden">
     <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
       <h5 class="font-display font-semibold text-lg">Generate New API Key</h5><button type="button"
         onclick="closeModal('createAPIKeyModal')" class="text-txlog-indigo/40 hover:text-txlog-indigo"><i

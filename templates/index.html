@@ -20,16 +20,10 @@
         <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
       </div>
       <div class="flex items-baseline gap-2">
-        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{
-          printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name " executions-30-days" }}{{ if gt .Percentage 0.0
-          }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end
-          }}{{ end }} text-sm font-medium flex items-center gap-1">
-          {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatPercentage .Percentage)
-          }}{{ end }}{{ end }}%
-          <i data-lucide="{{ range .statistics }}{{ if eq .Name " executions-30-days" }}{{ if gt .Percentage 0.0
-            }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"
-            class="w-4 h-4"></i>
+        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
+          {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
+          <i data-lucide="{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}" class="w-4 h-4"></i>
         </span>
       </div>
     </div>
@@ -39,16 +33,10 @@
         <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
       </div>
       <div class="flex items-baseline gap-2">
-        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days"
-          }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name " installed-packages-30-days" }}{{ if gt .Percentage 0.0
-          }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end
-          }}{{ end }} text-sm font-medium flex items-center gap-1">
-          {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatPercentage
-          .Percentage) }}{{ end }}{{ end }}%
-          <i data-lucide="{{ range .statistics }}{{ if eq .Name " installed-packages-30-days" }}{{ if gt .Percentage 0.0
-            }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"
-            class="w-4 h-4"></i>
+        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
+          {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
+          <i data-lucide="{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}" class="w-4 h-4"></i>
         </span>
       </div>
     </div>
@@ -58,16 +46,10 @@
         <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
       </div>
       <div class="flex items-baseline gap-2">
-        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days"
-          }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name " upgraded-packages-30-days" }}{{ if gt .Percentage 0.0
-          }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end
-          }}{{ end }} text-sm font-medium flex items-center gap-1">
-          {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatPercentage
-          .Percentage) }}{{ end }}{{ end }}%
-          <i data-lucide="{{ range .statistics }}{{ if eq .Name " upgraded-packages-30-days" }}{{ if gt .Percentage 0.0
-            }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}"
-            class="w-4 h-4"></i>
+        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
+          {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
+          <i data-lucide="{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}" class="w-4 h-4"></i>
         </span>
       </div>
     </div>

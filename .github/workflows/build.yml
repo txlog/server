@@ -27,6 +27,13 @@ jobs:
     - name: Install Cosign
       uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3
 
+    - name: Build Tailwind CSS
+      run: |
+        mkdir -p tools
+        curl -sL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 -o tools/tailwindcss
+        chmod +x tools/tailwindcss
+        make css
+
     - name: Compile
       run: |
         VERSION=$(cat .version)

@@ -50,7 +50,7 @@
                 <i data-lucide="chevron-down" class="w-3 h-3"></i>
               </button>
               <div id="reports-menu"
-                class="hidden absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-soft border border-txlog-lavender/30 py-2 z-50">
+                class="hidden absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-txlog-lavender/30 py-2 z-50">
                 <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
                   href="/package-progression">Package Progression</a>
                 <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
@@ -104,7 +104,7 @@
               </div>
             </button>
             <div id="user-menu"
-              class="hidden absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-soft border border-txlog-lavender/30 py-2 z-50">
+              class="hidden absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-txlog-lavender/30 py-2 z-50">
               {{ $latestVersion := .Context.Keys.env.latestVersion }}
               {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
               <div class="px-4 py-2">

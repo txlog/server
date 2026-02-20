@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	logger "github.com/txlog/server/logger"
 )
@@ -75,6 +76,41 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 			rows, err = database.Query(query+" ORDER BY hostname", params...)
 		} else {
 			rows, err = database.Query(query + " ORDER BY hostname")
+		}
+
+		// Fallback: if agent_version column doesn't exist in assets table,
+		// filter via subquery on executions table instead
+		if err != nil && agentVersion != "" {
+			pqErr, ok := err.(*pq.Error)
+			if ok && pqErr.Code == "42703" { // undefined_column
+				logger.Info("Falling back to executions table for agent_version filter")
+				query = `
+    SELECT
+      a.hostname,
+      a.machine_id
+    FROM assets a
+    WHERE a.is_active = TRUE`
+				params = nil
+				paramCount = 0
+
+				if os != "" {
+					paramCount++
+					query += ` AND a.os = $` + strconv.Itoa(paramCount)
+					params = append(params, os)
+				}
+
+				paramCount++
+				query += ` AND a.machine_id IN (
+      SELECT DISTINCT e.machine_id FROM executions e
+      WHERE e.agent_version = $` + strconv.Itoa(paramCount) + `)`
+				params = append(params, agentVersion)
+
+				if len(params) > 0 {
+					rows, err = database.Query(query+" ORDER BY hostname", params...)
+				} else {
+					rows, err = database.Query(query + " ORDER BY hostname")
+				}
+			}
 		}
 
 		if err != nil {

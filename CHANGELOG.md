@@ -18,6 +18,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Fixed
+
+- Fix login page CSS returning HTTP 307 by allowing unauthenticated access to the
+  `/css/` path in the authentication middleware.
+
 ## [1.23.0] - 2026-02-20
 
 ### Added

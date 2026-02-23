@@ -18,6 +18,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Changed
+
+- Harmonize OS distribution SVG icons with the new Tailwind color palette.
+
 ## [1.23.1] - 2026-02-23
 
 ### Fixed

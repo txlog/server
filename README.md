@@ -192,6 +192,7 @@ The image should now appear as signed and trusted in the Zot UI.
 ## 🪴 Project Activity
 
 ![Alt](https://repobeats.axiom.co/api/embed/e7072dd27ed7e95ffffdca0b6b8b1b9b8a9687ed.svg "Repobeats analytics image")
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_shield)
 
 ## Development
 
@@ -342,3 +343,7 @@ The server will run at <http://localhost:8080> and the Swagger docs at
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_large)

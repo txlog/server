@@ -8,6 +8,7 @@
     <a href="https://semver.org"><img src="https://img.shields.io/badge/SemVer-2.0.0-22bfda.svg" alt="SemVer Format"></a>
     <a href="./CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-Keep_a_Changelog_v1.1.0-E05735" alt="Keep a Changelog"></a>
     <a href="https://github.com/txlog/.github/blob/main/profile/CODE_OF_CONDUCT.md"><img src="https://img.shields.io/badge/Contributor%20Covenant-3.0-4baaaa.svg" alt="Contributor Covenant"></a>
+    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_shield"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=shield" alt="FOSSA Status"></a>
     <a href="https://newreleases.io/github/txlog/server"><img src="https://newreleases.io/badge.svg" alt="NewReleases"></a>
     <a href="https://deepwiki.com/txlog/server"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   </p>
@@ -192,7 +193,6 @@ The image should now appear as signed and trusted in the Zot UI.
 ## 🪴 Project Activity
 
 ![Alt](https://repobeats.axiom.co/api/embed/e7072dd27ed7e95ffffdca0b6b8b1b9b8a9687ed.svg "Repobeats analytics image")
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_shield)
 
 ## Development
 
@@ -346,4 +346,5 @@ The server will run at <http://localhost:8080> and the Swagger docs at
 
 
 ## License
+
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_large)

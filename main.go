@@ -56,6 +56,9 @@ func main() {
 	database.ConnectDatabase()
 	scheduler.StartScheduler()
 
+	// Inject the background task trigger into controllers safely without direct package cycle
+	controllers.SetSchedulerOSVTrigger(scheduler.UpdateVulnerabilitiesJob)
+
 	// Initialize OIDC service (optional)
 	var oidcService *auth.OIDCService
 	oidcService, err := auth.NewOIDCService(database.Db)
@@ -160,6 +163,8 @@ func main() {
 	{
 		adminGroup.GET("", controllers.GetAdminIndex(database.Db))
 		adminGroup.POST("/migrations/run", controllers.PostAdminRunMigrations(database.Db))
+		adminGroup.POST("/migrations/run_osv_update", controllers.PostAdminRunOSVUpdate(database.Db))
+		adminGroup.POST("/migrations/reset_osv", controllers.PostAdminResetOSV(database.Db))
 	}
 
 	// Admin routes that require OIDC or LDAP (user and API key management)
@@ -188,6 +193,7 @@ func main() {
 	r.GET("/analytics/freshness", controllers.GetAnalyticsFreshness(database.Db))
 	r.GET("/analytics/adoption", controllers.GetAnalyticsAdoption(database.Db))
 	r.GET("/analytics/anomalies", controllers.GetAnalyticsAnomalies(database.Db))
+	r.GET("/analytics/security", controllers.GetAnalyticsSecurity(database.Db))
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,
@@ -223,6 +229,7 @@ func main() {
 		v1Group.GET("/reports/package-freshness", v1API.GetPackageFreshness(database.Db))
 		v1Group.GET("/reports/package-adoption", v1API.GetPackageAdoption(database.Db))
 		v1Group.GET("/reports/anomalies", v1API.GetAnomalies(database.Db))
+		v1Group.GET("/reports/fixed-vulnerabilities", v1API.GetFixedVulnerabilities(database.Db))
 
 		// Endpoints for agent pre-v1.6.0
 		v1Group.GET("/machines/ids", v1API.GetMachineIDs(database.Db))
@@ -253,6 +260,7 @@ func EnvironmentVariablesMiddleware() gin.HandlerFunc {
 		"cronRetentionDays":        os.Getenv("CRON_RETENTION_DAYS"),
 		"cronRetentionExpression":  os.Getenv("CRON_RETENTION_EXPRESSION"),
 		"cronStatisticsExpression": os.Getenv("CRON_STATS_EXPRESSION"),
+		"cronOsvExpression":        os.Getenv("CRON_OSV_EXPRESSION"),
 		"oidcIssuerUrl":            os.Getenv("OIDC_ISSUER_URL"),
 		"oidcClientId":             os.Getenv("OIDC_CLIENT_ID"),
 		"oidcClientSecret":         util.MaskString(os.Getenv("OIDC_CLIENT_SECRET")),

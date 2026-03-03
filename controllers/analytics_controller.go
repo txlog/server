@@ -55,6 +55,16 @@ func GetAnalyticsAnomalies(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
+// GetAnalyticsSecurity returns the security analysis page
+func GetAnalyticsSecurity(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.HTML(http.StatusOK, "analytics_security.html", gin.H{
+			"Context": c,
+			"title":   "Security & Mitigations",
+		})
+	}
+}
+
 // AssetForComparison represents an asset available for comparison
 type AssetForComparison struct {
 	MachineID string

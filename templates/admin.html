@@ -303,6 +303,57 @@
           </tbody>
         </table>
       </div>
+      <!-- OSV Vulnerabilities Job -->
+      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
+        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm flex items-center justify-between">
+          Vulnerabilities Updates (OSV)
+          {{ if .osvIsRunning }}
+          <span class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-txlog-golden"></span> Running Now</span>
+          {{ else }}
+          <span class="bg-txlog-leaf/10 text-txlog-leaf text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Idle</span>
+          {{ end }}
+        </div>
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-txlog-lavender/30">
+            <tr>
+              <td class="px-4 py-2 w-1/2 font-medium">Schedule Expression</td>
+              <td class="px-4 py-2"><code
+                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ if .Context.Keys.env.cronOsvExpression }}{{ .Context.Keys.env.cronOsvExpression }}{{ else }}0 4 * * *{{ end }}</code>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" class="px-4 py-2.5">
+                <form action="/admin/migrations/run_osv_update" method="post" class="w-full">
+                  {{ if .osvIsRunning }}
+                  <button type="button" disabled class="w-full bg-txlog-lavender text-txlog-indigo/50 font-medium py-1.5 rounded-lg border border-txlog-lavender/50 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
+                    <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
+                  </button>
+                  {{ else }}
+                  <button type="submit" onclick="return confirm('This will start fetching and processing OSV vulnerabilities in the background. Note: this job may take a while. Proceed?')" class="w-full bg-white text-txlog-indigo font-medium py-1.5 rounded-lg border border-txlog-lavender hover:bg-txlog-lavender/30 hover:border-txlog-sky transition-colors flex items-center justify-center gap-2 text-xs">
+                    <i data-lucide="play" class="w-3.5 h-3.5"></i> Run Manually Now
+                  </button>
+                  {{ end }}
+                </form>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" class="px-4 py-2.5">
+                <form action="/admin/migrations/reset_osv" method="post" class="w-full">
+                  {{ if .osvIsRunning }}
+                  <button type="button" disabled class="w-full bg-txlog-coral/10 text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/20 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
+                    <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
+                  </button>
+                  {{ else }}
+                  <button type="submit" onclick="return confirm('WARNING: This will erase EVERY downloaded OSV vulnerability from the database, reset all transaction scoreboards to zero AND re-start the fetch job from scratch. It might take dozens of minutes to rebuild everything. Proceed?')" class="w-full text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/30 hover:bg-txlog-coral/10 hover:border-txlog-coral transition-colors flex items-center justify-center gap-2 text-xs">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reset All Data & Rebuild
+                  </button>
+                  {{ end }}
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 

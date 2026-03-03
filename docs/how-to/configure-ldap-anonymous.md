@@ -314,4 +314,5 @@ Authentication **WITHOUT service account** is:
 - ❌ **Does not work** with typical Active Directory.
 - ❌ **May not meet** corporate security policies.
 
-**Recommendation:** Start without service account. If it works and meets your security needs, great! If it doesn't work or if you need more control, add the service account.
+**Recommendation:** Start without service account. If it works and meets your security needs, great!
+If it doesn't work or if you need more control, add the service account.

@@ -328,7 +328,7 @@ member: CN=Jane Doe,CN=Users,DC=example,DC=com
 Based on login attribute identified in **Step 3.3**:
 
 | Login Attribute | LDAP_USER_FILTER | System |
-|-----------------|------------------|--------|
+| --- | --- | --- |
 | `uid` | `(uid=%s)` | OpenLDAP, FreeIPA, 389 DS |
 | `sAMAccountName` | `(sAMAccountName=%s)` | Active Directory |
 | `cn` | `(cn=%s)` | Legacy systems |
@@ -342,7 +342,7 @@ Based on login attribute identified in **Step 3.3**:
 Based on member attribute identified in **Step 4.3**:
 
 | Member Attribute | LDAP_GROUP_FILTER | System |
-|------------------|-------------------|--------|
+| --- | --- | --- |
 | `member` | `(member=%s)` | groupOfNames, AD |
 | `uniqueMember` | `(uniqueMember=%s)` | groupOfUniqueNames |
 | `memberUid` | `(memberUid=%s)` | posixGroup |
@@ -379,7 +379,8 @@ LDAP_USER_FILTER=(uid=%s)
 LDAP_GROUP_FILTER=(memberUid=%s)
 ```
 
-**⚠️ IMPORTANT:** For posixGroup, you need to modify Txlog Server code to extract only the `uid` from the DN before doing the group search. Currently, it passes the full DN.
+**⚠️ IMPORTANT:** For posixGroup, you need to modify Txlog Server code to extract only the `uid` from the DN
+before doing the group search. Currently, it passes the full DN.
 
 ### Active Directory
 

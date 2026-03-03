@@ -1,0 +1,194 @@
+{{ template "header.html" . }}
+<div class="bg-txlog-indigo -mt-4 pt-4 pb-6 mb-6 print:hidden">
+    <div class="max-w-7xl mx-auto px-6">
+        <p class="text-white/60 text-sm mb-1">Analytics</p>
+        <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
+        <p class="text-white/50 text-sm mt-1">Track vulnerability resolutions over time, mitigated CVSS risk points, and fixed critical vulnerabilities.</p>
+    </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-6 pb-8">
+    <div class="grid lg:grid-cols-3 gap-6">
+        <div class="space-y-6">
+            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+                <div class="border-b border-txlog-lavender px-6 py-4">
+                    <h3 class="font-display font-semibold text-lg">Filters</h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="font-medium text-sm pl-1 block mb-1.5">Time Period</label>
+                        <select id="days-filter" onchange="loadSecurity()"
+                            class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-3 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all text-txlog-indigo font-medium">
+                            <option value="7">Last 7 days</option>
+                            <option value="14">Last 14 days</option>
+                            <option value="30" selected>Last 30 days</option>
+                            <option value="60">Last 60 days</option>
+                            <option value="90">Last 90 days</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+                <div class="border-b border-txlog-lavender px-6 py-4">
+                    <h3 class="font-display font-semibold text-lg">Summary Scoreboard</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Vulns Fixed</div>
+                            <div class="font-display font-bold text-2xl text-txlog-sky" id="total-fixed">-</div>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Critical Fixed</div>
+                            <div class="font-display font-bold text-2xl text-txlog-coral" id="critical-fixed">-</div>
+                        </div>
+                        <div class="col-span-2">
+                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Risk Mitigated (CVSS)</div>
+                            <div class="font-display font-bold text-2xl text-txlog-leaf" id="risk-mitigated">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+                <div class="border-b border-txlog-lavender px-6 py-4">
+                    <h3 class="font-display font-semibold text-lg">Security Delta <span
+                            class="text-sm text-txlog-indigo/50 font-normal ml-1">over selected period</span></h3>
+                </div>
+                <div class="p-6">
+                    <div id="chart-security" class="min-h-[350px]"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    var securityChart;
+
+    function loadSecurity() {
+        var days = document.getElementById('days-filter').value;
+        var url = '/v1/reports/fixed-vulnerabilities?days=' + days;
+
+        fetch(url)
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                if (!Array.isArray(data)) { data = []; }
+
+                var dates = [];
+                var seriesFixed = [];
+                var seriesCritical = [];
+                var seriesCVSS = [];
+
+                var sumFixed = 0;
+                var sumCritical = 0;
+                var sumCVSS = 0;
+
+                data.forEach(function(item) {
+                    dates.push(item.date);
+                    seriesFixed.push(item.total_fixed);
+                    seriesCritical.push(item.total_critical_fixed);
+                    seriesCVSS.push(item.total_risk_points_reduced);
+
+                    sumFixed += item.total_fixed;
+                    sumCritical += item.total_critical_fixed;
+                    sumCVSS += item.total_risk_points_reduced;
+                });
+
+                document.getElementById('total-fixed').textContent = sumFixed.toLocaleString();
+                document.getElementById('critical-fixed').textContent = sumCritical.toLocaleString();
+                document.getElementById('risk-mitigated').textContent = sumCVSS.toLocaleString();
+
+                var options = {
+                    series: [{
+                        name: 'Fixed Vulnerabilities',
+                        type: 'column',
+                        data: seriesFixed
+                    }, {
+                        name: 'Critical Fixed',
+                        type: 'line',
+                        data: seriesCritical
+                    }, {
+                        name: 'CVSS Score Mitigated',
+                        type: 'area',
+                        data: seriesCVSS
+                    }],
+                    chart: {
+                        height: 350,
+                        type: 'line',
+                        fontFamily: 'inherit',
+                        toolbar: { show: false },
+                        zoom: { enabled: false }
+                    },
+                    colors: ['#0ea5e9', '#ef4444', '#10b981'],
+                    stroke: {
+                        curve: 'smooth',
+                        width: [0, 4, 0]
+                    },
+                    fill: {
+                        type: ['solid', 'solid', 'gradient'],
+                        gradient: {
+                            shadeIntensity: 1,
+                            inverseColors: false,
+                            opacityFrom: 0.45,
+                            opacityTo: 0.05,
+                            stops: [20, 100]
+                        }
+                    },
+                    dataLabels: { enabled: false },
+                    labels: dates,
+                    xaxis: {
+                        type: 'datetime',
+                        labels: {
+                            style: { colors: '#64748b' }
+                        }
+                    },
+                    yaxis: [
+                        {
+                            title: { text: 'Vulnerabilities', style: { color: '#64748b' } },
+                            labels: { style: { colors: '#64748b' } }
+                        },
+                        {
+                            show: false,
+                        },
+                        {
+                            opposite: true,
+                            title: { text: 'CVSS Score Mitigated', style: { color: '#64748b' } },
+                            labels: { style: { colors: '#64748b' } }
+                        }
+                    ],
+                    grid: {
+                        borderColor: '#e2e8f0',
+                        strokeDashArray: 4
+                    },
+                    tooltip: {
+                        shared: true,
+                        intersect: false,
+                        y: {
+                            formatter: function (y) {
+                                if (typeof y !== "undefined") {
+                                    return y.toFixed(0);
+                                }
+                                return y;
+                            }
+                        }
+                    }
+                };
+
+                if (securityChart) {
+                    securityChart.destroy();
+                }
+
+                securityChart = new ApexCharts(document.querySelector("#chart-security"), options);
+                securityChart.render();
+            })
+            .catch(function (error) {
+                console.error('Error loading security analytics:', error);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSecurity);
+</script>
+{{ template "footer.html" . }}

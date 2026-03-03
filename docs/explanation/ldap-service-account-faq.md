@@ -151,7 +151,7 @@ ldapsearch -H ldap://your-ldap:389 \
 ## Recommendations by server type
 
 | LDAP Server | Recommendation | Reason |
-|-------------|----------------|--------|
+| --- | --- | --- |
 | **OpenLDAP** (default) | ✅ WITHOUT service account | Anonymous bind enabled by default |
 | **OpenLDAP** (hardened) | ⚠️ WITH service account | Anonymous bind disabled |
 | **Active Directory** | ⚠️ WITH service account | Requires authentication for searches |
@@ -232,7 +232,7 @@ LDAP_BIND_PASSWORD=service_account_password
 ## Conclusion
 
 | Criteria | WITHOUT Service Account | WITH Service Account |
-|----------|-------------------------|----------------------|
+| --- | --- | --- |
 | **Simplicity** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
 | **Security** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
 | **Compatibility** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |

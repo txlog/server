@@ -30,7 +30,7 @@ using `information_schema` and `pg_catalog` queries.
 
 ### 2.1 Architecture Overview
 
-```
+```text
 ┌── CI/CD (GitHub Actions) ─────────────────────────────────┐
 │                                                           │
 │  1. Start ephemeral PostgreSQL (Docker service)           │
@@ -728,7 +728,7 @@ Alternatively, use GitHub Actions' built-in `services` for PostgreSQL:
 The build order is critical. The schema snapshot must be generated **before**
 `go build` so that `//go:embed` includes the JSON in the binary:
 
-```
+```text
 1. Build Tailwind CSS         (make css)
 2. Start ephemeral PostgreSQL
 3. Run all migrations
@@ -755,23 +755,23 @@ make schema-snapshot
 
 ```makefile
 schema-snapshot:
-	@echo "Starting ephemeral PostgreSQL..."
-	@docker run -d --name pg_schema_check \
-	    -e POSTGRES_DB=txlog_expected \
-	    -e POSTGRES_USER=postgres \
-	    -e POSTGRES_PASSWORD=check \
-	    -p 5433:5432 postgres:17
-	@echo "Waiting for PostgreSQL..."
-	@sleep 3
-	@echo "Running migrations..."
-	@migrate -path database/migrations \
-	    -database "postgres://postgres:check@localhost:5433/txlog_expected?sslmode=disable" up
-	@echo "Generating schema snapshot..."
-	@DATABASE_URL="postgres://postgres:check@localhost:5433/txlog_expected?sslmode=disable" \
-	    go run tools/schema-snapshot/main.go database/expected_schema.json
-	@echo "Cleaning up..."
-	@docker rm -f pg_schema_check
-	@echo "Done. Schema snapshot saved to database/expected_schema.json"
+ @echo "Starting ephemeral PostgreSQL..."
+ @docker run -d --name pg_schema_check \
+     -e POSTGRES_DB=txlog_expected \
+     -e POSTGRES_USER=postgres \
+     -e POSTGRES_PASSWORD=check \
+     -p 5433:5432 postgres:17
+ @echo "Waiting for PostgreSQL..."
+ @sleep 3
+ @echo "Running migrations..."
+ @migrate -path database/migrations \
+     -database "postgres://postgres:check@localhost:5433/txlog_expected?sslmode=disable" up
+ @echo "Generating schema snapshot..."
+ @DATABASE_URL="postgres://postgres:check@localhost:5433/txlog_expected?sslmode=disable" \
+     go run tools/schema-snapshot/main.go database/expected_schema.json
+ @echo "Cleaning up..."
+ @docker rm -f pg_schema_check
+ @echo "Done. Schema snapshot saved to database/expected_schema.json"
 ```
 
 ## 7. Admin Page Integration
@@ -892,7 +892,7 @@ section:
 
 When schema matches:
 
-```
+```text
 ┌─ Schema Validation ──────────────── [Schema OK] ─┐
 │                                                   │
 │  🛡️  Schema Verified                              │
@@ -904,7 +904,7 @@ When schema matches:
 
 When differences are found:
 
-```
+```text
 ┌─ Schema Validation ────────── [3 differences] ───┐
 │                                                   │
 │  ⚠️  Schema Divergence Detected                   │
@@ -979,7 +979,7 @@ this (uses maps keyed by column name).
 ## 9. Files to Create
 
 | File | Purpose |
-|---|---|
+| --- | --- |
 | `database/schema.go` | Type definitions (SchemaSnapshot, SchemaDiff, etc.) |
 | `database/schema_validator.go` | Comparison logic + embed directive |
 | `database/expected_schema.json` | Placeholder (empty JSON `{}`) |
@@ -988,7 +988,7 @@ this (uses maps keyed by column name).
 ## 10. Files to Modify
 
 | File | Change |
-|---|---|
+| --- | --- |
 | `.github/workflows/build.yml` | Add PostgreSQL service + snapshot generation steps |
 | `Makefile` | Add `schema-snapshot` target |
 | `controllers/admin_controller.go` | Call validator, pass results to template |
@@ -998,7 +998,7 @@ this (uses maps keyed by column name).
 ## 11. Estimated Effort
 
 | Component | Lines of Code | Complexity |
-|---|---|---|
+| --- | --- | --- |
 | Type definitions | ~50 | Low |
 | Snapshot tool | ~120 | Low |
 | Validator | ~180 | Medium |

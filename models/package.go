@@ -9,14 +9,15 @@ type PackageProgression struct {
 }
 
 type PackageListing struct {
-	Package       string    `json:"package"`
-	Version       string    `json:"version"`
-	Release       string    `json:"release"`
-	Arch          string    `json:"arch"`
-	Repo          string    `json:"repo"`
-	TotalVersions int       `json:"total_versions"`
-	MachineCount  int       `json:"machine_count"`
-	LastSeen      time.Time `json:"last_seen"`
+	Package         string    `json:"package"`
+	Version         string    `json:"version"`
+	Release         string    `json:"release"`
+	Arch            string    `json:"arch"`
+	Repo            string    `json:"repo"`
+	TotalVersions   int       `json:"total_versions"`
+	MachineCount    int       `json:"machine_count"`
+	LastSeen        time.Time `json:"last_seen"`
+	Vulnerabilities []string  `json:"vulnerabilities,omitempty"`
 }
 
 type Package struct {

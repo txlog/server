@@ -464,6 +464,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/reports/fixed-vulnerabilities": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Returns daily aggregated data on vulnerabilities fixed by transactions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reports"
+                ],
+                "summary": "Get vulnerability mitigation metrics over time",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of days to look back (default 30)",
+                        "name": "days",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/v1.VulnerabilitySeries"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/reports/monthly": {
             "get": {
                 "security": [
@@ -1094,11 +1139,26 @@ const docTemplate = `{
                 "comment": {
                     "type": "string"
                 },
+                "critical_vulns_fixed": {
+                    "type": "integer"
+                },
+                "critical_vulns_introduced": {
+                    "type": "integer"
+                },
                 "end_time": {
                     "type": "string"
                 },
+                "high_vulns_fixed": {
+                    "type": "integer"
+                },
+                "high_vulns_introduced": {
+                    "type": "integer"
+                },
                 "hostname": {
                     "type": "string"
+                },
+                "is_security_patch": {
+                    "type": "boolean"
                 },
                 "items": {
                     "type": "array",
@@ -1106,14 +1166,32 @@ const docTemplate = `{
                         "$ref": "#/definitions/models.TransactionItem"
                     }
                 },
+                "low_vulns_fixed": {
+                    "type": "integer"
+                },
+                "low_vulns_introduced": {
+                    "type": "integer"
+                },
                 "machine_id": {
                     "type": "string"
+                },
+                "max_severity_fixed": {
+                    "type": "string"
+                },
+                "medium_vulns_fixed": {
+                    "type": "integer"
+                },
+                "medium_vulns_introduced": {
+                    "type": "integer"
                 },
                 "release_version": {
                     "type": "string"
                 },
                 "return_code": {
                     "type": "string"
+                },
+                "risk_score_mitigated": {
+                    "type": "number"
                 },
                 "scriptlet_output": {
                     "type": "string"
@@ -1123,6 +1201,15 @@ const docTemplate = `{
                 },
                 "user": {
                     "type": "string"
+                },
+                "vulnerable_packages_updated": {
+                    "type": "integer"
+                },
+                "vulns_fixed": {
+                    "type": "integer"
+                },
+                "vulns_introduced": {
+                    "type": "integer"
                 }
             }
         },
@@ -1210,6 +1297,23 @@ const docTemplate = `{
                 },
                 "year": {
                     "type": "integer"
+                }
+            }
+        },
+        "v1.VulnerabilitySeries": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "total_critical_fixed": {
+                    "type": "integer"
+                },
+                "total_fixed": {
+                    "type": "integer"
+                },
+                "total_risk_points_reduced": {
+                    "type": "number"
                 }
             }
         }

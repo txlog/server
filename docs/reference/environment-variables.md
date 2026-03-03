@@ -30,7 +30,7 @@ Configuration reference for Txlog Server.
 | `OIDC_CLIENT_ID` | No | Client ID from provider. |
 | `OIDC_CLIENT_SECRET` | No | Client Secret from provider. |
 | `OIDC_REDIRECT_URL` | No | Callback URL (must match provider config). |
-| `OIDC_SKIP_TLS_VERIFY`| No | Set `true` to skip TLS checks (dev only). |
+| `OIDC_SKIP_TLS_VERIFY` | No | Set `true` to skip TLS checks (dev only). |
 
 ## Authentication (LDAP)
 
@@ -53,3 +53,4 @@ Configuration reference for Txlog Server.
 | `CRON_RETENTION_DAYS` | `7` | Days to keep execution history. |
 | `CRON_RETENTION_EXPRESSION` | `0 2 * * *` | Cron schedule for cleanup job. |
 | `CRON_STATS_EXPRESSION` | `0 * * * *` | Cron schedule for statistics calculation. |
+| `CRON_OSV_EXPRESSION` | `0 4 * * *` | Cron schedule for the OSV vulnerability data sync. |

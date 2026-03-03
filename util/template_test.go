@@ -603,7 +603,7 @@ func TestTimeStatusClass(t *testing.T) {
 		{
 			name:     "nil time",
 			input:    nil,
-			expected: "status-dot status-red",
+			expected: "w-2 h-2 rounded-full bg-txlog-coral flex-shrink-0",
 		},
 		{
 			name: "less than 24 hours - 1 hour ago",
@@ -611,7 +611,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-1 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-dot-animated status-green",
+			expected: "w-2 h-2 rounded-full bg-txlog-leaf animate-pulse flex-shrink-0",
 		},
 		{
 			name: "less than 24 hours - 23 hours ago",
@@ -619,7 +619,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-23 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-dot-animated status-green",
+			expected: "w-2 h-2 rounded-full bg-txlog-leaf animate-pulse flex-shrink-0",
 		},
 		{
 			name: "exactly 24 hours ago",
@@ -627,7 +627,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-24 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-yellow",
+			expected: "w-2 h-2 rounded-full bg-txlog-golden flex-shrink-0",
 		},
 		{
 			name: "between 24 hours and 15 days - 2 days ago",
@@ -635,7 +635,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-48 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-yellow",
+			expected: "w-2 h-2 rounded-full bg-txlog-golden flex-shrink-0",
 		},
 		{
 			name: "between 24 hours and 15 days - 14 days ago",
@@ -643,7 +643,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-14 * 24 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-yellow",
+			expected: "w-2 h-2 rounded-full bg-txlog-golden flex-shrink-0",
 		},
 		{
 			name: "exactly 15 days ago",
@@ -651,7 +651,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-15 * 24 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-red",
+			expected: "w-2 h-2 rounded-full bg-txlog-coral flex-shrink-0",
 		},
 		{
 			name: "more than 15 days - 30 days ago",
@@ -659,7 +659,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-30 * 24 * time.Hour)
 				return &t
 			}(),
-			expected: "status-dot status-red",
+			expected: "w-2 h-2 rounded-full bg-txlog-coral flex-shrink-0",
 		},
 		{
 			name: "recent - 5 minutes ago",
@@ -667,7 +667,7 @@ func TestTimeStatusClass(t *testing.T) {
 				t := now.Add(-5 * time.Minute)
 				return &t
 			}(),
-			expected: "status-dot status-dot-animated status-green",
+			expected: "w-2 h-2 rounded-full bg-txlog-leaf animate-pulse flex-shrink-0",
 		},
 	}
 

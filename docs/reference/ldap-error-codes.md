@@ -4,7 +4,8 @@
 
 ### 🔍 What does it mean?
 
-The error **"LDAP Result Code 32: No Such Object"** means that the LDAP server **could not find the object** (user, group, or DN) you are trying to access. It is like looking for a file that does not exist in a directory.
+The error **"LDAP Result Code 32: No Such Object"** means that the LDAP server **could not find the object**
+(user, group, or DN) you are trying to access. It is like looking for a file that does not exist in a directory.
 
 ### 📍 Where Can It Occur?
 
@@ -182,7 +183,7 @@ time=... level=ERROR msg="LDAP search failed: LDAP Result Code 32 \"No Such Obje
 The logs show which operation failed:
 
 | Log Message | Incorrect DN | .env Variable |
-|-------------|--------------|---------------|
+| --- | --- | --- |
 | "LDAP user search: baseDN=..." | Base DN | `LDAP_BASE_DN` |
 | "Binding with service account: ..." | Bind DN | `LDAP_BIND_DN` |
 | "LDAP search failed: ... filter=(uid=...)" | Base DN | `LDAP_BASE_DN` |
@@ -410,7 +411,7 @@ make run
 ## 📊 LDAP Codes Summary Table
 
 | Code | Name | Meaning | Common Solution |
-|------|------|---------|-----------------|
+| --- | --- | --- | --- |
 | 0 | Success | Operation successful | N/A |
 | 32 | No Such Object | DN does not exist | Check DNs in .env |
 | 34 | Invalid DN Syntax | Incorrect DN format | Check commas and format |

@@ -56,10 +56,21 @@
               <div class="flex items-start justify-between gap-3">
                 <h4 class="font-semibold">{{ .Version }}<span class="text-txlog-indigo/50">-{{ .Release }}-{{ .Arch
                     }}</span></h4>
-                <a href="javascript:loadPackageAssets('{{ $.name }}', '{{ .Version }}', '{{ .Release }}')"
-                  class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors flex items-center gap-1">
-                  List assets <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
-                </a>
+                <div class="flex items-center gap-2">
+                  {{ if gt (len .Vulnerabilities) 0 }}
+                    <span class="bg-txlog-coral text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <i data-lucide="shield-alert" class="w-3 h-3"></i> {{ len .Vulnerabilities }} Vulns
+                    </span>
+                  {{ else }}
+                    <span class="bg-txlog-leaf text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <i data-lucide="shield-check" class="w-3 h-3"></i> Safe
+                    </span>
+                  {{ end }}
+                  <a href="javascript:loadPackageAssets('{{ $.name }}', '{{ .Version }}', '{{ .Release }}', [{{ range $i, $v := .Vulnerabilities }}{{ if $i }}, {{ end }}'{{ $v }}'{{ end }}])"
+                    class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors flex items-center gap-1">
+                    List assets <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                  </a>
+                </div>
               </div>
               <p class="text-sm text-txlog-indigo/60 mt-1">
                 <strong>Repo:</strong> {{ .Repo }}<br />
@@ -87,6 +98,7 @@
           <h3 class="font-display font-semibold text-lg">Assets running version <kbd id="version-display"
               class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">loading...</kbd></h3>
         </div>
+        <div id="vulns-container" class="hidden"></div>
         <div id="assets-table-container">
           <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -116,7 +128,7 @@
 
       <script>
         var isLoadingAssets = false;
-        function loadPackageAssets(packageName, version, release) {
+        function loadPackageAssets(packageName, version, release, vulns) {
           if (isLoadingAssets) return;
           isLoadingAssets = true;
           var tableCard = document.getElementById('table-assets');
@@ -126,6 +138,21 @@
           var assetsTableContainer = document.getElementById('assets-table-container');
           var emptyStateContainer = document.getElementById('empty-state-container');
           var emptyStateSubtitle = document.getElementById('empty-state-subtitle');
+          var vulnsContainer = document.getElementById('vulns-container');
+
+          if (vulns && vulns.length > 0) {
+            var vulnsHtml = '<div class="px-6 py-4 bg-txlog-coral/5 border-b border-txlog-coral/20"><h4 class="font-semibold text-txlog-coral text-sm mb-3 flex items-center gap-1.5"><i data-lucide="shield-alert" class="w-4 h-4"></i> Known Vulnerabilities (' + vulns.length + ')</h4><div class="flex flex-wrap gap-2">';
+            vulns.forEach(function(v) {
+                vulnsHtml += '<a href="https://osv.dev/vulnerability/' + v + '" target="_blank" class="bg-white hover:bg-txlog-coral/10 text-txlog-coral text-xs font-mono px-2 py-1 rounded border border-txlog-coral/30 hover:border-txlog-coral transition-colors flex items-center gap-1">' + v + ' <i data-lucide="external-link" class="w-2.5 h-2.5"></i></a>';
+            });
+            vulnsHtml += '</div></div>';
+            vulnsContainer.innerHTML = vulnsHtml;
+            vulnsContainer.classList.remove('hidden');
+          } else {
+            vulnsContainer.innerHTML = '';
+            vulnsContainer.classList.add('hidden');
+          }
+
           var displayVersion = version + '-' + release;
           versionDisplay.textContent = displayVersion;
           tableCard.classList.remove('hidden');
@@ -168,6 +195,7 @@
             .finally(function () {
               document.getElementById('table-placeholder').classList.add('hidden');
               isLoadingAssets = false;
+              if (window.lucide) window.lucide.createIcons();
             });
         }
       </script>

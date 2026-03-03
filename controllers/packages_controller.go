@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	logger "github.com/txlog/server/logger"
@@ -402,11 +403,21 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
         ti.release,
         ti.arch,
         ti.repo,
-        MAX(t.end_time) AS last_seen
+        MAX(t.end_time) AS last_seen,
+        COALESCE(string_agg(DISTINCT pv.vulnerability_id, ','), '') AS vulns
       FROM
         public.transaction_items AS ti
       JOIN
         public.transactions AS t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
+      JOIN
+        public.assets AS a ON t.machine_id = a.machine_id AND t.hostname = a.hostname
+      LEFT JOIN
+        public.package_vulnerabilities AS pv ON ti.package = pv.package_name AND ti.version = pv.version
+         AND (
+             (a.os ILIKE '%AlmaLinux%' AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
+             (a.os ILIKE '%Rocky%' AND pv.ecosystem = 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
+             ((a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%') AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+'))
+         )
       WHERE
         ti.package = $1
       AND ti.repo != '@System'
@@ -434,6 +445,7 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
 		packageNames := []models.PackageListing{}
 		for rows.Next() {
 			var packageName models.PackageListing
+			var vulns string
 			err := rows.Scan(
 				&packageName.Package,
 				&packageName.Version,
@@ -441,6 +453,7 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
 				&packageName.Arch,
 				&packageName.Repo,
 				&packageName.LastSeen,
+				&vulns,
 			)
 			if err != nil {
 				logger.Error("Error iterating packages:" + err.Error())
@@ -448,6 +461,9 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
 					"error": err.Error(),
 				})
 				return
+			}
+			if vulns != "" {
+				packageName.Vulnerabilities = strings.Split(vulns, ",")
 			}
 			packageNames = append(packageNames, packageName)
 		}

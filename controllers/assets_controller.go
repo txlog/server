@@ -408,7 +408,10 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
         actions,
         altered,
         "user",
-        command_line
+        command_line,
+        COALESCE(is_security_patch, false),
+        COALESCE(vulns_fixed, 0),
+        COALESCE(max_severity_fixed, '')
       FROM public.transactions
       WHERE machine_id = $1
       ORDER BY transaction_id DESC
@@ -433,6 +436,9 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 				&transaction.Altered,
 				&transaction.User,
 				&transaction.CommandLine,
+				&transaction.IsSecurityPatch,
+				&transaction.VulnsFixed,
+				&transaction.MaxSeverityFixed,
 			)
 			if err != nil {
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{

@@ -43,12 +43,15 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 			apiKeys = []models.ApiKey{}
 		}
 
+		osvIsRunning := GetCronLockStatus(db, "vulnerabilities")
+
 		c.HTML(http.StatusOK, "admin.html", gin.H{
-			"Context":    c,
-			"title":      "Administration - Txlog Server",
-			"users":      users,
-			"migrations": migrationStatus,
-			"apiKeys":    apiKeys,
+			"Context":      c,
+			"title":        "Administration - Txlog Server",
+			"users":        users,
+			"migrations":   migrationStatus,
+			"apiKeys":      apiKeys,
+			"osvIsRunning": osvIsRunning,
 		})
 	}
 }
@@ -200,6 +203,74 @@ func PostAdminForceCleanMigration(db *sql.DB) gin.HandlerFunc {
 
 		logger.Info("Database migration forced to clean state via admin panel")
 		c.Redirect(http.StatusSeeOther, "/admin?migration_success=1")
+	}
+}
+
+// GetCronLockStatus retrieves the boolean status of a lock record.
+func GetCronLockStatus(db *sql.DB, lockName string) bool {
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM cron_lock WHERE job_name = $1", lockName).Scan(&count)
+	if err != nil {
+		logger.Error("Failed to check cron lock status for " + lockName + ": " + err.Error())
+		return false
+	}
+	return count > 0
+}
+
+// PostAdminRunOSVUpdate manually triggers the OSV sync task.
+func PostAdminRunOSVUpdate(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Import scheduler locally just to run the background job asynchronously
+		importSchedulerFunc()
+
+		c.Redirect(http.StatusSeeOther, "/admin?osv_update_started=1")
+	}
+}
+
+// PostAdminResetOSV clears all vulnerability data and recompiles scoreboards
+func PostAdminResetOSV(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		query := `
+			TRUNCATE TABLE package_vulnerabilities;
+			TRUNCATE TABLE vulnerabilities CASCADE;
+			UPDATE transactions SET
+				vulns_fixed = 0, vulns_introduced = 0,
+				critical_vulns_fixed = 0, critical_vulns_introduced = 0,
+				high_vulns_fixed = 0, high_vulns_introduced = 0,
+				medium_vulns_fixed = 0, medium_vulns_introduced = 0,
+				low_vulns_fixed = 0, low_vulns_introduced = 0,
+				risk_score_mitigated = 0, is_security_patch = false;
+			DELETE FROM cron_lock WHERE job_name = 'vulnerabilities';
+		`
+		_, err := db.Exec(query)
+		if err != nil {
+			logger.Error("Failed to reset vulnerabilities database: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Database Error",
+				"error": "Failed to reset vulnerabilities database: " + err.Error(),
+			})
+			return
+		}
+
+		importSchedulerFunc()
+
+		c.Redirect(http.StatusSeeOther, "/admin?osv_reset_started=1")
+	}
+}
+
+// Wrapper local para instanciar função sem ciclio cruzado (em go é melhor expor uma funçao wrapper global se dependencias cruzarem ou canal de channel porem aqui podemos simular a task chamando async via goroutine na camada de route, o melhor design).
+var schedulerOSVTrigger func()
+
+// SetSchedulerOSVTrigger injeta do pacote pai a funçao de trigger (evitando cycle).
+func SetSchedulerOSVTrigger(f func()) {
+	schedulerOSVTrigger = f
+}
+
+func importSchedulerFunc() {
+	if schedulerOSVTrigger != nil {
+		go schedulerOSVTrigger()
+	} else {
+		logger.Error("OSV Update wrapper not statically assigned.")
 	}
 }
 

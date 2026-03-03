@@ -71,7 +71,7 @@ LDAP_GROUP_FILTER=(memberUid=%s)
 ## Environment Variable Reference
 
 | Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
+| --- | --- | --- | --- |
 | `LDAP_HOST` | Yes | - | LDAP server hostname |
 | `LDAP_PORT` | No | 389/636 | LDAP server port |
 | `LDAP_USE_TLS` | No | false | Enable TLS connection |

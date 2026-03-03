@@ -156,3 +156,70 @@ func getTotalActiveAssetsForReport(database *sql.DB) (int, error) {
 
 	return count, nil
 }
+
+type VulnerabilitySeries struct {
+	Date                   string  `json:"date"`
+	TotalFixed             int     `json:"total_fixed"`
+	TotalCriticalFixed     int     `json:"total_critical_fixed"`
+	TotalRiskPointsReduced float64 `json:"total_risk_points_reduced"`
+}
+
+// GetFixedVulnerabilities Get time-series data for fixed vulnerabilities
+//
+//	@summary		Get vulnerability mitigation metrics over time
+//	@description	Returns daily aggregated data on vulnerabilities fixed by transactions
+//	@tags			reports
+//	@produce		json
+//	@param			days	query		int	false	"Number of days to look back (default 30)"
+//	@success		200		{array}		VulnerabilitySeries
+//	@failure		500		{object}	map[string]string	"Internal server error"
+//	@router			/v1/reports/fixed-vulnerabilities [get]
+//	@security		ApiKeyAuth
+func GetFixedVulnerabilities(database *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		daysStr := c.Query("days")
+		days := 30
+		if daysStr != "" {
+			if d, err := strconv.Atoi(daysStr); err == nil && d > 0 {
+				days = d
+			}
+		}
+
+		query := `
+		SELECT
+		    DATE_TRUNC('day', end_time) as date,
+		    SUM(vulns_fixed) as total_fixed,
+		    SUM(critical_vulns_fixed) as total_critical_fixed,
+		    SUM(risk_score_mitigated) as total_risk_points_reduced
+		FROM transactions
+		WHERE end_time >= NOW() - INTERVAL '1 day' * $1
+          AND vulns_fixed > 0
+		GROUP BY DATE_TRUNC('day', end_time)
+		ORDER BY date ASC
+		`
+		rows, err := database.Query(query, days)
+		if err != nil {
+			logger.Error("Error getting vulnerability series: " + err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query vulnerabilities series"})
+			return
+		}
+		defer rows.Close()
+
+		var series []VulnerabilitySeries
+		for rows.Next() {
+			var s VulnerabilitySeries
+			var date string
+			if err := rows.Scan(&date, &s.TotalFixed, &s.TotalCriticalFixed, &s.TotalRiskPointsReduced); err != nil {
+				continue
+			}
+			s.Date = date[:10]
+			series = append(series, s)
+		}
+
+		if series == nil {
+			series = []VulnerabilitySeries{}
+		}
+
+		c.JSON(http.StatusOK, series)
+	}
+}

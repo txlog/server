@@ -31,6 +31,12 @@ func StartScheduler() {
 	ctab.MustAddJob("0 * * * *", latestVersionJob)
 	ctab.MustAddJob("*/5 * * * *", refreshMaterializedViewsJob)
 
+	cronOsv := os.Getenv("CRON_OSV_EXPRESSION")
+	if cronOsv == "" {
+		cronOsv = "0 4 * * *"
+	}
+	ctab.MustAddJob(cronOsv, UpdateVulnerabilitiesJob)
+
 	latestVersionJob()            // Run for the first time
 	refreshMaterializedViewsJob() // Run for the first time
 	logger.Info("Scheduler: started.")
@@ -220,6 +226,13 @@ func housekeepingJob() {
 //   - bool: true if the lock was acquired, false if it already exists
 //   - error: An error object if the database operation fails
 func acquireLock(lockName string) (bool, error) {
+	// First, prevent a distributed deadlock due to a crashed instance by cleaning up
+	// locks older than 12 hours. We assume jobs don't take this long.
+	_, err := database.Db.Exec(`DELETE FROM cron_lock WHERE job_name = $1 AND locked_at < NOW() - INTERVAL '12 hours'`, lockName)
+	if err != nil {
+		logger.Error("Failed to clean up stale lock for " + lockName + ": " + err.Error())
+	}
+
 	res, err := database.Db.Exec(`INSERT INTO cron_lock (job_name, locked_at) VALUES ($1, NOW()) ON CONFLICT (job_name) DO NOTHING`, lockName)
 	if err != nil {
 		return false, err

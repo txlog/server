@@ -66,6 +66,7 @@ PGSQL_SSLMODE=disable
 CRON_RETENTION_DAYS=7
 CRON_RETENTION_EXPRESSION=0 2 * * *
 CRON_STATS_EXPRESSION=0 * * * *
+CRON_OSV_EXPRESSION=0 4 * * *
 ```
 
 > **Note**: We set `PGSQL_SSLMODE=disable` because the standard Postgres Docker image does not have SSL configured by default.

@@ -60,6 +60,7 @@ docker run -d -p 8080:8080 \
   -e CRON_RETENTION_DAYS=7 \
   -e CRON_RETENTION_EXPRESSION=0 2 * * * \
   -e CRON_STATS_EXPRESSION=0 * * * * \
+  -e CRON_OSV_EXPRESSION=0 4 * * * \
   ghcr.io/txlog/server:main
 ```
 
@@ -123,6 +124,8 @@ spec:
           value: 0 2 * * *
         - name: CRON_STATS_EXPRESSION
           value: 0 * * * *
+        - name: CRON_OSV_EXPRESSION
+          value: 0 4 * * *
 ```
 
 If you want to use a production (stable) version, replace `main` by the version
@@ -256,6 +259,7 @@ PGSQL_SSLMODE=require
 CRON_RETENTION_DAYS=1
 CRON_RETENTION_EXPRESSION=0 2 * * *
 CRON_STATS_EXPRESSION=0 * * * *
+CRON_OSV_EXPRESSION=0 4 * * *
 
 # OIDC Authentication (Optional)
 OIDC_ISSUER_URL=https://id.example.com
@@ -363,7 +367,6 @@ The server will run at <http://localhost:8080> and the Swagger docs at
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
-
 
 ## License
 

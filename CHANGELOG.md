@@ -33,6 +33,10 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Implement explicit administration endpoints to instantly trigger OSV re-fetch or complete
   vulnerability database rebuilds via the Admin UI.
 
+### Removed
+
+- Remove Package Comparison, Package Freshness, and Package Adoption endpoints, templates, and API functions.
+
 ## [1.23.2] - 2026-02-23
 
 ### Changed

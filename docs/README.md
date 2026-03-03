@@ -32,7 +32,7 @@ Welcome to the Txlog Server documentation. This documentation is divided into fo
 
 #### Reports
 
-- **[Use Reports Features](how-to/use-reports.md)**: Compare packages, analyze freshness, track adoption, detect anomalies.
+- **[Detect Transaction Anomalies](how-to/detect-anomalies.md)**: Detect and manage unusual transactions.
 
 #### Development
 

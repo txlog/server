@@ -1,93 +1,67 @@
 # Relatório de Pesquisa: Txlog Server
 
-## 1. Visão Geral do Projeto
+## 1. Visão Geral
+O **Txlog Server** é o sistema centralizado do ecossistema Txlog, projetado para receber, armazenar e analisar dados de log de transações de gerenciadores de pacotes (como YUM e DNF) enviados por **Agentes Txlog** instalados em diversos servidores (assets). O sistema provê uma plataforma unificada para auditoria, controle de atualizações, análise de segurança e monitoramento de frota (infraestrutura) baseada em sistemas operacionais RPM-based, em sua maior parte (AlmaLinux, Rocky Linux, Red Hat, etc.).
 
-O **Txlog Server** é o servidor central projetado para receber, armazenar e relatar dados enviados por instâncias
-do "Txlog Agent". Ele atua como uma central analítica e de monitoramento de infraestrutura, com foco elementar
-no rastreamento de operações de gerenciamento de pacotes (instalações, atualizações, remoções) e no estado geral
-das execuções sistêmicas das máquinas conectadas de um ambiente distribuído.
+## 2. Arquitetura e Tecnologias
+Construído para ser eficiente e portável, as principais tecnologias do projeto incluem:
+- **Linguagem:** Go (Golang) com o framework web **Gin** (`github.com/gin-gonic/gin`).
+- **Banco de Dados:** PostgreSQL (`lib/pq`), utilizando raw queries e transações. O banco faz uso de **Materialized Views** e VIEWS complexas para calcular agregações de desempenho e painéis (dashboards).
+- **Frontend / Interface do Usuário:** Server-Side Rendering (SSR) utilizando as templates HTML padrão do Go (`html/template`) integradas com **Tailwind CSS**. A build do Tailwind é gerada via CLI standalone para evitar a necessidade do Node.js no ambiente de produção.
+- **Autenticação Flexível:** Implementação dual de provedores, suportando simultaneamente ou individualmente **OIDC (OpenID Connect)** e **LDAP / Active Directory**.
+- **Agendador Integrado (Scheduler):** Gerencia tarefas periódicas como cron jobs, utilizando a biblioteca `crontab` em memória com suporte a _locks_ distribuídos no banco para evitar conflitos de execução em cenários Multi-Pod (Kubernetes).
+- **Documentação da API:** Gerada via Swagger / Swaggo.
 
-## 2. Arquitetura Técnica e Tecnologias Base
+## 3. Estrutura de Diretórios
+O código do servidor segue um padrão MVC e está muito bem organizado nas seguintes pastas principais:
+- `auth/`: Implementa toda a lógica dos provedores OIDC e LDAP, mapeando grupos, criando sessões de usuários e integrando metadados de identidade ao banco de dados interno de usuários do sistema.
+- `controllers/`: Gerencia todas as rotas (HTTP/REST) do sistema.
+  - O subdiretório `api/v1/` contém a API exposta para consumo pelo _Txlog Agent_.
+  - A raiz desta pasta gerencia as visualizações e interações visuais via navegador, desde os dashboards até telas de admin e analíticas.
+- `database/`: Conexões com o banco PostgreSQL e seus "migrations" escritos puramente em arquivos `.sql` (`.up.sql` e `.down.sql`).
+- `models/`: Definições das entidades fundamentais do sistema (`Transaction`, `TransactionItem`, `Execution`, `User`, `Asset`, `Vulnerability`). Contém também a lógica avançada para inserções como o mecanismo `AssetManager`.
+- `scheduler/`: Responsável pelos "Cron Jobs" de limpeza (housekeeping), estatísticas, atualização de Vulnerabilidades (OSV) e atualização do Materialized Views de performance.
+- `middleware/`: Interceptadores do Gin (ex: injeção de variáveis de ambiente nas requests, middlewares de Autenticação LDAP/OIDC, autorização de API Keys para Agentes e Admin).
+- `util/`: Funções utilitárias abrangentes, formatadores para a View, e comunicação de requisições de API para a base de vulnerabilidades OSV.
+- `templates/` e `static/`: Contêm quase toda a casca visual da aplicação, HTMLs com _Tailwind classes_ e pequenos pedaços de CSS.
 
-- **Linguagem**: O servidor é desenvolvido inteiramente em Go (Golang).
-- **Framework Web**: Utiliza o framework `gin-gonic/gin` para expor duas frentes: a API RESTful e o
-  portal/dashboard Web iterativo.
-- **Banco de Dados**: Depende de um banco transacional PostgreSQL, cujo acesso é orquestrado através do pacote
-  puro `lib/pq` (`database/sql`). Traz consigo um motor embutido (`golang-migrate/migrate/v4`) que realiza a
-  análise e a imposição automatizada do esquema de dados a cada inicialização via Scripts SQL.
-- **Frontend**: Não é uma SPA tipica (Single Page Application, Ex: React). Pelo contrário, adota a poderosa engine
-  Server-Side do Go (`html/template`) para processar e renderizar as visões utilizando a pasta `templates/`. O
-  **Tailwind CSS** suporta o visual das estruturas HTML geradas usando um build via executável standalone.
-- **Portabilidade Total**: Arquivos estáticos essenciais, como CSS, Imagens, arquivos HTML (templates) e até mesmo
-  migrações de banco em SQL, são todos compilados para dentro do binário resultante por intermédio da biblioteca
-  `embed.FS` nativa. Isto gera um executável agnóstico e independente do host, perfeito para Docker e Kubernetes.
+## 4. Fluxo de Dados e Funcionalidades Core
 
-## 3. Modelos de Dados (Entidades do Domínio)
+### Máquinas (Assets)
+Qualquer máquina comunicando-se com o Txlog reporta o `MachineID`, `Hostname` e o SO (ex: AlmaLinux 9). O servidor realiza Upserts registrando o momento em que a máquina "foi vista pela última vez" e se ela precisa de "reinicialização" (Needs Restarting) em decorrência de eventos como updates de kernel constatados pelo agente na ponta.
 
-Ao analisar o pacote `models`, identificam-se de imediato os artefatos de controle chave:
+### Execuções (Executions)
+Representam as submissões periódicas de log que os agentes reportam, sejam elas acompanhadas ou não de pacotes recém-instalados. Servem como heartbeat avançado informando versão do agente, sistema operacional exato daquele payload da máquina e quaisquer erros que ocorreram do lado do agente.
 
-- **Assets (Máquinas)**: Cadastro e acompanhamento de ponta a ponta dos computadores corporativos (identificados
-  univocamente pelo `MachineID` e `Hostname`). O Server sabe exatamente qual arquitetura, sistema operacional e
-  qual a versão do *agent* está em execução neste Asset.
-- **Transactions**: Agregado macro das ações efetuadas frequentemente por um sistema de repositórios (yum, apt,
-  dnf, zypper). Guarda informações úteis como linha de comando submetida, usuário que autorizou, tempo decorrido,
-  saída padrão de terminal obtida (scriptlet output) e códigos numéricos de retorno do processo.
-- **Transaction Items**: Um detalhamento atômico associado a cada *Transaction*. Para cada requisição de alteração
-  de pacotes feita pela máquina, detalha rigorosamente e rastreia o pacote (Ex: `name`, `version`, `release`,
-  `epoch`, `arch`, `repo`).
-- **Executions**: Um log vitalício reportando os contatos periódicos (pulsações) que o Agente do Txlog propôs ao
-  servidor central. Exibe se houve êxito de contato, a quantidade de remessas e sinaliza bandeiras imperativas,
-  como uma booleana `needs_restarting` provendo o alinhamento de servidores carentes de reboots pendentes.
+### Transações (Transactions) e Pacotes (Transaction Items)
+O coração do problema resolvido pelo Txlog. Cada instalação/remoção feita no pacote (via comando dnf upgrade, por exemplo) gera uma "Transação", cujo detalhes salvam:
+- Ação executada (Instalação, Downgrade, Erase, Upgrade).
+- Usuário que comandou e a linha de comando original efetuada.
+- Código de retorno.
+- Detalhes (itens) pacote por pacote (Nome, Versão, Repositório e Arquitetura).
+Essa agregação ajuda a manter os audit logs da infraestrutura visíveis dentro de sua totalidade.
 
-## 4. Endpoints e Interface do Usuário (UI/API)
+### Motor de Vulnerabilidades (Security / OSV)
+O sistema possui uma engine de segurança que correlaciona de forma cruzada as "Transações" das máquinas com o banco de dados global público de vulnerabilidades de código aberto do Google OSV (Open Source Vulnerability).
+Quando há um _Upgrade_:
+- O `scheduler` em background consulta cada pacote e versão recém-aplicada mapeando contra o "ecossistema" do Linux.
+- Recupera-se a pontuação CVSS e gravidade (Low, Medium, High, Critical) da vulnerabilidade.
+- Calcula-se então, numa métrica denominada "Scoreboard", qual foi o Risco Mitigado (`risk_score_mitigated`) com aquela atualização de pacote, mostrando ao sysadmin relatórios de pacotes corrigidos (Vulns Fixed) ou introduzidos por downgrade.
 
-- **Módulo Administrador & Relatórios (Visualização)**: Injetado por funções customizadas Go Template (Ex:
-  transformações visuais `formatDateTime`, `timeStatusClass`), e hospedadas nas rotas limpas do gin (`/` index,
-  `/assets`, `/packages`, e as telas complexas analíticas como `/analytics/compare`, `adoption`, `freshness`).
-- **Módulo de Ingestão (`/v1`)**: Com proteção garantida por uma autorização com validade cruzada com API Key
-  Middleware, esses canais servem inteiramente aos Txlog Agents. Destaques aos pontos focais `POST /v1/transactions`
-  (que inclusive cadastra as transações já ligadas de maneira segura através de transações atômicas `tx.Begin()`
-  com *Rollback*) e `POST /v1/executions`.
+## 5. Rotinas Automatizadas (Scheduler)
+As rotinas funcionam utilizando _locks distríbuidos_ via Postgres inserindo linhas em uma tabela `cron_lock` para garantir que apenas um container servidor em um cluster executará o job.
+As tarefas incluem:
+- **housekeepingJob:** Limpeza configurável de Execuções e pacotes "órfãos" (por inatividade prolongada de máquinas desativadas) dependente do valor `CRON_RETENTION_DAYS`.
+- **statsJob:** Contabilização massiva do número de execuções mensais, quantidade de pacotes modificados, para facilitar e deixar veloz a renderização diária.
+- **UpdateVulnerabilitiesJob:** Sincronização batch com a API externa da base OSV periodicamente de acordo com a regra CRON (`CRON_OSV_EXPRESSION`). Subdivide em pedaços (Chunks) e faz a ingestão das correções e "score" de vulnerabilidades do pacote.
+- **refreshMaterializedViewsJob:** Recalcula visualizações materializadas das queries que sustentam o endpoint e interface de Dashboard de Pacotes.
 
-## 5. Autenticação e Segurança Multinível
+## 6. Autenticação e Segurança da API
+Por padrão, o Txlog Server roda **sem autenticação** liberando todo o consumo (inclusive para leitura), porém ele embute as bibliotecas do **OAuth2 / OIDC** e o pacote **go-ldap** de Active Directory.
+Uma vez providenciado os `.envs` como `LDAP_HOST` ou `OIDC_CLIENT_ID`, o sistema:
+1. "Trava" a Web Interface, exigindo login.
+2. Intercepta requests para os endpoints `/v1/` através de `APIKeyAuth` via Headers com API Keys auto-geradas a nível de banco de dados, sendo essa a única maneira dos "Agents" continuarem efetuando suas postagens (reports). Diferentemente da Interface Web que passa a aceitar Cookies de Sessão criados no banco de dados providos por `CreateUserSession`.
+O serviço de LDAP faz parse das permissões via `LDAP_ADMIN_GROUP` ou `LDAP_VIEWER_GROUP` definindo qual o escopo (is_admin) do usuário no portal.
 
-A aplicação suporta múltiplos conectores para segurança e autorização de interfaces.
-
-1. **Nativo/Tratamento Indiferenciado**: Opcionalmente funcional para ambientes locais sem requisitos extras.
-2. **OIDC (OpenID Connect)**: Integração e permissibilidade atrelada a provedores de terceiros modernos OAuth.
-3. **LDAP**: Módulo extensivo customizado a se ligar aos serviços complexos do Active Directory/OpenLDAP visando
-   autorizar o corpo funcional de uma empresa na adoção deste painel. Permite consultas elaboradas baseadas unicamente
-   em Filtros (`LDAP_USER_FILTER`, `LDAP_GROUP_FILTER`) e distingue Grupos Administrativos de Grupos de Leitura.
-
-*Agentes requerem chaves de API restritas vinculadas via interface administrativa que valida todas as entradas
-aos endpoints `/v1/`.*
-
-## 6. Agendador Background (Subsistema Scheduler)
-
-Hospedado de forma nativa pela biblioteca Cron `github.com/mileusna/crontab` atuante de maneira perptenua em
-sua goroutine isolada:
-
-- **`housekeepingJob`**: Job empenhado rotineiramente a higienizar o banco logístico, purgando do sistema as
-  execuções antigas sob uma regra regida por ambiente (`CRON_RETENTION_DAYS`), varrendo registros e
-  `transaction_items` orfãos cujas máquinas repousam por 90+ dias na condição inoperante.
-- **`refreshMaterializedViewsJob`**: Como lidamos com logs agressivos de transações, este processo executa um
-  `REFRESH MATERIALIZED VIEW CONCURRENTLY` com constância máxima (5 minutos). Ele atualiza caches precomputados e
-  pré-paginados relativas a dashboards (`mv_package_listing`, `mv_dashboard_agent_stats`, etc.), tirando o impacto
-  da agregação em tempo real do banco na hora exata em que o cliente dá F5 na aba de relatórios.
-- **`statsJob` e `latestVersionJob`**: Ocupam-se, respectivamente, da coleta de estatísticas demográficas de
-  instalações dos últimos 30 dias na base PostgreSQL e da verificação pública, na URL corporativa externa, de qual o
-  último versionamento global suportado pelo `txlog-agent`.
-
-*Detalhe de alta resiliência: Devido à possível implantação paralela em Nuvem/Kubernetes com várias cópias do
-Server (Replicas>1), os cron jobs estão amparados por um **Distributed Lock** amarrado às tabelas de PostgreSQL
-(`cron_lock`), assegurando que duas ou mais instâncias gêmeas nunca disparam as manutenções perigosas em horários
-sobrepostos.*
-
-## 7. Conclusões e Destaques Importantes
-
-A robustez identificada sublinha um projeto idealizado com padrões sólidos de produção. A performance via
-**Materialized Views Concorrentes** com um limite engessado (`SetMaxOpenConns` em 25 posições máximas de
-conexão) comprova uma arquitetura feita num pilar de performance antecipada à *Storms* massivos de eventos emitidos
-subitamente por todos os relatórios de ativos nas redes locais. Ademais, a portabilidade impulsionada pelo `embed`
-unida aos scripts prontos e visões acentuam ser uma proposta que prioriza a "facilidade do deploy na linha
-de chegada" para DevOps Administrators.
+## Conclusão
+O **Txlog Server** é uma base madura, extremamente acoplada em eficiência via goroutines e sem "bloat" de dependências de frontend. O software concentra a complexidade nas interações com PostgreSQL e abstrai com maestria a união do *gerenciamento de inventário de máquinas*, *auditoria de comandos DNF* e a *consciência cibernética (Vulnerability Risk Assessment)* do pacote de maneira consolidada para o Administrador de Sistemas de plataforma Linux.

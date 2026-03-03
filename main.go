@@ -189,9 +189,6 @@ func main() {
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 
 	// Analytics pages
-	r.GET("/analytics/compare", controllers.GetAnalyticsCompare(database.Db))
-	r.GET("/analytics/freshness", controllers.GetAnalyticsFreshness(database.Db))
-	r.GET("/analytics/adoption", controllers.GetAnalyticsAdoption(database.Db))
 	r.GET("/analytics/anomalies", controllers.GetAnalyticsAnomalies(database.Db))
 	r.GET("/analytics/security", controllers.GetAnalyticsSecurity(database.Db))
 
@@ -225,9 +222,6 @@ func main() {
 
 		// Reports endpoints
 		v1Group.GET("/reports/monthly", v1API.GetMonthlyReport(database.Db))
-		v1Group.GET("/reports/compare-packages", v1API.ComparePackages(database.Db))
-		v1Group.GET("/reports/package-freshness", v1API.GetPackageFreshness(database.Db))
-		v1Group.GET("/reports/package-adoption", v1API.GetPackageAdoption(database.Db))
 		v1Group.GET("/reports/anomalies", v1API.GetAnomalies(database.Db))
 		v1Group.GET("/reports/fixed-vulnerabilities", v1API.GetFixedVulnerabilities(database.Db))
 

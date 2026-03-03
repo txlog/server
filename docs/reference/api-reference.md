@@ -48,9 +48,6 @@ the Swagger UI at `/swagger/index.html`.
 | Method | Path | Description | Query Params |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/reports/monthly` | Monthly package update report. | `month`, `year` |
-| `GET` | `/reports/compare-packages` | Compare packages across assets. | `machine_ids` (Required, comma-separated, 2-20) |
-| `GET` | `/reports/package-freshness` | Analyze package version ages. | `machine_id`, `limit` (1-500) |
-| `GET` | `/reports/package-adoption` | Report package adoption rates. | `limit` (1-500), `min_assets` |
 | `GET` | `/reports/anomalies` | Detect unusual transaction patterns. | `days` (1-90), `severity` (low/medium/high) |
 
 ### System

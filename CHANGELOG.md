@@ -18,20 +18,23 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
-## [Unreleased]
+## [1.24.0] - 2026-03-04
 
 ### Added
 
-- Integrate Open Source Vulnerabilities (OSV) API to fetch real-time vulnerability data for installed
-  Linux packages.
-- Calculate and aggregate synthetic CVSS risk scores, abstracting natural language severity flags
-  (e.g., "Critical", "Important") for packages lacking native metric data.
-- Display "Risk Score Mitigated" and real-time vulnerability statistics (Total Fixed, Critical Fixed,
-  Moderate Fixed) across a new Security Dashboard and transactions detail view.
-- Introduce a comprehensive background caching mechanism handling dual-tier OSV API queries
-  (batch queries coupled with detail fallbacks for truncated payload fields).
-- Implement explicit administration endpoints to instantly trigger OSV re-fetch or complete
-  vulnerability database rebuilds via the Admin UI.
+- Integrate Open Source Vulnerabilities (OSV) API to fetch real-time
+  vulnerability data for installed Linux packages.
+- Calculate and aggregate synthetic CVSS risk scores, abstracting natural
+  language severity flags (e.g., "Critical", "Important") for packages lacking
+  native metric data.
+- Display "Risk Score Mitigated" and real-time vulnerability statistics (Total
+  Fixed, Critical Fixed, Moderate Fixed) across a new Security Dashboard and
+  transactions detail view.
+- Introduce a comprehensive background caching mechanism handling dual-tier OSV
+  API queries (batch queries coupled with detail fallbacks for truncated payload
+  fields).
+- Implement explicit administration endpoints to instantly trigger OSV re-fetch
+  or complete vulnerability database rebuilds via the Admin UI.
 
 ### Removed
 

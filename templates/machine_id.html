@@ -90,11 +90,8 @@
                 <div class="flex items-center gap-2">
                   <kbd class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .TransactionID }}</kbd>
                   {{ if .IsSecurityPatch }}
-                  <span class="bg-txlog-coral text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1 group/badge relative cursor-help">
+                  <span class="bg-txlog-coral text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
                     <i data-lucide="shield-check" class="w-3 h-3"></i> {{ .VulnsFixed }}
-                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover/badge:block bg-txlog-indigo text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-20 font-normal">
-                      Security Patch ({{ .MaxSeverityFixed }})
-                    </div>
                   </span>
                   {{ end }}
                 </div>
@@ -144,8 +141,26 @@
             <td class="px-6 py-3 text-txlog-indigo/40 max-w-[300px]">No command recorded</td>
             {{ end }}
             <td class="px-6 py-3">
-              <a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="#"
-                onclick="showModal('{{ .TransactionID }}')">Details</a>
+              <div class="inline-flex items-stretch rounded-lg border border-txlog-sky/20">
+                <a class="text-txlog-sky text-sm font-medium px-3 py-1 hover:bg-txlog-sky/10 transition-colors flex items-center" href="#"
+                  onclick="event.preventDefault(); showModal('{{ .TransactionID }}')">Details</a>
+                <div class="relative flex">
+                  <button type="button" class="dropdown-toggle text-txlog-sky px-1.5 border-l border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors flex items-center" data-txid="{{ .TransactionID }}" data-has-vulns="{{ .IsSecurityPatch }}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                  </button>
+                  <div class="dropdown-menu hidden absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-txlog-lavender z-30 min-w-[160px]">
+                    {{ if .IsSecurityPatch }}
+                    <button onclick="showVulnsModal('{{ .TransactionID }}'); closeAllDropdowns()" class="w-full text-left px-3 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/20 transition-colors flex items-center gap-2 rounded-lg">
+                      <i data-lucide="shield-check" class="w-3.5 h-3.5 text-txlog-coral"></i> Vulnerabilities
+                    </button>
+                    {{ else }}
+                    <span class="w-full text-left px-3 py-2 text-sm text-txlog-indigo/30 flex items-center gap-2 cursor-not-allowed rounded-lg">
+                      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Vulnerabilities
+                    </span>
+                    {{ end }}
+                  </div>
+                </div>
+              </div>
             </td>
           </tr>
           {{ end }}
@@ -328,6 +343,54 @@
   </div>
 </div>
 
+<div id="modal-vulns" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+  onclick="if(event.target===this)closeModal('modal-vulns')">
+  <div data-modal-panel
+    class="bg-white rounded-3xl shadow-soft max-w-3xl w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between flex-shrink-0">
+      <h5 class="font-display font-semibold text-lg flex items-center gap-2" id="modal-vulns-title">
+        <i data-lucide="shield-check" class="w-5 h-5 text-txlog-coral"></i>
+        Loading...
+      </h5>
+      <button onclick="closeModal('modal-vulns')"
+        class="text-txlog-indigo/40 hover:text-txlog-indigo transition-colors"><i data-lucide="x"
+          class="w-5 h-5"></i></button>
+    </div>
+    <div class="overflow-y-auto flex-1 p-6">
+      <div id="modal-vulns-summary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4"></div>
+      <p id="modal-vulns-explanation" class="hidden text-xs text-txlog-indigo/50 mb-5 leading-relaxed">
+        Each vulnerability (CVE) is counted once, regardless of how many packages it affects.
+        <strong>Fixed</strong> means the vulnerable package version was removed or upgraded.
+        <strong>Introduced</strong> means a package version with known vulnerabilities was installed.
+        Severity data is sourced from the <a href="https://osv.dev" target="_blank" class="text-txlog-sky hover:underline">OSV</a> database.
+      </p>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-txlog-lavender/50 text-left">
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Severity</th>
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">CVE</th>
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Package</th>
+            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
+          </tr>
+        </thead>
+        <tbody id="modal-vulns-body" class="divide-y divide-txlog-lavender/30">
+          <tr>
+            <td colspan="4" class="py-4">
+              <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
+                <div class="h-full bg-txlog-coral rounded-full animate-pulse w-2/3"></div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="border-t border-txlog-lavender px-6 py-4 flex-shrink-0">
+      <button onclick="closeModal('modal-vulns')"
+        class="w-full bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="modal-reason" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
   onclick="if(event.target===this)closeModal('modal-reason')">
   <div data-modal-panel
@@ -381,6 +444,38 @@
     openModal('modal-reason');
   }
 
+  function severityBadge(severity) {
+    var colors = {
+      'CRITICAL': 'bg-txlog-coral text-white',
+      'HIGH': 'bg-txlog-golden text-white',
+      'MEDIUM': 'bg-txlog-sky text-white',
+      'LOW': 'bg-txlog-indigo/20 text-txlog-indigo',
+      'UNKNOWN': 'bg-txlog-indigo/10 text-txlog-indigo/50'
+    };
+    var cls = colors[severity] || colors['UNKNOWN'];
+    return '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded ' + cls + '">' + severity + '</span>';
+  }
+
+  function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.classList.add('hidden'); });
+  }
+
+  document.addEventListener('click', function(e) {
+    var toggle = e.target.closest('.dropdown-toggle');
+    if (toggle) {
+      e.preventDefault();
+      e.stopPropagation();
+      var menu = toggle.closest('.relative').querySelector('.dropdown-menu');
+      var wasHidden = menu.classList.contains('hidden');
+      closeAllDropdowns();
+      if (wasHidden) menu.classList.remove('hidden');
+      return;
+    }
+    if (!e.target.closest('.dropdown-menu')) {
+      closeAllDropdowns();
+    }
+  });
+
   function showModal(transactionId) {
     fetch('/v1/items?machine_id={{ .machine_id }}&transaction_id=' + transactionId)
       .then(function (response) { return response.json(); })
@@ -409,6 +504,54 @@
       .catch(function (error) { console.error('Error:', error); });
     document.getElementById('modal-title').textContent = "Details of transaction #" + transactionId;
     openModal('modal-scrollable');
+  }
+
+  function showVulnsModal(transactionId) {
+    document.getElementById('modal-vulns-title').innerHTML = '<i data-lucide="shield-check" class="w-5 h-5 text-txlog-coral"></i> Loading...';
+    document.getElementById('modal-vulns-summary').innerHTML = '';
+    document.getElementById('modal-vulns-explanation').classList.add('hidden');
+    document.getElementById('modal-vulns-body').innerHTML = '<tr><td colspan="4" class="py-4"><div class="h-2 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-coral rounded-full animate-pulse w-2/3"></div></div></td></tr>';
+    openModal('modal-vulns');
+
+    fetch('/v1/vulnerabilities?machine_id={{ .machine_id }}&transaction_id=' + transactionId)
+      .then(function (response) { return response.json(); })
+      .then(function (vulns) {
+        var fixedCount = vulns.filter(function(v) { return v.type === 'fixed'; }).length;
+        var introducedCount = vulns.filter(function(v) { return v.type === 'introduced'; }).length;
+        var criticalCount = vulns.filter(function(v) { return v.severity === 'CRITICAL'; }).length;
+        var highCount = vulns.filter(function(v) { return v.severity === 'HIGH'; }).length;
+
+        document.getElementById('modal-vulns-title').innerHTML = '<i data-lucide="shield-check" class="w-5 h-5 text-txlog-coral"></i> Vulnerabilities — Transaction #' + transactionId;
+
+        var summaryHtml = '';
+        if (fixedCount > 0) summaryHtml += '<div class="bg-txlog-leaf/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-leaf">' + fixedCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-leaf/70 font-semibold">Fixed</div></div>';
+        if (introducedCount > 0) summaryHtml += '<div class="bg-txlog-coral/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-coral">' + introducedCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-coral/70 font-semibold">Introduced</div></div>';
+        if (criticalCount > 0) summaryHtml += '<div class="bg-txlog-coral/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-coral">' + criticalCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-coral/70 font-semibold">Critical</div></div>';
+        if (highCount > 0) summaryHtml += '<div class="bg-txlog-golden/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-golden">' + highCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-golden/70 font-semibold">High</div></div>';
+        document.getElementById('modal-vulns-summary').innerHTML = summaryHtml;
+        document.getElementById('modal-vulns-explanation').classList.remove('hidden');
+
+        var tbody = document.getElementById('modal-vulns-body');
+        tbody.innerHTML = '';
+        if (vulns.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" class="py-4 text-txlog-indigo/50">No vulnerabilities found.</td></tr>';
+        } else {
+          vulns.forEach(function (v) {
+            var row = document.createElement('tr');
+            row.className = 'hover:bg-txlog-lavender/10 transition-colors';
+            var statusBadge = v.type === 'fixed'
+              ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-txlog-leaf/15 text-txlog-leaf">FIXED</span>'
+              : '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-txlog-coral/15 text-txlog-coral">INTRODUCED</span>';
+            row.innerHTML = '<td class="py-2">' + severityBadge(v.severity) + '</td>' +
+              '<td class="py-2"><a href="https://osv.dev/vulnerability/' + v.id + '" target="_blank" class="text-txlog-sky hover:underline font-mono text-xs">' + v.id + '</a></td>' +
+              '<td class="py-2 text-xs">' + v.package + '-' + v.version + '</td>' +
+              '<td class="py-2">' + statusBadge + '</td>';
+            tbody.appendChild(row);
+          });
+        }
+        lucide.createIcons();
+      })
+      .catch(function (error) { console.error('Error fetching vulns:', error); });
   }
 
   function deleteAsset(assetId) {

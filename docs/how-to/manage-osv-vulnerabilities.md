@@ -43,3 +43,51 @@ server to repopulate all CVSS scores from zero:
 4. **Scoring Fallback**: The server extracts CVSS scores intrinsically (e.g., translating "Important" to `8.0`).
 5. **Re-scoring**: It re-evaluates all historical package installations to map mitigating actions accurately back to
    your dashboard.
+
+## How Vulnerability Counts Work
+
+### The Security Patch Badge
+
+When a transaction is identified as a security patch, a red shield badge appears next to the transaction ID showing
+the number of unique vulnerabilities fixed. This badge is visible on the asset details page.
+
+A transaction is classified as a security patch when it results in a **net reduction** of known vulnerabilities — that
+is, when the packages removed or upgraded had more CVEs than the packages installed or upgraded to.
+
+### Counting Logic
+
+Each vulnerability (CVE/ALSA/GHSA) is counted **once**, regardless of how many packages it affects. For example, if
+advisory `ALSA-2025:23279` affects five kernel sub-packages (`kernel`, `kernel-core`, `kernel-modules`,
+`kernel-modules-core`, `kernel-modules-extra`), it is counted as **1 vulnerability**, not 5.
+
+The scoreboard for each transaction is calculated as a delta:
+
+```text
+vulns_fixed = (unique CVEs in removed/upgraded-from packages) − (unique CVEs in installed/upgraded-to packages)
+```
+
+For a pure removal (e.g., `dnf remove kernel-6.12.0`), the formula becomes:
+
+```text
+vulns_fixed = (unique CVEs in removed packages) − 0
+```
+
+### Fixed vs. Introduced
+
+- **Fixed**: The vulnerable package version was removed, upgraded, or obsoleted. The CVEs associated with the old
+  version are no longer present on the system.
+- **Introduced**: A package version with known vulnerabilities was installed or downgraded to. The CVEs associated
+  with the new version are now present on the system.
+
+### Severity Classification
+
+Severity levels (Critical, High, Medium, Low) are inferred from the vulnerability metadata provided by the
+[OSV database](https://osv.dev). When the OSV API does not provide an explicit severity, the server attempts to
+infer it from keywords in the vulnerability summary and details fields.
+
+### Viewing Vulnerability Details
+
+On the asset details page, each transaction row has a split button. The main "Details" button shows the transaction
+packages, while the dropdown arrow reveals a "Vulnerabilities" option that opens a dedicated modal listing every CVE
+associated with the transaction, including its severity, the affected package, and whether it was fixed or introduced.
+The "Vulnerabilities" option is disabled for transactions that have no associated vulnerability data.

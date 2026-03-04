@@ -232,6 +232,7 @@ func main() {
 		v1Group.GET("/transactions", v1API.GetTransactions(database.Db))
 		v1Group.GET("/items/ids", v1API.GetItemIDs(database.Db))
 		v1Group.GET("/items", v1API.GetItems(database.Db))
+		v1Group.GET("/vulnerabilities", v1API.GetTransactionVulnerabilities(database.Db))
 	}
 
 	r.Run()

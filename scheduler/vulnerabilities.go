@@ -33,7 +33,8 @@ func UpdateVulnerabilitiesJob() {
         FROM transaction_items ti
         JOIN transactions t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
         JOIN assets a ON t.machine_id = a.machine_id AND t.hostname = a.hostname
-        WHERE ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade')
+        WHERE ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade',
+                             'Removed', 'Upgraded', 'Downgraded', 'Obsoleted', 'removed')
     `
 	rows, err := database.Db.Query(query)
 	if err != nil {
@@ -194,12 +195,12 @@ func updateTransactionScoreboards() {
 WITH removed_vulns AS (
     SELECT
         ti.transaction_id,
-        COUNT(pv.vulnerability_id) as total_removed,
-        SUM(CASE WHEN v.severity = 'CRITICAL' THEN 1 ELSE 0 END) as critical_removed,
-        SUM(CASE WHEN v.severity = 'HIGH' THEN 1 ELSE 0 END) as high_removed,
-        SUM(CASE WHEN v.severity = 'MEDIUM' THEN 1 ELSE 0 END) as medium_removed,
-        SUM(CASE WHEN v.severity = 'LOW' THEN 1 ELSE 0 END) as low_removed,
-        SUM(v.cvss_score) as removed_cvss
+        COUNT(DISTINCT pv.vulnerability_id) as total_removed,
+        COUNT(DISTINCT CASE WHEN v.severity = 'CRITICAL' THEN pv.vulnerability_id END) as critical_removed,
+        COUNT(DISTINCT CASE WHEN v.severity = 'HIGH' THEN pv.vulnerability_id END) as high_removed,
+        COUNT(DISTINCT CASE WHEN v.severity = 'MEDIUM' THEN pv.vulnerability_id END) as medium_removed,
+        COUNT(DISTINCT CASE WHEN v.severity = 'LOW' THEN pv.vulnerability_id END) as low_removed,
+        SUM(DISTINCT v.cvss_score) as removed_cvss
     FROM transaction_items ti
     JOIN transactions trans ON ti.transaction_id = trans.transaction_id AND ti.machine_id = trans.machine_id
     JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
@@ -216,12 +217,12 @@ WITH removed_vulns AS (
 installed_vulns AS (
     SELECT
         ti.transaction_id,
-        COUNT(pv.vulnerability_id) as total_installed,
-        SUM(CASE WHEN v.severity = 'CRITICAL' THEN 1 ELSE 0 END) as critical_installed,
-        SUM(CASE WHEN v.severity = 'HIGH' THEN 1 ELSE 0 END) as high_installed,
-        SUM(CASE WHEN v.severity = 'MEDIUM' THEN 1 ELSE 0 END) as medium_installed,
-        SUM(CASE WHEN v.severity = 'LOW' THEN 1 ELSE 0 END) as low_installed,
-        SUM(v.cvss_score) as installed_cvss
+        COUNT(DISTINCT pv.vulnerability_id) as total_installed,
+        COUNT(DISTINCT CASE WHEN v.severity = 'CRITICAL' THEN pv.vulnerability_id END) as critical_installed,
+        COUNT(DISTINCT CASE WHEN v.severity = 'HIGH' THEN pv.vulnerability_id END) as high_installed,
+        COUNT(DISTINCT CASE WHEN v.severity = 'MEDIUM' THEN pv.vulnerability_id END) as medium_installed,
+        COUNT(DISTINCT CASE WHEN v.severity = 'LOW' THEN pv.vulnerability_id END) as low_installed,
+        SUM(DISTINCT v.cvss_score) as installed_cvss
     FROM transaction_items ti
     JOIN transactions trans ON ti.transaction_id = trans.transaction_id AND ti.machine_id = trans.machine_id
     JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname

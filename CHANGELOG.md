@@ -18,7 +18,37 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
-## [1.24.0] - 2026-03-04
+## [1.24.1] - 2026-03-04
+
+### Added
+
+- Add `GET /v1/vulnerabilities` API endpoint to retrieve detailed CVE
+  information (ID, summary, severity, CVSS score, package, version, status) for
+  a given transaction.
+- Add dedicated vulnerabilities modal accessible via a split button dropdown on
+  each transaction row, showing summary cards (fixed, introduced, critical,
+  high) and a table of CVEs with links to OSV.
+- Add explanatory text to the vulnerabilities modal describing how counts are
+  calculated and what fixed/introduced statuses mean.
+- Document vulnerability counting logic, security patch badge behavior, and the
+  new vulnerabilities modal in the OSV how-to guide.
+
+### Changed
+
+- Replace the single "Details" button on transaction rows with a split button
+  dropdown, where the main button opens transaction details and the dropdown
+  provides access to the vulnerabilities modal.
+
+### Fixed
+
+- Fix vulnerability counting inflating numbers by counting the same CVE once
+  per affected sub-package. Now uses `COUNT(DISTINCT vulnerability_id)` so each
+  CVE is counted once regardless of how many packages it affects.
+- Fix OSV vulnerability fetching not querying old package versions for removed
+  or upgraded packages, causing `vulns_fixed` to show 0 when vulnerabilities
+  were actually fixed.
+
+## [1.24.0] - 2026-03-03
 
 ### Added
 

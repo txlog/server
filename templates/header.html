@@ -83,6 +83,14 @@
             .Context.Keys.env.instance }}</span>
           {{ end }}
           {{ if .Context.Keys.user }}
+          {{ $latestVersion := .Context.Keys.env.latestVersion }}
+          {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
+          <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
+            class="hidden xl:inline-flex items-center gap-1.5 bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2.5 py-1 rounded-md hover:bg-txlog-coral/20 transition-colors">
+            New version: {{ $latestVersion }}
+            <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+          {{ end }}
           <div class="relative" id="user-dropdown">
             <button onclick="toggleDropdown('user-menu')"
               class="flex items-center gap-2 text-white p-0 hover:opacity-90 transition-opacity">
@@ -102,17 +110,6 @@
             </button>
             <div id="user-menu"
               class="hidden absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-txlog-lavender/30 py-2 z-50">
-              {{ $latestVersion := .Context.Keys.env.latestVersion }}
-              {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
-              <div class="px-4 py-2">
-                <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
-                  class="inline-flex items-center gap-1.5 bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2.5 py-1 rounded-md hover:bg-txlog-coral/20 transition-colors">
-                  New version: {{ $latestVersion }}
-                  <i data-lucide="external-link" class="w-3 h-3"></i>
-                </a>
-              </div>
-              {{ end }}
-              <div class="border-t border-txlog-lavender/50 my-1"></div>
               <div class="px-4 py-1 text-xs font-bold text-txlog-indigo/50 uppercase">{{ .Context.Keys.env.instance }}
               </div>
               {{ if .Context.Keys.user.IsAdmin }}

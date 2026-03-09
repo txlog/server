@@ -413,6 +413,7 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
         public.assets AS a ON t.machine_id = a.machine_id AND t.hostname = a.hostname
       LEFT JOIN
         public.package_vulnerabilities AS pv ON ti.package = pv.package_name AND ti.version = pv.version
+         AND pv.release = COALESCE(ti.release, '')
          AND (
              (a.os ILIKE '%AlmaLinux%' AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
              (a.os ILIKE '%Rocky%' AND pv.ecosystem = 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')) OR

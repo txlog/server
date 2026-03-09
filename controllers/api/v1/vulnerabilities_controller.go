@@ -37,7 +37,7 @@ func GetTransactionVulnerabilities(database *sql.DB) gin.HandlerFunc {
 			           ELSE 'introduced'
 			       END as type
 			FROM transaction_items ti
-			JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version
+			JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version AND pv.release = COALESCE(ti.release, '')
 			JOIN vulnerabilities v ON v.id = pv.vulnerability_id
 			WHERE ti.machine_id = $1
 			  AND ti.transaction_id = $2

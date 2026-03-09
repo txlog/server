@@ -29,7 +29,7 @@ func UpdateVulnerabilitiesJob() {
 
 	// Extrai todos os pacotes das transações recentes ou do ecossistema geral.
 	query := `
-        SELECT DISTINCT ti.package, ti.version, a.os
+        SELECT DISTINCT ti.package, ti.version, COALESCE(ti.release, '') AS release, a.os
         FROM transaction_items ti
         JOIN transactions t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
         JOIN assets a ON t.machine_id = a.machine_id AND t.hostname = a.hostname
@@ -46,6 +46,7 @@ func UpdateVulnerabilitiesJob() {
 	type pkg struct {
 		Name      string
 		Version   string
+		Release   string
 		Ecosystem string
 	}
 	var packages []pkg
@@ -53,8 +54,8 @@ func UpdateVulnerabilitiesJob() {
 	pkgMap := make(map[string]pkg)
 
 	for rows.Next() {
-		var pName, pVersion, pOs sql.NullString
-		if err := rows.Scan(&pName, &pVersion, &pOs); err != nil {
+		var pName, pVersion, pRelease, pOs sql.NullString
+		if err := rows.Scan(&pName, &pVersion, &pRelease, &pOs); err != nil {
 			logger.Error("Vulnerabilities scan error: " + err.Error())
 			continue
 		}
@@ -65,8 +66,8 @@ func UpdateVulnerabilitiesJob() {
 
 		ecos := util.ExtractOSVEcosystems(pOs.String)
 		for _, eco := range ecos {
-			key := fmt.Sprintf("%s|%s|%s", pName.String, pVersion.String, eco)
-			pkgMap[key] = pkg{Name: pName.String, Version: pVersion.String, Ecosystem: eco}
+			key := fmt.Sprintf("%s|%s|%s|%s", pName.String, pVersion.String, pRelease.String, eco)
+			pkgMap[key] = pkg{Name: pName.String, Version: pVersion.String, Release: pRelease.String, Ecosystem: eco}
 		}
 	}
 
@@ -92,9 +93,13 @@ func UpdateVulnerabilitiesJob() {
 		var osvQueries []util.OSVQuery
 
 		for _, p := range chunk {
+			fullVersion := p.Version
+			if p.Release != "" {
+				fullVersion = fullVersion + "-" + p.Release
+			}
 			osvQueries = append(osvQueries, util.OSVQuery{
 				Package: util.OSVPackage{Name: p.Name, Ecosystem: p.Ecosystem},
-				Version: p.Version,
+				Version: fullVersion,
 			})
 		}
 
@@ -165,10 +170,10 @@ func UpdateVulnerabilitiesJob() {
 
 					if targetPkg.Ecosystem != "" {
 						_, err = database.Db.Exec(`
-							INSERT INTO package_vulnerabilities (package_name, version, vulnerability_id, ecosystem)
-							VALUES ($1, $2, $3, $4)
+							INSERT INTO package_vulnerabilities (package_name, version, release, vulnerability_id, ecosystem)
+							VALUES ($1, $2, $3, $4, $5)
 							ON CONFLICT DO NOTHING
-						`, targetPkg.Name, targetPkg.Version, vuln.ID, targetPkg.Ecosystem)
+						`, targetPkg.Name, targetPkg.Version, targetPkg.Release, vuln.ID, targetPkg.Ecosystem)
 						if err != nil {
 							logger.Error("Error linking pkg to vulnerability: " + err.Error())
 						}
@@ -205,6 +210,7 @@ WITH removed_vulns AS (
     JOIN transactions trans ON ti.transaction_id = trans.transaction_id AND ti.machine_id = trans.machine_id
     JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
     JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version
+         AND pv.release = COALESCE(ti.release, '')
          AND (
              (a.os ILIKE '%AlmaLinux%' AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
              (a.os ILIKE '%Rocky%' AND pv.ecosystem = 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
@@ -227,6 +233,7 @@ installed_vulns AS (
     JOIN transactions trans ON ti.transaction_id = trans.transaction_id AND ti.machine_id = trans.machine_id
     JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
     JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version
+         AND pv.release = COALESCE(ti.release, '')
          AND (
              (a.os ILIKE '%AlmaLinux%' AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
              (a.os ILIKE '%Rocky%' AND pv.ecosystem = 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')) OR

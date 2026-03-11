@@ -4,361 +4,453 @@
     <h2 class="font-display font-bold text-2xl text-white">Administration</h2>
   </div>
 </div>
-<div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
-  <script>
-    var urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('migration_success')) {
-      document.addEventListener('DOMContentLoaded', function () {
-        var d = document.createElement('div');
-        d.className = 'bg-txlog-leaf/10 border border-txlog-leaf/30 text-txlog-leaf px-4 py-3 rounded-xl mb-4 flex items-center gap-2';
-        d.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i><span>All pending database migrations have been applied successfully.</span>';
-        document.querySelector('.space-y-6').insertBefore(d, document.querySelector('.space-y-6').firstChild);
-        lucide.createIcons();
-      });
-    }
-  </script>
+<div class="max-w-7xl mx-auto px-6 pb-8">
+  <!-- Mobile Navigation -->
+  <div class="md:hidden mb-4 -mx-1 overflow-x-auto">
+    <div class="flex gap-1 min-w-max px-1">
+      <button onclick="showSection('server')" data-nav="server" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap bg-txlog-sky text-white">
+        <i data-lucide="monitor" class="w-3.5 h-3.5"></i> Server
+      </button>
+      <button onclick="showSection('database')" data-nav="database" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Database
+      </button>
+      <button onclick="showSection('oidc')" data-nav="oidc" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="fingerprint" class="w-3.5 h-3.5"></i> OIDC
+      </button>
+      <button onclick="showSection('ldap')" data-nav="ldap" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="network" class="w-3.5 h-3.5"></i> LDAP
+      </button>
+      <button onclick="showSection('housekeeping')" data-nav="housekeeping" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="brush" class="w-3.5 h-3.5"></i> Housekeeping
+      </button>
+      <button onclick="showSection('statistics')" data-nav="statistics" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i> Statistics
+      </button>
+      <button onclick="showSection('osv')" data-nav="osv" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Vulnerabilities
+      </button>
+      {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
+      <button onclick="showSection('users')" data-nav="users" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="users" class="w-3.5 h-3.5"></i> Users
+      </button>
+      <button onclick="showSection('apikeys')" data-nav="apikeys" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="key-round" class="w-3.5 h-3.5"></i> API Keys
+      </button>
+      {{ end }}
+      <button onclick="showSection('migrations')" data-nav="migrations" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="database" class="w-3.5 h-3.5"></i> Migrations
+      </button>
+    </div>
+  </div>
 
-  <!-- Server Configuration -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+    <!-- Sidebar Navigation -->
+    <div class="hidden md:block md:col-span-1">
+      <div class="bg-white rounded-3xl shadow-soft overflow-hidden sticky top-24">
+        <div class="border-b border-txlog-lavender px-5 py-3">
+          <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Server Configuration</h3>
+        </div>
+        <nav class="p-2 space-y-0.5">
+          <button onclick="showSection('server')" data-nav="server" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left bg-txlog-sky/10 text-txlog-sky">
+            <i data-lucide="monitor" class="w-4 h-4 flex-shrink-0"></i> Server
+          </button>
+          <button onclick="showSection('database')" data-nav="database" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="hard-drive" class="w-4 h-4 flex-shrink-0"></i> Database Server
+          </button>
+          <button onclick="showSection('oidc')" data-nav="oidc" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="fingerprint" class="w-4 h-4 flex-shrink-0"></i> Auth OIDC
+          </button>
+          <button onclick="showSection('ldap')" data-nav="ldap" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="network" class="w-4 h-4 flex-shrink-0"></i> Auth LDAP
+          </button>
+          <button onclick="showSection('housekeeping')" data-nav="housekeeping" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="brush" class="w-4 h-4 flex-shrink-0"></i> Housekeeping
+          </button>
+          <button onclick="showSection('statistics')" data-nav="statistics" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="bar-chart-3" class="w-4 h-4 flex-shrink-0"></i> Statistics
+          </button>
+          <button onclick="showSection('osv')" data-nav="osv" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="shield-alert" class="w-4 h-4 flex-shrink-0"></i> Vulnerabilities
+          </button>
+        </nav>
+        {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
+        <div class="border-t border-txlog-lavender px-5 py-3">
+          <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Access Control</h3>
+        </div>
+        <nav class="p-2 pt-0 space-y-0.5">
+          <button onclick="showSection('users')" data-nav="users" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i> System Users
+          </button>
+          <button onclick="showSection('apikeys')" data-nav="apikeys" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="key-round" class="w-4 h-4 flex-shrink-0"></i> API Keys
+          </button>
+        </nav>
+        {{ end }}
+        <div class="border-t border-txlog-lavender px-5 py-3">
+          <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Maintenance</h3>
+        </div>
+        <nav class="p-2 pt-0 space-y-0.5 pb-3">
+          <button onclick="showSection('migrations')" data-nav="migrations" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="database" class="w-4 h-4 flex-shrink-0"></i> Migrations
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    <div class="md:col-span-3">
+      <div id="alert-container"></div>
+
+  <!-- Server -->
+  <div id="section-server" class="admin-section">
   <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
     <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Server Configuration</h3>
+      <h3 class="font-display font-semibold text-lg">Server</h3>
       <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
     </div>
-    <div class="p-6 grid md:grid-cols-2 gap-6">
-      <!-- Server -->
-      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
-        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Server</div>
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/30">
-            <tr>
-              <td class="px-4 py-2 w-1/2 font-medium">Instance</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.instance }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.instance }}</code>{{
-                else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Server Mode</td>
-              <td class="px-4 py-2">{{ if eq .Context.Keys.env.ginMode "release" }}<span
-                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Release</span>{{
-                else if eq .Context.Keys.env.ginMode "debug" }}<span
-                  class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Debug</span>{{
-                else if eq .Context.Keys.env.ginMode "test" }}<span
-                  class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Test</span>{{
-                else }}<span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Default
-                  (Release)</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Log Level</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.logLevel }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.logLevel }}</code>{{
-                else }}<span class="text-txlog-indigo/40">Default (INFO)</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">HTTP Port</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.port }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.port }}</code>{{
-                else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">8080</code> <span
-                  class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Latest Version</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.latestVersion }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.latestVersion }}</code>{{
-                else }}<span class="text-txlog-indigo/40">Not checked</span>{{ end }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Database Server -->
-      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
-        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Database Server
-        </div>
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/30">
-            <tr>
-              <td class="px-4 py-2 w-1/2 font-medium">Hostname</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlHost }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Port</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlPort }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Database</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlDb }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Username</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlUser }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Password</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.pgsqlPassword }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">SSL Mode</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlSslmode }}</code>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Auth OIDC -->
-      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
-        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Authentication -
-          OIDC</div>
-        {{ if .Context.Keys.oidc_enabled }}
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/30">
-            <tr>
-              <td class="px-4 py-2 w-1/2 font-medium">OIDC Status</td>
-              <td class="px-4 py-2"><span
-                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span></td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Issuer URL</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcIssuerUrl }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Client ID</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.oidcClientId }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Client Secret</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.oidcClientSecret }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Redirect URL</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcRedirectUrl }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Skip TLS Verify</td>
-              <td class="px-4 py-2">{{ if eq .Context.Keys.env.oidcSkipTlsVerify "true" }}<span
-                  class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
-                  (Insecure)</span>{{ else }}<span
-                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No (Secure)</span>{{
-                end }}</td>
-            </tr>
-          </tbody>
-        </table>
-        {{ else }}
-        <div class="p-8 text-center"><i data-lucide="shield-check"
-            class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
-          <p class="font-semibold mb-1">OIDC Not Configured</p>
-          <p class="text-sm text-txlog-indigo/50 mb-3">OpenID Connect authentication is not enabled.</p><a
-            href="https://txlog.rda.run/docs/server/how-to/configure-oidc" target="_blank"
-            class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
-              data-lucide="info" class="w-4 h-4"></i> Learn How to Configure OIDC</a>
-        </div>
-        {{ end }}
-      </div>
-      <!-- Auth LDAP -->
-      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
-        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Authentication -
-          LDAP</div>
-        {{ if .Context.Keys.ldap_enabled }}
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/30">
-            <tr>
-              <td class="px-4 py-2 w-1/2 font-medium">LDAP Status</td>
-              <td class="px-4 py-2"><span
-                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span></td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Host</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapHost }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Port</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapPort }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapPort }}</code>{{
-                else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">389</code> <span
-                  class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Use TLS</td>
-              <td class="px-4 py-2">{{ if eq .Context.Keys.env.ldapUseTls "true" }}<span
-                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Yes
-                  (Secure)</span>{{ else }}<span
-                  class="bg-txlog-indigo/10 text-txlog-indigo/50 text-xs font-bold px-2 py-0.5 rounded-md">No</span>{{
-                end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Skip TLS Verify</td>
-              <td class="px-4 py-2">{{ if eq .Context.Keys.env.ldapSkipTlsVerify "true" }}<span
-                  class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
-                  (Insecure)</span>{{ else }}<span
-                  class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No (Secure)</span>{{
-                end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Base DN</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBaseDn }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Bind DN</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapBindDn }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBindDn }}</code>{{
-                else }}<span class="text-txlog-indigo/40">Anonymous bind</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Bind Password</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapBindPassword }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.ldapBindPassword }}</code>{{
-                else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">User Filter</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapUserFilter }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapUserFilter }}</code>{{
-                else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(uid=%s)</code> <span
-                  class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Admin Group</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapAdminGroup }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapAdminGroup }}</code>{{
-                else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Viewer Group</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapViewerGroup }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapViewerGroup }}</code>{{
-                else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Group Filter</td>
-              <td class="px-4 py-2">{{ if .Context.Keys.env.ldapGroupFilter }}<code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapGroupFilter }}</code>{{
-                else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(member=%s)</code> <span
-                  class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
-            </tr>
-          </tbody>
-        </table>
-        {{ else }}
-        <div class="p-8 text-center"><i data-lucide="shield-check"
-            class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
-          <p class="font-semibold mb-1">LDAP Not Configured</p>
-          <p class="text-sm text-txlog-indigo/50 mb-3">LDAP authentication is not enabled.</p><a
-            href="https://txlog.rda.run/docs/server/how-to/configure-ldap" target="_blank"
-            class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
-              data-lucide="info" class="w-4 h-4"></i> Learn How to Configure LDAP</a>
-        </div>
-        {{ end }}
-      </div>
-      <!-- Housekeeping -->
-      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
-        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Housekeeping</div>
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/30">
-            <tr>
-              <td class="px-4 py-2 w-1/2 font-medium">Retention Days</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionDays }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-4 py-2 font-medium">Schedule Expression</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionExpression }}</code>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- Statistics -->
-      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
-        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm">Statistics</div>
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/30">
-            <tr>
-              <td class="px-4 py-2 w-1/2 font-medium">Schedule Expression</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronStatisticsExpression }}</code>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <!-- OSV Vulnerabilities Job -->
-      <div class="border border-txlog-lavender/50 rounded-2xl overflow-hidden">
-        <div class="bg-txlog-bg px-4 py-2.5 border-b border-txlog-lavender/50 font-semibold text-sm flex items-center justify-between">
-          Vulnerabilities Updates (OSV)
-          {{ if .osvIsRunning }}
-          <span class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-txlog-golden"></span> Running Now</span>
-          {{ else }}
-          <span class="bg-txlog-leaf/10 text-txlog-leaf text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Idle</span>
-          {{ end }}
-        </div>
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/30">
-            <tr>
-              <td class="px-4 py-2 w-1/2 font-medium">Schedule Expression</td>
-              <td class="px-4 py-2"><code
-                  class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ if .Context.Keys.env.cronOsvExpression }}{{ .Context.Keys.env.cronOsvExpression }}{{ else }}0 4 * * *{{ end }}</code>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" class="px-4 py-2.5">
-                <form action="/admin/migrations/run_osv_update" method="post" class="w-full">
-                  {{ if .osvIsRunning }}
-                  <button type="button" disabled class="w-full bg-txlog-lavender text-txlog-indigo/50 font-medium py-1.5 rounded-lg border border-txlog-lavender/50 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
-                    <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
-                  </button>
-                  {{ else }}
-                  <button type="submit" onclick="return confirm('This will start fetching and processing OSV vulnerabilities in the background. Note: this job may take a while. Proceed?')" class="w-full bg-white text-txlog-indigo font-medium py-1.5 rounded-lg border border-txlog-lavender hover:bg-txlog-lavender/30 hover:border-txlog-sky transition-colors flex items-center justify-center gap-2 text-xs">
-                    <i data-lucide="play" class="w-3.5 h-3.5"></i> Run Manually Now
-                  </button>
-                  {{ end }}
-                </form>
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" class="px-4 py-2.5">
-                <form action="/admin/migrations/reset_osv" method="post" class="w-full">
-                  {{ if .osvIsRunning }}
-                  <button type="button" disabled class="w-full bg-txlog-coral/10 text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/20 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
-                    <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
-                  </button>
-                  {{ else }}
-                  <button type="submit" onclick="return confirm('WARNING: This will erase EVERY downloaded OSV vulnerability from the database, reset all transaction scoreboards to zero AND re-start the fetch job from scratch. It might take dozens of minutes to rebuild everything. Proceed?')" class="w-full text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/30 hover:bg-txlog-coral/10 hover:border-txlog-coral transition-colors flex items-center justify-center gap-2 text-xs">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reset All Data & Rebuild
-                  </button>
-                  {{ end }}
-                </form>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-txlog-lavender/30">
+        <tr>
+          <td class="px-6 py-3 w-1/3 font-medium">Instance</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.instance }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.instance }}</code>{{
+            else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Server Mode</td>
+          <td class="px-6 py-3">{{ if eq .Context.Keys.env.ginMode "release" }}<span
+              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Release</span>{{
+            else if eq .Context.Keys.env.ginMode "debug" }}<span
+              class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Debug</span>{{
+            else if eq .Context.Keys.env.ginMode "test" }}<span
+              class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Test</span>{{
+            else }}<span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Default
+              (Release)</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Log Level</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.logLevel }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.logLevel }}</code>{{
+            else }}<span class="text-txlog-indigo/40">Default (INFO)</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">HTTP Port</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.port }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.port }}</code>{{
+            else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">8080</code> <span
+              class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Latest Version</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.latestVersion }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.latestVersion }}</code>{{
+            else }}<span class="text-txlog-indigo/40">Not checked</span>{{ end }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- Database Server -->
+  <div id="section-database" class="admin-section hidden">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">Database Server</h3>
+      <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
     </div>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-txlog-lavender/30">
+        <tr>
+          <td class="px-6 py-3 w-1/3 font-medium">Hostname</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlHost }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Port</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlPort }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Database</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlDb }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Username</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlUser }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Password</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.pgsqlPassword }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">SSL Mode</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlSslmode }}</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- Auth OIDC -->
+  <div id="section-oidc" class="admin-section hidden">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">Authentication - OIDC</h3>
+    </div>
+    {{ if .Context.Keys.oidc_enabled }}
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-txlog-lavender/30">
+        <tr>
+          <td class="px-6 py-3 w-1/3 font-medium">OIDC Status</td>
+          <td class="px-6 py-3"><span
+              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Issuer URL</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcIssuerUrl }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Client ID</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.oidcClientId }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Client Secret</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.oidcClientSecret }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Redirect URL</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcRedirectUrl }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Skip TLS Verify</td>
+          <td class="px-6 py-3">{{ if eq .Context.Keys.env.oidcSkipTlsVerify "true" }}<span
+              class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
+              (Insecure)</span>{{ else }}<span
+              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No (Secure)</span>{{
+            end }}</td>
+        </tr>
+      </tbody>
+    </table>
+    {{ else }}
+    <div class="p-8 text-center"><i data-lucide="shield-check"
+        class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+      <p class="font-semibold mb-1">OIDC Not Configured</p>
+      <p class="text-sm text-txlog-indigo/50 mb-3">OpenID Connect authentication is not enabled.</p><a
+        href="https://txlog.rda.run/docs/server/how-to/configure-oidc" target="_blank"
+        class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
+          data-lucide="info" class="w-4 h-4"></i> Learn How to Configure OIDC</a>
+    </div>
+    {{ end }}
+  </div>
+  </div>
+
+  <!-- Auth LDAP -->
+  <div id="section-ldap" class="admin-section hidden">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4">
+      <h3 class="font-display font-semibold text-lg">Authentication - LDAP</h3>
+    </div>
+    {{ if .Context.Keys.ldap_enabled }}
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-txlog-lavender/30">
+        <tr>
+          <td class="px-6 py-3 w-1/3 font-medium">LDAP Status</td>
+          <td class="px-6 py-3"><span
+              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Host</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapHost }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Port</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapPort }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapPort }}</code>{{
+            else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">389</code> <span
+              class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Use TLS</td>
+          <td class="px-6 py-3">{{ if eq .Context.Keys.env.ldapUseTls "true" }}<span
+              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Yes
+              (Secure)</span>{{ else }}<span
+              class="bg-txlog-indigo/10 text-txlog-indigo/50 text-xs font-bold px-2 py-0.5 rounded-md">No</span>{{
+            end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Skip TLS Verify</td>
+          <td class="px-6 py-3">{{ if eq .Context.Keys.env.ldapSkipTlsVerify "true" }}<span
+              class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
+              (Insecure)</span>{{ else }}<span
+              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No (Secure)</span>{{
+            end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Base DN</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBaseDn }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Bind DN</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapBindDn }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBindDn }}</code>{{
+            else }}<span class="text-txlog-indigo/40">Anonymous bind</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Bind Password</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapBindPassword }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.ldapBindPassword }}</code>{{
+            else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">User Filter</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapUserFilter }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapUserFilter }}</code>{{
+            else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(uid=%s)</code> <span
+              class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Admin Group</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapAdminGroup }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapAdminGroup }}</code>{{
+            else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Viewer Group</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapViewerGroup }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapViewerGroup }}</code>{{
+            else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Group Filter</td>
+          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapGroupFilter }}<code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapGroupFilter }}</code>{{
+            else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(member=%s)</code> <span
+              class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+        </tr>
+      </tbody>
+    </table>
+    {{ else }}
+    <div class="p-8 text-center"><i data-lucide="shield-check"
+        class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+      <p class="font-semibold mb-1">LDAP Not Configured</p>
+      <p class="text-sm text-txlog-indigo/50 mb-3">LDAP authentication is not enabled.</p><a
+        href="https://txlog.rda.run/docs/server/how-to/configure-ldap" target="_blank"
+        class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
+          data-lucide="info" class="w-4 h-4"></i> Learn How to Configure LDAP</a>
+    </div>
+    {{ end }}
+  </div>
+  </div>
+
+  <!-- Housekeeping -->
+  <div id="section-housekeeping" class="admin-section hidden">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">Housekeeping</h3>
+      <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
+    </div>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-txlog-lavender/30">
+        <tr>
+          <td class="px-6 py-3 w-1/3 font-medium">Retention Days</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionDays }}</code></td>
+        </tr>
+        <tr>
+          <td class="px-6 py-3 font-medium">Schedule Expression</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionExpression }}</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- Statistics -->
+  <div id="section-statistics" class="admin-section hidden">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">Statistics</h3>
+      <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
+    </div>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-txlog-lavender/30">
+        <tr>
+          <td class="px-6 py-3 w-1/3 font-medium">Schedule Expression</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronStatisticsExpression }}</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  </div>
+
+  <!-- Vulnerabilities Updates (OSV) -->
+  <div id="section-osv" class="admin-section hidden">
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">Vulnerabilities Updates (OSV)</h3>
+      {{ if .osvIsRunning }}
+      <span class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-txlog-golden"></span> Running Now</span>
+      {{ else }}
+      <span class="bg-txlog-leaf/10 text-txlog-leaf text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Idle</span>
+      {{ end }}
+    </div>
+    <table class="w-full text-sm">
+      <tbody class="divide-y divide-txlog-lavender/30">
+        <tr>
+          <td class="px-6 py-3 w-1/3 font-medium">Schedule Expression</td>
+          <td class="px-6 py-3"><code
+              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ if .Context.Keys.env.cronOsvExpression }}{{ .Context.Keys.env.cronOsvExpression }}{{ else }}0 4 * * *{{ end }}</code></td>
+        </tr>
+        <tr>
+          <td colspan="2" class="px-6 py-3">
+            <form action="/admin/migrations/run_osv_update" method="post" class="w-full">
+              {{ if .osvIsRunning }}
+              <button type="button" disabled class="w-full bg-txlog-lavender text-txlog-indigo/50 font-medium py-1.5 rounded-lg border border-txlog-lavender/50 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
+                <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
+              </button>
+              {{ else }}
+              <button type="submit" onclick="return confirm('This will start fetching and processing OSV vulnerabilities in the background. Note: this job may take a while. Proceed?')" class="w-full bg-white text-txlog-indigo font-medium py-1.5 rounded-lg border border-txlog-lavender hover:bg-txlog-lavender/30 hover:border-txlog-sky transition-colors flex items-center justify-center gap-2 text-xs">
+                <i data-lucide="play" class="w-3.5 h-3.5"></i> Run Manually Now
+              </button>
+              {{ end }}
+            </form>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2" class="px-6 py-3">
+            <form action="/admin/migrations/reset_osv" method="post" class="w-full">
+              {{ if .osvIsRunning }}
+              <button type="button" disabled class="w-full bg-txlog-coral/10 text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/20 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
+                <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
+              </button>
+              {{ else }}
+              <button type="submit" onclick="return confirm('WARNING: This will erase EVERY downloaded OSV vulnerability from the database, reset all transaction scoreboards to zero AND re-start the fetch job from scratch. It might take dozens of minutes to rebuild everything. Proceed?')" class="w-full text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/30 hover:bg-txlog-coral/10 hover:border-txlog-coral transition-colors flex items-center justify-center gap-2 text-xs">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reset All Data &amp; Rebuild
+              </button>
+              {{ end }}
+            </form>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
   </div>
 
   <!-- System Users -->
   {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
+  <div id="section-users" class="admin-section hidden">
   <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
     <div class="border-b border-txlog-lavender px-6 py-4">
       <h3 class="font-display font-semibold text-lg">System Users</h3>
@@ -495,10 +587,12 @@
     <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">Showing {{ len .users }} total
       user{{ if ne (len .users) 1 }}s{{ end }}</div>
   </div>
+  </div>
   {{ end }}
 
   <!-- API Keys -->
   {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
+  <div id="section-apikeys" class="admin-section hidden">
   <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
     <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
       <h3 class="font-display font-semibold text-lg">API Keys</h3>
@@ -614,9 +708,11 @@
     <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">Showing {{ len .apiKeys }} total
       key{{ if ne (len .apiKeys) 1 }}s{{ end }}</div>
   </div>
+  </div>
   {{ end }}
 
   <!-- Database Migrations -->
+  <div id="section-migrations" class="admin-section hidden">
   <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
     <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
       <h3 class="font-display font-semibold text-lg">Database Migrations</h3>
@@ -733,6 +829,10 @@
     </div>
     {{ end }}
   </div>
+  </div>
+
+    </div><!-- end content area -->
+  </div><!-- end grid -->
 </div>
 
 <!-- Create API Key Modal -->
@@ -830,7 +930,36 @@
 </div>
 
 <script>
+  function showSection(sectionId) {
+    document.querySelectorAll('.admin-section').forEach(function (s) { s.classList.add('hidden'); });
+    var target = document.getElementById('section-' + sectionId);
+    if (target) target.classList.remove('hidden');
+    document.querySelectorAll('.admin-nav-btn').forEach(function (btn) {
+      btn.className = btn.className
+        .replace(/bg-txlog-sky\/10\s*/g, '').replace(/text-txlog-sky\s*/g, '')
+        .replace(/bg-txlog-sky\s*/g, '').replace(/text-white\s*/g, '');
+      if (!btn.className.match(/text-txlog-indigo/)) btn.className += ' text-txlog-indigo/60 hover:bg-txlog-lavender/30';
+    });
+    document.querySelectorAll('[data-nav="' + sectionId + '"]').forEach(function (btn) {
+      btn.className = btn.className
+        .replace(/text-txlog-indigo\/60\s*/g, '').replace(/hover:bg-txlog-lavender\/30\s*/g, '');
+      if (btn.closest('.md\\:block')) btn.className += ' bg-txlog-sky/10 text-txlog-sky';
+      else btn.className += ' bg-txlog-sky text-white';
+    });
+    location.hash = sectionId;
+    lucide.createIcons();
+  }
   document.addEventListener('DOMContentLoaded', function () {
+    var hash = location.hash.replace('#', '');
+    var urlP = new URLSearchParams(window.location.search);
+    if (urlP.get('migration_success')) { hash = 'migrations'; showAdminAlert('All pending database migrations have been applied successfully.'); }
+    if (urlP.get('osv_update_started')) showAdminAlert('OSV vulnerability update started in background.');
+    if (urlP.get('osv_reset_started')) { hash = 'osv'; showAdminAlert('Vulnerabilities reset and rebuild started.'); }
+    if (urlP.get('apikey_revoked')) { hash = 'apikeys'; showAdminAlert('API key revoked successfully.'); }
+    if (urlP.get('apikey_deleted')) { hash = 'apikeys'; showAdminAlert('API key deleted successfully.'); }
+    var validSections = ['server', 'database', 'oidc', 'ldap', 'housekeeping', 'statistics', 'osv', 'users', 'apikeys', 'migrations'];
+    if (!hash || validSections.indexOf(hash) === -1 || !document.getElementById('section-' + hash)) hash = 'server';
+    showSection(hash);
     var runBtn = document.getElementById('runMigrationsBtn');
     if (runBtn) runBtn.addEventListener('click', function () { this.disabled = true; this.innerHTML = '<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Running...'; });
     var generateBtn = document.getElementById('generateAPIKeyBtn');
@@ -853,15 +982,12 @@
       copyBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Copied!'; lucide.createIcons();
       setTimeout(function () { copyBtn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i> Copy'; lucide.createIcons(); }, 2000);
     });
-    var urlP = new URLSearchParams(window.location.search);
-    if (urlP.get('apikey_revoked')) showAdminAlert('API key revoked successfully');
-    if (urlP.get('apikey_deleted')) showAdminAlert('API key deleted successfully');
   });
   function showAdminAlert(msg) {
     var d = document.createElement('div');
     d.className = 'bg-txlog-leaf/10 border border-txlog-leaf/30 text-txlog-leaf px-4 py-3 rounded-xl mb-4 flex items-center gap-2';
     d.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i><span>' + msg + '</span>';
-    var c = document.querySelector('.space-y-6'); c.insertBefore(d, c.firstChild); lucide.createIcons();
+    var c = document.getElementById('alert-container'); if (c) c.appendChild(d); lucide.createIcons();
   }
 </script>
 {{ template "footer.html" . }}

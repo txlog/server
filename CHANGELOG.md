@@ -18,6 +18,24 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- Add `release` field to the package vulnerability model and database migration,
+  improving vulnerability matching accuracy by considering the full
+  package-version-release tuple.
+- Add tooltip for security patch counts explaining how fixed/introduced
+  vulnerabilities are calculated. Clarify vulnerability summary labels in the
+  vulnerabilities modal.
+
+### Changed
+
+- Redesign the admin page layout.
+- Remove hover action tooltip from transaction ID display.
+- Bump `golang.org/x/oauth2` from 0.35.0 to 0.36.0.
+- Bump `golang.org/x/sync` from 0.19.0 to 0.20.0.
+
 ## [1.24.1] - 2026-03-04
 
 ### Added

@@ -15,13 +15,14 @@ module.exports = {
       colors: {
         txlog: {
           indigo: '#424565',
+          navy: '#1E293B',
           lavender: '#E6E6FA',
           coral: '#D9556A',
           golden: '#F4B54B',
           sky: '#4A8AE8',
           leaf: '#4A9E42',
           purple: '#8B5CF6',
-          bg: '#F8F9FE',
+          bg: '#EFF2F7',
         }
       },
       fontFamily: {
@@ -33,9 +34,9 @@ module.exports = {
         'glow-sky': '0 0 0 4px rgba(106, 162, 251, 0.2)',
       },
       borderRadius: {
-        'xl': '12px',
-        '2xl': '16px',
-        '3xl': '24px',
+        'xl': '6px',
+        '2xl': '8px',
+        '3xl': '12px',
       }
     }
   },

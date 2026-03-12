@@ -18,6 +18,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Changed
+
+- Refresh UI color palette.
+
 ## [1.24.2] - 2026-03-12
 
 ### Added

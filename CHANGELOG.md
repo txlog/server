@@ -18,6 +18,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Changed
+
+- Update Go version to 1.26.1.
+
 ## [1.25.0] - 2026-03-12
 
 ### Changed

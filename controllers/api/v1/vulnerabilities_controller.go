@@ -37,7 +37,13 @@ func GetTransactionVulnerabilities(database *sql.DB) gin.HandlerFunc {
 			           ELSE 'introduced'
 			       END as type
 			FROM transaction_items ti
+			JOIN assets a ON ti.machine_id = a.machine_id
 			JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version AND pv.release = COALESCE(ti.release, '')
+			  AND (
+			      (a.os ILIKE '%AlmaLinux%' AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
+			      (a.os ILIKE '%Rocky%' AND pv.ecosystem = 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
+			      ((a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%') AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+'))
+			  )
 			JOIN vulnerabilities v ON v.id = pv.vulnerability_id
 			WHERE ti.machine_id = $1
 			  AND ti.transaction_id = $2

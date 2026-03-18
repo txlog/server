@@ -200,6 +200,7 @@ func updateTransactionScoreboards() {
 WITH removed_vulns AS (
     SELECT
         ti.transaction_id,
+        ti.machine_id,
         COUNT(DISTINCT pv.vulnerability_id) as total_removed,
         COUNT(DISTINCT CASE WHEN v.severity = 'CRITICAL' THEN pv.vulnerability_id END) as critical_removed,
         COUNT(DISTINCT CASE WHEN v.severity = 'HIGH' THEN pv.vulnerability_id END) as high_removed,
@@ -218,11 +219,12 @@ WITH removed_vulns AS (
          )
     JOIN vulnerabilities v ON v.id = pv.vulnerability_id
     WHERE ti.action IN ('Removed', 'Obsoleted', 'Upgraded', 'Downgraded', 'removed')
-    GROUP BY ti.transaction_id
+    GROUP BY ti.transaction_id, ti.machine_id
 ),
 installed_vulns AS (
     SELECT
         ti.transaction_id,
+        ti.machine_id,
         COUNT(DISTINCT pv.vulnerability_id) as total_installed,
         COUNT(DISTINCT CASE WHEN v.severity = 'CRITICAL' THEN pv.vulnerability_id END) as critical_installed,
         COUNT(DISTINCT CASE WHEN v.severity = 'HIGH' THEN pv.vulnerability_id END) as high_installed,
@@ -241,7 +243,7 @@ installed_vulns AS (
          )
     JOIN vulnerabilities v ON v.id = pv.vulnerability_id
     WHERE ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade')
-    GROUP BY ti.transaction_id
+    GROUP BY ti.transaction_id, ti.machine_id
 )
 UPDATE transactions t
 SET
@@ -260,8 +262,9 @@ SET
                          GREATEST(COALESCE(r.high_removed, 0) - COALESCE(i.high_installed, 0), 0) > 0 OR
                          GREATEST(COALESCE(r.total_removed, 0) - COALESCE(i.total_installed, 0), 0) > 0)
 FROM removed_vulns r
-FULL OUTER JOIN installed_vulns i ON r.transaction_id = i.transaction_id
+FULL OUTER JOIN installed_vulns i ON r.transaction_id = i.transaction_id AND r.machine_id = i.machine_id
 WHERE t.transaction_id = COALESCE(r.transaction_id, i.transaction_id)
+  AND t.machine_id = COALESCE(r.machine_id, i.machine_id)
   AND (COALESCE(r.total_removed, 0) > 0 OR COALESCE(i.total_installed, 0) > 0);
 	`
 

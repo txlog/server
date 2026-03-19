@@ -231,6 +231,7 @@ func PostAdminRunOSVUpdate(db *sql.DB) gin.HandlerFunc {
 func PostAdminResetOSV(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		query := `
+			SET lock_timeout = '2s';
 			TRUNCATE TABLE package_vulnerabilities;
 			TRUNCATE TABLE vulnerabilities CASCADE;
 			UPDATE transactions SET
@@ -241,6 +242,7 @@ func PostAdminResetOSV(db *sql.DB) gin.HandlerFunc {
 				low_vulns_fixed = 0, low_vulns_introduced = 0,
 				risk_score_mitigated = 0, is_security_patch = false;
 			DELETE FROM cron_lock WHERE job_name = 'vulnerabilities';
+			SET lock_timeout = DEFAULT;
 		`
 		_, err := db.Exec(query)
 		if err != nil {

@@ -1,0 +1,1 @@
+ALTER TABLE statistics ALTER COLUMN percentage TYPE NUMERIC(10, 2);

@@ -97,7 +97,7 @@
                 </div>
                 <div
                   class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-txlog-indigo text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">
-                  Number of CVEs</div>
+                  New CVEs</div>
               </div>
             </td>
             <td class="px-6 py-3">{{ formatDateTime .BeginTime }}</td>
@@ -516,18 +516,33 @@
     fetch('/v1/vulnerabilities?machine_id={{ .machine_id }}&transaction_id=' + transactionId)
       .then(function (response) { return response.json(); })
       .then(function (vulns) {
-        var fixedCount = vulns.filter(function(v) { return v.type === 'fixed'; }).length;
-        var introducedCount = vulns.filter(function(v) { return v.type === 'introduced'; }).length;
-        var criticalCount = vulns.filter(function(v) { return v.severity === 'CRITICAL'; }).length;
-        var highCount = vulns.filter(function(v) { return v.severity === 'HIGH'; }).length;
+        var fixedIds = new Set(vulns.filter(function(v) { return v.type === 'fixed'; }).map(function(v) { return v.id; }));
+        var introducedIds = new Set(vulns.filter(function(v) { return v.type === 'introduced'; }).map(function(v) { return v.id; }));
+
+        var trulyFixed = new Set([...fixedIds].filter(x => !introducedIds.has(x)));
+        var trulyIntroduced = new Set([...introducedIds].filter(x => !fixedIds.has(x)));
+
+        // Remove intersection elements from overall vulns array so they don't count towards the summary
+        vulns = vulns.filter(function(v) { 
+            var isIntersect = fixedIds.has(v.id) && introducedIds.has(v.id);
+            return !isIntersect;
+        });
+
+        var uniqueCVEs = new Set(vulns.map(function(v) { return v.id; })).size;
+        
+        var fixedCount = trulyFixed.size;
+        var introducedCount = trulyIntroduced.size;
+        var criticalCount = new Set(vulns.filter(function(v) { return v.severity === 'CRITICAL'; }).map(function(v) { return v.id; })).size;
+        var highCount = new Set(vulns.filter(function(v) { return v.severity === 'HIGH'; }).map(function(v) { return v.id; })).size;
 
         document.getElementById('modal-vulns-title').innerHTML = '<i data-lucide="shield-check" class="w-5 h-5 text-txlog-coral"></i> Vulnerabilities — Transaction #' + transactionId;
 
         var summaryHtml = '';
-        if (fixedCount > 0) summaryHtml += '<div class="bg-txlog-leaf/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-leaf">' + fixedCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-leaf/70 font-semibold">Packages<br/>Fixed</div></div>';
-        if (introducedCount > 0) summaryHtml += '<div class="bg-txlog-coral/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-coral">' + introducedCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-coral/70 font-semibold">Packages with<br/>new vulnerabilities</div></div>';
-        if (criticalCount > 0) summaryHtml += '<div class="bg-txlog-coral/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-coral">' + criticalCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-coral/70 font-semibold">Packages with<br/>critical vulnerabilities</div></div>';
-        if (highCount > 0) summaryHtml += '<div class="bg-txlog-golden/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-golden">' + highCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-golden/70 font-semibold">Packages with<br/>high vulnerabilities</div></div>';
+        if (uniqueCVEs > 0) summaryHtml += '<div class="bg-txlog-indigo/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-indigo">' + uniqueCVEs + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-indigo/70 font-semibold">Total<br/>CVEs</div></div>';
+        if (fixedCount > 0) summaryHtml += '<div class="bg-txlog-leaf/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-leaf">' + fixedCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-leaf/70 font-semibold">CVEs<br/>Fixed</div></div>';
+        if (introducedCount > 0) summaryHtml += '<div class="bg-txlog-coral/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-coral">' + introducedCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-coral/70 font-semibold">New<br/>CVEs</div></div>';
+        if (criticalCount > 0) summaryHtml += '<div class="bg-txlog-coral/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-coral">' + criticalCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-coral/70 font-semibold">Critical<br/>CVEs</div></div>';
+        if (highCount > 0) summaryHtml += '<div class="bg-txlog-golden/10 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-txlog-golden">' + highCount + '</div><div class="text-[10px] uppercase tracking-wider text-txlog-golden/70 font-semibold">High<br/>CVEs</div></div>';
         document.getElementById('modal-vulns-summary').innerHTML = summaryHtml;
         document.getElementById('modal-vulns-explanation').classList.remove('hidden');
 

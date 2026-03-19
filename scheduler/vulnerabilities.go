@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/lib/pq"
 	"github.com/txlog/server/database"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/util"
@@ -189,25 +190,61 @@ func UpdateVulnerabilitiesJob() {
 }
 
 func updateTransactionScoreboards() {
-	// Puxa transações pendentes de serem "rated" com o Scoreboard.
-	// Como a gente não adicionou uma flag processada, apenas rodamos um batch
-	// atualizando quem não teve scoreboard injetado. Para evitar sobrecarga processamos em CTE ou batch.
+	logger.Info("Vulnerabilities: Fetching transactions for scoreboard calculation...")
 
-	// A strategy: execute an UPDATE statement that uses the delta
-	// of package_vulnerabilities from "removed" to "installed/upgrade" items of the same transaction.
+	type txKey struct {
+		TransactionID string
+		MachineID     string
+	}
+	var keys []txKey
 
-	stmt := `
-WITH removed_vulns AS (
+	rows, err := database.Db.Query("SELECT DISTINCT transaction_id, machine_id FROM transactions")
+	if err != nil {
+		logger.Error("Failed to fetch transactions list: " + err.Error())
+		return
+	}
+	for rows.Next() {
+		var k txKey
+		if err := rows.Scan(&k.TransactionID, &k.MachineID); err == nil {
+			keys = append(keys, k)
+		}
+	}
+	rows.Close()
+
+	total := len(keys)
+	logger.Info(fmt.Sprintf("Vulnerabilities: Total of %d transactions to process.", total))
+
+	chunkSize := 500
+	for i := 0; i < total; i += chunkSize {
+		end := i + chunkSize
+		if end > total {
+			end = total
+		}
+
+		pct := float64(i) / float64(total) * 100
+		logger.Info(fmt.Sprintf("Vulnerabilities: Processing batch %d to %d of %d (%.1f%%)...", i+1, end, total, pct))
+
+		chunk := keys[i:end]
+		var txnIDs []string
+		var mchnIDs []string
+		for _, k := range chunk {
+			txnIDs = append(txnIDs, k.TransactionID)
+			mchnIDs = append(mchnIDs, k.MachineID)
+		}
+
+		stmt := `
+WITH batch AS (
+    SELECT unnest($1::text[])::integer AS transaction_id, unnest($2::text[]) AS machine_id
+),
+raw_removed AS (
     SELECT
         ti.transaction_id,
         ti.machine_id,
-        COUNT(DISTINCT pv.vulnerability_id) as total_removed,
-        COUNT(DISTINCT CASE WHEN v.severity = 'CRITICAL' THEN pv.vulnerability_id END) as critical_removed,
-        COUNT(DISTINCT CASE WHEN v.severity = 'HIGH' THEN pv.vulnerability_id END) as high_removed,
-        COUNT(DISTINCT CASE WHEN v.severity = 'MEDIUM' THEN pv.vulnerability_id END) as medium_removed,
-        COUNT(DISTINCT CASE WHEN v.severity = 'LOW' THEN pv.vulnerability_id END) as low_removed,
-        SUM(DISTINCT v.cvss_score) as removed_cvss
+        pv.vulnerability_id,
+        v.severity,
+        v.cvss_score
     FROM transaction_items ti
+    JOIN batch b ON ti.transaction_id = b.transaction_id AND ti.machine_id = b.machine_id
     JOIN transactions trans ON ti.transaction_id = trans.transaction_id AND ti.machine_id = trans.machine_id
     JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
     JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version
@@ -219,19 +256,16 @@ WITH removed_vulns AS (
          )
     JOIN vulnerabilities v ON v.id = pv.vulnerability_id
     WHERE ti.action IN ('Removed', 'Obsoleted', 'Upgraded', 'Downgraded', 'removed')
-    GROUP BY ti.transaction_id, ti.machine_id
 ),
-installed_vulns AS (
+raw_installed AS (
     SELECT
         ti.transaction_id,
         ti.machine_id,
-        COUNT(DISTINCT pv.vulnerability_id) as total_installed,
-        COUNT(DISTINCT CASE WHEN v.severity = 'CRITICAL' THEN pv.vulnerability_id END) as critical_installed,
-        COUNT(DISTINCT CASE WHEN v.severity = 'HIGH' THEN pv.vulnerability_id END) as high_installed,
-        COUNT(DISTINCT CASE WHEN v.severity = 'MEDIUM' THEN pv.vulnerability_id END) as medium_installed,
-        COUNT(DISTINCT CASE WHEN v.severity = 'LOW' THEN pv.vulnerability_id END) as low_installed,
-        SUM(DISTINCT v.cvss_score) as installed_cvss
+        pv.vulnerability_id,
+        v.severity,
+        v.cvss_score
     FROM transaction_items ti
+    JOIN batch b ON ti.transaction_id = b.transaction_id AND ti.machine_id = b.machine_id
     JOIN transactions trans ON ti.transaction_id = trans.transaction_id AND ti.machine_id = trans.machine_id
     JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
     JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version
@@ -243,33 +277,71 @@ installed_vulns AS (
          )
     JOIN vulnerabilities v ON v.id = pv.vulnerability_id
     WHERE ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade')
-    GROUP BY ti.transaction_id, ti.machine_id
+),
+removed_vulns AS (
+    SELECT
+        transaction_id,
+        machine_id,
+        COUNT(DISTINCT vulnerability_id) as total_removed,
+        COUNT(DISTINCT CASE WHEN severity = 'CRITICAL' THEN vulnerability_id END) as critical_removed,
+        COUNT(DISTINCT CASE WHEN severity = 'HIGH' THEN vulnerability_id END) as high_removed,
+        COUNT(DISTINCT CASE WHEN severity = 'MEDIUM' THEN vulnerability_id END) as medium_removed,
+        COUNT(DISTINCT CASE WHEN severity = 'LOW' THEN vulnerability_id END) as low_removed,
+        COALESCE(SUM(cvss_score), 0) as removed_cvss
+    FROM (
+        SELECT DISTINCT transaction_id, machine_id, vulnerability_id, severity, cvss_score
+        FROM raw_removed r
+        WHERE NOT EXISTS (
+            SELECT 1 FROM raw_installed i
+            WHERE i.transaction_id = r.transaction_id AND i.machine_id = r.machine_id AND i.vulnerability_id = r.vulnerability_id
+        )
+    ) as truly_fixed
+    GROUP BY transaction_id, machine_id
+),
+installed_vulns AS (
+    SELECT
+        transaction_id,
+        machine_id,
+        COUNT(DISTINCT vulnerability_id) as total_installed,
+        COUNT(DISTINCT CASE WHEN severity = 'CRITICAL' THEN vulnerability_id END) as critical_installed,
+        COUNT(DISTINCT CASE WHEN severity = 'HIGH' THEN vulnerability_id END) as high_installed,
+        COUNT(DISTINCT CASE WHEN severity = 'MEDIUM' THEN vulnerability_id END) as medium_installed,
+        COUNT(DISTINCT CASE WHEN severity = 'LOW' THEN vulnerability_id END) as low_installed,
+        COALESCE(SUM(cvss_score), 0) as installed_cvss
+    FROM (
+        SELECT DISTINCT transaction_id, machine_id, vulnerability_id, severity, cvss_score
+        FROM raw_installed i
+        WHERE NOT EXISTS (
+            SELECT 1 FROM raw_removed r
+            WHERE r.transaction_id = i.transaction_id AND r.machine_id = i.machine_id AND r.vulnerability_id = i.vulnerability_id
+        )
+    ) as truly_introduced
+    GROUP BY transaction_id, machine_id
 )
 UPDATE transactions t
 SET
-    vulns_fixed = GREATEST(COALESCE(r.total_removed, 0) - COALESCE(i.total_installed, 0), 0),
-    vulns_introduced = GREATEST(COALESCE(i.total_installed, 0) - COALESCE(r.total_removed, 0), 0),
-    critical_vulns_fixed = GREATEST(COALESCE(r.critical_removed, 0) - COALESCE(i.critical_installed, 0), 0),
-    critical_vulns_introduced = GREATEST(COALESCE(i.critical_installed, 0) - COALESCE(r.critical_removed, 0), 0),
-    high_vulns_fixed = GREATEST(COALESCE(r.high_removed, 0) - COALESCE(i.high_installed, 0), 0),
-    high_vulns_introduced = GREATEST(COALESCE(i.high_installed, 0) - COALESCE(r.high_removed, 0), 0),
-    medium_vulns_fixed = GREATEST(COALESCE(r.medium_removed, 0) - COALESCE(i.medium_installed, 0), 0),
-    medium_vulns_introduced = GREATEST(COALESCE(i.medium_installed, 0) - COALESCE(r.medium_removed, 0), 0),
-    low_vulns_fixed = GREATEST(COALESCE(r.low_removed, 0) - COALESCE(i.low_installed, 0), 0),
-    low_vulns_introduced = GREATEST(COALESCE(i.low_installed, 0) - COALESCE(r.low_removed, 0), 0),
-    risk_score_mitigated = GREATEST(COALESCE(r.removed_cvss, 0) - COALESCE(i.installed_cvss, 0), 0),
-    is_security_patch = (GREATEST(COALESCE(r.critical_removed, 0) - COALESCE(i.critical_installed, 0), 0) > 0 OR
-                         GREATEST(COALESCE(r.high_removed, 0) - COALESCE(i.high_installed, 0), 0) > 0 OR
-                         GREATEST(COALESCE(r.total_removed, 0) - COALESCE(i.total_installed, 0), 0) > 0)
+    vulns_fixed = COALESCE(r.total_removed, 0),
+    vulns_introduced = COALESCE(i.total_installed, 0),
+    critical_vulns_fixed = COALESCE(r.critical_removed, 0),
+    critical_vulns_introduced = COALESCE(i.critical_installed, 0),
+    high_vulns_fixed = COALESCE(r.high_removed, 0),
+    high_vulns_introduced = COALESCE(i.high_installed, 0),
+    medium_vulns_fixed = COALESCE(r.medium_removed, 0),
+    medium_vulns_introduced = COALESCE(i.medium_installed, 0),
+    low_vulns_fixed = COALESCE(r.low_removed, 0),
+    low_vulns_introduced = COALESCE(i.low_installed, 0),
+    risk_score_mitigated = COALESCE(r.removed_cvss, 0) - COALESCE(i.installed_cvss, 0),
+    is_security_patch = (COALESCE(r.critical_removed, 0) > 0 OR COALESCE(r.high_removed, 0) > 0 OR COALESCE(r.total_removed, 0) > 0)
 FROM removed_vulns r
 FULL OUTER JOIN installed_vulns i ON r.transaction_id = i.transaction_id AND r.machine_id = i.machine_id
 WHERE t.transaction_id = COALESCE(r.transaction_id, i.transaction_id)
   AND t.machine_id = COALESCE(r.machine_id, i.machine_id)
   AND (COALESCE(r.total_removed, 0) > 0 OR COALESCE(i.total_installed, 0) > 0);
-	`
+		`
 
-	_, err := database.Db.Exec(stmt)
-	if err != nil {
-		logger.Error("Failed to update transaction scoreboards: " + err.Error())
+		_, err := database.Db.Exec(stmt, pq.Array(txnIDs), pq.Array(mchnIDs))
+		if err != nil {
+			logger.Error("Failed to update transaction scoreboards for batch: " + err.Error())
+		}
 	}
 }

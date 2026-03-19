@@ -20,9 +20,23 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Improve vulnerability counting logic and display in the UI.
+- Refactor scoreboard updates to use batch processing.
+
 ### Changed
 
+- Regenerate minified Tailwind CSS and modify the machine ID template.
+- Update database migration for statistics percentage.
 - Update Go version to 1.26.1.
+- Bump `github.com/lib/pq` from 1.11.2 to 1.12.0.
+- Bump `github.com/go-ldap/ldap/v3` from 3.4.12 to 3.4.13.
+
+### Fixed
+
+- Improve vulnerability tracking by incorporating machine ID in transaction updates and filtering package
+  vulnerabilities by asset OS ecosystem.
 
 ## [1.25.0] - 2026-03-12
 

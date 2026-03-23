@@ -18,6 +18,25 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- Extract CVSS scores and structured vulnerability severity natively from the
+  OSV ecosystem arrays.
+- Add optimized database indexes (`idx_pv_pkg_ver_rel_eco` and
+  `idx_ti_pkg_ver_rel_action`) to accelerate vulnerability lookups.
+
+### Changed
+
+- Improve OSV fetch performance using 10-worker concurrent HTTP pools.
+- Optimize vulnerability database update using 200-row batch SQL upserts.
+- Refactor transaction scoreboard calculation with incremental tracking to
+  evaluate only affected packages instead of historical data.
+- Fix severe database bottleneck in scoreboard calculation by replacing
+  nested loops with a single-pass boolean aggregation query and `MATERIALIZED`
+  CTEs, reducing query times from hours to milliseconds.
+
 ## [1.25.1] - 2026-03-19
 
 ### Added

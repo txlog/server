@@ -1,0 +1,1609 @@
+{
+  "postgresql_version": "18.2",
+  "tables": {
+    "api_keys": {
+      "name": "api_keys",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "nullable": false,
+          "default": "now()"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "integer",
+          "nullable": true,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('api_keys_id_seq'::regclass)",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        "key_hash": {
+          "name": "key_hash",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 64
+        },
+        "key_prefix": {
+          "name": "key_prefix",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 16
+        },
+        "last_used_at": {
+          "name": "last_used_at",
+          "type": "timestamp without time zone",
+          "nullable": true
+        },
+        "name": {
+          "name": "name",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 255
+        }
+      }
+    },
+    "assets": {
+      "name": "assets",
+      "columns": {
+        "agent_version": {
+          "name": "agent_version",
+          "type": "text",
+          "nullable": true
+        },
+        "asset_id": {
+          "name": "asset_id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('assets_asset_id_seq'::regclass)",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "deactivated_at": {
+          "name": "deactivated_at",
+          "type": "timestamp with time zone",
+          "nullable": true
+        },
+        "first_seen": {
+          "name": "first_seen",
+          "type": "timestamp with time zone",
+          "nullable": false
+        },
+        "hostname": {
+          "name": "hostname",
+          "type": "text",
+          "nullable": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": false,
+          "default": "true"
+        },
+        "last_seen": {
+          "name": "last_seen",
+          "type": "timestamp with time zone",
+          "nullable": false
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "nullable": false
+        },
+        "needs_restarting": {
+          "name": "needs_restarting",
+          "type": "boolean",
+          "nullable": true
+        },
+        "os": {
+          "name": "os",
+          "type": "text",
+          "nullable": true
+        },
+        "restarting_reason": {
+          "name": "restarting_reason",
+          "type": "text",
+          "nullable": true
+        }
+      }
+    },
+    "cron_lock": {
+      "name": "cron_lock",
+      "columns": {
+        "job_name": {
+          "name": "job_name",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 255
+        },
+        "locked_at": {
+          "name": "locked_at",
+          "type": "timestamp with time zone",
+          "nullable": true
+        }
+      }
+    },
+    "executions": {
+      "name": "executions",
+      "columns": {
+        "agent_version": {
+          "name": "agent_version",
+          "type": "text",
+          "nullable": true
+        },
+        "details": {
+          "name": "details",
+          "type": "text",
+          "nullable": true
+        },
+        "executed_at": {
+          "name": "executed_at",
+          "type": "timestamp with time zone",
+          "nullable": false
+        },
+        "hostname": {
+          "name": "hostname",
+          "type": "text",
+          "nullable": false
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('executions_id_seq'::regclass)",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "nullable": false
+        },
+        "needs_restarting": {
+          "name": "needs_restarting",
+          "type": "boolean",
+          "nullable": true
+        },
+        "os": {
+          "name": "os",
+          "type": "text",
+          "nullable": true
+        },
+        "restarting_reason": {
+          "name": "restarting_reason",
+          "type": "text",
+          "nullable": true
+        },
+        "success": {
+          "name": "success",
+          "type": "boolean",
+          "nullable": false
+        },
+        "transactions_processed": {
+          "name": "transactions_processed",
+          "type": "integer",
+          "nullable": true,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "transactions_sent": {
+          "name": "transactions_sent",
+          "type": "integer",
+          "nullable": true,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        }
+      }
+    },
+    "package_vulnerabilities": {
+      "name": "package_vulnerabilities",
+      "columns": {
+        "ecosystem": {
+          "name": "ecosystem",
+          "type": "character varying",
+          "nullable": false,
+          "default": "''::character varying",
+          "max_length": 255
+        },
+        "package_name": {
+          "name": "package_name",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 255
+        },
+        "release": {
+          "name": "release",
+          "type": "character varying",
+          "nullable": false,
+          "default": "''::character varying",
+          "max_length": 255
+        },
+        "version": {
+          "name": "version",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 255
+        },
+        "vulnerability_id": {
+          "name": "vulnerability_id",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 100
+        }
+      }
+    },
+    "schema_migrations": {
+      "name": "schema_migrations",
+      "columns": {
+        "dirty": {
+          "name": "dirty",
+          "type": "boolean",
+          "nullable": false
+        },
+        "version": {
+          "name": "version",
+          "type": "bigint",
+          "nullable": false,
+          "numeric_precision": 64,
+          "numeric_scale": 0
+        }
+      }
+    },
+    "statistics": {
+      "name": "statistics",
+      "columns": {
+        "name": {
+          "name": "name",
+          "type": "text",
+          "nullable": false
+        },
+        "percentage": {
+          "name": "percentage",
+          "type": "numeric",
+          "nullable": true,
+          "numeric_precision": 10,
+          "numeric_scale": 2
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": true
+        },
+        "value": {
+          "name": "value",
+          "type": "integer",
+          "nullable": false,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        }
+      }
+    },
+    "transaction_items": {
+      "name": "transaction_items",
+      "columns": {
+        "action": {
+          "name": "action",
+          "type": "text",
+          "nullable": true
+        },
+        "arch": {
+          "name": "arch",
+          "type": "text",
+          "nullable": true
+        },
+        "epoch": {
+          "name": "epoch",
+          "type": "text",
+          "nullable": true
+        },
+        "from_repo": {
+          "name": "from_repo",
+          "type": "text",
+          "nullable": true
+        },
+        "item_id": {
+          "name": "item_id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('transaction_items_item_id_seq'::regclass)",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "nullable": true
+        },
+        "package": {
+          "name": "package",
+          "type": "text",
+          "nullable": true
+        },
+        "release": {
+          "name": "release",
+          "type": "text",
+          "nullable": true
+        },
+        "repo": {
+          "name": "repo",
+          "type": "text",
+          "nullable": true
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "integer",
+          "nullable": true,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "version": {
+          "name": "version",
+          "type": "text",
+          "nullable": true
+        }
+      }
+    },
+    "transactions": {
+      "name": "transactions",
+      "columns": {
+        "actions": {
+          "name": "actions",
+          "type": "text",
+          "nullable": true
+        },
+        "altered": {
+          "name": "altered",
+          "type": "text",
+          "nullable": true
+        },
+        "begin_time": {
+          "name": "begin_time",
+          "type": "timestamp with time zone",
+          "nullable": true
+        },
+        "command_line": {
+          "name": "command_line",
+          "type": "text",
+          "nullable": true
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "nullable": true
+        },
+        "critical_vulns_fixed": {
+          "name": "critical_vulns_fixed",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "critical_vulns_introduced": {
+          "name": "critical_vulns_introduced",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamp with time zone",
+          "nullable": true
+        },
+        "high_vulns_fixed": {
+          "name": "high_vulns_fixed",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "high_vulns_introduced": {
+          "name": "high_vulns_introduced",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "hostname": {
+          "name": "hostname",
+          "type": "text",
+          "nullable": true
+        },
+        "is_security_patch": {
+          "name": "is_security_patch",
+          "type": "boolean",
+          "nullable": true,
+          "default": "false"
+        },
+        "low_vulns_fixed": {
+          "name": "low_vulns_fixed",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "low_vulns_introduced": {
+          "name": "low_vulns_introduced",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "machine_id": {
+          "name": "machine_id",
+          "type": "text",
+          "nullable": false
+        },
+        "max_severity_fixed": {
+          "name": "max_severity_fixed",
+          "type": "character varying",
+          "nullable": true,
+          "max_length": 20
+        },
+        "medium_vulns_fixed": {
+          "name": "medium_vulns_fixed",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "medium_vulns_introduced": {
+          "name": "medium_vulns_introduced",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "release_version": {
+          "name": "release_version",
+          "type": "text",
+          "nullable": true
+        },
+        "return_code": {
+          "name": "return_code",
+          "type": "text",
+          "nullable": true
+        },
+        "risk_score_mitigated": {
+          "name": "risk_score_mitigated",
+          "type": "numeric",
+          "nullable": true,
+          "default": "0.0",
+          "numeric_precision": 10,
+          "numeric_scale": 2
+        },
+        "scriptlet_output": {
+          "name": "scriptlet_output",
+          "type": "text",
+          "nullable": true
+        },
+        "transaction_id": {
+          "name": "transaction_id",
+          "type": "integer",
+          "nullable": false,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "user": {
+          "name": "user",
+          "type": "text",
+          "nullable": true
+        },
+        "vulnerable_packages_updated": {
+          "name": "vulnerable_packages_updated",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "vulns_fixed": {
+          "name": "vulns_fixed",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "vulns_introduced": {
+          "name": "vulns_introduced",
+          "type": "integer",
+          "nullable": true,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        }
+      }
+    },
+    "user_sessions": {
+      "name": "user_sessions",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": "now()"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "nullable": false
+        },
+        "id": {
+          "name": "id",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 64
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": true,
+          "default": "true"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "nullable": false,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        }
+      }
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": "now()"
+        },
+        "email": {
+          "name": "email",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 255
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('users_id_seq'::regclass)",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "nullable": true,
+          "default": "true"
+        },
+        "is_admin": {
+          "name": "is_admin",
+          "type": "boolean",
+          "nullable": true,
+          "default": "false"
+        },
+        "last_login_at": {
+          "name": "last_login_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": "now()"
+        },
+        "name": {
+          "name": "name",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 255
+        },
+        "picture": {
+          "name": "picture",
+          "type": "character varying",
+          "nullable": true,
+          "max_length": 512
+        },
+        "sub": {
+          "name": "sub",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 255
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "nullable": true,
+          "default": "now()"
+        }
+      }
+    },
+    "vulnerabilities": {
+      "name": "vulnerabilities",
+      "columns": {
+        "cvss_score": {
+          "name": "cvss_score",
+          "type": "numeric",
+          "nullable": true,
+          "default": "0.0",
+          "numeric_precision": 10,
+          "numeric_scale": 2
+        },
+        "details": {
+          "name": "details",
+          "type": "text",
+          "nullable": true
+        },
+        "id": {
+          "name": "id",
+          "type": "character varying",
+          "nullable": false,
+          "max_length": 100
+        },
+        "modified_at": {
+          "name": "modified_at",
+          "type": "timestamp with time zone",
+          "nullable": true
+        },
+        "published_at": {
+          "name": "published_at",
+          "type": "timestamp with time zone",
+          "nullable": true
+        },
+        "severity": {
+          "name": "severity",
+          "type": "character varying",
+          "nullable": true,
+          "max_length": 20
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "nullable": true
+        }
+      }
+    }
+  },
+  "indices": {
+    "api_keys_key_hash_key": {
+      "name": "api_keys_key_hash_key",
+      "table_name": "api_keys",
+      "definition": "CREATE UNIQUE INDEX api_keys_key_hash_key ON public.api_keys USING btree (key_hash)"
+    },
+    "api_keys_pkey": {
+      "name": "api_keys_pkey",
+      "table_name": "api_keys",
+      "definition": "CREATE UNIQUE INDEX api_keys_pkey ON public.api_keys USING btree (id)"
+    },
+    "assets_hostname_machine_id_unique": {
+      "name": "assets_hostname_machine_id_unique",
+      "table_name": "assets",
+      "definition": "CREATE UNIQUE INDEX assets_hostname_machine_id_unique ON public.assets USING btree (hostname, machine_id)"
+    },
+    "assets_pkey": {
+      "name": "assets_pkey",
+      "table_name": "assets",
+      "definition": "CREATE UNIQUE INDEX assets_pkey ON public.assets USING btree (asset_id)"
+    },
+    "cron_lock_pkey": {
+      "name": "cron_lock_pkey",
+      "table_name": "cron_lock",
+      "definition": "CREATE UNIQUE INDEX cron_lock_pkey ON public.cron_lock USING btree (job_name)"
+    },
+    "executions_pkey": {
+      "name": "executions_pkey",
+      "table_name": "executions",
+      "definition": "CREATE UNIQUE INDEX executions_pkey ON public.executions USING btree (id)"
+    },
+    "idx_api_keys_created_at": {
+      "name": "idx_api_keys_created_at",
+      "table_name": "api_keys",
+      "definition": "CREATE INDEX idx_api_keys_created_at ON public.api_keys USING btree (created_at DESC)"
+    },
+    "idx_api_keys_key_hash": {
+      "name": "idx_api_keys_key_hash",
+      "table_name": "api_keys",
+      "definition": "CREATE INDEX idx_api_keys_key_hash ON public.api_keys USING btree (key_hash) WHERE (is_active = true)"
+    },
+    "idx_assets_agent_version": {
+      "name": "idx_assets_agent_version",
+      "table_name": "assets",
+      "definition": "CREATE INDEX idx_assets_agent_version ON public.assets USING btree (agent_version) WHERE (agent_version IS NOT NULL)"
+    },
+    "idx_assets_deactivated_at": {
+      "name": "idx_assets_deactivated_at",
+      "table_name": "assets",
+      "definition": "CREATE INDEX idx_assets_deactivated_at ON public.assets USING btree (deactivated_at) WHERE (deactivated_at IS NOT NULL)"
+    },
+    "idx_assets_hostname_active": {
+      "name": "idx_assets_hostname_active",
+      "table_name": "assets",
+      "definition": "CREATE INDEX idx_assets_hostname_active ON public.assets USING btree (hostname, is_active) WHERE (is_active = true)"
+    },
+    "idx_assets_machine_id": {
+      "name": "idx_assets_machine_id",
+      "table_name": "assets",
+      "definition": "CREATE INDEX idx_assets_machine_id ON public.assets USING btree (machine_id)"
+    },
+    "idx_assets_needs_restarting": {
+      "name": "idx_assets_needs_restarting",
+      "table_name": "assets",
+      "definition": "CREATE INDEX idx_assets_needs_restarting ON public.assets USING btree (needs_restarting) WHERE (needs_restarting = true)"
+    },
+    "idx_assets_os": {
+      "name": "idx_assets_os",
+      "table_name": "assets",
+      "definition": "CREATE INDEX idx_assets_os ON public.assets USING btree (os) WHERE (os IS NOT NULL)"
+    },
+    "idx_executions_executed_at": {
+      "name": "idx_executions_executed_at",
+      "table_name": "executions",
+      "definition": "CREATE INDEX idx_executions_executed_at ON public.executions USING btree (executed_at DESC)"
+    },
+    "idx_executions_machine_hostname_time": {
+      "name": "idx_executions_machine_hostname_time",
+      "table_name": "executions",
+      "definition": "CREATE INDEX idx_executions_machine_hostname_time ON public.executions USING btree (machine_id, hostname, executed_at DESC)"
+    },
+    "idx_executions_machine_id": {
+      "name": "idx_executions_machine_id",
+      "table_name": "executions",
+      "definition": "CREATE INDEX idx_executions_machine_id ON public.executions USING btree (machine_id)"
+    },
+    "idx_executions_ranked_optim": {
+      "name": "idx_executions_ranked_optim",
+      "table_name": "executions",
+      "definition": "CREATE INDEX idx_executions_ranked_optim ON public.executions USING btree (hostname, executed_at DESC) INCLUDE (machine_id, needs_restarting)"
+    },
+    "idx_mv_dashboard_agent_stats": {
+      "name": "idx_mv_dashboard_agent_stats",
+      "table_name": "mv_dashboard_agent_stats",
+      "definition": "CREATE UNIQUE INDEX idx_mv_dashboard_agent_stats ON public.mv_dashboard_agent_stats USING btree (agent_version)"
+    },
+    "idx_mv_dashboard_most_updated": {
+      "name": "idx_mv_dashboard_most_updated",
+      "table_name": "mv_dashboard_most_updated",
+      "definition": "CREATE UNIQUE INDEX idx_mv_dashboard_most_updated ON public.mv_dashboard_most_updated USING btree (package)"
+    },
+    "idx_mv_dashboard_os_stats": {
+      "name": "idx_mv_dashboard_os_stats",
+      "table_name": "mv_dashboard_os_stats",
+      "definition": "CREATE UNIQUE INDEX idx_mv_dashboard_os_stats ON public.mv_dashboard_os_stats USING btree (os)"
+    },
+    "idx_mv_package_listing_package": {
+      "name": "idx_mv_package_listing_package",
+      "table_name": "mv_package_listing",
+      "definition": "CREATE UNIQUE INDEX idx_mv_package_listing_package ON public.mv_package_listing USING btree (package)"
+    },
+    "idx_mv_package_listing_package_text": {
+      "name": "idx_mv_package_listing_package_text",
+      "table_name": "mv_package_listing",
+      "definition": "CREATE INDEX idx_mv_package_listing_package_text ON public.mv_package_listing USING gin (package gin_trgm_ops)"
+    },
+    "idx_pv_pkg_ver_rel_eco": {
+      "name": "idx_pv_pkg_ver_rel_eco",
+      "table_name": "package_vulnerabilities",
+      "definition": "CREATE INDEX idx_pv_pkg_ver_rel_eco ON public.package_vulnerabilities USING btree (package_name, version, release, ecosystem)"
+    },
+    "idx_ti_action_covering": {
+      "name": "idx_ti_action_covering",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_ti_action_covering ON public.transaction_items USING btree (action) INCLUDE (transaction_id, machine_id, package)"
+    },
+    "idx_ti_package_gin": {
+      "name": "idx_ti_package_gin",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_ti_package_gin ON public.transaction_items USING gin (package gin_trgm_ops)"
+    },
+    "idx_ti_pkg_machid": {
+      "name": "idx_ti_pkg_machid",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_ti_pkg_machid ON public.transaction_items USING btree (package, machine_id)"
+    },
+    "idx_ti_pkg_ver_rel": {
+      "name": "idx_ti_pkg_ver_rel",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_ti_pkg_ver_rel ON public.transaction_items USING btree (package, version DESC, release DESC)"
+    },
+    "idx_ti_pkg_ver_rel_action": {
+      "name": "idx_ti_pkg_ver_rel_action",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_ti_pkg_ver_rel_action ON public.transaction_items USING btree (package, version, release, action)"
+    },
+    "idx_ti_txid_machineid": {
+      "name": "idx_ti_txid_machineid",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_ti_txid_machineid ON public.transaction_items USING btree (transaction_id, machine_id)"
+    },
+    "idx_transaction_items_action": {
+      "name": "idx_transaction_items_action",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_transaction_items_action ON public.transaction_items USING btree (action)"
+    },
+    "idx_transaction_items_machine_id_tx_id": {
+      "name": "idx_transaction_items_machine_id_tx_id",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_transaction_items_machine_id_tx_id ON public.transaction_items USING btree (machine_id, transaction_id DESC)"
+    },
+    "idx_transaction_items_package_name": {
+      "name": "idx_transaction_items_package_name",
+      "table_name": "transaction_items",
+      "definition": "CREATE INDEX idx_transaction_items_package_name ON public.transaction_items USING btree (package)"
+    },
+    "idx_transactions_begin_time": {
+      "name": "idx_transactions_begin_time",
+      "table_name": "transactions",
+      "definition": "CREATE INDEX idx_transactions_begin_time ON public.transactions USING btree (begin_time)"
+    },
+    "idx_transactions_machine_id_hostname": {
+      "name": "idx_transactions_machine_id_hostname",
+      "table_name": "transactions",
+      "definition": "CREATE INDEX idx_transactions_machine_id_hostname ON public.transactions USING btree (machine_id, hostname)"
+    },
+    "idx_user_sessions_expires_at": {
+      "name": "idx_user_sessions_expires_at",
+      "table_name": "user_sessions",
+      "definition": "CREATE INDEX idx_user_sessions_expires_at ON public.user_sessions USING btree (expires_at)"
+    },
+    "idx_user_sessions_is_active": {
+      "name": "idx_user_sessions_is_active",
+      "table_name": "user_sessions",
+      "definition": "CREATE INDEX idx_user_sessions_is_active ON public.user_sessions USING btree (is_active)"
+    },
+    "idx_user_sessions_user_id": {
+      "name": "idx_user_sessions_user_id",
+      "table_name": "user_sessions",
+      "definition": "CREATE INDEX idx_user_sessions_user_id ON public.user_sessions USING btree (user_id)"
+    },
+    "idx_users_created_at": {
+      "name": "idx_users_created_at",
+      "table_name": "users",
+      "definition": "CREATE INDEX idx_users_created_at ON public.users USING btree (created_at DESC)"
+    },
+    "idx_users_email": {
+      "name": "idx_users_email",
+      "table_name": "users",
+      "definition": "CREATE INDEX idx_users_email ON public.users USING btree (email)"
+    },
+    "idx_users_is_active": {
+      "name": "idx_users_is_active",
+      "table_name": "users",
+      "definition": "CREATE INDEX idx_users_is_active ON public.users USING btree (is_active)"
+    },
+    "idx_users_sub": {
+      "name": "idx_users_sub",
+      "table_name": "users",
+      "definition": "CREATE INDEX idx_users_sub ON public.users USING btree (sub)"
+    },
+    "package_vulnerabilities_pkey": {
+      "name": "package_vulnerabilities_pkey",
+      "table_name": "package_vulnerabilities",
+      "definition": "CREATE UNIQUE INDEX package_vulnerabilities_pkey ON public.package_vulnerabilities USING btree (package_name, version, release, vulnerability_id, ecosystem)"
+    },
+    "schema_migrations_pkey": {
+      "name": "schema_migrations_pkey",
+      "table_name": "schema_migrations",
+      "definition": "CREATE UNIQUE INDEX schema_migrations_pkey ON public.schema_migrations USING btree (version)"
+    },
+    "statistics_pkey": {
+      "name": "statistics_pkey",
+      "table_name": "statistics",
+      "definition": "CREATE UNIQUE INDEX statistics_pkey ON public.statistics USING btree (name)"
+    },
+    "transaction_items_pkey": {
+      "name": "transaction_items_pkey",
+      "table_name": "transaction_items",
+      "definition": "CREATE UNIQUE INDEX transaction_items_pkey ON public.transaction_items USING btree (item_id)"
+    },
+    "transactions_pkey": {
+      "name": "transactions_pkey",
+      "table_name": "transactions",
+      "definition": "CREATE UNIQUE INDEX transactions_pkey ON public.transactions USING btree (transaction_id, machine_id)"
+    },
+    "user_sessions_pkey": {
+      "name": "user_sessions_pkey",
+      "table_name": "user_sessions",
+      "definition": "CREATE UNIQUE INDEX user_sessions_pkey ON public.user_sessions USING btree (id)"
+    },
+    "users_email_key": {
+      "name": "users_email_key",
+      "table_name": "users",
+      "definition": "CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email)"
+    },
+    "users_pkey": {
+      "name": "users_pkey",
+      "table_name": "users",
+      "definition": "CREATE UNIQUE INDEX users_pkey ON public.users USING btree (id)"
+    },
+    "users_sub_key": {
+      "name": "users_sub_key",
+      "table_name": "users",
+      "definition": "CREATE UNIQUE INDEX users_sub_key ON public.users USING btree (sub)"
+    },
+    "vulnerabilities_pkey": {
+      "name": "vulnerabilities_pkey",
+      "table_name": "vulnerabilities",
+      "definition": "CREATE UNIQUE INDEX vulnerabilities_pkey ON public.vulnerabilities USING btree (id)"
+    }
+  },
+  "constraints": {
+    "api_keys_created_at_not_null": {
+      "name": "api_keys_created_at_not_null",
+      "type": "n",
+      "table_name": "api_keys",
+      "definition": "NOT NULL created_at"
+    },
+    "api_keys_created_by_fkey": {
+      "name": "api_keys_created_by_fkey",
+      "type": "f",
+      "table_name": "api_keys",
+      "definition": "FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL"
+    },
+    "api_keys_id_not_null": {
+      "name": "api_keys_id_not_null",
+      "type": "n",
+      "table_name": "api_keys",
+      "definition": "NOT NULL id"
+    },
+    "api_keys_is_active_not_null": {
+      "name": "api_keys_is_active_not_null",
+      "type": "n",
+      "table_name": "api_keys",
+      "definition": "NOT NULL is_active"
+    },
+    "api_keys_key_hash_key": {
+      "name": "api_keys_key_hash_key",
+      "type": "u",
+      "table_name": "api_keys",
+      "definition": "UNIQUE (key_hash)"
+    },
+    "api_keys_key_hash_not_null": {
+      "name": "api_keys_key_hash_not_null",
+      "type": "n",
+      "table_name": "api_keys",
+      "definition": "NOT NULL key_hash"
+    },
+    "api_keys_key_prefix_not_null": {
+      "name": "api_keys_key_prefix_not_null",
+      "type": "n",
+      "table_name": "api_keys",
+      "definition": "NOT NULL key_prefix"
+    },
+    "api_keys_name_check": {
+      "name": "api_keys_name_check",
+      "type": "c",
+      "table_name": "api_keys",
+      "definition": "CHECK ((char_length((name)::text) \u003e= 3))"
+    },
+    "api_keys_name_not_null": {
+      "name": "api_keys_name_not_null",
+      "type": "n",
+      "table_name": "api_keys",
+      "definition": "NOT NULL name"
+    },
+    "api_keys_pkey": {
+      "name": "api_keys_pkey",
+      "type": "p",
+      "table_name": "api_keys",
+      "definition": "PRIMARY KEY (id)"
+    },
+    "assets_asset_id_not_null": {
+      "name": "assets_asset_id_not_null",
+      "type": "n",
+      "table_name": "assets",
+      "definition": "NOT NULL asset_id"
+    },
+    "assets_created_at_not_null": {
+      "name": "assets_created_at_not_null",
+      "type": "n",
+      "table_name": "assets",
+      "definition": "NOT NULL created_at"
+    },
+    "assets_first_seen_not_null": {
+      "name": "assets_first_seen_not_null",
+      "type": "n",
+      "table_name": "assets",
+      "definition": "NOT NULL first_seen"
+    },
+    "assets_hostname_machine_id_unique": {
+      "name": "assets_hostname_machine_id_unique",
+      "type": "u",
+      "table_name": "assets",
+      "definition": "UNIQUE (hostname, machine_id)"
+    },
+    "assets_hostname_not_null": {
+      "name": "assets_hostname_not_null",
+      "type": "n",
+      "table_name": "assets",
+      "definition": "NOT NULL hostname"
+    },
+    "assets_is_active_not_null": {
+      "name": "assets_is_active_not_null",
+      "type": "n",
+      "table_name": "assets",
+      "definition": "NOT NULL is_active"
+    },
+    "assets_last_seen_not_null": {
+      "name": "assets_last_seen_not_null",
+      "type": "n",
+      "table_name": "assets",
+      "definition": "NOT NULL last_seen"
+    },
+    "assets_machine_id_not_null": {
+      "name": "assets_machine_id_not_null",
+      "type": "n",
+      "table_name": "assets",
+      "definition": "NOT NULL machine_id"
+    },
+    "assets_pkey": {
+      "name": "assets_pkey",
+      "type": "p",
+      "table_name": "assets",
+      "definition": "PRIMARY KEY (asset_id)"
+    },
+    "cron_lock_job_name_not_null": {
+      "name": "cron_lock_job_name_not_null",
+      "type": "n",
+      "table_name": "cron_lock",
+      "definition": "NOT NULL job_name"
+    },
+    "cron_lock_pkey": {
+      "name": "cron_lock_pkey",
+      "type": "p",
+      "table_name": "cron_lock",
+      "definition": "PRIMARY KEY (job_name)"
+    },
+    "executions_executed_at_not_null": {
+      "name": "executions_executed_at_not_null",
+      "type": "n",
+      "table_name": "executions",
+      "definition": "NOT NULL executed_at"
+    },
+    "executions_hostname_not_null": {
+      "name": "executions_hostname_not_null",
+      "type": "n",
+      "table_name": "executions",
+      "definition": "NOT NULL hostname"
+    },
+    "executions_id_not_null": {
+      "name": "executions_id_not_null",
+      "type": "n",
+      "table_name": "executions",
+      "definition": "NOT NULL id"
+    },
+    "executions_machine_id_not_null": {
+      "name": "executions_machine_id_not_null",
+      "type": "n",
+      "table_name": "executions",
+      "definition": "NOT NULL machine_id"
+    },
+    "executions_pkey": {
+      "name": "executions_pkey",
+      "type": "p",
+      "table_name": "executions",
+      "definition": "PRIMARY KEY (id)"
+    },
+    "executions_success_not_null": {
+      "name": "executions_success_not_null",
+      "type": "n",
+      "table_name": "executions",
+      "definition": "NOT NULL success"
+    },
+    "package_vulnerabilities_ecosystem_not_null": {
+      "name": "package_vulnerabilities_ecosystem_not_null",
+      "type": "n",
+      "table_name": "package_vulnerabilities",
+      "definition": "NOT NULL ecosystem"
+    },
+    "package_vulnerabilities_package_name_not_null": {
+      "name": "package_vulnerabilities_package_name_not_null",
+      "type": "n",
+      "table_name": "package_vulnerabilities",
+      "definition": "NOT NULL package_name"
+    },
+    "package_vulnerabilities_pkey": {
+      "name": "package_vulnerabilities_pkey",
+      "type": "p",
+      "table_name": "package_vulnerabilities",
+      "definition": "PRIMARY KEY (package_name, version, release, vulnerability_id, ecosystem)"
+    },
+    "package_vulnerabilities_release_not_null": {
+      "name": "package_vulnerabilities_release_not_null",
+      "type": "n",
+      "table_name": "package_vulnerabilities",
+      "definition": "NOT NULL release"
+    },
+    "package_vulnerabilities_version_not_null": {
+      "name": "package_vulnerabilities_version_not_null",
+      "type": "n",
+      "table_name": "package_vulnerabilities",
+      "definition": "NOT NULL version"
+    },
+    "package_vulnerabilities_vulnerability_id_fkey": {
+      "name": "package_vulnerabilities_vulnerability_id_fkey",
+      "type": "f",
+      "table_name": "package_vulnerabilities",
+      "definition": "FOREIGN KEY (vulnerability_id) REFERENCES vulnerabilities(id) ON DELETE CASCADE"
+    },
+    "package_vulnerabilities_vulnerability_id_not_null": {
+      "name": "package_vulnerabilities_vulnerability_id_not_null",
+      "type": "n",
+      "table_name": "package_vulnerabilities",
+      "definition": "NOT NULL vulnerability_id"
+    },
+    "schema_migrations_dirty_not_null": {
+      "name": "schema_migrations_dirty_not_null",
+      "type": "n",
+      "table_name": "schema_migrations",
+      "definition": "NOT NULL dirty"
+    },
+    "schema_migrations_pkey": {
+      "name": "schema_migrations_pkey",
+      "type": "p",
+      "table_name": "schema_migrations",
+      "definition": "PRIMARY KEY (version)"
+    },
+    "schema_migrations_version_not_null": {
+      "name": "schema_migrations_version_not_null",
+      "type": "n",
+      "table_name": "schema_migrations",
+      "definition": "NOT NULL version"
+    },
+    "statistics_name_not_null": {
+      "name": "statistics_name_not_null",
+      "type": "n",
+      "table_name": "statistics",
+      "definition": "NOT NULL name"
+    },
+    "statistics_pkey": {
+      "name": "statistics_pkey",
+      "type": "p",
+      "table_name": "statistics",
+      "definition": "PRIMARY KEY (name)"
+    },
+    "statistics_value_not_null": {
+      "name": "statistics_value_not_null",
+      "type": "n",
+      "table_name": "statistics",
+      "definition": "NOT NULL value"
+    },
+    "transaction_items_item_id_not_null": {
+      "name": "transaction_items_item_id_not_null",
+      "type": "n",
+      "table_name": "transaction_items",
+      "definition": "NOT NULL item_id"
+    },
+    "transaction_items_pkey": {
+      "name": "transaction_items_pkey",
+      "type": "p",
+      "table_name": "transaction_items",
+      "definition": "PRIMARY KEY (item_id)"
+    },
+    "transaction_items_transaction_id_machine_id_fkey": {
+      "name": "transaction_items_transaction_id_machine_id_fkey",
+      "type": "f",
+      "table_name": "transaction_items",
+      "definition": "FOREIGN KEY (transaction_id, machine_id) REFERENCES transactions(transaction_id, machine_id)"
+    },
+    "transactions_machine_id_not_null": {
+      "name": "transactions_machine_id_not_null",
+      "type": "n",
+      "table_name": "transactions",
+      "definition": "NOT NULL machine_id"
+    },
+    "transactions_pkey": {
+      "name": "transactions_pkey",
+      "type": "p",
+      "table_name": "transactions",
+      "definition": "PRIMARY KEY (transaction_id, machine_id)"
+    },
+    "transactions_transaction_id_not_null": {
+      "name": "transactions_transaction_id_not_null",
+      "type": "n",
+      "table_name": "transactions",
+      "definition": "NOT NULL transaction_id"
+    },
+    "user_sessions_expires_at_not_null": {
+      "name": "user_sessions_expires_at_not_null",
+      "type": "n",
+      "table_name": "user_sessions",
+      "definition": "NOT NULL expires_at"
+    },
+    "user_sessions_id_not_null": {
+      "name": "user_sessions_id_not_null",
+      "type": "n",
+      "table_name": "user_sessions",
+      "definition": "NOT NULL id"
+    },
+    "user_sessions_pkey": {
+      "name": "user_sessions_pkey",
+      "type": "p",
+      "table_name": "user_sessions",
+      "definition": "PRIMARY KEY (id)"
+    },
+    "user_sessions_user_id_fkey": {
+      "name": "user_sessions_user_id_fkey",
+      "type": "f",
+      "table_name": "user_sessions",
+      "definition": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
+    },
+    "user_sessions_user_id_not_null": {
+      "name": "user_sessions_user_id_not_null",
+      "type": "n",
+      "table_name": "user_sessions",
+      "definition": "NOT NULL user_id"
+    },
+    "users_email_key": {
+      "name": "users_email_key",
+      "type": "u",
+      "table_name": "users",
+      "definition": "UNIQUE (email)"
+    },
+    "users_email_not_null": {
+      "name": "users_email_not_null",
+      "type": "n",
+      "table_name": "users",
+      "definition": "NOT NULL email"
+    },
+    "users_id_not_null": {
+      "name": "users_id_not_null",
+      "type": "n",
+      "table_name": "users",
+      "definition": "NOT NULL id"
+    },
+    "users_name_not_null": {
+      "name": "users_name_not_null",
+      "type": "n",
+      "table_name": "users",
+      "definition": "NOT NULL name"
+    },
+    "users_pkey": {
+      "name": "users_pkey",
+      "type": "p",
+      "table_name": "users",
+      "definition": "PRIMARY KEY (id)"
+    },
+    "users_sub_key": {
+      "name": "users_sub_key",
+      "type": "u",
+      "table_name": "users",
+      "definition": "UNIQUE (sub)"
+    },
+    "users_sub_not_null": {
+      "name": "users_sub_not_null",
+      "type": "n",
+      "table_name": "users",
+      "definition": "NOT NULL sub"
+    },
+    "vulnerabilities_id_not_null": {
+      "name": "vulnerabilities_id_not_null",
+      "type": "n",
+      "table_name": "vulnerabilities",
+      "definition": "NOT NULL id"
+    },
+    "vulnerabilities_pkey": {
+      "name": "vulnerabilities_pkey",
+      "type": "p",
+      "table_name": "vulnerabilities",
+      "definition": "PRIMARY KEY (id)"
+    }
+  },
+  "sequences": {
+    "api_keys_id_seq": {
+      "name": "api_keys_id_seq",
+      "start_value": 1,
+      "minimum_value": 1,
+      "maximum_value": 2147483647,
+      "increment": 1,
+      "cycle_option": false
+    },
+    "assets_asset_id_seq": {
+      "name": "assets_asset_id_seq",
+      "start_value": 1,
+      "minimum_value": 1,
+      "maximum_value": 2147483647,
+      "increment": 1,
+      "cycle_option": false
+    },
+    "executions_id_seq": {
+      "name": "executions_id_seq",
+      "start_value": 1,
+      "minimum_value": 1,
+      "maximum_value": 2147483647,
+      "increment": 1,
+      "cycle_option": false
+    },
+    "transaction_items_item_id_seq": {
+      "name": "transaction_items_item_id_seq",
+      "start_value": 1,
+      "minimum_value": 1,
+      "maximum_value": 2147483647,
+      "increment": 1,
+      "cycle_option": false
+    },
+    "users_id_seq": {
+      "name": "users_id_seq",
+      "start_value": 1,
+      "minimum_value": 1,
+      "maximum_value": 2147483647,
+      "increment": 1,
+      "cycle_option": false
+    }
+  },
+  "materialized_views": {
+    "mv_dashboard_agent_stats": {
+      "name": "mv_dashboard_agent_stats",
+      "definition": " SELECT agent_version,\n    count(*) AS num_machines\n   FROM assets\n  WHERE ((is_active = true) AND (agent_version IS NOT NULL))\n  GROUP BY agent_version\n  ORDER BY (count(*)) DESC;"
+    },
+    "mv_dashboard_most_updated": {
+      "name": "mv_dashboard_most_updated",
+      "definition": " SELECT ti.package,\n    count(*) AS total_updates,\n    count(DISTINCT t.hostname) AS distinct_hosts_updated\n   FROM ((transaction_items ti\n     JOIN transactions t ON (((ti.transaction_id = t.transaction_id) AND (ti.machine_id = t.machine_id))))\n     JOIN assets a ON (((t.machine_id = a.machine_id) AND (t.hostname = a.hostname))))\n  WHERE ((ti.action = 'Upgrade'::text) AND (t.end_time \u003e= (now() - '30 days'::interval)) AND (a.is_active = true))\n  GROUP BY ti.package\n  ORDER BY (count(*)) DESC\n LIMIT 10;"
+    },
+    "mv_dashboard_os_stats": {
+      "name": "mv_dashboard_os_stats",
+      "definition": " SELECT os,\n    count(*) AS num_machines\n   FROM assets\n  WHERE ((is_active = true) AND (os IS NOT NULL))\n  GROUP BY os\n  ORDER BY (count(*)) DESC;"
+    },
+    "mv_package_listing": {
+      "name": "mv_package_listing",
+      "definition": " WITH distinctpackages AS (\n         SELECT DISTINCT\n                CASE\n                    WHEN (transaction_items.package ~~ 'Change %'::text) THEN SUBSTRING(transaction_items.package FROM 8)\n                    ELSE transaction_items.package\n                END AS clean_package\n           FROM transaction_items\n        ), latestversions AS (\n         SELECT DISTINCT ON (\n                CASE\n                    WHEN (transaction_items.package ~~ 'Change %'::text) THEN SUBSTRING(transaction_items.package FROM 8)\n                    ELSE transaction_items.package\n                END)\n                CASE\n                    WHEN (transaction_items.package ~~ 'Change %'::text) THEN SUBSTRING(transaction_items.package FROM 8)\n                    ELSE transaction_items.package\n                END AS package,\n            transaction_items.version,\n            transaction_items.release,\n            transaction_items.arch,\n            transaction_items.repo\n           FROM transaction_items\n          ORDER BY\n                CASE\n                    WHEN (transaction_items.package ~~ 'Change %'::text) THEN SUBSTRING(transaction_items.package FROM 8)\n                    ELSE transaction_items.package\n                END, transaction_items.version DESC, transaction_items.release DESC\n        ), versioncounts AS (\n         SELECT\n                CASE\n                    WHEN (transaction_items.package ~~ 'Change %'::text) THEN SUBSTRING(transaction_items.package FROM 8)\n                    ELSE transaction_items.package\n                END AS package,\n            count(DISTINCT ROW(transaction_items.version, transaction_items.release)) AS total_versions\n           FROM transaction_items\n          GROUP BY\n                CASE\n                    WHEN (transaction_items.package ~~ 'Change %'::text) THEN SUBSTRING(transaction_items.package FROM 8)\n                    ELSE transaction_items.package\n                END\n        ), machinecounts AS (\n         SELECT\n                CASE\n                    WHEN (ti.package ~~ 'Change %'::text) THEN SUBSTRING(ti.package FROM 8)\n                    ELSE ti.package\n                END AS package,\n            count(DISTINCT ti.machine_id) AS machine_count\n           FROM (transaction_items ti\n             JOIN assets a ON ((ti.machine_id = a.machine_id)))\n          WHERE (a.is_active = true)\n          GROUP BY\n                CASE\n                    WHEN (ti.package ~~ 'Change %'::text) THEN SUBSTRING(ti.package FROM 8)\n                    ELSE ti.package\n                END\n        )\n SELECT lv.package,\n    lv.version,\n    lv.release,\n    lv.arch,\n    lv.repo,\n    (COALESCE(vc.total_versions, (1)::bigint) - 1) AS other_versions_count,\n    COALESCE(mc.machine_count, (0)::bigint) AS machine_count\n   FROM ((latestversions lv\n     LEFT JOIN versioncounts vc ON ((lv.package = vc.package)))\n     LEFT JOIN machinecounts mc ON ((lv.package = mc.package)))\n  ORDER BY lv.package;"
+    }
+  },
+  "views": {},
+  "triggers": {},
+  "functions": {
+    "gin_extract_query_trgm(text, internal, smallint, internal, internal, internal, internal)": {
+      "name": "gin_extract_query_trgm",
+      "arguments": "text, internal, smallint, internal, internal, internal, internal",
+      "return_type": "internal",
+      "definition": "gin_extract_query_trgm",
+      "volatility": "IMMUTABLE"
+    },
+    "gin_extract_value_trgm(text, internal)": {
+      "name": "gin_extract_value_trgm",
+      "arguments": "text, internal",
+      "return_type": "internal",
+      "definition": "gin_extract_value_trgm",
+      "volatility": "IMMUTABLE"
+    },
+    "gin_trgm_consistent(internal, smallint, text, integer, internal, internal, internal, internal)": {
+      "name": "gin_trgm_consistent",
+      "arguments": "internal, smallint, text, integer, internal, internal, internal, internal",
+      "return_type": "boolean",
+      "definition": "gin_trgm_consistent",
+      "volatility": "IMMUTABLE"
+    },
+    "gin_trgm_triconsistent(internal, smallint, text, integer, internal, internal, internal)": {
+      "name": "gin_trgm_triconsistent",
+      "arguments": "internal, smallint, text, integer, internal, internal, internal",
+      "return_type": "\"char\"",
+      "definition": "gin_trgm_triconsistent",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_compress(internal)": {
+      "name": "gtrgm_compress",
+      "arguments": "internal",
+      "return_type": "internal",
+      "definition": "gtrgm_compress",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_consistent(internal, text, smallint, oid, internal)": {
+      "name": "gtrgm_consistent",
+      "arguments": "internal, text, smallint, oid, internal",
+      "return_type": "boolean",
+      "definition": "gtrgm_consistent",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_decompress(internal)": {
+      "name": "gtrgm_decompress",
+      "arguments": "internal",
+      "return_type": "internal",
+      "definition": "gtrgm_decompress",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_distance(internal, text, smallint, oid, internal)": {
+      "name": "gtrgm_distance",
+      "arguments": "internal, text, smallint, oid, internal",
+      "return_type": "double precision",
+      "definition": "gtrgm_distance",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_in(cstring)": {
+      "name": "gtrgm_in",
+      "arguments": "cstring",
+      "return_type": "USER-DEFINED",
+      "definition": "gtrgm_in",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_options(internal)": {
+      "name": "gtrgm_options",
+      "arguments": "internal",
+      "return_type": "void",
+      "definition": "gtrgm_options",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_out(gtrgm)": {
+      "name": "gtrgm_out",
+      "arguments": "gtrgm",
+      "return_type": "cstring",
+      "definition": "gtrgm_out",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_penalty(internal, internal, internal)": {
+      "name": "gtrgm_penalty",
+      "arguments": "internal, internal, internal",
+      "return_type": "internal",
+      "definition": "gtrgm_penalty",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_picksplit(internal, internal)": {
+      "name": "gtrgm_picksplit",
+      "arguments": "internal, internal",
+      "return_type": "internal",
+      "definition": "gtrgm_picksplit",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_same(gtrgm, gtrgm, internal)": {
+      "name": "gtrgm_same",
+      "arguments": "gtrgm, gtrgm, internal",
+      "return_type": "internal",
+      "definition": "gtrgm_same",
+      "volatility": "IMMUTABLE"
+    },
+    "gtrgm_union(internal, internal)": {
+      "name": "gtrgm_union",
+      "arguments": "internal, internal",
+      "return_type": "USER-DEFINED",
+      "definition": "gtrgm_union",
+      "volatility": "IMMUTABLE"
+    },
+    "set_limit(real)": {
+      "name": "set_limit",
+      "arguments": "real",
+      "return_type": "real",
+      "definition": "set_limit",
+      "volatility": "VOLATILE"
+    },
+    "show_limit()": {
+      "name": "show_limit",
+      "arguments": "",
+      "return_type": "real",
+      "definition": "show_limit",
+      "volatility": "STABLE"
+    },
+    "show_trgm(text)": {
+      "name": "show_trgm",
+      "arguments": "text",
+      "return_type": "ARRAY",
+      "definition": "show_trgm",
+      "volatility": "IMMUTABLE"
+    },
+    "similarity(text, text)": {
+      "name": "similarity",
+      "arguments": "text, text",
+      "return_type": "real",
+      "definition": "similarity",
+      "volatility": "IMMUTABLE"
+    },
+    "similarity_dist(text, text)": {
+      "name": "similarity_dist",
+      "arguments": "text, text",
+      "return_type": "real",
+      "definition": "similarity_dist",
+      "volatility": "IMMUTABLE"
+    },
+    "similarity_op(text, text)": {
+      "name": "similarity_op",
+      "arguments": "text, text",
+      "return_type": "boolean",
+      "definition": "similarity_op",
+      "volatility": "STABLE"
+    },
+    "strict_word_similarity(text, text)": {
+      "name": "strict_word_similarity",
+      "arguments": "text, text",
+      "return_type": "real",
+      "definition": "strict_word_similarity",
+      "volatility": "IMMUTABLE"
+    },
+    "strict_word_similarity_commutator_op(text, text)": {
+      "name": "strict_word_similarity_commutator_op",
+      "arguments": "text, text",
+      "return_type": "boolean",
+      "definition": "strict_word_similarity_commutator_op",
+      "volatility": "STABLE"
+    },
+    "strict_word_similarity_dist_commutator_op(text, text)": {
+      "name": "strict_word_similarity_dist_commutator_op",
+      "arguments": "text, text",
+      "return_type": "real",
+      "definition": "strict_word_similarity_dist_commutator_op",
+      "volatility": "IMMUTABLE"
+    },
+    "strict_word_similarity_dist_op(text, text)": {
+      "name": "strict_word_similarity_dist_op",
+      "arguments": "text, text",
+      "return_type": "real",
+      "definition": "strict_word_similarity_dist_op",
+      "volatility": "IMMUTABLE"
+    },
+    "strict_word_similarity_op(text, text)": {
+      "name": "strict_word_similarity_op",
+      "arguments": "text, text",
+      "return_type": "boolean",
+      "definition": "strict_word_similarity_op",
+      "volatility": "STABLE"
+    },
+    "word_similarity(text, text)": {
+      "name": "word_similarity",
+      "arguments": "text, text",
+      "return_type": "real",
+      "definition": "word_similarity",
+      "volatility": "IMMUTABLE"
+    },
+    "word_similarity_commutator_op(text, text)": {
+      "name": "word_similarity_commutator_op",
+      "arguments": "text, text",
+      "return_type": "boolean",
+      "definition": "word_similarity_commutator_op",
+      "volatility": "STABLE"
+    },
+    "word_similarity_dist_commutator_op(text, text)": {
+      "name": "word_similarity_dist_commutator_op",
+      "arguments": "text, text",
+      "return_type": "real",
+      "definition": "word_similarity_dist_commutator_op",
+      "volatility": "IMMUTABLE"
+    },
+    "word_similarity_dist_op(text, text)": {
+      "name": "word_similarity_dist_op",
+      "arguments": "text, text",
+      "return_type": "real",
+      "definition": "word_similarity_dist_op",
+      "volatility": "IMMUTABLE"
+    },
+    "word_similarity_op(text, text)": {
+      "name": "word_similarity_op",
+      "arguments": "text, text",
+      "return_type": "boolean",
+      "definition": "word_similarity_op",
+      "volatility": "STABLE"
+    }
+  },
+  "enums": {},
+  "extensions": {
+    "pg_trgm": {
+      "name": "pg_trgm",
+      "version": "1.6"
+    },
+    "plpgsql": {
+      "name": "plpgsql",
+      "version": "1.0"
+    }
+  }
+}

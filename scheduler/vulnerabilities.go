@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/lib/pq"
@@ -11,6 +12,37 @@ import (
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/util"
 )
+
+// Package-level types used across multiple functions in the vulnerability pipeline.
+
+type vulnRecord struct {
+	ID          string
+	Summary     string
+	Details     string
+	Severity    string
+	CVSSScore   float64
+	ModifiedAt  *time.Time
+	PublishedAt *time.Time
+}
+
+type pvRecord struct {
+	PackageName     string
+	Version         string
+	Release         string
+	VulnerabilityID string
+	Ecosystem       string
+}
+
+type vulnPkgKey struct {
+	Name    string
+	Version string
+	Release string
+}
+
+type vulnTxKey struct {
+	TransactionID string
+	MachineID     string
+}
 
 func UpdateVulnerabilitiesJob() {
 	logger.Info("Vulnerabilities: executing update task...")
@@ -28,7 +60,7 @@ func UpdateVulnerabilitiesJob() {
 	}
 	defer releaseLock(lockName)
 
-	// Extrai todos os pacotes das transações recentes ou do ecossistema geral.
+	// Extract all distinct packages from transaction items, joined with asset OS.
 	query := `
         SELECT DISTINCT ti.package, ti.version, COALESCE(ti.release, '') AS release, a.os
         FROM transaction_items ti
@@ -78,8 +110,12 @@ func UpdateVulnerabilitiesJob() {
 
 	logger.Info(fmt.Sprintf("Vulnerabilities: found %d discrete package/ecosystem pairs to check.", len(packages)))
 
-	// Caches the detailed vulnerability data
+	// Cache for detailed vulnerability data
 	fetchedVulns := make(map[string]*util.OSVVuln)
+	var fetchedMu sync.Mutex
+
+	// Track which packages had vulnerability data changed for incremental scoreboard
+	updatedPackages := make(map[vulnPkgKey]bool)
 
 	chunkSize := 500
 	for i := 0; i < len(packages); i += chunkSize {
@@ -110,20 +146,75 @@ func UpdateVulnerabilitiesJob() {
 			continue
 		}
 
+		// Collect unique vulnerability IDs that need detail fetching
+		var idsToFetch []string
+		for _, result := range resp.Results {
+			for _, batchVuln := range result.Vulns {
+				fetchedMu.Lock()
+				_, found := fetchedVulns[batchVuln.ID]
+				fetchedMu.Unlock()
+				if !found {
+					idsToFetch = append(idsToFetch, batchVuln.ID)
+				}
+			}
+		}
+
+		// Deduplicate IDs
+		idSet := make(map[string]bool)
+		var uniqueIDs []string
+		for _, id := range idsToFetch {
+			if !idSet[id] {
+				idSet[id] = true
+				uniqueIDs = append(uniqueIDs, id)
+			}
+		}
+
+		// Fetch vulnerability details concurrently with a worker pool
+		if len(uniqueIDs) > 0 {
+			logger.Info(fmt.Sprintf("Vulnerabilities: fetching details for %d unique CVEs...", len(uniqueIDs)))
+			const workers = 10
+			idChan := make(chan string, len(uniqueIDs))
+			var wg sync.WaitGroup
+
+			for _, id := range uniqueIDs {
+				idChan <- id
+			}
+			close(idChan)
+
+			for w := 0; w < workers && w < len(uniqueIDs); w++ {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
+					for id := range idChan {
+						fetched, err := util.FetchOSVVulnerabilityDetails(id)
+						fetchedMu.Lock()
+						if err == nil && fetched != nil {
+							fetchedVulns[id] = fetched
+						}
+						fetchedMu.Unlock()
+					}
+				}()
+			}
+			wg.Wait()
+		}
+
+		// Collect batch data for bulk inserts
+		vulnBatch := make(map[string]vulnRecord)
+		var pvBatch []pvRecord
+
 		for j, result := range resp.Results {
 			targetPkg := chunk[j]
 			if len(result.Vulns) > 0 {
 				for _, batchVuln := range result.Vulns {
+					fetchedMu.Lock()
 					vuln, found := fetchedVulns[batchVuln.ID]
+					fetchedMu.Unlock()
 					if !found {
-						fetched, err := util.FetchOSVVulnerabilityDetails(batchVuln.ID)
-						if err == nil && fetched != nil {
-							vuln = fetched
-							fetchedVulns[batchVuln.ID] = vuln
-						} else {
-							vuln = &batchVuln // fallback
-						}
+						vuln = &batchVuln // fallback
 					}
+
+					// Use structured severity extraction
+					severity, cvssScore := vuln.ExtractSeverityAndScore()
 
 					var modifiedAt, publishedAt *time.Time
 					if !vuln.ModifiedAt.IsZero() {
@@ -133,70 +224,185 @@ func UpdateVulnerabilitiesJob() {
 						publishedAt = &vuln.Published
 					}
 
-					// Infer severity loosely if possible, OSV does not always explicitly provide top-level string.
-					severity := "UNKNOWN"
-					cvssScore := 0.0
-
-					summaryUpper := strings.ToUpper(vuln.Summary)
-					detailsUpper := strings.ToUpper(vuln.Details)
-
-					if strings.Contains(summaryUpper, "CRITICAL") || strings.Contains(detailsUpper, "CRITICAL") {
-						severity = "CRITICAL"
-						cvssScore = 9.5
-					} else if strings.Contains(summaryUpper, "IMPORTANT") || strings.Contains(summaryUpper, "HIGH") || strings.Contains(detailsUpper, "HIGH") {
-						severity = "HIGH"
-						cvssScore = 8.0
-					} else if strings.Contains(summaryUpper, "MODERATE") || strings.Contains(summaryUpper, "MEDIUM") || strings.Contains(detailsUpper, "MEDIUM") {
-						severity = "MEDIUM"
-						cvssScore = 5.5
-					} else if strings.Contains(summaryUpper, "LOW") || strings.Contains(detailsUpper, "LOW") {
-						severity = "LOW"
-						cvssScore = 3.0
-					}
-
-					_, err := database.Db.Exec(`
-						INSERT INTO vulnerabilities (id, summary, details, severity, cvss_score, modified_at, published_at)
-						VALUES ($1, $2, $3, $4, $5, $6, $7)
-						ON CONFLICT (id) DO UPDATE SET
-							summary = EXCLUDED.summary,
-							details = EXCLUDED.details,
-							severity = EXCLUDED.severity,
-							cvss_score = EXCLUDED.cvss_score,
-							modified_at = EXCLUDED.modified_at
-					`, vuln.ID, vuln.Summary, vuln.Details, severity, cvssScore, modifiedAt, publishedAt)
-					if err != nil {
-						logger.Error("Error inserting vulnerability: " + err.Error())
-						continue
+					vulnBatch[vuln.ID] = vulnRecord{
+						ID:          vuln.ID,
+						Summary:     vuln.Summary,
+						Details:     vuln.Details,
+						Severity:    severity,
+						CVSSScore:   cvssScore,
+						ModifiedAt:  modifiedAt,
+						PublishedAt: publishedAt,
 					}
 
 					if targetPkg.Ecosystem != "" {
-						_, err = database.Db.Exec(`
-							INSERT INTO package_vulnerabilities (package_name, version, release, vulnerability_id, ecosystem)
-							VALUES ($1, $2, $3, $4, $5)
-							ON CONFLICT DO NOTHING
-						`, targetPkg.Name, targetPkg.Version, targetPkg.Release, vuln.ID, targetPkg.Ecosystem)
-						if err != nil {
-							logger.Error("Error linking pkg to vulnerability: " + err.Error())
-						}
+						pvBatch = append(pvBatch, pvRecord{
+							PackageName:     targetPkg.Name,
+							Version:         targetPkg.Version,
+							Release:         targetPkg.Release,
+							VulnerabilityID: vuln.ID,
+							Ecosystem:       targetPkg.Ecosystem,
+						})
+
+						updatedPackages[vulnPkgKey{
+							Name:    targetPkg.Name,
+							Version: targetPkg.Version,
+							Release: targetPkg.Release,
+						}] = true
 					}
 				}
 			}
 		}
+
+		// Batch upsert vulnerabilities (multi-row INSERT ... ON CONFLICT)
+		if len(vulnBatch) > 0 {
+			batchUpsertVulnerabilities(vulnBatch)
+		}
+
+		// Batch upsert package_vulnerabilities
+		if len(pvBatch) > 0 {
+			batchUpsertPackageVulnerabilities(pvBatch)
+		}
 	}
 
 	logger.Info("Vulnerabilities downloaded. Proceeding to calculate transaction scoreboards...")
-	updateTransactionScoreboards()
+	updateTransactionScoreboards(updatedPackages)
 	logger.Info("Vulnerabilities and transaction scoreboards updated successfully.")
 }
 
-func updateTransactionScoreboards() {
-	logger.Info("Vulnerabilities: Fetching transactions for scoreboard calculation...")
-
-	type txKey struct {
-		TransactionID string
-		MachineID     string
+// batchUpsertVulnerabilities inserts/updates vulnerabilities in batches of 200 rows.
+func batchUpsertVulnerabilities(records map[string]vulnRecord) {
+	var all []vulnRecord
+	for _, r := range records {
+		all = append(all, r)
 	}
-	var keys []txKey
+
+	batchSize := 200
+	for i := 0; i < len(all); i += batchSize {
+		end := i + batchSize
+		if end > len(all) {
+			end = len(all)
+		}
+		batch := all[i:end]
+
+		var valueParts []string
+		var args []interface{}
+		idx := 1
+
+		for _, r := range batch {
+			valueParts = append(valueParts, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+				idx, idx+1, idx+2, idx+3, idx+4, idx+5, idx+6))
+			args = append(args, r.ID, r.Summary, r.Details, r.Severity, r.CVSSScore, r.ModifiedAt, r.PublishedAt)
+			idx += 7
+		}
+
+		stmt := fmt.Sprintf(`
+			INSERT INTO vulnerabilities (id, summary, details, severity, cvss_score, modified_at, published_at)
+			VALUES %s
+			ON CONFLICT (id) DO UPDATE SET
+				summary = EXCLUDED.summary,
+				details = EXCLUDED.details,
+				severity = EXCLUDED.severity,
+				cvss_score = EXCLUDED.cvss_score,
+				modified_at = EXCLUDED.modified_at
+		`, strings.Join(valueParts, ", "))
+
+		_, err := database.Db.Exec(stmt, args...)
+		if err != nil {
+			logger.Error("Batch upsert vulnerabilities error: " + err.Error())
+		}
+	}
+}
+
+// batchUpsertPackageVulnerabilities inserts package↔vulnerability links in batches.
+func batchUpsertPackageVulnerabilities(records []pvRecord) {
+	batchSize := 200
+	for i := 0; i < len(records); i += batchSize {
+		end := i + batchSize
+		if end > len(records) {
+			end = len(records)
+		}
+		batch := records[i:end]
+
+		var valueParts []string
+		var args []interface{}
+		idx := 1
+
+		for _, r := range batch {
+			valueParts = append(valueParts, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d)",
+				idx, idx+1, idx+2, idx+3, idx+4))
+			args = append(args, r.PackageName, r.Version, r.Release, r.VulnerabilityID, r.Ecosystem)
+			idx += 5
+		}
+
+		stmt := fmt.Sprintf(`
+			INSERT INTO package_vulnerabilities (package_name, version, release, vulnerability_id, ecosystem)
+			VALUES %s
+			ON CONFLICT DO NOTHING
+		`, strings.Join(valueParts, ", "))
+
+		_, err := database.Db.Exec(stmt, args...)
+		if err != nil {
+			logger.Error("Batch upsert package_vulnerabilities error: " + err.Error())
+		}
+	}
+}
+
+func updateTransactionScoreboards(updatedPackages map[vulnPkgKey]bool) {
+	if len(updatedPackages) == 0 {
+		logger.Info("Vulnerabilities: No packages were updated, skipping scoreboard recalculation.")
+		return
+	}
+
+	logger.Info(fmt.Sprintf("Vulnerabilities: %d packages had vulnerability updates. Fetching affected transactions...", len(updatedPackages)))
+
+	// Build arrays of package names/versions/releases that were updated
+	var pkgNames, pkgVersions, pkgReleases []string
+	for k := range updatedPackages {
+		pkgNames = append(pkgNames, k.Name)
+		pkgVersions = append(pkgVersions, k.Version)
+		pkgReleases = append(pkgReleases, k.Release)
+	}
+
+	// Find only transactions that contain items matching the updated packages
+	rows, err := database.Db.Query(`
+		SELECT DISTINCT ti.transaction_id, ti.machine_id
+		FROM transaction_items ti
+		WHERE EXISTS (
+			SELECT 1 FROM unnest($1::text[], $2::text[], $3::text[]) AS u(pkg, ver, rel)
+			WHERE ti.package = u.pkg AND ti.version = u.ver AND COALESCE(ti.release, '') = u.rel
+		)
+	`, pq.Array(pkgNames), pq.Array(pkgVersions), pq.Array(pkgReleases))
+	if err != nil {
+		logger.Error("Failed to fetch affected transactions: " + err.Error())
+		// Fallback to processing all transactions
+		updateAllTransactionScoreboards()
+		return
+	}
+
+	var keys []vulnTxKey
+	for rows.Next() {
+		var k vulnTxKey
+		if err := rows.Scan(&k.TransactionID, &k.MachineID); err == nil {
+			keys = append(keys, k)
+		}
+	}
+	rows.Close()
+
+	total := len(keys)
+	logger.Info(fmt.Sprintf("Vulnerabilities: %d affected transactions to process (incremental).", total))
+
+	if total == 0 {
+		return
+	}
+
+	processScoreboardBatch(keys)
+}
+
+// updateAllTransactionScoreboards is the fallback that processes all transactions.
+func updateAllTransactionScoreboards() {
+	logger.Info("Vulnerabilities: Fallback - fetching ALL transactions for scoreboard calculation...")
+
+	var keys []vulnTxKey
 
 	rows, err := database.Db.Query("SELECT DISTINCT transaction_id, machine_id FROM transactions")
 	if err != nil {
@@ -204,7 +410,7 @@ func updateTransactionScoreboards() {
 		return
 	}
 	for rows.Next() {
-		var k txKey
+		var k vulnTxKey
 		if err := rows.Scan(&k.TransactionID, &k.MachineID); err == nil {
 			keys = append(keys, k)
 		}
@@ -214,6 +420,11 @@ func updateTransactionScoreboards() {
 	total := len(keys)
 	logger.Info(fmt.Sprintf("Vulnerabilities: Total of %d transactions to process.", total))
 
+	processScoreboardBatch(keys)
+}
+
+func processScoreboardBatch(keys []vulnTxKey) {
+	total := len(keys)
 	chunkSize := 500
 	for i := 0; i < total; i += chunkSize {
 		end := i + chunkSize
@@ -236,107 +447,86 @@ func updateTransactionScoreboards() {
 WITH batch AS (
     SELECT unnest($1::text[])::integer AS transaction_id, unnest($2::text[]) AS machine_id
 ),
-raw_removed AS (
+mapped_assets AS (
+    SELECT
+        b.transaction_id,
+        b.machine_id,
+        CASE
+            WHEN a.os ILIKE '%AlmaLinux%' THEN 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')
+            WHEN a.os ILIKE '%Rocky%' THEN 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')
+            WHEN a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%' THEN 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')
+            ELSE ''
+        END AS ecosystem
+    FROM batch b
+    JOIN transactions trans ON b.transaction_id = trans.transaction_id AND b.machine_id = trans.machine_id
+    JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
+),
+vuln_actions AS (
     SELECT
         ti.transaction_id,
         ti.machine_id,
         pv.vulnerability_id,
         v.severity,
-        v.cvss_score
+        v.cvss_score,
+        CASE WHEN ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade') THEN 1 ELSE 0 END AS is_installed,
+        CASE WHEN ti.action IN ('Removed', 'Obsoleted', 'Upgraded', 'Downgraded', 'removed') THEN 1 ELSE 0 END AS is_removed
     FROM transaction_items ti
-    JOIN batch b ON ti.transaction_id = b.transaction_id AND ti.machine_id = b.machine_id
-    JOIN transactions trans ON ti.transaction_id = trans.transaction_id AND ti.machine_id = trans.machine_id
-    JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
+    JOIN mapped_assets ma ON ti.transaction_id = ma.transaction_id AND ti.machine_id = ma.machine_id
     JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version
          AND pv.release = COALESCE(ti.release, '')
-         AND (
-             (a.os ILIKE '%AlmaLinux%' AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
-             (a.os ILIKE '%Rocky%' AND pv.ecosystem = 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
-             ((a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%') AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+'))
-         )
+         AND pv.ecosystem = ma.ecosystem
     JOIN vulnerabilities v ON v.id = pv.vulnerability_id
-    WHERE ti.action IN ('Removed', 'Obsoleted', 'Upgraded', 'Downgraded', 'removed')
+    WHERE ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade', 'Removed', 'Obsoleted', 'Upgraded', 'Downgraded', 'removed')
 ),
-raw_installed AS (
-    SELECT
-        ti.transaction_id,
-        ti.machine_id,
-        pv.vulnerability_id,
-        v.severity,
-        v.cvss_score
-    FROM transaction_items ti
-    JOIN batch b ON ti.transaction_id = b.transaction_id AND ti.machine_id = b.machine_id
-    JOIN transactions trans ON ti.transaction_id = trans.transaction_id AND ti.machine_id = trans.machine_id
-    JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
-    JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version
-         AND pv.release = COALESCE(ti.release, '')
-         AND (
-             (a.os ILIKE '%AlmaLinux%' AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
-             (a.os ILIKE '%Rocky%' AND pv.ecosystem = 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
-             ((a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%') AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+'))
-         )
-    JOIN vulnerabilities v ON v.id = pv.vulnerability_id
-    WHERE ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade')
-),
-removed_vulns AS (
+vuln_status AS (
     SELECT
         transaction_id,
         machine_id,
-        COUNT(DISTINCT vulnerability_id) as total_removed,
-        COUNT(DISTINCT CASE WHEN severity = 'CRITICAL' THEN vulnerability_id END) as critical_removed,
-        COUNT(DISTINCT CASE WHEN severity = 'HIGH' THEN vulnerability_id END) as high_removed,
-        COUNT(DISTINCT CASE WHEN severity = 'MEDIUM' THEN vulnerability_id END) as medium_removed,
-        COUNT(DISTINCT CASE WHEN severity = 'LOW' THEN vulnerability_id END) as low_removed,
-        COALESCE(SUM(cvss_score), 0) as removed_cvss
-    FROM (
-        SELECT DISTINCT transaction_id, machine_id, vulnerability_id, severity, cvss_score
-        FROM raw_removed r
-        WHERE NOT EXISTS (
-            SELECT 1 FROM raw_installed i
-            WHERE i.transaction_id = r.transaction_id AND i.machine_id = r.machine_id AND i.vulnerability_id = r.vulnerability_id
-        )
-    ) as truly_fixed
-    GROUP BY transaction_id, machine_id
+        vulnerability_id,
+        severity,
+        cvss_score,
+        MAX(is_installed) AS has_installed,
+        MAX(is_removed) AS has_removed
+    FROM vuln_actions
+    GROUP BY transaction_id, machine_id, vulnerability_id, severity, cvss_score
 ),
-installed_vulns AS (
+transaction_summary AS (
     SELECT
         transaction_id,
         machine_id,
-        COUNT(DISTINCT vulnerability_id) as total_installed,
-        COUNT(DISTINCT CASE WHEN severity = 'CRITICAL' THEN vulnerability_id END) as critical_installed,
-        COUNT(DISTINCT CASE WHEN severity = 'HIGH' THEN vulnerability_id END) as high_installed,
-        COUNT(DISTINCT CASE WHEN severity = 'MEDIUM' THEN vulnerability_id END) as medium_installed,
-        COUNT(DISTINCT CASE WHEN severity = 'LOW' THEN vulnerability_id END) as low_installed,
-        COALESCE(SUM(cvss_score), 0) as installed_cvss
-    FROM (
-        SELECT DISTINCT transaction_id, machine_id, vulnerability_id, severity, cvss_score
-        FROM raw_installed i
-        WHERE NOT EXISTS (
-            SELECT 1 FROM raw_removed r
-            WHERE r.transaction_id = i.transaction_id AND r.machine_id = i.machine_id AND r.vulnerability_id = i.vulnerability_id
-        )
-    ) as truly_introduced
+        COUNT(DISTINCT CASE WHEN has_removed = 1 AND has_installed = 0 THEN vulnerability_id END) AS total_fixed,
+        COUNT(DISTINCT CASE WHEN has_removed = 1 AND has_installed = 0 AND severity = 'CRITICAL' THEN vulnerability_id END) AS critical_fixed,
+        COUNT(DISTINCT CASE WHEN has_removed = 1 AND has_installed = 0 AND severity = 'HIGH' THEN vulnerability_id END) AS high_fixed,
+        COUNT(DISTINCT CASE WHEN has_removed = 1 AND has_installed = 0 AND severity = 'MEDIUM' THEN vulnerability_id END) AS medium_fixed,
+        COUNT(DISTINCT CASE WHEN has_removed = 1 AND has_installed = 0 AND severity = 'LOW' THEN vulnerability_id END) AS low_fixed,
+        COALESCE(SUM(CASE WHEN has_removed = 1 AND has_installed = 0 THEN cvss_score ELSE 0 END), 0) AS fixed_cvss,
+        
+        COUNT(DISTINCT CASE WHEN has_installed = 1 AND has_removed = 0 THEN vulnerability_id END) AS total_introduced,
+        COUNT(DISTINCT CASE WHEN has_installed = 1 AND has_removed = 0 AND severity = 'CRITICAL' THEN vulnerability_id END) AS critical_introduced,
+        COUNT(DISTINCT CASE WHEN has_installed = 1 AND has_removed = 0 AND severity = 'HIGH' THEN vulnerability_id END) AS high_introduced,
+        COUNT(DISTINCT CASE WHEN has_installed = 1 AND has_removed = 0 AND severity = 'MEDIUM' THEN vulnerability_id END) AS medium_introduced,
+        COUNT(DISTINCT CASE WHEN has_installed = 1 AND has_removed = 0 AND severity = 'LOW' THEN vulnerability_id END) AS low_introduced,
+        COALESCE(SUM(CASE WHEN has_installed = 1 AND has_removed = 0 THEN cvss_score ELSE 0 END), 0) AS introduced_cvss
+    FROM vuln_status
     GROUP BY transaction_id, machine_id
 )
 UPDATE transactions t
 SET
-    vulns_fixed = COALESCE(r.total_removed, 0),
-    vulns_introduced = COALESCE(i.total_installed, 0),
-    critical_vulns_fixed = COALESCE(r.critical_removed, 0),
-    critical_vulns_introduced = COALESCE(i.critical_installed, 0),
-    high_vulns_fixed = COALESCE(r.high_removed, 0),
-    high_vulns_introduced = COALESCE(i.high_installed, 0),
-    medium_vulns_fixed = COALESCE(r.medium_removed, 0),
-    medium_vulns_introduced = COALESCE(i.medium_installed, 0),
-    low_vulns_fixed = COALESCE(r.low_removed, 0),
-    low_vulns_introduced = COALESCE(i.low_installed, 0),
-    risk_score_mitigated = COALESCE(r.removed_cvss, 0) - COALESCE(i.installed_cvss, 0),
-    is_security_patch = (COALESCE(r.critical_removed, 0) > 0 OR COALESCE(r.high_removed, 0) > 0 OR COALESCE(r.total_removed, 0) > 0)
-FROM removed_vulns r
-FULL OUTER JOIN installed_vulns i ON r.transaction_id = i.transaction_id AND r.machine_id = i.machine_id
-WHERE t.transaction_id = COALESCE(r.transaction_id, i.transaction_id)
-  AND t.machine_id = COALESCE(r.machine_id, i.machine_id)
-  AND (COALESCE(r.total_removed, 0) > 0 OR COALESCE(i.total_installed, 0) > 0);
+    vulns_fixed = COALESCE(s.total_fixed, 0),
+    vulns_introduced = COALESCE(s.total_introduced, 0),
+    critical_vulns_fixed = COALESCE(s.critical_fixed, 0),
+    critical_vulns_introduced = COALESCE(s.critical_introduced, 0),
+    high_vulns_fixed = COALESCE(s.high_fixed, 0),
+    high_vulns_introduced = COALESCE(s.high_introduced, 0),
+    medium_vulns_fixed = COALESCE(s.medium_fixed, 0),
+    medium_vulns_introduced = COALESCE(s.medium_introduced, 0),
+    low_vulns_fixed = COALESCE(s.low_fixed, 0),
+    low_vulns_introduced = COALESCE(s.low_introduced, 0),
+    risk_score_mitigated = COALESCE(s.fixed_cvss, 0) - COALESCE(s.introduced_cvss, 0),
+    is_security_patch = (COALESCE(s.critical_fixed, 0) > 0 OR COALESCE(s.high_fixed, 0) > 0 OR COALESCE(s.total_fixed, 0) > 0)
+FROM transaction_summary s
+WHERE t.transaction_id = s.transaction_id
+  AND t.machine_id = s.machine_id;
 		`
 
 		_, err := database.Db.Exec(stmt, pq.Array(txnIDs), pq.Array(mchnIDs))

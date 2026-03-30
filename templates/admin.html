@@ -357,7 +357,6 @@
   <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
     <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
       <h3 class="font-display font-semibold text-lg">Housekeeping</h3>
-      <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
     </div>
     <table class="w-full text-sm">
       <tbody class="divide-y divide-txlog-lavender/30">
@@ -373,6 +372,48 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Cleanup Inactive Assets -->
+  <div class="bg-white rounded-3xl shadow-soft overflow-hidden mt-6">
+    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+      <h3 class="font-display font-semibold text-lg">Cleanup Inactive Assets</h3>
+      {{ if gt .inactiveAssetsCount 0 }}
+      <span class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-3 py-1 rounded-lg">{{ .inactiveAssetsCount }} inactive</span>
+      {{ else }}
+      <span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-3 py-1 rounded-lg">All active</span>
+      {{ end }}
+    </div>
+    <div class="p-6">
+      <div class="flex gap-3 mb-4">
+        <i data-lucide="info" class="w-5 h-5 text-txlog-sky flex-shrink-0 mt-0.5"></i>
+        <p class="text-sm text-txlog-indigo/60">Assets are considered <strong>inactive</strong> when they have not sent any new data in the last <strong>15 days</strong>. This operation removes all data associated with these servers (transactions, items, executions, and asset records).</p>
+      </div>
+      {{ if gt .inactiveAssetsCount 0 }}
+      <div class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-2xl p-4 mb-4">
+        <div class="flex gap-3">
+          <i data-lucide="triangle-alert" class="w-5 h-5 text-txlog-coral flex-shrink-0 mt-0.5"></i>
+          <div>
+            <h4 class="font-semibold text-sm mb-1">Destructive Action</h4>
+            <p class="text-sm text-txlog-indigo/60">This will permanently delete <strong>{{ .inactiveAssetsCount }} inactive asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }}</strong> and all their associated data. This action cannot be undone.</p>
+          </div>
+        </div>
+      </div>
+      <form action="/admin/cleanup/inactive-assets" method="post">
+        <button type="submit" onclick="return confirm('WARNING: This will permanently delete all data for {{ .inactiveAssetsCount }} inactive asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }} (transactions, items, executions, and asset records). This action cannot be undone. Proceed?')" class="w-full text-txlog-coral font-medium py-2 rounded-lg border border-txlog-coral/30 hover:bg-txlog-coral/10 hover:border-txlog-coral transition-colors flex items-center justify-center gap-2 text-sm">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Cleanup {{ .inactiveAssetsCount }} Inactive Asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }}
+        </button>
+      </form>
+      {{ else }}
+      <div class="bg-txlog-leaf/5 border border-txlog-leaf/20 rounded-2xl p-4 flex gap-3">
+        <i data-lucide="check-circle" class="w-5 h-5 text-txlog-leaf flex-shrink-0 mt-0.5"></i>
+        <div>
+          <h4 class="font-semibold text-sm mb-1">No Inactive Assets</h4>
+          <p class="text-sm text-txlog-indigo/60">All registered assets have reported data within the last 15 days. No cleanup is needed.</p>
+        </div>
+      </div>
+      {{ end }}
+    </div>
   </div>
   </div>
 
@@ -955,6 +996,7 @@
     if (urlP.get('migration_success')) { hash = 'migrations'; showAdminAlert('All pending database migrations have been applied successfully.'); }
     if (urlP.get('osv_update_started')) showAdminAlert('OSV vulnerability update started in background.');
     if (urlP.get('osv_reset_started')) { hash = 'osv'; showAdminAlert('Vulnerabilities reset and rebuild started.'); }
+    if (urlP.get('cleanup_success')) { hash = 'housekeeping'; showAdminAlert('Inactive assets cleanup completed successfully.'); }
     if (urlP.get('apikey_revoked')) { hash = 'apikeys'; showAdminAlert('API key revoked successfully.'); }
     if (urlP.get('apikey_deleted')) { hash = 'apikeys'; showAdminAlert('API key deleted successfully.'); }
     var validSections = ['server', 'database', 'oidc', 'ldap', 'housekeeping', 'statistics', 'osv', 'users', 'apikeys', 'migrations'];

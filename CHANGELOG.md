@@ -20,6 +20,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Add inactive server cleanup option to the administration interface. This
+  feature identifies servers that haven't sent data in the last 15 days and
+  allows for bulk deletion of all associated records (transactions, items,
+  executions, and asset entries) in a single database transaction.
+
 ### Fixed
 
 - Fix vulnerability ecosystem isolation: each distribution now queries only its

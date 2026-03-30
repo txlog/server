@@ -45,13 +45,21 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 
 		osvIsRunning := GetCronLockStatus(db, "vulnerabilities")
 
+		// Get inactive assets count for housekeeping section
+		inactiveAssetsCount, err := getInactiveAssetsCount(db)
+		if err != nil {
+			logger.Error("Failed to get inactive assets count: " + err.Error())
+			inactiveAssetsCount = 0
+		}
+
 		c.HTML(http.StatusOK, "admin.html", gin.H{
-			"Context":      c,
-			"title":        "Administration - Txlog Server",
-			"users":        users,
-			"migrations":   migrationStatus,
-			"apiKeys":      apiKeys,
-			"osvIsRunning": osvIsRunning,
+			"Context":             c,
+			"title":               "Administration - Txlog Server",
+			"users":               users,
+			"migrations":          migrationStatus,
+			"apiKeys":             apiKeys,
+			"osvIsRunning":        osvIsRunning,
+			"inactiveAssetsCount": inactiveAssetsCount,
 		})
 	}
 }
@@ -455,5 +463,146 @@ func DeleteAdminAPIKey(db *sql.DB) gin.HandlerFunc {
 
 		logger.Info(fmt.Sprintf("API key deleted: ID=%d", keyID))
 		c.Redirect(http.StatusSeeOther, "/admin?apikey_deleted=1")
+	}
+}
+
+// getInactiveAssetsCount returns the number of active assets with no data in the last 15 days
+func getInactiveAssetsCount(db *sql.DB) (int, error) {
+	var count int
+	err := db.QueryRow(`
+		SELECT COUNT(*)
+		FROM assets
+		WHERE is_active = true
+		  AND last_seen < NOW() - INTERVAL '15 days'
+	`).Scan(&count)
+	return count, err
+}
+
+// PostAdminCleanupInactiveAssets deletes all data for servers inactive for 15+ days
+func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// First, get the list of inactive machine IDs
+		rows, err := db.Query(`
+			SELECT machine_id
+			FROM assets
+			WHERE is_active = true
+			  AND last_seen < NOW() - INTERVAL '15 days'
+		`)
+		if err != nil {
+			logger.Error("Failed to query inactive assets: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Cleanup Error",
+				"error": "Failed to query inactive assets: " + err.Error(),
+			})
+			return
+		}
+		defer rows.Close()
+
+		var machineIDs []string
+		for rows.Next() {
+			var id string
+			if err := rows.Scan(&id); err != nil {
+				logger.Error("Failed to scan inactive asset: " + err.Error())
+				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+					"title": "Cleanup Error",
+					"error": "Failed to scan inactive asset: " + err.Error(),
+				})
+				return
+			}
+			machineIDs = append(machineIDs, id)
+		}
+		if err := rows.Err(); err != nil {
+			logger.Error("Error iterating inactive assets: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Cleanup Error",
+				"error": "Error iterating inactive assets: " + err.Error(),
+			})
+			return
+		}
+
+		if len(machineIDs) == 0 {
+			c.Redirect(http.StatusSeeOther, "/admin?cleanup_success=1")
+			return
+		}
+
+		// Delete all data in a single transaction
+		tx, err := db.Begin()
+		if err != nil {
+			logger.Error("Failed to start cleanup transaction: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Cleanup Error",
+				"error": "Failed to start transaction: " + err.Error(),
+			})
+			return
+		}
+		defer func() {
+			if p := recover(); p != nil {
+				tx.Rollback()
+				panic(p)
+			}
+		}()
+
+		// Use a subquery approach to delete in bulk rather than per-machine_id
+		inactiveSubquery := `machine_id IN (
+			SELECT machine_id FROM assets
+			WHERE is_active = true
+			  AND last_seen < NOW() - INTERVAL '15 days'
+		)`
+
+		_, err = tx.Exec(`DELETE FROM transaction_items WHERE ` + inactiveSubquery)
+		if err != nil {
+			tx.Rollback()
+			logger.Error("Failed to delete transaction_items for inactive assets: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Cleanup Error",
+				"error": "Failed to delete transaction items: " + err.Error(),
+			})
+			return
+		}
+
+		_, err = tx.Exec(`DELETE FROM transactions WHERE ` + inactiveSubquery)
+		if err != nil {
+			tx.Rollback()
+			logger.Error("Failed to delete transactions for inactive assets: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Cleanup Error",
+				"error": "Failed to delete transactions: " + err.Error(),
+			})
+			return
+		}
+
+		_, err = tx.Exec(`DELETE FROM executions WHERE ` + inactiveSubquery)
+		if err != nil {
+			tx.Rollback()
+			logger.Error("Failed to delete executions for inactive assets: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Cleanup Error",
+				"error": "Failed to delete executions: " + err.Error(),
+			})
+			return
+		}
+
+		_, err = tx.Exec(`DELETE FROM assets WHERE is_active = true AND last_seen < NOW() - INTERVAL '15 days'`)
+		if err != nil {
+			tx.Rollback()
+			logger.Error("Failed to delete inactive assets: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Cleanup Error",
+				"error": "Failed to delete assets: " + err.Error(),
+			})
+			return
+		}
+
+		if err := tx.Commit(); err != nil {
+			logger.Error("Failed to commit cleanup transaction: " + err.Error())
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
+				"title": "Cleanup Error",
+				"error": "Failed to commit transaction: " + err.Error(),
+			})
+			return
+		}
+
+		logger.Info(fmt.Sprintf("Inactive assets cleanup completed: %d assets removed", len(machineIDs)))
+		c.Redirect(http.StatusSeeOther, "/admin?cleanup_success=1")
 	}
 }

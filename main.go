@@ -165,6 +165,7 @@ func main() {
 		adminGroup.POST("/migrations/run", controllers.PostAdminRunMigrations(database.Db))
 		adminGroup.POST("/migrations/run_osv_update", controllers.PostAdminRunOSVUpdate(database.Db))
 		adminGroup.POST("/migrations/reset_osv", controllers.PostAdminResetOSV(database.Db))
+		adminGroup.POST("/cleanup/inactive-assets", controllers.PostAdminCleanupInactiveAssets(database.Db))
 	}
 
 	// Admin routes that require OIDC or LDAP (user and API key management)

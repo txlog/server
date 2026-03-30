@@ -18,6 +18,32 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Fixed
+
+- Fix vulnerability ecosystem isolation: each distribution now queries only its
+  own OSV ecosystem. AlmaLinux systems return only ALSA-\* advisories, Rocky
+  Linux only RLSA-\*, and Red Hat only RHSA-\*. Previously, all RHEL-family
+  systems were incorrectly mapped to the AlmaLinux ecosystem.
+- CentOS and Oracle Linux (which have no dedicated OSV ecosystem) are now
+  correctly mapped to Red Hat advisories (RHSA-\*) instead of AlmaLinux.
+- Use the `repo` column from `transaction_items` to derive the exact Red Hat
+  CPE channel (`baseos`, `appstream`, `crb`) for precise OSV queries.
+
+### Changed
+
+- `ExtractOSVEcosystems` now accepts a `repo` parameter in addition to the OS
+  string, used to derive the Red Hat CPE channel.
+- Scoreboard SQL updated to use `LIKE` pattern matching for Red Hat CPE
+  ecosystems instead of exact match against AlmaLinux.
+- Update OSV integration documentation to reflect per-distribution ecosystem
+  isolation and severity extraction details.
+
+> **Note:** After upgrading, administrators should truncate
+> `package_vulnerabilities` via the Admin panel and re-run the vulnerability
+> job to repopulate with correctly isolated advisory data.
+
 ## [1.25.2] - 2026-03-23
 
 ### Added

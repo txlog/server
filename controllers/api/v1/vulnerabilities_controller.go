@@ -42,7 +42,7 @@ func GetTransactionVulnerabilities(database *sql.DB) gin.HandlerFunc {
 			  AND (
 			      (a.os ILIKE '%AlmaLinux%' AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
 			      (a.os ILIKE '%Rocky%' AND pv.ecosystem = 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')) OR
-			      ((a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%') AND pv.ecosystem = 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+'))
+			      ((a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%') AND pv.ecosystem LIKE 'Red Hat:enterprise_linux:' || SUBSTRING(a.os FROM '[0-9]+') || '::%')
 			  )
 			JOIN vulnerabilities v ON v.id = pv.vulnerability_id
 			WHERE ti.machine_id = $1

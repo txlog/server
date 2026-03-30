@@ -7,3 +7,5 @@ tools/
 research.md
 plan.md
 server.log
+.go-cache/
+.gopath/

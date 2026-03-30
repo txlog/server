@@ -62,7 +62,7 @@ func UpdateVulnerabilitiesJob() {
 
 	// Extract all distinct packages from transaction items, joined with asset OS.
 	query := `
-        SELECT DISTINCT ti.package, ti.version, COALESCE(ti.release, '') AS release, a.os
+        SELECT DISTINCT ti.package, ti.version, COALESCE(ti.release, '') AS release, a.os, COALESCE(ti.repo, '') AS repo
         FROM transaction_items ti
         JOIN transactions t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
         JOIN assets a ON t.machine_id = a.machine_id AND t.hostname = a.hostname
@@ -87,8 +87,8 @@ func UpdateVulnerabilitiesJob() {
 	pkgMap := make(map[string]pkg)
 
 	for rows.Next() {
-		var pName, pVersion, pRelease, pOs sql.NullString
-		if err := rows.Scan(&pName, &pVersion, &pRelease, &pOs); err != nil {
+		var pName, pVersion, pRelease, pOs, pRepo sql.NullString
+		if err := rows.Scan(&pName, &pVersion, &pRelease, &pOs, &pRepo); err != nil {
 			logger.Error("Vulnerabilities scan error: " + err.Error())
 			continue
 		}
@@ -97,7 +97,7 @@ func UpdateVulnerabilitiesJob() {
 			continue
 		}
 
-		ecos := util.ExtractOSVEcosystems(pOs.String)
+		ecos := util.ExtractOSVEcosystems(pOs.String, pRepo.String)
 		for _, eco := range ecos {
 			key := fmt.Sprintf("%s|%s|%s|%s", pName.String, pVersion.String, pRelease.String, eco)
 			pkgMap[key] = pkg{Name: pName.String, Version: pVersion.String, Release: pRelease.String, Ecosystem: eco}
@@ -454,9 +454,13 @@ mapped_assets AS (
         CASE
             WHEN a.os ILIKE '%AlmaLinux%' THEN 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')
             WHEN a.os ILIKE '%Rocky%' THEN 'Rocky Linux:' || SUBSTRING(a.os FROM '[0-9]+')
-            WHEN a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%' THEN 'AlmaLinux:' || SUBSTRING(a.os FROM '[0-9]+')
+            WHEN a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%' THEN 'Red Hat:enterprise_linux:' || SUBSTRING(a.os FROM '[0-9]+')
             ELSE ''
-        END AS ecosystem
+        END AS ecosystem_prefix,
+        CASE
+            WHEN a.os ILIKE '%Red Hat%' OR a.os ILIKE '%RHEL%' OR a.os ILIKE '%CentOS%' OR a.os ILIKE '%Oracle%' THEN TRUE
+            ELSE FALSE
+        END AS is_rh_family
     FROM batch b
     JOIN transactions trans ON b.transaction_id = trans.transaction_id AND b.machine_id = trans.machine_id
     JOIN assets a ON trans.machine_id = a.machine_id AND trans.hostname = a.hostname
@@ -474,7 +478,10 @@ vuln_actions AS (
     JOIN mapped_assets ma ON ti.transaction_id = ma.transaction_id AND ti.machine_id = ma.machine_id
     JOIN package_vulnerabilities pv ON pv.package_name = ti.package AND pv.version = ti.version
          AND pv.release = COALESCE(ti.release, '')
-         AND pv.ecosystem = ma.ecosystem
+         AND (
+             (NOT ma.is_rh_family AND pv.ecosystem = ma.ecosystem_prefix) OR
+             (ma.is_rh_family AND pv.ecosystem LIKE ma.ecosystem_prefix || '::%')
+         )
     JOIN vulnerabilities v ON v.id = pv.vulnerability_id
     WHERE ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade', 'Removed', 'Obsoleted', 'Upgraded', 'Downgraded', 'removed')
 ),

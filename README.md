@@ -19,9 +19,6 @@
       <img src="https://img.shields.io/badge/Contributor%20Covenant-3.0-4baaaa.svg" alt="Contributor Covenant">
     </a>
     <br/>
-    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_shield">
-      <img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=shield" alt="FOSSA Status">
-    </a>
     <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_shield&issueType=security">
       <img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=shield&issueType=security" alt="FOSSA Status"/>
     </a>
@@ -33,21 +30,19 @@
     </a>
   </p>
 </p>
-<!-- markdownlint-enable MD033 MD013 -->
 
 This repository contains the code for the Txlog Server.
 
+![Alt](https://repobeats.axiom.co/api/embed/e7072dd27ed7e95ffffdca0b6b8b1b9b8a9687ed.svg "Repobeats analytics image")
+
 ## Installation
 
-Use Docker to run this server.
+<details>
+<summary>Docker</summary>
 
 ```bash
 docker pull ghcr.io/txlog/server:main
-```
 
-Run the server.
-
-```bash
 docker run -d -p 8080:8080 \
   -e INSTANCE=Datacenter 001 \
   -e LOG_LEVEL=INFO \
@@ -64,7 +59,10 @@ docker run -d -p 8080:8080 \
   ghcr.io/txlog/server:main
 ```
 
-Or use it on your Kubernetes cluster
+</details>
+
+<details>
+<summary>Kubernetes</summary>
 
 ```yaml
 apiVersion: apps/v1
@@ -128,8 +126,7 @@ spec:
           value: 0 4 * * *
 ```
 
-If you want to use a production (stable) version, replace `main` by the version
-number (e.g. `v1.0`) in the Docker commands and Kubernetes configuration.
+</details>
 
 ## Image Signature Verification
 
@@ -138,10 +135,8 @@ digitally signed using [Cosign](https://github.com/sigstore/cosign) from the
 [Sigstore](https://www.sigstore.dev/) project. This ensures the authenticity and
 integrity of the images you pull.
 
-### Verifying an Image
-
-To verify the signature of an image, you need to have `cosign` installed. Then,
-use the public key included in this repository:
+<details>
+<summary>Verifying an Image</summary>
 
 ```bash
 cosign verify \
@@ -159,69 +154,14 @@ cosign verify \
 
 A successful verification will display the image digest and signature details.
 If the signature is invalid or missing, `cosign` will return an error.
-
-### Using with Zot Registry
-
-If you are mirroring images to a [Zot Registry](https://zotregistry.dev/), you
-need to configure it to verify signatures and copy the image with its referrers
-(signatures).
-
-#### 1. Enable the Trust Extension
-
-In your Zot configuration file (`config.json`), enable the trust extension:
-
-```json
-{
-  "extensions": {
-    "trust": {
-      "enable": true,
-      "cosign": true
-    }
-  }
-}
-```
-
-#### 2. Upload the Public Key
-
-Upload the public key to your Zot instance:
-
-```bash
-curl --data-binary @cosign.pub \
-  -X POST \
-  "https://your-zot-registry/v2/_zot/ext/cosign"
-```
-
-#### 3. Copy Images with Signatures
-
-The standard sync or pull operations may not copy the signature referrers. Use
-[ORAS](https://oras.land/) to copy the image along with all its referrers
-(including signatures):
-
-```bash
-oras copy --recursive \
-  ghcr.io/txlog/server:v1.19.1 \
-  your-zot-registry/txlog/server:v1.19.1
-```
-
-#### 4. Restart Zot
-
-After uploading the public key, restart Zot to re-evaluate signature validity:
-
-```bash
-sudo systemctl restart zot
-```
-
-The image should now appear as signed and trusted in the Zot UI.
-
-## 🪴 Project Activity
-
-![Alt](https://repobeats.axiom.co/api/embed/e7072dd27ed7e95ffffdca0b6b8b1b9b8a9687ed.svg "Repobeats analytics image")
+</details>
 
 ## Development
 
 To make changes on this project, you need:
 
-### Golang
+<details>
+<summary>Golang</summary>
 
 ```bash
 wget https://go.dev/dl/go1.26.1.linux-amd64.tar.gz
@@ -232,19 +172,28 @@ source ~/.bashrc
 rm go1.26.1.linux-amd64.tar.gz
 ```
 
-### Swaggo
+</details>
+
+<details>
+<summary>Swaggo</summary>
 
 ```bash
 curl -fsSL https://install.rda.run/swaggo/swag@latest! | bash
 ```
 
-### Air
+</details>
+
+<details>
+<summary>Air</summary>
 
 ```bash
 curl -fsSL https://install.rda.run/air-verse/air@latest! | bash
 ```
 
-### A `.env` file
+</details>
+
+<details>
+<summary>A `.env` file</summary>
 
 ```bash
 INSTANCE=Development environment
@@ -282,7 +231,28 @@ LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 LDAP_GROUP_FILTER=(member=%s)
 ```
 
-#### Authentication Configuration
+</details>
+
+<details>
+<summary>Tailwind CSS</summary>
+
+The UI uses [Tailwind CSS](https://tailwindcss.com/) compiled locally via the
+standalone CLI (no Node.js required). Download the CLI binary to the `tools/`
+directory:
+
+```bash
+mkdir -p tools
+curl -sL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 \
+  -o tools/tailwindcss
+chmod +x tools/tailwindcss
+```
+
+The configuration lives in `tailwind.config.js` and the source CSS in
+`static/css/input.css`. The compiled output is `static/css/style.css`.
+
+</details>
+
+### Authentication Configuration
 
 Txlog Server supports three authentication modes:
 
@@ -295,7 +265,8 @@ Txlog Server supports three authentication modes:
 4. **Both OIDC and LDAP**: Both can be enabled simultaneously, allowing users to
    choose their preferred authentication method
 
-##### LDAP Configuration Details
+<details>
+<summary>LDAP Configuration Details</summary>
 
 - **LDAP_HOST** (Required): LDAP server hostname
 - **LDAP_PORT**: LDAP server port (default: 389 for LDAP, 636 for LDAPS)
@@ -327,21 +298,7 @@ If not provided, the server will:
 - Use the authenticated user's session for group membership checks
 - Active Directory typically **requires** a service account
 
-### Tailwind CSS
-
-The UI uses [Tailwind CSS](https://tailwindcss.com/) compiled locally via the
-standalone CLI (no Node.js required). Download the CLI binary to the `tools/`
-directory:
-
-```bash
-mkdir -p tools
-curl -sL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 \
-  -o tools/tailwindcss
-chmod +x tools/tailwindcss
-```
-
-The configuration lives in `tailwind.config.js` and the source CSS in
-`static/css/input.css`. The compiled output is `static/css/style.css`.
+</details>
 
 ### Development commands
 
@@ -368,6 +325,4 @@ The server will run at <http://localhost:8080> and the Swagger docs at
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
-## License
-
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_large)
+<!-- markdownlint-enable MD033 MD013 -->

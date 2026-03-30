@@ -18,7 +18,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
-## [Unreleased]
+## [1.26.0] - 2026-03-31
 
 ### Added
 

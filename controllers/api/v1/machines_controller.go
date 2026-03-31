@@ -57,9 +57,13 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 			if os == "Undefined OS" {
 				os = ""
 			}
-			paramCount++
-			query += ` AND a.os = $` + strconv.Itoa(paramCount)
-			params = append(params, os)
+			if os == "" {
+				query += ` AND (a.os IS NULL OR a.os = '')`
+			} else {
+				paramCount++
+				query += ` AND a.os = $` + strconv.Itoa(paramCount)
+				params = append(params, os)
+			}
 		}
 
 		if agentVersion != "" {
@@ -67,9 +71,13 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 			if agentVersion == "with undefined version" {
 				agentVersion = ""
 			}
-			paramCount++
-			query += ` AND a.agent_version = $` + strconv.Itoa(paramCount)
-			params = append(params, agentVersion)
+			if agentVersion == "" {
+				query += ` AND (a.agent_version IS NULL OR a.agent_version = '')`
+			} else {
+				paramCount++
+				query += ` AND a.agent_version = $` + strconv.Itoa(paramCount)
+				params = append(params, agentVersion)
+			}
 		}
 
 		if len(params) > 0 {
@@ -94,16 +102,35 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 				paramCount = 0
 
 				if os != "" {
-					paramCount++
-					query += ` AND a.os = $` + strconv.Itoa(paramCount)
-					params = append(params, os)
+					if os == "Undefined OS" {
+						os = ""
+					}
+					if os == "" {
+						query += ` AND (a.os IS NULL OR a.os = '')`
+					} else {
+						paramCount++
+						query += ` AND a.os = $` + strconv.Itoa(paramCount)
+						params = append(params, os)
+					}
 				}
 
-				paramCount++
+				if agentVersion == "with undefined version" {
+					agentVersion = ""
+				}
 				query += ` AND a.machine_id IN (
-      SELECT DISTINCT e.machine_id FROM executions e
-      WHERE e.agent_version = $` + strconv.Itoa(paramCount) + `)`
-				params = append(params, agentVersion)
+      SELECT e.machine_id FROM executions e
+      WHERE e.executed_at = (
+        SELECT MAX(e2.executed_at)
+        FROM executions e2
+        WHERE e2.machine_id = e.machine_id AND e2.hostname = e.hostname
+      )`
+				if agentVersion == "" {
+					query += ` AND (e.agent_version IS NULL OR e.agent_version = ''))`
+				} else {
+					paramCount++
+					query += ` AND e.agent_version = $` + strconv.Itoa(paramCount) + `)`
+					params = append(params, agentVersion)
+				}
 
 				if len(params) > 0 {
 					rows, err = database.Query(query+" ORDER BY hostname", params...)

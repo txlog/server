@@ -187,12 +187,12 @@ func getTotalActiveAssets(database *sql.DB) (int, error) {
 // the query fails.
 func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
 	rows, err := database.Query(`
-  SELECT
-    os,
+   SELECT
+    COALESCE(os, '') AS os,
     COUNT(*) AS num_machines
   FROM assets
-  WHERE is_active = TRUE AND os IS NOT NULL
-  GROUP BY os
+  WHERE is_active = TRUE
+  GROUP BY COALESCE(os, '')
   ORDER BY num_machines DESC;`)
 
 	if err != nil {
@@ -219,19 +219,19 @@ func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
 // Falls back to querying executions table if agent_version column doesn't exist yet.
 func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
 	rows, err := database.Query(`
-  SELECT
-    agent_version,
+   SELECT
+    COALESCE(agent_version, '') AS agent_version,
     COUNT(*) AS num_machines
   FROM assets
-  WHERE is_active = TRUE AND agent_version IS NOT NULL
-  GROUP BY agent_version
+  WHERE is_active = TRUE
+  GROUP BY COALESCE(agent_version, '')
   ORDER BY num_machines DESC;`)
 
 	if err != nil {
 		// Fallback: agent_version column may not exist yet (migration not applied)
 		rows, err = database.Query(`
-  SELECT
-    e.agent_version,
+   SELECT
+    COALESCE(e.agent_version, '') AS agent_version,
     COUNT(DISTINCT a.hostname) AS num_machines
   FROM assets a
   INNER JOIN executions e ON e.machine_id = a.machine_id AND e.hostname = a.hostname
@@ -241,7 +241,7 @@ func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
     FROM executions e2
     WHERE e2.machine_id = a.machine_id AND e2.hostname = a.hostname
   )
-  GROUP BY e.agent_version
+  GROUP BY COALESCE(e.agent_version, '')
   ORDER BY num_machines DESC;`)
 		if err != nil {
 			return nil, err

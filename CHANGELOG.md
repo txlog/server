@@ -18,6 +18,21 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.26.1] - 2026-03-31
+
+### Added
+
+- Include assets with undefined (NULL or empty) agent version or OS in the
+  dashboard distribution counts using `COALESCE`, ensuring all active assets are
+  categorized.
+
+### Fixed
+
+- Fix broad agent version filtering in the assets modal by ensuring the fallback
+  query only matches the version from each machine's latest execution.
+- Improve handling of "Undefined" values in API filters for OS and Agent Version
+  by correctly matching both NULL and empty string values.
+
 ## [1.26.0] - 2026-03-31
 
 ### Added

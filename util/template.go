@@ -61,17 +61,18 @@ func FormatPercentage(percentage float64) string {
 		return integerPart + "," + decimalPart
 	}
 
-	var result string
+	var result strings.Builder
+	result.Grow(n + n/3)
 	for i := 0; i < n; i++ {
 		if (n-i)%3 == 0 && i != 0 {
-			result += "."
+			result.WriteByte('.')
 		}
-		result += string(integerPart[i])
+		result.WriteByte(integerPart[i])
 	}
 	if isNegative {
-		return "-" + result + "," + decimalPart
+		return "-" + result.String() + "," + decimalPart
 	}
-	return result + "," + decimalPart
+	return result.String() + "," + decimalPart
 }
 
 // FormatInteger formats an integer with thousand separators using dots.

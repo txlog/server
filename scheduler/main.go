@@ -37,7 +37,7 @@ func StartScheduler(db *sql.DB) {
 	}
 	ctab.MustAddJob(cronOsv, func() { UpdateVulnerabilitiesJob(db) })
 
-	latestVersionJob()            // Run for the first time
+	latestVersionJob()              // Run for the first time
 	refreshMaterializedViewsJob(db) // Run for the first time
 	logger.Info("Scheduler: started.")
 }

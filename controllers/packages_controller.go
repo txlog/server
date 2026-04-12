@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 	"strconv"
@@ -27,11 +28,11 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
 		offset := (page - 1) * limit
 
 		// Try to use the materialized view first (much faster)
-		packageNames, total, err := getPackagesFromMaterializedView(database, search, limit, offset)
+		packageNames, total, err := getPackagesFromMaterializedView(c.Request.Context(), database, search, limit, offset)
 		if err != nil {
 			// Fallback to direct query if materialized view doesn't exist
 			logger.Debug("Using fallback query for packages: " + err.Error())
-			packageNames, total, err = getPackagesFromDirectQuery(database, search, limit, offset)
+			packageNames, total, err = getPackagesFromDirectQuery(c.Request.Context(), database, search, limit, offset)
 			if err != nil {
 				logger.Error("Error listing packages:" + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
@@ -59,7 +60,7 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
 
 // getPackagesFromMaterializedView queries the pre-computed mv_package_listing view
 // for fast package listing. Returns packages, total count, and any error.
-func getPackagesFromMaterializedView(database *sql.DB, search string, limit, offset int) ([]models.PackageListing, int, error) {
+func getPackagesFromMaterializedView(ctx context.Context, database *sql.DB, search string, limit, offset int) ([]models.PackageListing, int, error) {
 	var rows *sql.Rows
 	var err error
 
@@ -79,7 +80,7 @@ func getPackagesFromMaterializedView(database *sql.DB, search string, limit, off
 		WHERE package ILIKE $1
 		ORDER BY package
 		LIMIT $2 OFFSET $3`
-		rows, err = database.Query(query, util.FormatSearchTerm(search), limit, offset)
+		rows, err = database.QueryContext(ctx, query, util.FormatSearchTerm(search), limit, offset)
 	} else {
 		query := `
 		SELECT
@@ -94,7 +95,7 @@ func getPackagesFromMaterializedView(database *sql.DB, search string, limit, off
 		FROM mv_package_listing
 		ORDER BY package
 		LIMIT $1 OFFSET $2`
-		rows, err = database.Query(query, limit, offset)
+		rows, err = database.QueryContext(ctx, query, limit, offset)
 	}
 
 	if err != nil {
@@ -127,7 +128,7 @@ func getPackagesFromMaterializedView(database *sql.DB, search string, limit, off
 		total = 0
 	} else if len(packageNames) == 0 {
 		// Get total count when offset exceeds available data
-		err := database.QueryRow(`SELECT COUNT(*) FROM mv_package_listing`).Scan(&total)
+		err := database.QueryRowContext(ctx, `SELECT COUNT(*) FROM mv_package_listing`).Scan(&total)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -138,7 +139,7 @@ func getPackagesFromMaterializedView(database *sql.DB, search string, limit, off
 
 // getPackagesFromDirectQuery is the fallback method that uses the original complex query
 // when the materialized view is not available.
-func getPackagesFromDirectQuery(database *sql.DB, search string, limit, offset int) ([]models.PackageListing, int, error) {
+func getPackagesFromDirectQuery(ctx context.Context, database *sql.DB, search string, limit, offset int) ([]models.PackageListing, int, error) {
 	var total int
 	var query string
 	var err error
@@ -189,7 +190,7 @@ func getPackagesFromDirectQuery(database *sql.DB, search string, limit, offset i
             ri.rn = 1
             AND ri.package ILIKE $1;
       `
-		err = database.QueryRow(query, util.FormatSearchTerm(search)).Scan(&total)
+		err = database.QueryRowContext(ctx, query, util.FormatSearchTerm(search)).Scan(&total)
 	} else {
 		query = `
         WITH RankedItems AS (
@@ -234,7 +235,7 @@ func getPackagesFromDirectQuery(database *sql.DB, search string, limit, offset i
         WHERE
             ri.rn = 1;
       `
-		err = database.QueryRow(query).Scan(&total)
+		err = database.QueryRowContext(ctx, query).Scan(&total)
 	}
 
 	if err != nil {
@@ -301,7 +302,7 @@ func getPackagesFromDirectQuery(database *sql.DB, search string, limit, offset i
             ri.package
         LIMIT $1 OFFSET $2
       `
-		rows, err = database.Query(query, limit, offset, util.FormatSearchTerm(search))
+		rows, err = database.QueryContext(ctx, query, limit, offset, util.FormatSearchTerm(search))
 	} else {
 		query = `
         WITH RankedItems AS (
@@ -359,7 +360,7 @@ func getPackagesFromDirectQuery(database *sql.DB, search string, limit, offset i
             ri.package
         LIMIT $1 OFFSET $2
       `
-		rows, err = database.Query(query, limit, offset)
+		rows, err = database.QueryContext(ctx, query, limit, offset)
 	}
 
 	if err != nil {
@@ -432,7 +433,7 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
         version DESC,
         release DESC;
     `
-		rows, err := database.Query(query, pkg.Name)
+		rows, err := database.QueryContext(c.Request.Context(), query, pkg.Name)
 
 		if err != nil {
 			logger.Error("Error listing packages:" + err.Error())

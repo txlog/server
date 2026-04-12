@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
@@ -99,13 +100,16 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 		}
 
 		// Update last_used_at timestamp (async, don't block request)
-		go func() {
+		// Update last_used_at timestamp (async, don't block request)
+		go func(id int) {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
 			updateQuery := `UPDATE api_keys SET last_used_at = $1 WHERE id = $2`
-			_, err := db.Exec(updateQuery, time.Now(), keyID)
+			_, err := db.ExecContext(ctx, updateQuery, time.Now(), id)
 			if err != nil {
 				logger.Error("Failed to update last_used_at for API key: " + err.Error())
 			}
-		}()
+		}(keyID)
 
 		// Store API key ID in context for potential logging
 		c.Set("api_key_id", keyID)

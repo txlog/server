@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 
@@ -57,41 +58,41 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 			mostUpdatedPackages  []UpdatedPackage
 		)
 
-		g := new(errgroup.Group)
+		g, ctx := errgroup.WithContext(c.Request.Context())
 
 		g.Go(func() error {
 			var err error
-			statistics, err = getStatistics(database)
+			statistics, err = getStatistics(ctx, database)
 			return err
 		})
 
 		g.Go(func() error {
 			var err error
-			totalActiveAssets, err = getTotalActiveAssets(database)
+			totalActiveAssets, err = getTotalActiveAssets(ctx, database)
 			return err
 		})
 
 		g.Go(func() error {
 			var err error
-			assetsByOS, err = getAssetsByOS(database)
+			assetsByOS, err = getAssetsByOS(ctx, database)
 			return err
 		})
 
 		g.Go(func() error {
 			var err error
-			assetsByAgentVersion, err = getAssetsByAgentVersion(database)
+			assetsByAgentVersion, err = getAssetsByAgentVersion(ctx, database)
 			return err
 		})
 
 		g.Go(func() error {
 			var err error
-			duplicatedAssets, err = getDuplicatedAssets(database)
+			duplicatedAssets, err = getDuplicatedAssets(ctx, database)
 			return err
 		})
 
 		g.Go(func() error {
 			var err error
-			mostUpdatedPackages, err = getMostUpdatedPackages(database)
+			mostUpdatedPackages, err = getMostUpdatedPackages(ctx, database)
 			return err
 		})
 
@@ -126,8 +127,8 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 // Returns:
 //   - []models.Statistic: Slice containing all statistics records
 //   - error: Any error that occurred during database operations, nil if successful
-func getStatistics(database *sql.DB) ([]models.Statistic, error) {
-	rows, err := database.Query(`SELECT name, value, percentage, updated_at FROM statistics;`)
+func getStatistics(ctx context.Context, database *sql.DB) ([]models.Statistic, error) {
+	rows, err := database.QueryContext(ctx, `SELECT name, value, percentage, updated_at FROM statistics;`)
 
 	if err != nil {
 		return nil, err
@@ -166,9 +167,9 @@ func getStatistics(database *sql.DB) ([]models.Statistic, error) {
 // Returns:
 //   - int: The total number of active assets
 //   - error: An error if the database query fails, nil otherwise
-func getTotalActiveAssets(database *sql.DB) (int, error) {
+func getTotalActiveAssets(ctx context.Context, database *sql.DB) (int, error) {
 	var count int
-	err := database.QueryRow(`
+	err := database.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM assets
 		WHERE is_active = TRUE
@@ -185,8 +186,8 @@ func getTotalActiveAssets(database *sql.DB) (int, error) {
 // operating system from the assets table. Returns a slice of OSStats
 // containing the OS name and the corresponding machine count, or an error if
 // the query fails.
-func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
-	rows, err := database.Query(`
+func getAssetsByOS(ctx context.Context, database *sql.DB) ([]OSStats, error) {
+	rows, err := database.QueryContext(ctx, `
    SELECT
     COALESCE(os, '') AS os,
     COUNT(*) AS num_machines
@@ -217,8 +218,8 @@ func getAssetsByOS(database *sql.DB) ([]OSStats, error) {
 // of AgentStats containing agent version and number of machines, or an error
 // if the query fails.
 // Falls back to querying executions table if agent_version column doesn't exist yet.
-func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
-	rows, err := database.Query(`
+func getAssetsByAgentVersion(ctx context.Context, database *sql.DB) ([]AgentStats, error) {
+	rows, err := database.QueryContext(ctx, `
    SELECT
     COALESCE(agent_version, '') AS agent_version,
     COUNT(*) AS num_machines
@@ -229,7 +230,7 @@ func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
 
 	if err != nil {
 		// Fallback: agent_version column may not exist yet (migration not applied)
-		rows, err = database.Query(`
+		rows, err = database.QueryContext(ctx, `
    SELECT
     COALESCE(e.agent_version, '') AS agent_version,
     COUNT(DISTINCT a.hostname) AS num_machines
@@ -281,8 +282,8 @@ func getAssetsByAgentVersion(database *sql.DB) ([]AgentStats, error) {
 // The function will return records only if:
 //   - The hostname has been reported from more than one machine_id
 //   - The second most recent execution occurred within the last 30 days
-func getDuplicatedAssets(database *sql.DB) ([]DuplicatedAsset, error) {
-	rows, err := database.Query(`
+func getDuplicatedAssets(ctx context.Context, database *sql.DB) ([]DuplicatedAsset, error) {
+	rows, err := database.QueryContext(ctx, `
   SELECT
     hostname,
     COUNT(*) as num_machines
@@ -332,8 +333,8 @@ func getDuplicatedAssets(database *sql.DB) ([]DuplicatedAsset, error) {
 //   - error: An error if the database query or scan operations fail, nil otherwise
 //
 // The results are ordered by total number of updates in descending order and limited to 10 entries.
-func getMostUpdatedPackages(database *sql.DB) ([]UpdatedPackage, error) {
-	rows, err := database.Query(`
+func getMostUpdatedPackages(ctx context.Context, database *sql.DB) ([]UpdatedPackage, error) {
+	rows, err := database.QueryContext(ctx, `
   SELECT
     ti.package,
     COUNT(*) AS total_updates,

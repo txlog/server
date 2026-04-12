@@ -117,7 +117,7 @@ func GetPackagesByMonth(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		assetCount, err := getTotalActiveAssets(database)
+		assetCount, err := getTotalActiveAssets(c.Request.Context(), database)
 		if err != nil {
 			logger.Error("Error getting total active assets: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching asset count: " + err.Error()})

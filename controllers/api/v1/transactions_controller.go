@@ -40,7 +40,7 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		rows, err := database.Query(`
+		rows, err := database.QueryContext(c.Request.Context(), `
       SELECT transaction_id
       FROM public.transactions
       WHERE machine_id = $1
@@ -113,7 +113,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 		var rows *sql.Rows
 		var err error
 
-		rows, err = database.Query(`
+		rows, err = database.QueryContext(c.Request.Context(), `
       SELECT transaction_id, hostname, begin_time, end_time, actions, altered, "user", return_code,
            release_version, command_line, comment, scriptlet_output
       FROM public.transactions
@@ -211,7 +211,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		}
 
 		// Start database transaction
-		tx, err := database.Begin()
+		tx, err := database.BeginTx(c.Request.Context(), nil)
 		if err != nil {
 			logger.Error("Error beginning transaction: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})

@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"database/sql"
 	"github.com/mileusna/crontab"
-	"github.com/txlog/server/database"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/statistics"
 )
@@ -24,21 +24,21 @@ var numericRegex = regexp.MustCompile(`^[0-9]+$`)
 //   - A materialized view refresh job that runs every 5 minutes
 //
 // The scheduler uses crontab for job scheduling and execution.
-func StartScheduler() {
+func StartScheduler(db *sql.DB) {
 	ctab := crontab.New()
-	ctab.MustAddJob(os.Getenv("CRON_RETENTION_EXPRESSION"), housekeepingJob)
-	ctab.MustAddJob(os.Getenv("CRON_STATS_EXPRESSION"), statsJob)
+	ctab.MustAddJob(os.Getenv("CRON_RETENTION_EXPRESSION"), func() { housekeepingJob(db) })
+	ctab.MustAddJob(os.Getenv("CRON_STATS_EXPRESSION"), func() { statsJob(db) })
 	ctab.MustAddJob("0 * * * *", latestVersionJob)
-	ctab.MustAddJob("*/5 * * * *", refreshMaterializedViewsJob)
+	ctab.MustAddJob("*/5 * * * *", func() { refreshMaterializedViewsJob(db) })
 
 	cronOsv := os.Getenv("CRON_OSV_EXPRESSION")
 	if cronOsv == "" {
 		cronOsv = "0 4 * * *"
 	}
-	ctab.MustAddJob(cronOsv, UpdateVulnerabilitiesJob)
+	ctab.MustAddJob(cronOsv, func() { UpdateVulnerabilitiesJob(db) })
 
 	latestVersionJob()            // Run for the first time
-	refreshMaterializedViewsJob() // Run for the first time
+	refreshMaterializedViewsJob(db) // Run for the first time
 	logger.Info("Scheduler: started.")
 }
 
@@ -71,10 +71,10 @@ func latestVersionJob() {
 //
 // This job should run frequently (every 5 minutes) to keep the data relatively fresh
 // while avoiding the expensive CTEs on each request.
-func refreshMaterializedViewsJob() {
+func refreshMaterializedViewsJob(db *sql.DB) {
 	lockName := "refresh-materialized-views"
 
-	locked, err := acquireLock(lockName)
+	locked, err := acquireLock(db, lockName)
 	if err != nil {
 		logger.Error("Error acquiring lock for materialized view refresh: " + err.Error())
 		return
@@ -85,14 +85,14 @@ func refreshMaterializedViewsJob() {
 		return
 	}
 
-	defer releaseLock(lockName)
+	defer releaseLock(db, lockName)
 
 	// Refresh the package listing materialized view
 	// Using CONCURRENTLY to allow reads during refresh (requires UNIQUE index)
-	_, err = database.Db.Exec(`REFRESH MATERIALIZED VIEW CONCURRENTLY mv_package_listing`)
+	_, err = db.Exec(`REFRESH MATERIALIZED VIEW CONCURRENTLY mv_package_listing`)
 	if err != nil {
 		// If CONCURRENTLY fails (e.g., first run or no unique index), try without it
-		_, err = database.Db.Exec(`REFRESH MATERIALIZED VIEW mv_package_listing`)
+		_, err = db.Exec(`REFRESH MATERIALIZED VIEW mv_package_listing`)
 		if err != nil {
 			// View might not exist yet (migration not applied)
 			// This is expected on first deployment, so we only log at debug level
@@ -107,9 +107,9 @@ func refreshMaterializedViewsJob() {
 		"mv_dashboard_most_updated",
 	}
 	for _, view := range dashboardViews {
-		_, err = database.Db.Exec(`REFRESH MATERIALIZED VIEW CONCURRENTLY ` + view)
+		_, err = db.Exec(`REFRESH MATERIALIZED VIEW CONCURRENTLY ` + view)
 		if err != nil {
-			_, err = database.Db.Exec(`REFRESH MATERIALIZED VIEW ` + view)
+			_, err = db.Exec(`REFRESH MATERIALIZED VIEW ` + view)
 			if err != nil {
 				logger.Debug("Could not refresh " + view + ": " + err.Error())
 			}
@@ -127,12 +127,12 @@ func refreshMaterializedViewsJob() {
 // 2. If lock acquisition fails or another instance is running, exits early
 // 3. Counts executions, installed packages, and upgraded packages for the last 30 days
 // 4. Automatically releases the lock when the function completes
-func statsJob() {
+func statsJob(db *sql.DB) {
 	logger.Info("Statistics: executing task...")
 
 	lockName := "stats"
 
-	locked, err := acquireLock(lockName)
+	locked, err := acquireLock(db, lockName)
 	if err != nil {
 		logger.Error("Error acquiring lock: " + err.Error())
 		return
@@ -143,7 +143,7 @@ func statsJob() {
 		return
 	}
 
-	defer releaseLock(lockName)
+	defer releaseLock(db, lockName)
 
 	statistics.CountExecutions()
 	statistics.CountInstalledPackages()
@@ -158,12 +158,12 @@ func statsJob() {
 // (defaults to 7 days if not set). Records older than the retention period are
 // deleted from the executions table. The function logs its progress and any errors
 // encountered during the process.
-func housekeepingJob() {
+func housekeepingJob(db *sql.DB) {
 	logger.Info("Housekeeping: executing task...")
 
 	lockName := "retention-days"
 
-	locked, err := acquireLock(lockName)
+	locked, err := acquireLock(db, lockName)
 	if err != nil {
 		logger.Error("Error acquiring lock: " + err.Error())
 		return
@@ -174,18 +174,18 @@ func housekeepingJob() {
 		return
 	}
 
-	defer releaseLock(lockName)
+	defer releaseLock(db, lockName)
 
 	retentionDays := os.Getenv("CRON_RETENTION_DAYS")
 	if retentionDays == "" {
 		retentionDays = "7" // default to 7 days if not set
 	}
 	if numericRegex.MatchString(retentionDays) {
-		_, _ = database.Db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL $1 day", retentionDays)
+		_, _ = db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL $1 day", retentionDays)
 	}
 
 	// D11: Cleanup orphan transaction_items and transactions from inactive assets
-	_, err = database.Db.Exec(`
+	_, err = db.Exec(`
 		DELETE FROM transaction_items ti
 		WHERE NOT EXISTS (
 			SELECT 1 FROM assets a
@@ -199,7 +199,7 @@ func housekeepingJob() {
 		logger.Error("Housekeeping: error cleaning orphan transaction_items: " + err.Error())
 	}
 
-	_, err = database.Db.Exec(`
+	_, err = db.Exec(`
 		DELETE FROM transactions t
 		WHERE NOT EXISTS (
 			SELECT 1 FROM assets a
@@ -225,15 +225,15 @@ func housekeepingJob() {
 // Returns:
 //   - bool: true if the lock was acquired, false if it already exists
 //   - error: An error object if the database operation fails
-func acquireLock(lockName string) (bool, error) {
+func acquireLock(db *sql.DB, lockName string) (bool, error) {
 	// First, prevent a distributed deadlock due to a crashed instance by cleaning up
 	// locks older than 12 hours. We assume jobs don't take this long.
-	_, err := database.Db.Exec(`DELETE FROM cron_lock WHERE job_name = $1 AND locked_at < NOW() - INTERVAL '12 hours'`, lockName)
+	_, err := db.Exec(`DELETE FROM cron_lock WHERE job_name = $1 AND locked_at < NOW() - INTERVAL '12 hours'`, lockName)
 	if err != nil {
 		logger.Error("Failed to clean up stale lock for " + lockName + ": " + err.Error())
 	}
 
-	res, err := database.Db.Exec(`INSERT INTO cron_lock (job_name, locked_at) VALUES ($1, NOW()) ON CONFLICT (job_name) DO NOTHING`, lockName)
+	res, err := db.Exec(`INSERT INTO cron_lock (job_name, locked_at) VALUES ($1, NOW()) ON CONFLICT (job_name) DO NOTHING`, lockName)
 	if err != nil {
 		return false, err
 	}
@@ -255,7 +255,7 @@ func acquireLock(lockName string) (bool, error) {
 // Returns:
 //   - error: returns any error that occurred during the lock release operation,
 //     nil if successful
-func releaseLock(lockName string) error {
-	_, err := database.Db.Exec(`DELETE FROM cron_lock WHERE job_name = $1`, lockName)
+func releaseLock(db *sql.DB, lockName string) error {
+	_, err := db.Exec(`DELETE FROM cron_lock WHERE job_name = $1`, lockName)
 	return err
 }

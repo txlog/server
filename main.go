@@ -54,10 +54,10 @@ func main() {
 	}
 
 	database.ConnectDatabase()
-	scheduler.StartScheduler()
+	scheduler.StartScheduler(database.Db)
 
 	// Inject the background task trigger into controllers safely without direct package cycle
-	controllers.SetSchedulerOSVTrigger(scheduler.UpdateVulnerabilitiesJob)
+	controllers.SetSchedulerOSVTrigger(func() { scheduler.UpdateVulnerabilitiesJob(database.Db) })
 
 	// Initialize OIDC service (optional)
 	var oidcService *auth.OIDCService

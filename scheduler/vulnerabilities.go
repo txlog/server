@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	"github.com/txlog/server/database"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/util"
 )
@@ -44,12 +43,12 @@ type vulnTxKey struct {
 	MachineID     string
 }
 
-func UpdateVulnerabilitiesJob() {
+func UpdateVulnerabilitiesJob(db *sql.DB) {
 	logger.Info("Vulnerabilities: executing update task...")
 
 	lockName := "vulnerabilities"
 
-	locked, err := acquireLock(lockName)
+	locked, err := acquireLock(db, lockName)
 	if err != nil {
 		logger.Error("Error acquiring lock for vulnerabilities: " + err.Error())
 		return
@@ -58,7 +57,7 @@ func UpdateVulnerabilitiesJob() {
 		logger.Info("Another instance is running this vulnerabilities job.")
 		return
 	}
-	defer releaseLock(lockName)
+	defer releaseLock(db, lockName)
 
 	// Extract all distinct packages from transaction items, joined with asset OS.
 	query := `
@@ -69,7 +68,7 @@ func UpdateVulnerabilitiesJob() {
         WHERE ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade',
                              'Removed', 'Upgraded', 'Downgraded', 'Obsoleted', 'removed')
     `
-	rows, err := database.Db.Query(query)
+	rows, err := db.Query(query)
 	if err != nil {
 		logger.Error("Vulnerabilities: " + err.Error())
 		return
@@ -254,22 +253,22 @@ func UpdateVulnerabilitiesJob() {
 
 		// Batch upsert vulnerabilities (multi-row INSERT ... ON CONFLICT)
 		if len(vulnBatch) > 0 {
-			batchUpsertVulnerabilities(vulnBatch)
+			batchUpsertVulnerabilities(db, vulnBatch)
 		}
 
 		// Batch upsert package_vulnerabilities
 		if len(pvBatch) > 0 {
-			batchUpsertPackageVulnerabilities(pvBatch)
+			batchUpsertPackageVulnerabilities(db, pvBatch)
 		}
 	}
 
 	logger.Info("Vulnerabilities downloaded. Proceeding to calculate transaction scoreboards...")
-	updateTransactionScoreboards(updatedPackages)
+	updateTransactionScoreboards(db, updatedPackages)
 	logger.Info("Vulnerabilities and transaction scoreboards updated successfully.")
 }
 
 // batchUpsertVulnerabilities inserts/updates vulnerabilities in batches of 200 rows.
-func batchUpsertVulnerabilities(records map[string]vulnRecord) {
+func batchUpsertVulnerabilities(db *sql.DB, records map[string]vulnRecord) {
 	var all []vulnRecord
 	for _, r := range records {
 		all = append(all, r)
@@ -305,7 +304,7 @@ func batchUpsertVulnerabilities(records map[string]vulnRecord) {
 				modified_at = EXCLUDED.modified_at
 		`, strings.Join(valueParts, ", "))
 
-		_, err := database.Db.Exec(stmt, args...)
+		_, err := db.Exec(stmt, args...)
 		if err != nil {
 			logger.Error("Batch upsert vulnerabilities error: " + err.Error())
 		}
@@ -313,7 +312,7 @@ func batchUpsertVulnerabilities(records map[string]vulnRecord) {
 }
 
 // batchUpsertPackageVulnerabilities inserts package↔vulnerability links in batches.
-func batchUpsertPackageVulnerabilities(records []pvRecord) {
+func batchUpsertPackageVulnerabilities(db *sql.DB, records []pvRecord) {
 	batchSize := 200
 	for i := 0; i < len(records); i += batchSize {
 		end := i + batchSize
@@ -339,14 +338,14 @@ func batchUpsertPackageVulnerabilities(records []pvRecord) {
 			ON CONFLICT DO NOTHING
 		`, strings.Join(valueParts, ", "))
 
-		_, err := database.Db.Exec(stmt, args...)
+		_, err := db.Exec(stmt, args...)
 		if err != nil {
 			logger.Error("Batch upsert package_vulnerabilities error: " + err.Error())
 		}
 	}
 }
 
-func updateTransactionScoreboards(updatedPackages map[vulnPkgKey]bool) {
+func updateTransactionScoreboards(db *sql.DB, updatedPackages map[vulnPkgKey]bool) {
 	if len(updatedPackages) == 0 {
 		logger.Info("Vulnerabilities: No packages were updated, skipping scoreboard recalculation.")
 		return
@@ -363,7 +362,7 @@ func updateTransactionScoreboards(updatedPackages map[vulnPkgKey]bool) {
 	}
 
 	// Find only transactions that contain items matching the updated packages
-	rows, err := database.Db.Query(`
+	rows, err := db.Query(`
 		SELECT DISTINCT ti.transaction_id, ti.machine_id
 		FROM transaction_items ti
 		WHERE EXISTS (
@@ -374,7 +373,7 @@ func updateTransactionScoreboards(updatedPackages map[vulnPkgKey]bool) {
 	if err != nil {
 		logger.Error("Failed to fetch affected transactions: " + err.Error())
 		// Fallback to processing all transactions
-		updateAllTransactionScoreboards()
+		updateAllTransactionScoreboards(db)
 		return
 	}
 
@@ -394,16 +393,16 @@ func updateTransactionScoreboards(updatedPackages map[vulnPkgKey]bool) {
 		return
 	}
 
-	processScoreboardBatch(keys)
+	processScoreboardBatch(db, keys)
 }
 
 // updateAllTransactionScoreboards is the fallback that processes all transactions.
-func updateAllTransactionScoreboards() {
+func updateAllTransactionScoreboards(db *sql.DB) {
 	logger.Info("Vulnerabilities: Fallback - fetching ALL transactions for scoreboard calculation...")
 
 	var keys []vulnTxKey
 
-	rows, err := database.Db.Query("SELECT DISTINCT transaction_id, machine_id FROM transactions")
+	rows, err := db.Query("SELECT DISTINCT transaction_id, machine_id FROM transactions")
 	if err != nil {
 		logger.Error("Failed to fetch transactions list: " + err.Error())
 		return
@@ -419,10 +418,10 @@ func updateAllTransactionScoreboards() {
 	total := len(keys)
 	logger.Info(fmt.Sprintf("Vulnerabilities: Total of %d transactions to process.", total))
 
-	processScoreboardBatch(keys)
+	processScoreboardBatch(db, keys)
 }
 
-func processScoreboardBatch(keys []vulnTxKey) {
+func processScoreboardBatch(db *sql.DB, keys []vulnTxKey) {
 	total := len(keys)
 	chunkSize := 500
 	for i := 0; i < total; i += chunkSize {
@@ -535,7 +534,7 @@ WHERE t.transaction_id = s.transaction_id
   AND t.machine_id = s.machine_id;
 		`
 
-		_, err := database.Db.Exec(stmt, pq.Array(txnIDs), pq.Array(mchnIDs))
+		_, err := db.Exec(stmt, pq.Array(txnIDs), pq.Array(mchnIDs))
 		if err != nil {
 			logger.Error("Failed to update transaction scoreboards for batch: " + err.Error())
 		}

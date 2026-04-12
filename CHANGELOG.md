@@ -35,6 +35,9 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   using `context.WithTimeout` for asynchronous `last_used_at` updates.
 - Improve panic recovery in asset deletion by logging the affected machine ID
   context before re-panicking to Gin's middleware.
+- Fix test suite compatibility by updating function signatures in all existing
+  test files to match the new context-aware and dependency-injected
+  architecture.
 
 ## [1.26.1] - 2026-03-31
 

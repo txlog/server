@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -41,7 +42,7 @@ func GetAnomalies(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		report, err := detectAnomalies(database, days, severityFilter)
+		report, err := detectAnomalies(c.Request.Context(), database, days, severityFilter)
 		if err != nil {
 			logger.Error("Error detecting anomalies: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error detecting anomalies: " + err.Error()})
@@ -52,7 +53,7 @@ func GetAnomalies(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
-func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models.AnomalyReport, error) {
+func detectAnomalies(ctx context.Context, database *sql.DB, days int, severityFilter string) (*models.AnomalyReport, error) {
 	report := &models.AnomalyReport{
 		TimeWindow: fmt.Sprintf("%d days", days),
 		Anomalies:  make([]models.TransactionAnomaly, 0),
@@ -80,7 +81,7 @@ func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models
 		ORDER BY package_count DESC
 	`
 
-	rows, err := database.Query(highVolumeQuery, days)
+	rows, err := database.QueryContext(ctx, highVolumeQuery, days)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +155,7 @@ func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models
 		ORDER BY change_count DESC
 	`
 
-	rows2, err := database.Query(rapidChangeQuery, days)
+	rows2, err := database.QueryContext(ctx, rapidChangeQuery, days)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +218,7 @@ func detectAnomalies(database *sql.DB, days int, severityFilter string) (*models
 		ORDER BY t.begin_time DESC
 	`
 
-	rows3, err := database.Query(downgradeQuery, days)
+	rows3, err := database.QueryContext(ctx, downgradeQuery, days)
 	if err != nil {
 		return nil, err
 	}

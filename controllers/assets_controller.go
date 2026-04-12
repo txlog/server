@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -89,7 +90,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			FROM assets
 			WHERE ` + activeFilter + whereClause
 
-		err = database.QueryRow(countQuery, queryArgs...).Scan(&total)
+		err = database.QueryRowContext(c.Request.Context(), countQuery, queryArgs...).Scan(&total)
 		if err != nil {
 			logger.Error("Error counting assets:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
@@ -116,7 +117,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			LIMIT $` + strconv.Itoa(paramNum) + ` OFFSET $` + strconv.Itoa(paramNum+1)
 
 		queryArgs = append(queryArgs, limit, offset)
-		rows, err = database.Query(selectQuery, queryArgs...)
+		rows, err = database.QueryContext(c.Request.Context(), selectQuery, queryArgs...)
 
 		if err != nil {
 			logger.Error("Error listing assets:" + err.Error())
@@ -156,7 +157,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			assets = append(assets, asset)
 		}
 
-		rows, err = database.Query(`
+		rows, err = database.QueryContext(c.Request.Context(), `
       SELECT
         name,
         value,
@@ -234,7 +235,7 @@ func DeleteMachineID(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		tx, err := database.Begin()
+		tx, err := database.BeginTx(c.Request.Context(), nil)
 		if err != nil {
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": "Failed to start transaction: " + err.Error(),
@@ -244,6 +245,7 @@ func DeleteMachineID(database *sql.DB) gin.HandlerFunc {
 		defer func() {
 			if p := recover(); p != nil {
 				tx.Rollback()
+				logger.Error(fmt.Sprintf("Critical panic caught deleting machine %s: %v", machineID, p))
 				panic(p)
 			}
 		}()
@@ -328,7 +330,7 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 		// Last 10 executions with transactions sent
 		// All machines with this hostname
 
-		row := database.QueryRow(`
+		row := database.QueryRowContext(c.Request.Context(), `
         SELECT hostname FROM executions WHERE machine_id = $1
     `, machineID)
 
@@ -347,7 +349,7 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		rows, err := database.Query(`
+		rows, err := database.QueryContext(c.Request.Context(), `
       SELECT id, machine_id, hostname, executed_at, success,
         details, transactions_processed, transactions_sent,
         agent_version, os
@@ -401,7 +403,7 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			executions = append(executions, exec)
 		}
 
-		rows, err = database.Query(`
+		rows, err = database.QueryContext(c.Request.Context(), `
       SELECT
         transaction_id,
         begin_time,
@@ -452,7 +454,7 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			transactions = append(transactions, transaction)
 		}
 
-		rows, err = database.Query(`
+		rows, err = database.QueryContext(c.Request.Context(), `
       SELECT a.machine_id, a.hostname, a.last_seen, e.agent_version, e.os
       FROM assets a
       LEFT JOIN LATERAL (
@@ -508,7 +510,7 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 		// query if this asset must be restarted
 		var needsRestarting sql.NullBool
 		var restartingReason sql.NullString
-		err = database.QueryRow(`
+		err = database.QueryRowContext(c.Request.Context(), `
       SELECT needs_restarting, restarting_reason
       FROM assets
       WHERE machine_id = $1

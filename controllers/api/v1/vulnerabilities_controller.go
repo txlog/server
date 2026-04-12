@@ -29,7 +29,7 @@ func GetTransactionVulnerabilities(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		rows, err := database.Query(`
+		rows, err := database.QueryContext(c.Request.Context(), `
 			SELECT DISTINCT v.id, COALESCE(v.summary, ''), v.severity, v.cvss_score,
 			       ti.package, ti.version,
 			       CASE

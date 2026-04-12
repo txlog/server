@@ -7,7 +7,6 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
-	"github.com/txlog/server/database"
 )
 
 // setupTestDB creates a test database connection for scheduler tests
@@ -43,15 +42,10 @@ func TestAcquireLock(t *testing.T) {
 	defer db.Close()
 	defer cleanupTestData(t, db)
 
-	// Set the database connection for the scheduler package
-	originalDB := database.Db
-	database.Db = db
-	defer func() { database.Db = originalDB }()
-
 	lockName := "test-lock-1"
 
 	t.Run("Acquire lock successfully", func(t *testing.T) {
-		locked, err := acquireLock(lockName)
+		locked, err := acquireLock(db, lockName)
 		if err != nil {
 			t.Fatalf("Failed to acquire lock: %v", err)
 		}
@@ -73,7 +67,7 @@ func TestAcquireLock(t *testing.T) {
 	})
 
 	t.Run("Cannot acquire already locked job", func(t *testing.T) {
-		locked, err := acquireLock(lockName)
+		locked, err := acquireLock(db, lockName)
 		if err != nil {
 			t.Fatalf("Failed to attempt lock acquisition: %v", err)
 		}
@@ -90,15 +84,11 @@ func TestReleaseLock(t *testing.T) {
 	defer db.Close()
 	defer cleanupTestData(t, db)
 
-	originalDB := database.Db
-	database.Db = db
-	defer func() { database.Db = originalDB }()
-
 	lockName := "test-lock-2"
 
 	t.Run("Release existing lock", func(t *testing.T) {
 		// First acquire the lock
-		locked, err := acquireLock(lockName)
+		locked, err := acquireLock(db, lockName)
 		if err != nil {
 			t.Fatalf("Failed to acquire lock: %v", err)
 		}
@@ -108,7 +98,7 @@ func TestReleaseLock(t *testing.T) {
 		}
 
 		// Now release it
-		err = releaseLock(lockName)
+		err = releaseLock(db, lockName)
 		if err != nil {
 			t.Fatalf("Failed to release lock: %v", err)
 		}
@@ -126,7 +116,7 @@ func TestReleaseLock(t *testing.T) {
 	})
 
 	t.Run("Release non-existent lock does not error", func(t *testing.T) {
-		err := releaseLock("test-lock-nonexistent")
+		err := releaseLock(db, "test-lock-nonexistent")
 		if err != nil {
 			t.Errorf("Expected no error when releasing non-existent lock, got: %v", err)
 		}
@@ -139,15 +129,11 @@ func TestLockAcquireReleaseFlow(t *testing.T) {
 	defer db.Close()
 	defer cleanupTestData(t, db)
 
-	originalDB := database.Db
-	database.Db = db
-	defer func() { database.Db = originalDB }()
-
 	lockName := "test-lock-flow"
 
 	t.Run("Complete lock lifecycle", func(t *testing.T) {
 		// Acquire lock
-		locked, err := acquireLock(lockName)
+		locked, err := acquireLock(db, lockName)
 		if err != nil {
 			t.Fatalf("Failed to acquire lock: %v", err)
 		}
@@ -156,7 +142,7 @@ func TestLockAcquireReleaseFlow(t *testing.T) {
 		}
 
 		// Try to acquire again (should fail)
-		locked, err = acquireLock(lockName)
+		locked, err = acquireLock(db, lockName)
 		if err != nil {
 			t.Fatalf("Failed to attempt second acquisition: %v", err)
 		}
@@ -165,13 +151,13 @@ func TestLockAcquireReleaseFlow(t *testing.T) {
 		}
 
 		// Release lock
-		err = releaseLock(lockName)
+		err = releaseLock(db, lockName)
 		if err != nil {
 			t.Fatalf("Failed to release lock: %v", err)
 		}
 
 		// Acquire again (should succeed now)
-		locked, err = acquireLock(lockName)
+		locked, err = acquireLock(db, lockName)
 		if err != nil {
 			t.Fatalf("Failed to re-acquire lock: %v", err)
 		}
@@ -180,7 +166,7 @@ func TestLockAcquireReleaseFlow(t *testing.T) {
 		}
 
 		// Cleanup
-		releaseLock(lockName)
+		releaseLock(db, lockName)
 	})
 }
 
@@ -189,10 +175,6 @@ func TestHousekeepingJob(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 	defer cleanupTestData(t, db)
-
-	originalDB := database.Db
-	database.Db = db
-	defer func() { database.Db = originalDB }()
 
 	machineID := "scheduler-test-machine-001"
 
@@ -240,7 +222,7 @@ func TestHousekeepingJob(t *testing.T) {
 		}
 
 		// Run housekeeping job
-		housekeepingJob()
+		housekeepingJob(db)
 
 		// Count executions after housekeeping
 		var countAfter int
@@ -273,10 +255,6 @@ func TestHousekeepingJobWithDefaultRetention(t *testing.T) {
 	defer db.Close()
 	defer cleanupTestData(t, db)
 
-	originalDB := database.Db
-	database.Db = db
-	defer func() { database.Db = originalDB }()
-
 	t.Run("Use default retention when env not set", func(t *testing.T) {
 		// Unset the retention env variable
 		originalRetention := os.Getenv("CRON_RETENTION_DAYS")
@@ -300,7 +278,7 @@ func TestHousekeepingJobWithDefaultRetention(t *testing.T) {
 		}
 
 		// Run housekeeping with default retention
-		housekeepingJob()
+		housekeepingJob(db)
 
 		// Verify old execution was deleted
 		var count int
@@ -320,10 +298,6 @@ func TestHousekeepingJobWithInvalidRetention(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 	defer cleanupTestData(t, db)
-
-	originalDB := database.Db
-	database.Db = db
-	defer func() { database.Db = originalDB }()
 
 	t.Run("Ignore invalid retention value", func(t *testing.T) {
 		// Set invalid retention value
@@ -357,7 +331,7 @@ func TestHousekeepingJobWithInvalidRetention(t *testing.T) {
 		}
 
 		// Run housekeeping (should not delete anything with invalid value)
-		housekeepingJob()
+		housekeepingJob(db)
 
 		// Count after
 		var countAfter int
@@ -379,10 +353,6 @@ func TestConcurrentLockAcquisition(t *testing.T) {
 	defer db.Close()
 	defer cleanupTestData(t, db)
 
-	originalDB := database.Db
-	database.Db = db
-	defer func() { database.Db = originalDB }()
-
 	lockName := "test-concurrent-lock"
 
 	t.Run("Multiple goroutines try to acquire same lock", func(t *testing.T) {
@@ -391,7 +361,7 @@ func TestConcurrentLockAcquisition(t *testing.T) {
 		// Launch 5 goroutines trying to acquire the same lock
 		for i := 0; i < 5; i++ {
 			go func() {
-				locked, _ := acquireLock(lockName)
+				locked, _ := acquireLock(db, lockName)
 				results <- locked
 			}()
 		}
@@ -410,6 +380,6 @@ func TestConcurrentLockAcquisition(t *testing.T) {
 		}
 
 		// Cleanup
-		releaseLock(lockName)
+		releaseLock(db, lockName)
 	})
 }

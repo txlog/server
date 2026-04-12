@@ -6,6 +6,7 @@ import (
 )
 
 var majorMinorVersionRe = regexp.MustCompile(`\b(\d+)\.\d+`)
+var majorVersionRe = regexp.MustCompile(`\b(\d+)`)
 
 // ExtractOSVEcosystems converts a Txlog OS string like "AlmaLinux 9.4" into
 // a list of valid OSV ecosystem identifiers. The repo parameter is used for
@@ -22,8 +23,8 @@ func ExtractOSVEcosystems(osString, repo string) []string {
 	var majorVersion string
 	if len(matches) > 1 {
 		majorVersion = matches[1]
-	} else if regexp.MustCompile(`\b(\d+)`).MatchString(osString) {
-		majorVersion = regexp.MustCompile(`\b(\d+)`).FindStringSubmatch(osString)[1]
+	} else if majorVersionRe.MatchString(osString) {
+		majorVersion = majorVersionRe.FindStringSubmatch(osString)[1]
 	}
 
 	if majorVersion == "" {

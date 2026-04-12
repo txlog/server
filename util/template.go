@@ -133,7 +133,10 @@ func FormatInteger(num int) string {
 // Returns:
 //   - []int: A slice containing all integers from start to count
 func Iterate(start, count int) []int {
-	var items []int
+	if start > count {
+		return nil
+	}
+	items := make([]int, 0, count-start+1)
 	for i := start; i <= count; i++ {
 		items = append(items, i)
 	}

@@ -126,7 +126,7 @@ func UpdateVulnerabilitiesJob() {
 		logger.Info(fmt.Sprintf("Vulnerabilities: fetching %d to %d of %d...", i+1, end, len(packages)))
 
 		chunk := packages[i:end]
-		var osvQueries []util.OSVQuery
+		osvQueries := make([]util.OSVQuery, 0, len(chunk))
 
 		for _, p := range chunk {
 			fullVersion := p.Version

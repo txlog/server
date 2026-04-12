@@ -37,7 +37,7 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 
 		if transactionID == "" {
 			// If no transaction_id provided, get the latest one
-			row := database.QueryRow(`
+			row := database.QueryRowContext(c.Request.Context(), `
         SELECT transaction_id
         FROM public.transaction_items
         WHERE machine_id = $1
@@ -49,7 +49,7 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 			}
 		}
 
-		rows, err := database.Query(`
+		rows, err := database.QueryContext(c.Request.Context(), `
       SELECT item_id
       FROM public.transaction_items
       WHERE machine_id = $1
@@ -108,7 +108,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 
 		if transactionID == "" {
 			// If no transaction_id provided, get the latest one
-			row := database.QueryRow(`
+			row := database.QueryRowContext(c.Request.Context(), `
         SELECT transaction_id
         FROM public.transaction_items
         WHERE machine_id = $1
@@ -125,7 +125,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 		var endTime sql.NullTime
 
 		// Query for transaction details using QueryRow since we expect only one row
-		row := database.QueryRow(`
+		row := database.QueryRowContext(c.Request.Context(), `
       SELECT
         transaction_id,
         hostname,
@@ -180,7 +180,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 
 		// details about the items
 
-		rows, err := database.Query(`
+		rows, err := database.QueryContext(c.Request.Context(), `
     SELECT
       action,
       package,

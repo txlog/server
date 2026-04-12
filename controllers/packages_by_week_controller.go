@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 
 func GetPackagesByWeekIndex(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		graphData, err := getGraphData(database)
+		graphData, err := getGraphData(c.Request.Context(), database)
 		if err != nil {
 			logger.Error("Error getting statistics:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
@@ -31,8 +32,8 @@ func GetPackagesByWeekIndex(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
-func getGraphData(database *sql.DB) ([]models.PackageProgression, error) {
-	rows, err := database.Query(`
+func getGraphData(ctx context.Context, database *sql.DB) ([]models.PackageProgression, error) {
+	rows, err := database.QueryContext(ctx, `
     SELECT
       week,
       install,
@@ -110,7 +111,7 @@ func GetPackagesByMonth(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		csvData, err := getMonthlyPackageData(database, month, year)
+		csvData, err := getMonthlyPackageData(c.Request.Context(), database, month, year)
 		if err != nil {
 			logger.Error("Error getting monthly package data: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching package data: " + err.Error()})
@@ -133,7 +134,7 @@ func GetPackagesByMonth(database *sql.DB) gin.HandlerFunc {
 	}
 }
 
-func getMonthlyPackageData(database *sql.DB, month, year int) (string, error) {
+func getMonthlyPackageData(ctx context.Context, database *sql.DB, month, year int) (string, error) {
 	// Query to get package updates for the specified month
 	// Gets OS version from executions table (most recent execution per machine)
 	// Groups by OS version, package name, version, release, and arch
@@ -174,7 +175,7 @@ func getMonthlyPackageData(database *sql.DB, month, year int) (string, error) {
 		LIMIT 500
 	`
 
-	rows, err := database.Query(query, month, year)
+	rows, err := database.QueryContext(ctx, query, month, year)
 	if err != nil {
 		return "", err
 	}

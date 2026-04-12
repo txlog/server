@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"database/sql"
 	"net/http"
 	"strconv"
@@ -60,14 +61,14 @@ func GetMonthlyReport(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		packages, err := getMonthlyPackageReport(database, month, year)
+		packages, err := getMonthlyPackageReport(c.Request.Context(), database, month, year)
 		if err != nil {
 			logger.Error("Error getting monthly package report: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching package data: " + err.Error()})
 			return
 		}
 
-		assetCount, err := getTotalActiveAssetsForReport(database)
+		assetCount, err := getTotalActiveAssetsForReport(c.Request.Context(), database)
 		if err != nil {
 			logger.Error("Error getting total active assets: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching asset count: " + err.Error()})
@@ -86,7 +87,7 @@ func GetMonthlyReport(database *sql.DB) gin.HandlerFunc {
 }
 
 // getMonthlyPackageReport retrieves package update data for a specific month
-func getMonthlyPackageReport(database *sql.DB, month, year int) ([]MonthlyReportPackage, error) {
+func getMonthlyPackageReport(ctx context.Context, database *sql.DB, month, year int) ([]MonthlyReportPackage, error) {
 	query := `
 		WITH latest_executions AS (
 			SELECT DISTINCT ON (machine_id)
@@ -117,7 +118,7 @@ func getMonthlyPackageReport(database *sql.DB, month, year int) ([]MonthlyReport
 		LIMIT 500
 	`
 
-	rows, err := database.Query(query, month, year)
+	rows, err := database.QueryContext(ctx, query, month, year)
 	if err != nil {
 		return nil, err
 	}
@@ -142,9 +143,9 @@ func getMonthlyPackageReport(database *sql.DB, month, year int) ([]MonthlyReport
 }
 
 // getTotalActiveAssetsForReport retrieves the count of active assets from the database
-func getTotalActiveAssetsForReport(database *sql.DB) (int, error) {
+func getTotalActiveAssetsForReport(ctx context.Context, database *sql.DB) (int, error) {
 	var count int
-	err := database.QueryRow(`
+	err := database.QueryRowContext(ctx, `
 		SELECT COUNT(*)
 		FROM assets
 		WHERE is_active = TRUE
@@ -197,7 +198,7 @@ func GetFixedVulnerabilities(database *sql.DB) gin.HandlerFunc {
 		GROUP BY DATE_TRUNC('day', end_time)
 		ORDER BY date ASC
 		`
-		rows, err := database.Query(query, days)
+		rows, err := database.QueryContext(c.Request.Context(), query, days)
 		if err != nil {
 			logger.Error("Error getting vulnerability series: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query vulnerabilities series"})

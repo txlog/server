@@ -43,5 +43,5 @@ run:
 
 ## doc: Write the swagger documentation based on method comments
 doc:
-	@~/go/bin/swag init --outputTypes go
-	@~/go/bin/swag fmt
+	@swag init --outputTypes go
+	@swag fmt

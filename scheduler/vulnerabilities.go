@@ -160,7 +160,7 @@ func UpdateVulnerabilitiesJob() {
 
 		// Deduplicate IDs
 		idSet := make(map[string]bool)
-		var uniqueIDs []string
+		uniqueIDs := make([]string, 0, len(idsToFetch))
 		for _, id := range idsToFetch {
 			if !idSet[id] {
 				idSet[id] = true

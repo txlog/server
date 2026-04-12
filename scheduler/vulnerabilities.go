@@ -82,8 +82,6 @@ func UpdateVulnerabilitiesJob() {
 		Release   string
 		Ecosystem string
 	}
-	var packages []pkg
-
 	pkgMap := make(map[string]pkg)
 
 	for rows.Next() {
@@ -104,6 +102,7 @@ func UpdateVulnerabilitiesJob() {
 		}
 	}
 
+	packages := make([]pkg, 0, len(pkgMap))
 	for _, v := range pkgMap {
 		packages = append(packages, v)
 	}

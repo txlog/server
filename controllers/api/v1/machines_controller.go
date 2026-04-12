@@ -81,9 +81,9 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if len(params) > 0 {
-			rows, err = database.Query(query+" ORDER BY hostname", params...)
+			rows, err = database.QueryContext(c.Request.Context(), query+" ORDER BY hostname", params...)
 		} else {
-			rows, err = database.Query(query + " ORDER BY hostname")
+			rows, err = database.QueryContext(c.Request.Context(), query+" ORDER BY hostname")
 		}
 
 		// Fallback: if agent_version column doesn't exist in assets table,
@@ -133,9 +133,9 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 				}
 
 				if len(params) > 0 {
-					rows, err = database.Query(query+" ORDER BY hostname", params...)
+					rows, err = database.QueryContext(c.Request.Context(), query+" ORDER BY hostname", params...)
 				} else {
-					rows, err = database.Query(query + " ORDER BY hostname")
+					rows, err = database.QueryContext(c.Request.Context(), query+" ORDER BY hostname")
 				}
 			}
 		}
@@ -193,7 +193,7 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
       AND a.needs_restarting IS TRUE
       ORDER BY a.hostname ASC;`
 
-		rows, err = database.Query(query)
+		rows, err = database.QueryContext(c.Request.Context(), query)
 
 		if err != nil {
 			logger.Error("Error querying assets that require a restart: " + err.Error())
@@ -233,7 +233,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 		var rows *sql.Rows
 		var err error
 
-		rows, err = database.Query(`
+		rows, err = database.QueryContext(c.Request.Context(), `
       SELECT hostname, machine_id, first_seen
       FROM assets
       WHERE hostname = $1

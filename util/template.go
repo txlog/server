@@ -109,17 +109,18 @@ func FormatInteger(num int) string {
 		return s
 	}
 
-	var result string
+	var result strings.Builder
+	result.Grow(n + n/3)
 	for i := 0; i < n; i++ {
 		if (n-i)%3 == 0 && i != 0 {
-			result += "."
+			result.WriteByte('.')
 		}
-		result += string(s[i])
+		result.WriteByte(s[i])
 	}
 	if isNegative {
-		return "-" + result
+		return "-" + result.String()
 	}
-	return result
+	return result.String()
 }
 
 // Iterate generates a slice of integers from start to count (inclusive).

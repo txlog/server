@@ -435,8 +435,8 @@ func processScoreboardBatch(keys []vulnTxKey) {
 		logger.Info(fmt.Sprintf("Vulnerabilities: Processing batch %d to %d of %d (%.1f%%)...", i+1, end, total, pct))
 
 		chunk := keys[i:end]
-		var txnIDs []string
-		var mchnIDs []string
+		txnIDs := make([]string, 0, len(chunk))
+		mchnIDs := make([]string, 0, len(chunk))
 		for _, k := range chunk {
 			txnIDs = append(txnIDs, k.TransactionID)
 			mchnIDs = append(mchnIDs, k.MachineID)

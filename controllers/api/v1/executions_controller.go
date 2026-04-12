@@ -64,7 +64,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		}
 
 		// Start database transaction
-		tx, err := database.Begin()
+		tx, err := database.BeginTx(c.Request.Context(), nil)
 		if err != nil {
 			logger.Error("Error beginning transaction:" + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -168,7 +168,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 		var rows *sql.Rows
 		var err error
 		if success != "" {
-			rows, err = database.Query(
+			rows, err = database.QueryContext(c.Request.Context(),
 				`SELECT
           id, machine_id, hostname, executed_at, success,
           details, transactions_processed, transactions_sent,
@@ -178,7 +178,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 				machineID, success, limit, offset,
 			)
 		} else {
-			rows, err = database.Query(
+			rows, err = database.QueryContext(c.Request.Context(),
 				`SELECT
           id, machine_id, hostname, executed_at, success,
           details, transactions_processed, transactions_sent,

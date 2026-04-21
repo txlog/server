@@ -90,6 +90,10 @@ func main() {
 
 	r := gin.Default()
 	r.SetTrustedProxies(nil)
+	r.Use(func(c *gin.Context) {
+		c.SetSameSite(http.SameSiteLaxMode)
+		c.Next()
+	})
 	r.Use(EnvironmentVariablesMiddleware())
 	r.Use(middleware.AuthMiddleware(database.Db))
 
@@ -166,6 +170,7 @@ func main() {
 		adminGroup.POST("/migrations/run_osv_update", controllers.PostAdminRunOSVUpdate(database.Db))
 		adminGroup.POST("/migrations/reset_osv", controllers.PostAdminResetOSV(database.Db))
 		adminGroup.POST("/cleanup/inactive-assets", controllers.PostAdminCleanupInactiveAssets(database.Db))
+		adminGroup.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
 	}
 
 	// Admin routes that require OIDC or LDAP (user and API key management)
@@ -181,7 +186,6 @@ func main() {
 		}
 	}
 	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
-	r.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)

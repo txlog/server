@@ -3,12 +3,17 @@ package middleware
 import (
 	"database/sql"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/txlog/server/auth"
 	"github.com/txlog/server/models"
 )
+
+func isSecureCookie() bool {
+	return os.Getenv("GIN_MODE") != "debug"
+}
 
 // AuthMiddleware checks for valid user sessions
 // If neither OIDC nor LDAP is configured, it allows all requests through
@@ -42,7 +47,7 @@ func AuthMiddleware(db *sql.DB) gin.HandlerFunc {
 
 		user, err := getUserBySessionID(db, sessionID)
 		if err != nil || !user.IsActive {
-			c.SetCookie("session_id", "", -1, "/", "", false, true)
+			c.SetCookie("session_id", "", -1, "/", "", isSecureCookie(), true)
 			c.Redirect(http.StatusTemporaryRedirect, "/login")
 			c.Abort()
 			return

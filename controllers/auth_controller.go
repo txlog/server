@@ -3,12 +3,17 @@ package controllers
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/txlog/server/auth"
 	logger "github.com/txlog/server/logger"
 )
+
+func isSecureCookie() bool {
+	return os.Getenv("GIN_MODE") != "debug"
+}
 
 // GetLogin displays the login page
 func GetLogin(oidcService *auth.OIDCService, ldapService *auth.LDAPService) gin.HandlerFunc {
@@ -38,7 +43,7 @@ func PostLogin(oidcService *auth.OIDCService) gin.HandlerFunc {
 		}
 
 		// Store state in session/cookie for verification
-		c.SetCookie("oidc_state", state, 300, "/", "", false, true) // 5 minutes
+		c.SetCookie("oidc_state", state, 300, "/", "", isSecureCookie(), true)
 
 		authURL := oidcService.GetAuthURL(state)
 		c.Redirect(http.StatusSeeOther, authURL)
@@ -66,7 +71,7 @@ func GetCallback(oidcService *auth.OIDCService) gin.HandlerFunc {
 		}
 
 		// Clear state cookie
-		c.SetCookie("oidc_state", "", -1, "/", "", false, true)
+		c.SetCookie("oidc_state", "", -1, "/", "", isSecureCookie(), true)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
@@ -118,8 +123,7 @@ func GetCallback(oidcService *auth.OIDCService) gin.HandlerFunc {
 		}
 
 		// Set session cookie
-		c.SetCookie("session_id", sessionID, 7*24*3600, "/", "", false, true) // 7 days
-
+		c.SetCookie("session_id", sessionID, 7*24*3600, "/", "", isSecureCookie(), true)
 		logger.Info("User " + user.Email + " logged in successfully")
 		c.Redirect(http.StatusSeeOther, "/")
 	}
@@ -163,8 +167,7 @@ func PostLDAPLogin(ldapService *auth.LDAPService) gin.HandlerFunc {
 		}
 
 		// Set session cookie
-		c.SetCookie("session_id", sessionID, 7*24*3600, "/", "", false, true) // 7 days
-
+		c.SetCookie("session_id", sessionID, 7*24*3600, "/", "", isSecureCookie(), true)
 		logger.Info("User " + user.Email + " logged in successfully via LDAP")
 		c.Redirect(http.StatusSeeOther, "/")
 	}
@@ -188,7 +191,7 @@ func PostLogout(oidcService *auth.OIDCService, ldapService *auth.LDAPService) gi
 		}
 
 		// Clear session cookie
-		c.SetCookie("session_id", "", -1, "/", "", false, true)
+		c.SetCookie("session_id", "", -1, "/", "", isSecureCookie(), true)
 
 		c.Redirect(http.StatusSeeOther, "/")
 	}

@@ -135,7 +135,7 @@ func main() {
 		r.Static("/css", "./static/css")
 	}
 
-	healthcheck.New(r, util.CheckConfig(), util.Check())
+	healthcheck.New(r, util.CheckConfig(), util.Check(database.Db))
 
 	r.NoRoute(controllers.Get404)
 

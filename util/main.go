@@ -1,13 +1,9 @@
 package util
 
 import (
-	"bytes"
 	"database/sql"
-	"fmt"
-	"os"
 	"strings"
 
-	_ "github.com/lib/pq"
 	"github.com/tavsec/gin-healthcheck/checks"
 	"github.com/tavsec/gin-healthcheck/config"
 )
@@ -41,7 +37,7 @@ func CheckConfig() config.Config {
 // Check performs environment and database connectivity checks for PostgreSQL
 // connection. It verifies the presence of required environment variables for
 // database connection and tests the database connectivity using the provided
-// credentials.
+// connection.
 //
 // The following environment variables are checked:
 // - PGSQL_HOST: Database host address
@@ -53,25 +49,13 @@ func CheckConfig() config.Config {
 //
 // Returns a slice of checks.Check containing the results of both environment
 // variable checks and database connectivity test.
-func Check() []checks.Check {
+func Check(db *sql.DB) []checks.Check {
 	dbHostCheck := checks.NewEnvCheck("PGSQL_HOST")
 	dbPortCheck := checks.NewEnvCheck("PGSQL_PORT")
 	dbUserCheck := checks.NewEnvCheck("PGSQL_USER")
 	dbNameCheck := checks.NewEnvCheck("PGSQL_DB")
 	dbPasswordCheck := checks.NewEnvCheck("PGSQL_PASSWORD")
 	dbSslModeCheck := checks.NewEnvCheck("PGSQL_SSLMODE")
-
-	psqlSetup := fmt.Sprintf(
-		"host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		os.Getenv("PGSQL_HOST"),
-		os.Getenv("PGSQL_PORT"),
-		os.Getenv("PGSQL_USER"),
-		os.Getenv("PGSQL_DB"),
-		os.Getenv("PGSQL_PASSWORD"),
-		os.Getenv("PGSQL_SSLMODE"),
-	)
-
-	db, _ := sql.Open("postgres", psqlSetup)
 
 	return []checks.Check{
 		checks.SqlCheck{Sql: db},
@@ -84,15 +68,14 @@ func Check() []checks.Check {
 	}
 }
 
-// MaskString takes a string input and returns a new string of the same length
-// where each character is replaced with an asterisk (*). This is useful for
-// masking sensitive information in logs or output.
+// MaskString returns a fixed-length mask string to avoid revealing the length
+// of sensitive values such as passwords or secrets. Returns an empty string
+// for empty input.
 func MaskString(theString string) string {
-	var buf bytes.Buffer
-	for range theString {
-		buf.WriteRune('*')
+	if theString == "" {
+		return ""
 	}
-	return buf.String()
+	return "********"
 }
 
 // FormatSearchTerm prepares a search string for SQL LIKE queries by:

@@ -18,12 +18,6 @@ func isSecureCookie() bool {
 // GetLogin displays the login page
 func GetLogin(oidcService *auth.OIDCService, ldapService *auth.LDAPService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Check if user is already logged in
-		if sessionID, err := c.Cookie("session_id"); err == nil && sessionID != "" {
-			c.Redirect(http.StatusSeeOther, "/")
-			return
-		}
-
 		c.HTML(http.StatusOK, "login.html", gin.H{
 			"title":        "Login - Txlog Server",
 			"ldap_enabled": ldapService != nil,

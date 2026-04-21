@@ -8,7 +8,7 @@ Configuration reference for Txlog Server.
 | :--- | :--- | :--- |
 | `INSTANCE` | - | Name of the environment (e.g., "Production"). Displayed in UI. |
 | `LOG_LEVEL` | `INFO` | Logging verbosity (`DEBUG`, `INFO`, `WARN`, `ERROR`). |
-| `GIN_MODE` | `release` | Gin framework mode (`debug`, `release`). |
+| `GIN_MODE` | `release` | Gin framework mode (`debug`, `release`). In `release` mode, session cookies are marked as `Secure`. |
 | `PORT` | `8080` | HTTP port to listen on. |
 
 ## Database
@@ -30,7 +30,6 @@ Configuration reference for Txlog Server.
 | `OIDC_CLIENT_ID` | No | Client ID from provider. |
 | `OIDC_CLIENT_SECRET` | No | Client Secret from provider. |
 | `OIDC_REDIRECT_URL` | No | Callback URL (must match provider config). |
-| `OIDC_SKIP_TLS_VERIFY` | No | Set `true` to skip TLS checks (dev only). |
 
 ## Authentication (LDAP)
 

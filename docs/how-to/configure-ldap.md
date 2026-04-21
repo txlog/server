@@ -20,10 +20,12 @@ This guide explains how to connect Txlog Server to an LDAP directory (like Activ
     LDAP_PORT=389 # or 636 for LDAPS
     LDAP_USE_TLS=false # Set to true for LDAPS
 
-    # Service Account (optional for some servers)
     LDAP_BIND_DN=cn=admin,dc=example,dc=com
     LDAP_BIND_PASSWORD=secret
     ```
+
+    > [!IMPORTANT]
+    > Txlog Server always verifies the TLS certificate when `LDAP_USE_TLS=true`. Ensure your server's certificate is valid and trusted by the Txlog Server host. Insecure/skip-verify modes are not supported for security reasons.
 
 3. **Set the Search and Group variables**:
 

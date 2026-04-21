@@ -21,6 +21,7 @@ the Swagger UI at `/swagger/index.html`.
 | `GET` | `/machines` | List active machines. | `os`, `agent_version` |
 | `GET` | `/machines/ids` | Get machine IDs for a hostname. | `hostname` (Required) |
 | `GET` | `/assets/requiring-restart` | List assets flagged for restart. | - |
+| `DELETE` | `/admin/assets/:machine_id` | Delete a machine and its data (**Admin Only**). | - |
 
 ### Executions
 
@@ -55,3 +56,13 @@ the Swagger UI at `/swagger/index.html`.
 | Method | Path | Description |
 | :--- | :--- | :--- |
 | `GET` | `/version` | Get server version. |
+
+## Error Responses
+
+The API uses generic error messages to prevent leaking internal system details:
+
+- `500 Internal Server Error`: Generic internal failure.
+- `500 Database error`: Generic database connectivity or execution failure.
+
+Detailed error logs are available on the server for troubleshooting.
+

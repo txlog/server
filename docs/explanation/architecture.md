@@ -65,7 +65,16 @@ The system supports a hybrid authentication model to cater to different user nee
 - **OIDC/LDAP**: For Humans (web interface). Integrates with enterprise identity providers.
 - **No-Auth Mode**: For local development or isolated networks, reducing friction during initial setup.
 
-## Data Flow
+## Security Principles
+
+The server implements several layers of security hardening:
+
+1. **Cookie Security**: All session and authentication cookies are protected with `SameSite=Lax`. When the server is running in production mode (`GIN_MODE=release`), cookies are also marked as `Secure`.
+2. **CSRF Mitigation**: State-mutating operations use `POST` requests, which are protected by the `SameSite=Lax` cookie policy.
+3. **No-Leak Error Handling**: API responses to clients use generic error messages. Detailed database or internal errors are only visible in server-side logs.
+4. **Mandatory TLS Verification**: The server always verifies TLS certificates when connecting to external OIDC providers or LDAP servers. Insecure "skip verify" modes are not supported.
+5. **RBAC for Destructive Actions**: Destructive operations, such as deleting an asset or running database migrations, are strictly restricted to the Administrator role.
+6. **Credential Masking**: Sensitive configuration values are masked in the UI with fixed-length strings to prevent leaking credential lengths.
 
 ### Ingestion Pipeline
 

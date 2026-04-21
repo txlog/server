@@ -28,10 +28,10 @@ log in using your existing identity provider (e.g., Google, Keycloak, Okta).
 
     # The callback URL (must match what is registered in the IdP)
     OIDC_REDIRECT_URL=http://localhost:8080/auth/callback
-
-    # Optional: Skip TLS verification (only for testing with self-signed certs)
-    OIDC_SKIP_TLS_VERIFY=false
     ```
+
+    > [!IMPORTANT]
+    > Txlog Server always verifies the TLS certificate of the `OIDC_ISSUER_URL`. Ensure your provider's certificate is valid and trusted by the Txlog Server host. Insecure/skip-verify modes are not supported for security reasons.
 
 3. **Restart the Server**.
 

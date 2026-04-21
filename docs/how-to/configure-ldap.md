@@ -25,7 +25,9 @@ This guide explains how to connect Txlog Server to an LDAP directory (like Activ
     ```
 
     > [!IMPORTANT]
-    > Txlog Server always verifies the TLS certificate when `LDAP_USE_TLS=true`. Ensure your server's certificate is valid and trusted by the Txlog Server host. Insecure/skip-verify modes are not supported for security reasons.
+    > Txlog Server always verifies the TLS certificate when `LDAP_USE_TLS=true`.
+    > Ensure your server's certificate is valid and trusted by the Txlog Server
+    > host. Insecure/skip-verify modes are not supported for security reasons.
 
 3. **Set the Search and Group variables**:
 

@@ -31,7 +31,10 @@ log in using your existing identity provider (e.g., Google, Keycloak, Okta).
     ```
 
     > [!IMPORTANT]
-    > Txlog Server always verifies the TLS certificate of the `OIDC_ISSUER_URL`. Ensure your provider's certificate is valid and trusted by the Txlog Server host. Insecure/skip-verify modes are not supported for security reasons.
+    > Txlog Server always verifies the TLS certificate of the `OIDC_ISSUER_URL`.
+    > Ensure your provider's certificate is valid and trusted by the Txlog
+    > Server host. Insecure/skip-verify modes are not supported for security
+    > reasons.
 
 3. **Restart the Server**.
 

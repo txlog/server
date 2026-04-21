@@ -64,14 +64,14 @@ func GetMonthlyReport(database *sql.DB) gin.HandlerFunc {
 		packages, err := getMonthlyPackageReport(c.Request.Context(), database, month, year)
 		if err != nil {
 			logger.Error("Error getting monthly package report: " + err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching package data: " + err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 
 		assetCount, err := getTotalActiveAssetsForReport(c.Request.Context(), database)
 		if err != nil {
 			logger.Error("Error getting total active assets: " + err.Error())
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching asset count: " + err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 

@@ -167,7 +167,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 		}
 		if err != nil {
 			logger.Error("Error querying transaction: " + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 
@@ -200,7 +200,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying items: " + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 		defer rows.Close()
@@ -220,7 +220,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 
 			if err != nil {
 				logger.Error("Error reading transaction item: " + err.Error())
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
 

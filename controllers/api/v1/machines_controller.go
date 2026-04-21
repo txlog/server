@@ -142,7 +142,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying assets: " + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 		defer rows.Close()
@@ -156,7 +156,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 			)
 			if err != nil {
 				logger.Error("Error iterating assets: " + err.Error())
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
 			machines = append(machines, machine)
@@ -197,7 +197,7 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying assets that require a restart: " + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 		defer rows.Close()
@@ -211,7 +211,7 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 			)
 			if err != nil {
 				logger.Error("Error iterating assets: " + err.Error())
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
 			machines = append(machines, machine)
@@ -243,7 +243,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying machine_id: " + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 		defer rows.Close()
@@ -259,7 +259,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 			)
 			if err != nil {
 				logger.Error("Error iterating machine_id: " + err.Error())
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
 			if firstSeen.Valid {

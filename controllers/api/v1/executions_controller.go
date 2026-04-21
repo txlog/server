@@ -95,7 +95,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error inserting execution:" + err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
 
@@ -117,7 +117,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()
 			logger.Error("Error committing execution:" + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
 
@@ -191,7 +191,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying executions:" + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 		defer rows.Close()
@@ -218,7 +218,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 			execution.OS = os.String
 			if err != nil {
 				logger.Error("Error iterating executions:" + err.Error())
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
 			if executedAt.Valid {

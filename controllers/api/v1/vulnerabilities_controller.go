@@ -54,7 +54,7 @@ func GetTransactionVulnerabilities(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying transaction vulnerabilities: " + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 		defer rows.Close()

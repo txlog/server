@@ -125,7 +125,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			logger.Error("Error querying transactions: " + err.Error())
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 		defer rows.Close()
@@ -152,7 +152,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 
 			if err != nil {
 				logger.Error("Error iterating transactions: " + err.Error())
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
 			if beginTime.Valid {
@@ -244,7 +244,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error inserting transaction: " + err.Error())
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
 
@@ -285,7 +285,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			if err != nil {
 				tx.Rollback()
 				logger.Error("Error inserting transaction items: " + err.Error())
-				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 				return
 			}
 		}

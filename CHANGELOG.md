@@ -18,6 +18,34 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Security
+
+- Enforce `Secure` cookie flag based on `GIN_MODE`: when not set to `debug`,
+  session and state cookies are marked `Secure`, ensuring they are only
+  transmitted over HTTPS (e.g., behind a TLS-terminating reverse proxy such as
+  HAProxy).
+- Add `SameSite=Lax` to all session and OIDC state cookies via a global
+  middleware, providing CSRF mitigation for all state-mutating POST endpoints.
+- Move `DELETE /assets/:machine_id` route into the admin-protected group,
+  preventing non-admin authenticated users from permanently destroying asset
+  data.
+- Remove `OIDC_SKIP_TLS_VERIFY` and `LDAP_SKIP_TLS_VERIFY` environment
+  variable support. TLS certificate verification is now always enforced for
+  OIDC provider and LDAP server connections, eliminating the risk of
+  man-in-the-middle attacks on authentication flows.
+- Replace raw database and internal error messages in all `/v1/` API responses
+  with generic messages (`"Internal server error"`, `"Database error"`).
+  Detailed error context is retained in server-side logs only.
+- Fix `GET /login` handler to no longer redirect users based solely on the
+  presence of a `session_id` cookie without validating it against the database.
+  The authentication middleware now handles this correctly.
+- Reuse the application's existing database connection pool in the health check
+  endpoint instead of opening a separate unmanaged connection per startup.
+- `MaskString()` now returns a fixed-length mask (`"********"`) regardless of
+  input length, preventing credential length disclosure in the admin panel.
+
 ## [1.27.0] - 2026-04-11
 
 ### Changed

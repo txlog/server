@@ -3,13 +3,11 @@ package auth
 import (
 	"context"
 	"crypto/rand"
-	"crypto/tls"
 	"database/sql"
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
@@ -34,8 +32,6 @@ type OIDCService struct {
 //   - OIDC_CLIENT_SECRET: OAuth2 client secret
 //   - OIDC_ISSUER_URL: OIDC provider issuer URL (default: http://localhost:8090)
 //   - OIDC_REDIRECT_URL: OAuth2 redirect URL (default: http://localhost:8080/auth/callback)
-//   - OIDC_SKIP_TLS_VERIFY: Skip TLS certificate verification (default: false)
-//     Set to "true" for self-signed certificates in production environments
 func NewOIDCService(db *sql.DB) (*OIDCService, error) {
 	clientID := os.Getenv("OIDC_CLIENT_ID")
 	clientSecret := os.Getenv("OIDC_CLIENT_SECRET")
@@ -58,18 +54,8 @@ func NewOIDCService(db *sql.DB) (*OIDCService, error) {
 		redirectURL = "http://localhost:8080/auth/callback"
 	}
 
-	// Create HTTP client with TLS configuration
 	httpClient := &http.Client{}
 
-	// Check if we should skip TLS verification (useful for self-signed certificates in production)
-	skipTLSVerify := strings.ToLower(os.Getenv("OIDC_SKIP_TLS_VERIFY")) == "true"
-	if skipTLSVerify {
-		httpClient.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-	}
-
-	// Create context with custom HTTP client for OIDC provider
 	ctx = oidc.ClientContext(ctx, httpClient)
 
 	provider, err := oidc.NewProvider(ctx, issuerURL)

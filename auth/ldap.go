@@ -64,7 +64,6 @@ type LDAPService struct {
 //   - LDAP_HOST: LDAP server host (e.g., ldap.example.com)
 //   - LDAP_PORT: LDAP server port (default: 389 for LDAP, 636 for LDAPS)
 //   - LDAP_USE_TLS: Use TLS connection (default: false)
-//   - LDAP_SKIP_TLS_VERIFY: Skip TLS certificate verification (default: false)
 //   - LDAP_BIND_DN: Bind DN for LDAP authentication (e.g., cn=admin,dc=example,dc=com)
 //   - LDAP_BIND_PASSWORD: Password for bind DN
 //   - LDAP_BASE_DN: Base DN for user searches (e.g., ou=users,dc=example,dc=com)
@@ -203,7 +202,6 @@ func (s *LDAPService) connect() (*ldap.Conn, error) {
 	host := os.Getenv("LDAP_HOST")
 	port := os.Getenv("LDAP_PORT")
 	useTLS := strings.ToLower(os.Getenv("LDAP_USE_TLS")) == "true"
-	skipTLSVerify := strings.ToLower(os.Getenv("LDAP_SKIP_TLS_VERIFY")) == "true"
 
 	// Default ports
 	if port == "" {
@@ -221,8 +219,7 @@ func (s *LDAPService) connect() (*ldap.Conn, error) {
 
 	if useTLS {
 		tlsConfig := &tls.Config{
-			ServerName:         host,
-			InsecureSkipVerify: skipTLSVerify,
+			ServerName: host,
 		}
 		conn, err = ldap.DialTLS("tcp", address, tlsConfig)
 	} else {

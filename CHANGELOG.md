@@ -18,6 +18,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.29.0] - 2026-05-03
+
+### Added
+
+- Implement detection and tracking for **CVE-2026-31431 (Copy Fail)**
+  vulnerability.
+
 ## [1.28.0] - 2026-04-21
 
 ### Security

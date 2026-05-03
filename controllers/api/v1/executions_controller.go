@@ -63,6 +63,13 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			restartingReason.Valid = true
 		}
 
+		// Convert *bool to sql.NullBool
+		var copyFail sql.NullBool
+		if body.CopyFail != nil {
+			copyFail.Bool = *body.CopyFail
+			copyFail.Valid = true
+		}
+
 		// Start database transaction
 		tx, err := database.BeginTx(c.Request.Context(), nil)
 		if err != nil {
@@ -75,9 +82,9 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
       INSERT INTO executions (
         machine_id, hostname, executed_at, success, details,
         transactions_processed, transactions_sent, agent_version, os, needs_restarting,
-        restarting_reason
+        restarting_reason, copy_fail
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
       )`,
 			body.MachineID,
 			body.Hostname,
@@ -90,6 +97,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			body.OS,
 			needsRestarting,
 			restartingReason,
+			copyFail,
 		)
 
 		if err != nil {
@@ -105,7 +113,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			now := executedAt.Time
 			timestamp = &now
 		}
-		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, needsRestarting, restartingReason, body.OS, body.AgentVersion)
+		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, needsRestarting, restartingReason, body.OS, body.AgentVersion, copyFail)
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error upserting asset:" + err.Error())

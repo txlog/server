@@ -86,7 +86,10 @@
               <div class="flex items-center gap-3">
                 <span class="w-8 h-8 rounded-lg bg-txlog-lavender flex-shrink-0 relative">
                   <img src="/images/{{ brand .OS }}" class="w-full h-full object-cover rounded-lg" alt="">
-                  {{ if derefBool .NeedsRestarting }}
+                  {{ if derefBool .CopyFail }}
+                  <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-txlog-coral rounded-full animate-pulse"
+                    title="Vulnerable to CVE-2026-31431 (Copy Fail)"></span>
+                  {{ else if derefBool .NeedsRestarting }}
                   <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-txlog-golden rounded-full animate-pulse"
                     title="Asset must be restarted"></span>
                   {{ end }}

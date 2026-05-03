@@ -15,7 +15,7 @@ func NewAssetManager(db *sql.DB) *AssetManager {
 	return &AssetManager{db: db}
 }
 
-func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID string, timestamp time.Time, needsRestarting sql.NullBool, restartingReason sql.NullString, os string, agentVersion string) error {
+func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID string, timestamp time.Time, needsRestarting sql.NullBool, restartingReason sql.NullString, os string, agentVersion string, copyFail sql.NullBool) error {
 	var existingAssetID int
 	var existingIsActive bool
 
@@ -34,16 +34,16 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 		// Try INSERT with agent_version, fallback without if column doesn't exist
 		tx.Exec("SAVEPOINT upsert_agent_version")
 		_, err = tx.Exec(`
-			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os, agent_version)
-			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6, $7)
-		`, hostname, machineID, timestamp, needsRestarting, restartingReason, os, agentVersion)
+			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os, agent_version, copy_fail)
+			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6, $7, $8)
+		`, hostname, machineID, timestamp, needsRestarting, restartingReason, os, agentVersion, copyFail)
 
 		if err != nil {
 			tx.Exec("ROLLBACK TO SAVEPOINT upsert_agent_version")
 			_, err = tx.Exec(`
-				INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os)
-				VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6)
-			`, hostname, machineID, timestamp, needsRestarting, restartingReason, os)
+				INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os, copy_fail)
+				VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6, $7)
+			`, hostname, machineID, timestamp, needsRestarting, restartingReason, os, copyFail)
 			if err != nil {
 				logger.Error("Error inserting asset: " + err.Error())
 				return err
@@ -63,17 +63,17 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 	tx.Exec("SAVEPOINT upsert_agent_version")
 	_, err = tx.Exec(`
 		UPDATE assets
-		SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4, agent_version = $5
-		WHERE asset_id = $6
-	`, timestamp, needsRestarting, restartingReason, os, agentVersion, existingAssetID)
+		SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4, agent_version = $5, copy_fail = $6
+		WHERE asset_id = $7
+	`, timestamp, needsRestarting, restartingReason, os, agentVersion, copyFail, existingAssetID)
 
 	if err != nil {
 		tx.Exec("ROLLBACK TO SAVEPOINT upsert_agent_version")
 		_, err = tx.Exec(`
 			UPDATE assets
-			SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4
-			WHERE asset_id = $5
-		`, timestamp, needsRestarting, restartingReason, os, existingAssetID)
+			SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4, copy_fail = $5
+			WHERE asset_id = $6
+		`, timestamp, needsRestarting, restartingReason, os, copyFail, existingAssetID)
 		if err != nil {
 			logger.Error("Error updating asset last_seen: " + err.Error())
 			return err
@@ -126,9 +126,10 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 	var deactivatedAt sql.NullTime
 	var needsRestarting sql.NullBool
 	var restartingReason sql.NullString
+	var copyFail sql.NullBool
 
 	err := am.db.QueryRow(`
-		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason
+		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason, copy_fail
 		FROM assets
 		WHERE hostname = $1 AND is_active = TRUE
 		LIMIT 1
@@ -143,6 +144,7 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 		&deactivatedAt,
 		&needsRestarting,
 		&restartingReason,
+		&copyFail,
 	)
 
 	if err != nil {
@@ -161,6 +163,10 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 		asset.RestartingReason = &restartingReason.String
 	}
 
+	if copyFail.Valid {
+		asset.CopyFail = &copyFail.Bool
+	}
+
 	return &asset, nil
 }
 
@@ -169,9 +175,10 @@ func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 	var deactivatedAt sql.NullTime
 	var needsRestarting sql.NullBool
 	var restartingReason sql.NullString
+	var copyFail sql.NullBool
 
 	err := am.db.QueryRow(`
-		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason
+		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason, copy_fail
 		FROM assets
 		WHERE machine_id = $1
 		LIMIT 1
@@ -186,6 +193,7 @@ func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 		&deactivatedAt,
 		&needsRestarting,
 		&restartingReason,
+		&copyFail,
 	)
 
 	if err != nil {
@@ -202,6 +210,10 @@ func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 
 	if restartingReason.Valid {
 		asset.RestartingReason = &restartingReason.String
+	}
+
+	if copyFail.Valid {
+		asset.CopyFail = &copyFail.Bool
 	}
 
 	return &asset, nil
@@ -218,4 +230,5 @@ type Asset struct {
 	DeactivatedAt    *time.Time
 	NeedsRestarting  *bool
 	RestartingReason *string
+	CopyFail         *bool
 }

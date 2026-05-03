@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	logger "github.com/txlog/server/logger"
@@ -39,6 +40,13 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		search := c.Query("search")
 		restart := c.Query("restart")
 		inactive := c.Query("inactive")
+
+		copyFailFilter := false
+		if strings.Contains(search, "copyfail:true") {
+			copyFailFilter = true
+			search = strings.ReplaceAll(search, "copyfail:true", "")
+			search = strings.TrimSpace(search)
+		}
 
 		searchType := "hostname"
 		if len(search) == 32 && !util.ContainsSpecialCharacters(search) {
@@ -80,6 +88,10 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			whereClause += " AND needs_restarting IS TRUE"
 		}
 
+		if copyFailFilter {
+			whereClause += " AND copy_fail IS TRUE"
+		}
+
 		if inactive == "true" {
 			whereClause += " AND last_seen < NOW() - INTERVAL '15 days'"
 		}
@@ -110,7 +122,8 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				last_seen,
 				machine_id,
 				os,
-				needs_restarting
+				needs_restarting,
+				copy_fail
 			FROM assets
 			WHERE ` + activeFilter + whereClause + `
 			ORDER BY hostname
@@ -133,6 +146,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			var asset models.Execution
 			var executedAt sql.NullTime
 			var os sql.NullString
+			var copyFail sql.NullBool
 			err := rows.Scan(
 				&asset.ExecutionID,
 				&asset.Hostname,
@@ -140,6 +154,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				&asset.MachineID,
 				&os,
 				&asset.NeedsRestarting,
+				&copyFail,
 			)
 			if err != nil {
 				logger.Error("Error iterating assets:" + err.Error())
@@ -153,6 +168,9 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			}
 			if os.Valid {
 				asset.OS = os.String
+			}
+			if copyFail.Valid {
+				asset.CopyFail = &copyFail.Bool
 			}
 			assets = append(assets, asset)
 		}
@@ -510,12 +528,13 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 		// query if this asset must be restarted
 		var needsRestarting sql.NullBool
 		var restartingReason sql.NullString
+		var copyFail sql.NullBool
 		err = database.QueryRowContext(c.Request.Context(), `
-      SELECT needs_restarting, restarting_reason
+      SELECT needs_restarting, restarting_reason, copy_fail
       FROM assets
       WHERE machine_id = $1
       LIMIT 1
-      `, machineID).Scan(&needsRestarting, &restartingReason)
+      `, machineID).Scan(&needsRestarting, &restartingReason, &copyFail)
 		if err != nil && err != sql.ErrNoRows {
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
@@ -535,6 +554,13 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			displayNeedsRestarting = false
 		}
 
+		var displayCopyFail bool
+		if copyFail.Valid {
+			displayCopyFail = copyFail.Bool
+		} else {
+			displayCopyFail = false
+		}
+
 		c.HTML(http.StatusOK, "machine_id.html", gin.H{
 			"Context":           c,
 			"title":             "Assets",
@@ -545,6 +571,7 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			"other_assets":      otherAssets,
 			"needs_restarting":  displayNeedsRestarting,
 			"restarting_reason": restartingReason.String,
+			"copy_fail":         displayCopyFail,
 		})
 	}
 }

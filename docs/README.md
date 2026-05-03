@@ -27,6 +27,7 @@ Welcome to the Txlog Server documentation. This documentation is divided into fo
 
 - **[Configure Data Retention](how-to/configure-data-retention.md)**: Manage database cleanup policies.
 - **[Manage OSV Vulnerabilities](how-to/manage-osv-vulnerabilities.md)**: Update, fetch, and rebuild OSV threat data.
+- **[Search and Filter Assets](how-to/search-and-filter-assets.md)**: How to use the dashboard search and status filters.
 - **[Run Database Migrations](how-to/run-migrations.md)**: Apply schema changes safely.
 - **[Deploy to Kubernetes](how-to/deploy-kubernetes.md)**: Production deployment manifest.
 

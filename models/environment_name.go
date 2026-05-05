@@ -6,8 +6,8 @@ import "time"
 // template to a friendly display name.
 // Example: MatchValue="prd" -> Name="Production"
 type EnvironmentName struct {
-	ID           int
-	MatchValue   string
-	Name         string
-	CreatedAt    time.Time
+	ID         int
+	MatchValue string
+	Name       string
+	CreatedAt  time.Time
 }

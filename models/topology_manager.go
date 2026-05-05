@@ -118,7 +118,7 @@ func CompileTemplate(template string) (string, error) {
 }
 
 // ValidateCompiledPattern checks whether a compiled regex is valid in
-// PostgreSQL by executing: SELECT '' ~ $1
+// PostgreSQL by executing: SELECT ” ~ $1
 func (tm *TopologyManager) ValidateCompiledPattern(pattern string) error {
 	var ok bool
 	err := tm.db.QueryRow(`SELECT '' ~ $1`, pattern).Scan(&ok)

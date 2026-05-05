@@ -1,12 +1,17 @@
 {{ template "header.html" . }}
 <div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
-  <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-    <h2 class="font-display font-bold text-2xl text-white">Package details</h2>
-    <a class="inline-flex items-center gap-2 border-2 border-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/10 transition-all"
-      href="https://pkgs.org/search/?q={{ .name }}" target="_blank">
-      Search for this package on pkgs.org
-      <i data-lucide="external-link" class="w-4 h-4"></i>
-    </a>
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h2 class="font-display font-bold text-2xl text-white">Package details</h2>
+        <p class="text-white/50 text-sm mt-0.5">Deep dive into versions, architecture, and asset distribution</p>
+      </div>
+      <a class="inline-flex items-center gap-2 border-2 border-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/10 transition-all"
+        href="https://pkgs.org/search/?q={{ .name }}" target="_blank">
+        Search for this package on pkgs.org
+        <i data-lucide="external-link" class="w-4 h-4"></i>
+      </a>
+    </div>
   </div>
 </div>
 

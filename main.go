@@ -160,6 +160,7 @@ func main() {
 	r.GET("/", controllers.GetRootIndex(database.Db))
 	r.GET("/assets", controllers.GetAssetsIndex(database.Db))
 	r.GET("/packages", controllers.GetPackagesIndex(database.Db))
+	r.GET("/topology", controllers.GetTopologyIndex(database.Db))
 
 	// Admin routes (requires admin middleware)
 	adminGroup := r.Group("/admin")
@@ -171,6 +172,18 @@ func main() {
 		adminGroup.POST("/migrations/reset_osv", controllers.PostAdminResetOSV(database.Db))
 		adminGroup.POST("/cleanup/inactive-assets", controllers.PostAdminCleanupInactiveAssets(database.Db))
 		adminGroup.DELETE("/assets/:machine_id", controllers.DeleteMachineID(database.Db))
+
+		// Topology configuration routes
+		adminGroup.GET("/topology/preview", controllers.GetAdminTopologyPreview(database.Db))
+		adminGroup.POST("/topology/patterns", controllers.PostAdminTopologyCreatePattern(database.Db))
+		adminGroup.POST("/topology/patterns/update", controllers.PostAdminTopologyUpdatePattern(database.Db))
+		adminGroup.POST("/topology/patterns/delete", controllers.PostAdminTopologyDeletePattern(database.Db))
+		adminGroup.POST("/topology/environments", controllers.PostAdminTopologyCreateEnvironment(database.Db))
+		adminGroup.POST("/topology/environments/update", controllers.PostAdminTopologyUpdateEnvironment(database.Db))
+		adminGroup.POST("/topology/environments/delete", controllers.PostAdminTopologyDeleteEnvironment(database.Db))
+		adminGroup.POST("/topology/services", controllers.PostAdminTopologyCreateService(database.Db))
+		adminGroup.POST("/topology/services/update", controllers.PostAdminTopologyUpdateService(database.Db))
+		adminGroup.POST("/topology/services/delete", controllers.PostAdminTopologyDeleteService(database.Db))
 	}
 
 	// Admin routes that require OIDC or LDAP (user and API key management)
@@ -189,7 +202,7 @@ func main() {
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
 	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
-	r.GET("/package-progression", controllers.GetPackagesByWeekIndex(database.Db))
+	r.GET("/analytics/progression", controllers.GetPackagesByWeekIndex(database.Db))
 	r.GET("/api/packages-by-month", controllers.GetPackagesByMonth(database.Db))
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 

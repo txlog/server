@@ -1,43 +1,59 @@
 {{ template "header.html" . }}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
   <div class="max-w-7xl mx-auto px-6">
     <h2 class="font-display font-bold text-2xl text-white">Administration</h2>
+    <p class="text-white/50 text-sm mt-0.5">System configuration, user management, and topology rules</p>
   </div>
 </div>
 <div class="max-w-7xl mx-auto px-6 pb-8">
   <!-- Mobile Navigation -->
   <div class="md:hidden mb-4 -mx-1 overflow-x-auto">
     <div class="flex gap-1 min-w-max px-1">
-      <button onclick="showSection('server')" data-nav="server" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap bg-txlog-sky text-white">
+      <button onclick="showSection('server')" data-nav="server"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap bg-txlog-sky text-white">
         <i data-lucide="monitor" class="w-3.5 h-3.5"></i> Server
       </button>
-      <button onclick="showSection('database')" data-nav="database" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('database')" data-nav="database"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Database
       </button>
-      <button onclick="showSection('oidc')" data-nav="oidc" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('oidc')" data-nav="oidc"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="fingerprint" class="w-3.5 h-3.5"></i> OIDC
       </button>
-      <button onclick="showSection('ldap')" data-nav="ldap" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('ldap')" data-nav="ldap"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="network" class="w-3.5 h-3.5"></i> LDAP
       </button>
-      <button onclick="showSection('housekeeping')" data-nav="housekeeping" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('housekeeping')" data-nav="housekeeping"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="brush" class="w-3.5 h-3.5"></i> Housekeeping
       </button>
-      <button onclick="showSection('statistics')" data-nav="statistics" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('statistics')" data-nav="statistics"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="bar-chart-3" class="w-3.5 h-3.5"></i> Statistics
       </button>
-      <button onclick="showSection('osv')" data-nav="osv" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('osv')" data-nav="osv"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Vulnerabilities
       </button>
       {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
-      <button onclick="showSection('users')" data-nav="users" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('users')" data-nav="users"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="users" class="w-3.5 h-3.5"></i> Users
       </button>
-      <button onclick="showSection('apikeys')" data-nav="apikeys" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('apikeys')" data-nav="apikeys"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="key-round" class="w-3.5 h-3.5"></i> API Keys
       </button>
       {{ end }}
-      <button onclick="showSection('migrations')" data-nav="migrations" class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+      <button onclick="showSection('topology')" data-nav="topology"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+        <i data-lucide="network" class="w-3.5 h-3.5"></i> Topology
+      </button>
+      <button onclick="showSection('migrations')" data-nav="migrations"
+        class="admin-nav-btn flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap text-txlog-indigo/60 hover:bg-txlog-lavender/30">
         <i data-lucide="database" class="w-3.5 h-3.5"></i> Migrations
       </button>
     </div>
@@ -48,49 +64,71 @@
     <div class="hidden md:block md:col-span-1">
       <div class="bg-white rounded-3xl shadow-soft overflow-hidden sticky top-24">
         <div class="border-b border-txlog-lavender px-5 py-3">
-          <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Server Configuration</h3>
+          <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Server
+            Configuration</h3>
         </div>
         <nav class="p-2 space-y-0.5">
-          <button onclick="showSection('server')" data-nav="server" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left bg-txlog-sky/10 text-txlog-sky">
+          <button onclick="showSection('server')" data-nav="server"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left bg-txlog-sky/10 text-txlog-sky">
             <i data-lucide="monitor" class="w-4 h-4 flex-shrink-0"></i> Server
           </button>
-          <button onclick="showSection('database')" data-nav="database" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('database')" data-nav="database"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="hard-drive" class="w-4 h-4 flex-shrink-0"></i> Database Server
           </button>
-          <button onclick="showSection('oidc')" data-nav="oidc" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('oidc')" data-nav="oidc"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="fingerprint" class="w-4 h-4 flex-shrink-0"></i> Auth OIDC
           </button>
-          <button onclick="showSection('ldap')" data-nav="ldap" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('ldap')" data-nav="ldap"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="network" class="w-4 h-4 flex-shrink-0"></i> Auth LDAP
           </button>
-          <button onclick="showSection('housekeeping')" data-nav="housekeeping" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('housekeeping')" data-nav="housekeeping"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="brush" class="w-4 h-4 flex-shrink-0"></i> Housekeeping
           </button>
-          <button onclick="showSection('statistics')" data-nav="statistics" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('statistics')" data-nav="statistics"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="bar-chart-3" class="w-4 h-4 flex-shrink-0"></i> Statistics
           </button>
-          <button onclick="showSection('osv')" data-nav="osv" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('osv')" data-nav="osv"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="shield-alert" class="w-4 h-4 flex-shrink-0"></i> Vulnerabilities
           </button>
         </nav>
         {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
         <div class="border-t border-txlog-lavender px-5 py-3">
-          <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Access Control</h3>
+          <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Access Control
+          </h3>
         </div>
         <nav class="p-2 pt-0 space-y-0.5">
-          <button onclick="showSection('users')" data-nav="users" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('users')" data-nav="users"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="users" class="w-4 h-4 flex-shrink-0"></i> System Users
           </button>
-          <button onclick="showSection('apikeys')" data-nav="apikeys" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('apikeys')" data-nav="apikeys"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="key-round" class="w-4 h-4 flex-shrink-0"></i> API Keys
           </button>
         </nav>
         {{ end }}
         <div class="border-t border-txlog-lavender px-5 py-3">
+          <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Infrastructure
+          </h3>
+        </div>
+        <nav class="p-2 pt-0 space-y-0.5">
+          <button onclick="showSection('topology')" data-nav="topology"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+            <i data-lucide="network" class="w-4 h-4 flex-shrink-0"></i> Topology
+          </button>
+        </nav>
+        <div class="border-t border-txlog-lavender px-5 py-3">
           <h3 class="font-display font-semibold text-xs text-txlog-indigo/40 uppercase tracking-wider">Maintenance</h3>
         </div>
         <nav class="p-2 pt-0 space-y-0.5 pb-3">
-          <button onclick="showSection('migrations')" data-nav="migrations" class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
+          <button onclick="showSection('migrations')" data-nav="migrations"
+            class="admin-nav-btn w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all text-left text-txlog-indigo/60 hover:bg-txlog-lavender/30">
             <i data-lucide="database" class="w-4 h-4 flex-shrink-0"></i> Migrations
           </button>
         </nav>
@@ -101,776 +139,1227 @@
     <div class="md:col-span-3">
       <div id="alert-container"></div>
 
-  <!-- Server -->
-  <div id="section-server" class="admin-section">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Server</h3>
-      <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
-    </div>
-    <table class="w-full text-sm">
-      <tbody class="divide-y divide-txlog-lavender/30">
-        <tr>
-          <td class="px-6 py-3 w-1/3 font-medium">Instance</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.instance }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.instance }}</code>{{
-            else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Server Mode</td>
-          <td class="px-6 py-3">{{ if eq .Context.Keys.env.ginMode "release" }}<span
-              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Release</span>{{
-            else if eq .Context.Keys.env.ginMode "debug" }}<span
-              class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Debug</span>{{
-            else if eq .Context.Keys.env.ginMode "test" }}<span
-              class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Test</span>{{
-            else }}<span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Default
-              (Release)</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Log Level</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.logLevel }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.logLevel }}</code>{{
-            else }}<span class="text-txlog-indigo/40">Default (INFO)</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">HTTP Port</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.port }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.port }}</code>{{
-            else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">8080</code> <span
-              class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Latest Version</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.latestVersion }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.latestVersion }}</code>{{
-            else }}<span class="text-txlog-indigo/40">Not checked</span>{{ end }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  </div>
-
-  <!-- Database Server -->
-  <div id="section-database" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Database Server</h3>
-      <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
-    </div>
-    <table class="w-full text-sm">
-      <tbody class="divide-y divide-txlog-lavender/30">
-        <tr>
-          <td class="px-6 py-3 w-1/3 font-medium">Hostname</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlHost }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Port</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlPort }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Database</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlDb }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Username</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlUser }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Password</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.pgsqlPassword }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">SSL Mode</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlSslmode }}</code></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  </div>
-
-  <!-- Auth OIDC -->
-  <div id="section-oidc" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4">
-      <h3 class="font-display font-semibold text-lg">Authentication - OIDC</h3>
-    </div>
-    {{ if .Context.Keys.oidc_enabled }}
-    <table class="w-full text-sm">
-      <tbody class="divide-y divide-txlog-lavender/30">
-        <tr>
-          <td class="px-6 py-3 w-1/3 font-medium">OIDC Status</td>
-          <td class="px-6 py-3"><span
-              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Issuer URL</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcIssuerUrl }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Client ID</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.oidcClientId }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Client Secret</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.oidcClientSecret }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Redirect URL</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcRedirectUrl }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Skip TLS Verify</td>
-          <td class="px-6 py-3">{{ if eq .Context.Keys.env.oidcSkipTlsVerify "true" }}<span
-              class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
-              (Insecure)</span>{{ else }}<span
-              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No (Secure)</span>{{
-            end }}</td>
-        </tr>
-      </tbody>
-    </table>
-    {{ else }}
-    <div class="p-8 text-center"><i data-lucide="shield-check"
-        class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
-      <p class="font-semibold mb-1">OIDC Not Configured</p>
-      <p class="text-sm text-txlog-indigo/50 mb-3">OpenID Connect authentication is not enabled.</p><a
-        href="https://txlog.rda.run/docs/server/how-to/configure-oidc" target="_blank"
-        class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
-          data-lucide="info" class="w-4 h-4"></i> Learn How to Configure OIDC</a>
-    </div>
-    {{ end }}
-  </div>
-  </div>
-
-  <!-- Auth LDAP -->
-  <div id="section-ldap" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4">
-      <h3 class="font-display font-semibold text-lg">Authentication - LDAP</h3>
-    </div>
-    {{ if .Context.Keys.ldap_enabled }}
-    <table class="w-full text-sm">
-      <tbody class="divide-y divide-txlog-lavender/30">
-        <tr>
-          <td class="px-6 py-3 w-1/3 font-medium">LDAP Status</td>
-          <td class="px-6 py-3"><span
-              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Host</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapHost }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Port</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapPort }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapPort }}</code>{{
-            else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">389</code> <span
-              class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Use TLS</td>
-          <td class="px-6 py-3">{{ if eq .Context.Keys.env.ldapUseTls "true" }}<span
-              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Yes
-              (Secure)</span>{{ else }}<span
-              class="bg-txlog-indigo/10 text-txlog-indigo/50 text-xs font-bold px-2 py-0.5 rounded-md">No</span>{{
-            end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Skip TLS Verify</td>
-          <td class="px-6 py-3">{{ if eq .Context.Keys.env.ldapSkipTlsVerify "true" }}<span
-              class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
-              (Insecure)</span>{{ else }}<span
-              class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No (Secure)</span>{{
-            end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Base DN</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBaseDn }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Bind DN</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapBindDn }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBindDn }}</code>{{
-            else }}<span class="text-txlog-indigo/40">Anonymous bind</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Bind Password</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapBindPassword }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.ldapBindPassword }}</code>{{
-            else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">User Filter</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapUserFilter }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapUserFilter }}</code>{{
-            else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(uid=%s)</code> <span
-              class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Admin Group</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapAdminGroup }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapAdminGroup }}</code>{{
-            else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Viewer Group</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapViewerGroup }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapViewerGroup }}</code>{{
-            else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Group Filter</td>
-          <td class="px-6 py-3">{{ if .Context.Keys.env.ldapGroupFilter }}<code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapGroupFilter }}</code>{{
-            else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(member=%s)</code> <span
-              class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
-        </tr>
-      </tbody>
-    </table>
-    {{ else }}
-    <div class="p-8 text-center"><i data-lucide="shield-check"
-        class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
-      <p class="font-semibold mb-1">LDAP Not Configured</p>
-      <p class="text-sm text-txlog-indigo/50 mb-3">LDAP authentication is not enabled.</p><a
-        href="https://txlog.rda.run/docs/server/how-to/configure-ldap" target="_blank"
-        class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
-          data-lucide="info" class="w-4 h-4"></i> Learn How to Configure LDAP</a>
-    </div>
-    {{ end }}
-  </div>
-  </div>
-
-  <!-- Housekeeping -->
-  <div id="section-housekeeping" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Housekeeping</h3>
-    </div>
-    <table class="w-full text-sm">
-      <tbody class="divide-y divide-txlog-lavender/30">
-        <tr>
-          <td class="px-6 py-3 w-1/3 font-medium">Retention Days</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionDays }}</code></td>
-        </tr>
-        <tr>
-          <td class="px-6 py-3 font-medium">Schedule Expression</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionExpression }}</code></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Cleanup Inactive Assets -->
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden mt-6">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Cleanup Inactive Assets</h3>
-      {{ if gt .inactiveAssetsCount 0 }}
-      <span class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-3 py-1 rounded-lg">{{ .inactiveAssetsCount }} inactive</span>
-      {{ else }}
-      <span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-3 py-1 rounded-lg">All active</span>
-      {{ end }}
-    </div>
-    <div class="p-6">
-      <div class="flex gap-3 mb-4">
-        <i data-lucide="info" class="w-5 h-5 text-txlog-sky flex-shrink-0 mt-0.5"></i>
-        <p class="text-sm text-txlog-indigo/60">Assets are considered <strong>inactive</strong> when they have not sent any new data in the last <strong>15 days</strong>. This operation removes all data associated with these servers (transactions, items, executions, and asset records).</p>
-      </div>
-      {{ if gt .inactiveAssetsCount 0 }}
-      <div class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-2xl p-4 mb-4">
-        <div class="flex gap-3">
-          <i data-lucide="triangle-alert" class="w-5 h-5 text-txlog-coral flex-shrink-0 mt-0.5"></i>
-          <div>
-            <h4 class="font-semibold text-sm mb-1">Destructive Action</h4>
-            <p class="text-sm text-txlog-indigo/60">This will permanently delete <strong>{{ .inactiveAssetsCount }} inactive asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }}</strong> and all their associated data. This action cannot be undone.</p>
+      <!-- Server -->
+      <div id="section-server" class="admin-section">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h3 class="font-display font-semibold text-lg">Server</h3>
+            <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
           </div>
+          <table class="w-full text-sm">
+            <tbody class="divide-y divide-txlog-lavender/30">
+              <tr>
+                <td class="px-6 py-3 w-1/3 font-medium">Instance</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.instance }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.instance }}</code>{{
+                  else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Server Mode</td>
+                <td class="px-6 py-3">{{ if eq .Context.Keys.env.ginMode "release" }}<span
+                    class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Release</span>{{
+                  else if eq .Context.Keys.env.ginMode "debug" }}<span
+                    class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Debug</span>{{
+                  else if eq .Context.Keys.env.ginMode "test" }}<span
+                    class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Test</span>{{
+                  else }}<span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Default
+                    (Release)</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Log Level</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.logLevel }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.logLevel }}</code>{{
+                  else }}<span class="text-txlog-indigo/40">Default (INFO)</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">HTTP Port</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.port }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.port }}</code>{{
+                  else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">8080</code> <span
+                    class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Latest Version</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.latestVersion }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.latestVersion }}</code>{{
+                  else }}<span class="text-txlog-indigo/40">Not checked</span>{{ end }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <form action="/admin/cleanup/inactive-assets" method="post">
-        <button type="submit" onclick="return confirm('WARNING: This will permanently delete all data for {{ .inactiveAssetsCount }} inactive asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }} (transactions, items, executions, and asset records). This action cannot be undone. Proceed?')" class="w-full text-txlog-coral font-medium py-2 rounded-lg border border-txlog-coral/30 hover:bg-txlog-coral/10 hover:border-txlog-coral transition-colors flex items-center justify-center gap-2 text-sm">
-          <i data-lucide="trash-2" class="w-4 h-4"></i> Cleanup {{ .inactiveAssetsCount }} Inactive Asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }}
-        </button>
-      </form>
-      {{ else }}
-      <div class="bg-txlog-leaf/5 border border-txlog-leaf/20 rounded-2xl p-4 flex gap-3">
-        <i data-lucide="check-circle" class="w-5 h-5 text-txlog-leaf flex-shrink-0 mt-0.5"></i>
-        <div>
-          <h4 class="font-semibold text-sm mb-1">No Inactive Assets</h4>
-          <p class="text-sm text-txlog-indigo/60">All registered assets have reported data within the last 15 days. No cleanup is needed.</p>
+
+      <!-- Database Server -->
+      <div id="section-database" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h3 class="font-display font-semibold text-lg">Database Server</h3>
+            <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
+          </div>
+          <table class="w-full text-sm">
+            <tbody class="divide-y divide-txlog-lavender/30">
+              <tr>
+                <td class="px-6 py-3 w-1/3 font-medium">Hostname</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlHost }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Port</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlPort }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Database</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlDb }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Username</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlUser }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Password</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.pgsqlPassword }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">SSL Mode</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.pgsqlSslmode }}</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      {{ end }}
-    </div>
-  </div>
-  </div>
 
-  <!-- Statistics -->
-  <div id="section-statistics" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Statistics</h3>
-      <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
-    </div>
-    <table class="w-full text-sm">
-      <tbody class="divide-y divide-txlog-lavender/30">
-        <tr>
-          <td class="px-6 py-3 w-1/3 font-medium">Schedule Expression</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronStatisticsExpression }}</code></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  </div>
-
-  <!-- Vulnerabilities Updates (OSV) -->
-  <div id="section-osv" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Vulnerabilities Updates (OSV)</h3>
-      {{ if .osvIsRunning }}
-      <span class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-txlog-golden"></span> Running Now</span>
-      {{ else }}
-      <span class="bg-txlog-leaf/10 text-txlog-leaf text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Idle</span>
-      {{ end }}
-    </div>
-    <table class="w-full text-sm">
-      <tbody class="divide-y divide-txlog-lavender/30">
-        <tr>
-          <td class="px-6 py-3 w-1/3 font-medium">Schedule Expression</td>
-          <td class="px-6 py-3"><code
-              class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ if .Context.Keys.env.cronOsvExpression }}{{ .Context.Keys.env.cronOsvExpression }}{{ else }}0 4 * * *{{ end }}</code></td>
-        </tr>
-        <tr>
-          <td colspan="2" class="px-6 py-3">
-            <form action="/admin/migrations/run_osv_update" method="post" class="w-full">
-              {{ if .osvIsRunning }}
-              <button type="button" disabled class="w-full bg-txlog-lavender text-txlog-indigo/50 font-medium py-1.5 rounded-lg border border-txlog-lavender/50 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
-                <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
-              </button>
-              {{ else }}
-              <button type="submit" onclick="return confirm('This will start fetching and processing OSV vulnerabilities in the background. Note: this job may take a while. Proceed?')" class="w-full bg-white text-txlog-indigo font-medium py-1.5 rounded-lg border border-txlog-lavender hover:bg-txlog-lavender/30 hover:border-txlog-sky transition-colors flex items-center justify-center gap-2 text-xs">
-                <i data-lucide="play" class="w-3.5 h-3.5"></i> Run Manually Now
-              </button>
-              {{ end }}
-            </form>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="2" class="px-6 py-3">
-            <form action="/admin/migrations/reset_osv" method="post" class="w-full">
-              {{ if .osvIsRunning }}
-              <button type="button" disabled class="w-full bg-txlog-coral/10 text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/20 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
-                <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
-              </button>
-              {{ else }}
-              <button type="submit" onclick="return confirm('WARNING: This will erase EVERY downloaded OSV vulnerability from the database, reset all transaction scoreboards to zero AND re-start the fetch job from scratch. It might take dozens of minutes to rebuild everything. Proceed?')" class="w-full text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/30 hover:bg-txlog-coral/10 hover:border-txlog-coral transition-colors flex items-center justify-center gap-2 text-xs">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reset All Data &amp; Rebuild
-              </button>
-              {{ end }}
-            </form>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  </div>
-
-  <!-- System Users -->
-  {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
-  <div id="section-users" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4">
-      <h3 class="font-display font-semibold text-lg">System Users</h3>
-    </div>
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-txlog-lavender/50 text-left">
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">User</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Email</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Role</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last Login</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created</th>
-            <th class="px-6 py-3 w-1">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-txlog-lavender/30">
-          {{ if .users }}{{ range .users }}
-          <tr class="hover:bg-txlog-lavender/10 transition-colors">
-            <td class="px-6 py-3">
-              <div class="flex items-center gap-3">
-                {{ if .Picture }}<img src="{{ .Picture }}" class="w-8 h-8 rounded-full object-cover">{{ else }}<span
-                  class="w-8 h-8 rounded-full bg-txlog-sky/10 text-txlog-sky text-xs font-bold flex items-center justify-center">{{
-                  initial .Name }}</span>{{ end }}
-                <div>
-                  <div class="font-medium">{{ .Name }}</div>
-                  <div class="text-xs text-txlog-indigo/40">ID: {{ .ID }}</div>
-                </div>
-              </div>
-            </td>
-            <td class="px-6 py-3">{{ .Email }}</td>
-            <td class="px-6 py-3">{{ if .IsActive }}<span class="flex items-center gap-1.5"><span
-                  class="w-2 h-2 rounded-full bg-txlog-leaf"></span> Active</span>{{ else }}<span
-                class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-txlog-coral"></span>
-                Inactive</span>{{ end }}</td>
-            <td class="px-6 py-3">{{ if .IsAdmin }}<span
-                class="bg-txlog-purple/10 text-txlog-purple text-xs font-bold px-2 py-0.5 rounded-md">Administrator</span>{{
-              else }}<span
-                class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-2 py-0.5 rounded-md">User</span>{{
-              end }}</td>
-            <td class="px-6 py-3">{{ formatDateTime .LastLoginAt }}</td>
-            <td class="px-6 py-3">{{ formatDateTime .CreatedAt }}</td>
-            <td class="px-6 py-3">
-              <div class="flex gap-2">
-                <button type="button" onclick="openModal('editModal{{ .ID }}')"
-                  class="bg-txlog-sky text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
-                    data-lucide="pencil" class="w-3 h-3"></i> Edit</button>
-                {{ if .IsActive }}<button type="button" onclick="openModal('deactivateModal{{ .ID }}')"
-                  class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
-                    data-lucide="user-x" class="w-3 h-3"></i> Deactivate</button>{{ end }}
-              </div>
-            </td>
-          </tr>
-          <!-- Edit Modal -->
-          <div id="editModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
-            onclick="if(event.target===this)closeModal('editModal{{ .ID }}')">
-            <div data-modal-panel
-              class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
-              <form action="/admin/update" method="post">
-                <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-                  <h5 class="font-display font-semibold">Edit User: {{ .Name }}</h5><button type="button"
-                    onclick="closeModal('editModal{{ .ID }}')" class="text-txlog-indigo/40 hover:text-txlog-indigo"><i
-                      data-lucide="x" class="w-5 h-5"></i></button>
-                </div>
-                <div class="p-6 space-y-4">
-                  <input type="hidden" name="user_id" value="{{ .ID }}">
-                  <div class="text-sm"><strong>Name:</strong> {{ .Name }}<br><strong>Email:</strong> {{ .Email }}</div>
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <div class="relative"><input type="checkbox" name="is_active" class="sr-only peer" {{ if .IsActive
-                        }}checked{{ end }}>
-                      <div class="w-10 h-6 bg-txlog-lavender rounded-full peer-checked:bg-txlog-sky transition-colors">
-                      </div>
-                      <div
-                        class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-4 transition-transform">
-                      </div>
-                    </div><span class="text-sm font-medium">Active User</span>
-                  </label>
-                  <label class="flex items-center gap-3 cursor-pointer">
-                    <div class="relative"><input type="checkbox" name="is_admin" class="sr-only peer" {{ if .IsAdmin
-                        }}checked{{ end }}>
-                      <div class="w-10 h-6 bg-txlog-lavender rounded-full peer-checked:bg-txlog-sky transition-colors">
-                      </div>
-                      <div
-                        class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-4 transition-transform">
-                      </div>
-                    </div><span class="text-sm font-medium">Administrator</span>
-                  </label>
-                </div>
-                <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3">
-                  <button type="button" onclick="closeModal('editModal{{ .ID }}')"
-                    class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button>
-                  <button type="submit"
-                    class="bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Save
-                    Changes</button>
-                </div>
-              </form>
-            </div>
+      <!-- Auth OIDC -->
+      <div id="section-oidc" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4">
+            <h3 class="font-display font-semibold text-lg">Authentication - OIDC</h3>
           </div>
-          <!-- Deactivate Modal -->
-          <div id="deactivateModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
-            onclick="if(event.target===this)closeModal('deactivateModal{{ .ID }}')">
-            <div data-modal-panel
-              class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
-              <form action="/admin/delete" method="post">
-                <div class="h-1 bg-txlog-coral rounded-t-3xl"></div>
-                <div class="p-6 text-center"><i data-lucide="user-x"
-                    class="w-12 h-12 text-txlog-coral mx-auto mb-3"></i>
-                  <h3 class="font-display font-semibold text-lg mb-2">Deactivate User</h3><input type="hidden"
-                    name="user_id" value="{{ .ID }}">
-                  <p class="text-sm text-txlog-indigo/60 mb-1">Are you sure you want to deactivate <strong>{{ .Name
-                      }}</strong> ({{ .Email }})?</p>
-                  <p class="text-xs text-txlog-indigo/40">This will prevent the user from logging in, but their data
-                    will be preserved.</p>
-                </div>
-                <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3">
-                  <button type="button" onclick="closeModal('deactivateModal{{ .ID }}')"
-                    class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button>
-                  <button type="submit"
-                    class="bg-txlog-coral text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-coral/30 transition-all">Deactivate
-                    User</button>
-                </div>
-              </form>
-            </div>
+          {{ if .Context.Keys.oidc_enabled }}
+          <table class="w-full text-sm">
+            <tbody class="divide-y divide-txlog-lavender/30">
+              <tr>
+                <td class="px-6 py-3 w-1/3 font-medium">OIDC Status</td>
+                <td class="px-6 py-3"><span
+                    class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Issuer URL</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcIssuerUrl }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Client ID</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.oidcClientId }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Client Secret</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.oidcClientSecret }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Redirect URL</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.oidcRedirectUrl }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Skip TLS Verify</td>
+                <td class="px-6 py-3">{{ if eq .Context.Keys.env.oidcSkipTlsVerify "true" }}<span
+                    class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
+                    (Insecure)</span>{{ else }}<span
+                    class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No
+                    (Secure)</span>{{
+                  end }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {{ else }}
+          <div class="p-8 text-center"><i data-lucide="shield-check"
+              class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+            <p class="font-semibold mb-1">OIDC Not Configured</p>
+            <p class="text-sm text-txlog-indigo/50 mb-3">OpenID Connect authentication is not enabled.</p><a
+              href="https://txlog.rda.run/docs/server/how-to/configure-oidc" target="_blank"
+              class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
+                data-lucide="info" class="w-4 h-4"></i> Learn How to Configure OIDC</a>
           </div>
-          {{ end }}{{ else }}
-          <tr>
-            <td colspan="7" class="px-6 py-8 text-center text-txlog-indigo/50">No users found in the system.</td>
-          </tr>
           {{ end }}
-        </tbody>
-      </table>
-    </div>
-    <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">Showing {{ len .users }} total
-      user{{ if ne (len .users) 1 }}s{{ end }}</div>
-  </div>
-  </div>
-  {{ end }}
+        </div>
+      </div>
 
-  <!-- API Keys -->
-  {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
-  <div id="section-apikeys" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">API Keys</h3>
-      <button type="button" onclick="openModal('createAPIKeyModal')"
-        class="bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2"><i
-          data-lucide="plus" class="w-4 h-4"></i> Generate New Key</button>
-    </div>
-    {{ if .apiKeys }}
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-txlog-lavender/50 text-left">
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Name</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Key Prefix</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created By</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last Used</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 w-1">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-txlog-lavender/30">
-          {{ range .apiKeys }}
-          <tr class="hover:bg-txlog-lavender/10 transition-colors">
-            <td class="px-6 py-3">
-              <div class="font-medium">{{ .Name }}</div>
-              <div class="text-xs text-txlog-indigo/40">ID: {{ .ID }}</div>
-            </td>
-            <td class="px-6 py-3"><code
-                class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .KeyPrefix }}</code></td>
-            <td class="px-6 py-3">{{ formatDateTime .CreatedAt }}</td>
-            <td class="px-6 py-3">{{ .CreatorName }}</td>
-            <td class="px-6 py-3">{{ if .LastUsedAt }}{{ formatDateTime .LastUsedAt }}{{ else }}<span
-                class="text-txlog-indigo/40">Never</span>{{ end }}</td>
-            <td class="px-6 py-3">{{ if .IsActive }}<span
-                class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Active</span>{{ else
-              }}<span
-                class="bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2 py-0.5 rounded-md">Revoked</span>{{ end
-              }}</td>
-            <td class="px-6 py-3">
-              <div class="flex gap-2">
-                {{ if .IsActive }}<button type="button" onclick="openModal('revokeAPIKeyModal{{ .ID }}')"
-                  class="bg-txlog-golden text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all">Revoke</button>{{
-                end }}
-                <button type="button" onclick="openModal('deleteAPIKeyModal{{ .ID }}')"
-                  class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all">Delete</button>
-              </div>
-            </td>
-          </tr>
-          <!-- Revoke Modal -->
-          <div id="revokeAPIKeyModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
-            onclick="if(event.target===this)closeModal('revokeAPIKeyModal{{ .ID }}')">
-            <div data-modal-panel
-              class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
-              <form action="/admin/apikeys/revoke" method="post">
-                <div class="p-6 text-center"><i data-lucide="circle-x"
-                    class="w-12 h-12 text-txlog-golden mx-auto mb-3"></i>
-                  <h3 class="font-display font-semibold text-lg mb-2">Revoke API Key</h3><input type="hidden"
-                    name="key_id" value="{{ .ID }}">
-                  <p class="text-sm text-txlog-indigo/60 mb-1">Are you sure you want to revoke <strong>{{ .Name
-                      }}</strong>?</p>
-                  <p class="text-xs text-txlog-indigo/40">This will prevent the key from authenticating any API
-                    requests.</p>
-                </div>
-                <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3"><button type="button"
-                    onclick="closeModal('revokeAPIKeyModal{{ .ID }}')"
-                    class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button><button
-                    type="submit"
-                    class="bg-txlog-golden text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 transition-all">Revoke
-                    Key</button></div>
-              </form>
-            </div>
+      <!-- Auth LDAP -->
+      <div id="section-ldap" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4">
+            <h3 class="font-display font-semibold text-lg">Authentication - LDAP</h3>
           </div>
-          <!-- Delete Modal -->
-          <div id="deleteAPIKeyModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
-            onclick="if(event.target===this)closeModal('deleteAPIKeyModal{{ .ID }}')">
-            <div data-modal-panel
-              class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
-              <form action="/admin/apikeys/delete" method="post">
-                <div class="h-1 bg-txlog-coral rounded-t-3xl"></div>
-                <div class="p-6 text-center"><i data-lucide="trash-2"
-                    class="w-12 h-12 text-txlog-coral mx-auto mb-3"></i>
-                  <h3 class="font-display font-semibold text-lg mb-2">Delete API Key</h3><input type="hidden"
-                    name="key_id" value="{{ .ID }}">
-                  <p class="text-sm text-txlog-indigo/60 mb-1">Permanently delete <strong>{{ .Name }}</strong>?</p>
-                  <div
-                    class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-xl p-3 text-xs text-txlog-coral mt-2">
-                    <strong>Warning:</strong> This action cannot be undone.
+          {{ if .Context.Keys.ldap_enabled }}
+          <table class="w-full text-sm">
+            <tbody class="divide-y divide-txlog-lavender/30">
+              <tr>
+                <td class="px-6 py-3 w-1/3 font-medium">LDAP Status</td>
+                <td class="px-6 py-3"><span
+                    class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Enabled</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Host</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapHost }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Port</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.ldapPort }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapPort }}</code>{{
+                  else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">389</code> <span
+                    class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Use TLS</td>
+                <td class="px-6 py-3">{{ if eq .Context.Keys.env.ldapUseTls "true" }}<span
+                    class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Yes
+                    (Secure)</span>{{ else }}<span
+                    class="bg-txlog-indigo/10 text-txlog-indigo/50 text-xs font-bold px-2 py-0.5 rounded-md">No</span>{{
+                  end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Skip TLS Verify</td>
+                <td class="px-6 py-3">{{ if eq .Context.Keys.env.ldapSkipTlsVerify "true" }}<span
+                    class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Yes
+                    (Insecure)</span>{{ else }}<span
+                    class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">No
+                    (Secure)</span>{{
+                  end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Base DN</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBaseDn }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Bind DN</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.ldapBindDn }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapBindDn }}</code>{{
+                  else }}<span class="text-txlog-indigo/40">Anonymous bind</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Bind Password</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.ldapBindPassword }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ maskString .Context.Keys.env.ldapBindPassword }}</code>{{
+                  else }}<span class="text-txlog-indigo/40">Not set</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">User Filter</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.ldapUserFilter }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapUserFilter }}</code>{{
+                  else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(uid=%s)</code> <span
+                    class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Admin Group</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.ldapAdminGroup }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapAdminGroup }}</code>{{
+                  else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Viewer Group</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.ldapViewerGroup }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded break-all">{{ .Context.Keys.env.ldapViewerGroup }}</code>{{
+                  else }}<span class="text-txlog-indigo/40">Not configured</span>{{ end }}</td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Group Filter</td>
+                <td class="px-6 py-3">{{ if .Context.Keys.env.ldapGroupFilter }}<code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.ldapGroupFilter }}</code>{{
+                  else }}<code class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">(member=%s)</code> <span
+                    class="text-txlog-indigo/40">(default)</span>{{ end }}</td>
+              </tr>
+            </tbody>
+          </table>
+          {{ else }}
+          <div class="p-8 text-center"><i data-lucide="shield-check"
+              class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+            <p class="font-semibold mb-1">LDAP Not Configured</p>
+            <p class="text-sm text-txlog-indigo/50 mb-3">LDAP authentication is not enabled.</p><a
+              href="https://txlog.rda.run/docs/server/how-to/configure-ldap" target="_blank"
+              class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
+                data-lucide="info" class="w-4 h-4"></i> Learn How to Configure LDAP</a>
+          </div>
+          {{ end }}
+        </div>
+      </div>
+
+      <!-- Housekeeping -->
+      <div id="section-housekeeping" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h3 class="font-display font-semibold text-lg">Housekeeping</h3>
+          </div>
+          <table class="w-full text-sm">
+            <tbody class="divide-y divide-txlog-lavender/30">
+              <tr>
+                <td class="px-6 py-3 w-1/3 font-medium">Retention Days</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionDays }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="px-6 py-3 font-medium">Schedule Expression</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronRetentionExpression }}</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Cleanup Inactive Assets -->
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden mt-6">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h3 class="font-display font-semibold text-lg">Cleanup Inactive Assets</h3>
+            {{ if gt .inactiveAssetsCount 0 }}
+            <span class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-3 py-1 rounded-lg">{{
+              .inactiveAssetsCount }} inactive</span>
+            {{ else }}
+            <span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-3 py-1 rounded-lg">All active</span>
+            {{ end }}
+          </div>
+          <div class="p-6">
+            <div class="flex gap-3 mb-4">
+              <i data-lucide="info" class="w-5 h-5 text-txlog-sky flex-shrink-0 mt-0.5"></i>
+              <p class="text-sm text-txlog-indigo/60">Assets are considered <strong>inactive</strong> when they have not
+                sent any new data in the last <strong>15 days</strong>. This operation removes all data associated with
+                these servers (transactions, items, executions, and asset records).</p>
+            </div>
+            {{ if gt .inactiveAssetsCount 0 }}
+            <div class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-2xl p-4 mb-4">
+              <div class="flex gap-3">
+                <i data-lucide="triangle-alert" class="w-5 h-5 text-txlog-coral flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="font-semibold text-sm mb-1">Destructive Action</h4>
+                  <p class="text-sm text-txlog-indigo/60">This will permanently delete <strong>{{ .inactiveAssetsCount
+                      }} inactive asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }}</strong> and all their associated
+                    data. This action cannot be undone.</p>
+                </div>
+              </div>
+            </div>
+            <form action="/admin/cleanup/inactive-assets" method="post">
+              <button type="submit"
+                onclick="return confirm('WARNING: This will permanently delete all data for {{ .inactiveAssetsCount }} inactive asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }} (transactions, items, executions, and asset records). This action cannot be undone. Proceed?')"
+                class="w-full text-txlog-coral font-medium py-2 rounded-lg border border-txlog-coral/30 hover:bg-txlog-coral/10 hover:border-txlog-coral transition-colors flex items-center justify-center gap-2 text-sm">
+                <i data-lucide="trash-2" class="w-4 h-4"></i> Cleanup {{ .inactiveAssetsCount }} Inactive Asset{{ if ne
+                .inactiveAssetsCount 1 }}s{{ end }}
+              </button>
+            </form>
+            {{ else }}
+            <div class="bg-txlog-leaf/5 border border-txlog-leaf/20 rounded-2xl p-4 flex gap-3">
+              <i data-lucide="check-circle" class="w-5 h-5 text-txlog-leaf flex-shrink-0 mt-0.5"></i>
+              <div>
+                <h4 class="font-semibold text-sm mb-1">No Inactive Assets</h4>
+                <p class="text-sm text-txlog-indigo/60">All registered assets have reported data within the last 15
+                  days. No cleanup is needed.</p>
+              </div>
+            </div>
+            {{ end }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div id="section-statistics" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h3 class="font-display font-semibold text-lg">Statistics</h3>
+            <span class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
+          </div>
+          <table class="w-full text-sm">
+            <tbody class="divide-y divide-txlog-lavender/30">
+              <tr>
+                <td class="px-6 py-3 w-1/3 font-medium">Schedule Expression</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Context.Keys.env.cronStatisticsExpression }}</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vulnerabilities Updates (OSV) -->
+      <div id="section-osv" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h3 class="font-display font-semibold text-lg">Vulnerabilities Updates (OSV)</h3>
+            {{ if .osvIsRunning }}
+            <span
+              class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse flex items-center gap-1.5"><span
+                class="w-1.5 h-1.5 rounded-full bg-txlog-golden"></span> Running Now</span>
+            {{ else }}
+            <span
+              class="bg-txlog-leaf/10 text-txlog-leaf text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Idle</span>
+            {{ end }}
+          </div>
+          <table class="w-full text-sm">
+            <tbody class="divide-y divide-txlog-lavender/30">
+              <tr>
+                <td class="px-6 py-3 w-1/3 font-medium">Schedule Expression</td>
+                <td class="px-6 py-3"><code
+                    class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ if .Context.Keys.env.cronOsvExpression }}{{ .Context.Keys.env.cronOsvExpression }}{{ else }}0 4 * * *{{ end }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" class="px-6 py-3">
+                  <form action="/admin/migrations/run_osv_update" method="post" class="w-full">
+                    {{ if .osvIsRunning }}
+                    <button type="button" disabled
+                      class="w-full bg-txlog-lavender text-txlog-indigo/50 font-medium py-1.5 rounded-lg border border-txlog-lavender/50 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
+                      <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
+                    </button>
+                    {{ else }}
+                    <button type="submit"
+                      onclick="return confirm('This will start fetching and processing OSV vulnerabilities in the background. Note: this job may take a while. Proceed?')"
+                      class="w-full bg-white text-txlog-indigo font-medium py-1.5 rounded-lg border border-txlog-lavender hover:bg-txlog-lavender/30 hover:border-txlog-sky transition-colors flex items-center justify-center gap-2 text-xs">
+                      <i data-lucide="play" class="w-3.5 h-3.5"></i> Run Manually Now
+                    </button>
+                    {{ end }}
+                  </form>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" class="px-6 py-3">
+                  <form action="/admin/migrations/reset_osv" method="post" class="w-full">
+                    {{ if .osvIsRunning }}
+                    <button type="button" disabled
+                      class="w-full bg-txlog-coral/10 text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/20 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
+                      <i data-lucide="loader-circle" class="w-3.5 h-3.5 animate-spin"></i> Update in Progress
+                    </button>
+                    {{ else }}
+                    <button type="submit"
+                      onclick="return confirm('WARNING: This will erase EVERY downloaded OSV vulnerability from the database, reset all transaction scoreboards to zero AND re-start the fetch job from scratch. It might take dozens of minutes to rebuild everything. Proceed?')"
+                      class="w-full text-txlog-coral font-medium py-1.5 rounded-lg border border-txlog-coral/30 hover:bg-txlog-coral/10 hover:border-txlog-coral transition-colors flex items-center justify-center gap-2 text-xs">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reset All Data &amp; Rebuild
+                    </button>
+                    {{ end }}
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- System Users -->
+      {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
+      <div id="section-users" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4">
+            <h3 class="font-display font-semibold text-lg">System Users</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-txlog-lavender/50 text-left">
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">User</th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Email</th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Role</th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last Login
+                  </th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created</th>
+                  <th class="px-6 py-3 w-1">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-txlog-lavender/30">
+                {{ if .users }}{{ range .users }}
+                <tr class="hover:bg-txlog-lavender/10 transition-colors">
+                  <td class="px-6 py-3">
+                    <div class="flex items-center gap-3">
+                      {{ if .Picture }}<img src="{{ .Picture }}" class="w-8 h-8 rounded-full object-cover">{{ else
+                      }}<span
+                        class="w-8 h-8 rounded-full bg-txlog-sky/10 text-txlog-sky text-xs font-bold flex items-center justify-center">{{
+                        initial .Name }}</span>{{ end }}
+                      <div>
+                        <div class="font-medium">{{ .Name }}</div>
+                        <div class="text-xs text-txlog-indigo/40">ID: {{ .ID }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-3">{{ .Email }}</td>
+                  <td class="px-6 py-3">{{ if .IsActive }}<span class="flex items-center gap-1.5"><span
+                        class="w-2 h-2 rounded-full bg-txlog-leaf"></span> Active</span>{{ else }}<span
+                      class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-txlog-coral"></span>
+                      Inactive</span>{{ end }}</td>
+                  <td class="px-6 py-3">{{ if .IsAdmin }}<span
+                      class="bg-txlog-purple/10 text-txlog-purple text-xs font-bold px-2 py-0.5 rounded-md">Administrator</span>{{
+                    else }}<span
+                      class="bg-txlog-indigo/5 text-txlog-indigo/50 text-xs font-bold px-2 py-0.5 rounded-md">User</span>{{
+                    end }}</td>
+                  <td class="px-6 py-3">{{ formatDateTime .LastLoginAt }}</td>
+                  <td class="px-6 py-3">{{ formatDateTime .CreatedAt }}</td>
+                  <td class="px-6 py-3">
+                    <div class="flex gap-2">
+                      <button type="button" onclick="openModal('editModal{{ .ID }}')"
+                        class="bg-txlog-sky text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
+                          data-lucide="pencil" class="w-3 h-3"></i> Edit</button>
+                      {{ if .IsActive }}<button type="button" onclick="openModal('deactivateModal{{ .ID }}')"
+                        class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
+                          data-lucide="user-x" class="w-3 h-3"></i> Deactivate</button>{{ end }}
+                    </div>
+                  </td>
+                </tr>
+                <!-- Edit Modal -->
+                <div id="editModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+                  onclick="if(event.target===this)closeModal('editModal{{ .ID }}')">
+                  <div data-modal-panel
+                    class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+                    <form action="/admin/update" method="post">
+                      <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+                        <h5 class="font-display font-semibold">Edit User: {{ .Name }}</h5><button type="button"
+                          onclick="closeModal('editModal{{ .ID }}')"
+                          class="text-txlog-indigo/40 hover:text-txlog-indigo"><i data-lucide="x"
+                            class="w-5 h-5"></i></button>
+                      </div>
+                      <div class="p-6 space-y-4">
+                        <input type="hidden" name="user_id" value="{{ .ID }}">
+                        <div class="text-sm"><strong>Name:</strong> {{ .Name }}<br><strong>Email:</strong> {{ .Email }}
+                        </div>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                          <div class="relative"><input type="checkbox" name="is_active" class="sr-only peer" {{ if
+                              .IsActive }}checked{{ end }}>
+                            <div
+                              class="w-10 h-6 bg-txlog-lavender rounded-full peer-checked:bg-txlog-sky transition-colors">
+                            </div>
+                            <div
+                              class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-4 transition-transform">
+                            </div>
+                          </div><span class="text-sm font-medium">Active User</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                          <div class="relative"><input type="checkbox" name="is_admin" class="sr-only peer" {{ if
+                              .IsAdmin }}checked{{ end }}>
+                            <div
+                              class="w-10 h-6 bg-txlog-lavender rounded-full peer-checked:bg-txlog-sky transition-colors">
+                            </div>
+                            <div
+                              class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full peer-checked:translate-x-4 transition-transform">
+                            </div>
+                          </div><span class="text-sm font-medium">Administrator</span>
+                        </label>
+                      </div>
+                      <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3">
+                        <button type="button" onclick="closeModal('editModal{{ .ID }}')"
+                          class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button>
+                        <button type="submit"
+                          class="bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Save
+                          Changes</button>
+                      </div>
+                    </form>
                   </div>
                 </div>
-                <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3"><button type="button"
-                    onclick="closeModal('deleteAPIKeyModal{{ .ID }}')"
-                    class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button><button
-                    type="submit"
-                    class="bg-txlog-coral text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 transition-all">Delete
-                    Permanently</button></div>
-              </form>
-            </div>
+                <!-- Deactivate Modal -->
+                <div id="deactivateModal{{ .ID }}"
+                  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+                  onclick="if(event.target===this)closeModal('deactivateModal{{ .ID }}')">
+                  <div data-modal-panel
+                    class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+                    <form action="/admin/delete" method="post">
+                      <div class="h-1 bg-txlog-coral rounded-t-3xl"></div>
+                      <div class="p-6 text-center"><i data-lucide="user-x"
+                          class="w-12 h-12 text-txlog-coral mx-auto mb-3"></i>
+                        <h3 class="font-display font-semibold text-lg mb-2">Deactivate User</h3><input type="hidden"
+                          name="user_id" value="{{ .ID }}">
+                        <p class="text-sm text-txlog-indigo/60 mb-1">Are you sure you want to deactivate <strong>{{
+                            .Name
+                            }}</strong> ({{ .Email }})?</p>
+                        <p class="text-xs text-txlog-indigo/40">This will prevent the user from logging in, but their
+                          data
+                          will be preserved.</p>
+                      </div>
+                      <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3">
+                        <button type="button" onclick="closeModal('deactivateModal{{ .ID }}')"
+                          class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button>
+                        <button type="submit"
+                          class="bg-txlog-coral text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-coral/30 transition-all">Deactivate
+                          User</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                {{ end }}{{ else }}
+                <tr>
+                  <td colspan="7" class="px-6 py-8 text-center text-txlog-indigo/50">No users found in the system.</td>
+                </tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+          <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">Showing {{ len .users }}
+            total
+            user{{ if ne (len .users) 1 }}s{{ end }}</div>
+        </div>
+      </div>
+      {{ end }}
+
+      <!-- API Keys -->
+      {{ if or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled }}
+      <div id="section-apikeys" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h3 class="font-display font-semibold text-lg">API Keys</h3>
+            <button type="button" onclick="openModal('createAPIKeyModal')"
+              class="bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2"><i
+                data-lucide="plus" class="w-4 h-4"></i> Generate New Key</button>
+          </div>
+          {{ if .apiKeys }}
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-txlog-lavender/50 text-left">
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Key Prefix
+                  </th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created</th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Created By
+                  </th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last Used
+                  </th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 w-1">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-txlog-lavender/30">
+                {{ range .apiKeys }}
+                <tr class="hover:bg-txlog-lavender/10 transition-colors">
+                  <td class="px-6 py-3">
+                    <div class="font-medium">{{ .Name }}</div>
+                    <div class="text-xs text-txlog-indigo/40">ID: {{ .ID }}</div>
+                  </td>
+                  <td class="px-6 py-3"><code
+                      class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .KeyPrefix }}</code></td>
+                  <td class="px-6 py-3">{{ formatDateTime .CreatedAt }}</td>
+                  <td class="px-6 py-3">{{ .CreatorName }}</td>
+                  <td class="px-6 py-3">{{ if .LastUsedAt }}{{ formatDateTime .LastUsedAt }}{{ else }}<span
+                      class="text-txlog-indigo/40">Never</span>{{ end }}</td>
+                  <td class="px-6 py-3">{{ if .IsActive }}<span
+                      class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Active</span>{{
+                    else
+                    }}<span
+                      class="bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2 py-0.5 rounded-md">Revoked</span>{{
+                    end
+                    }}</td>
+                  <td class="px-6 py-3">
+                    <div class="flex gap-2">
+                      {{ if .IsActive }}<button type="button" onclick="openModal('revokeAPIKeyModal{{ .ID }}')"
+                        class="bg-txlog-golden text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all">Revoke</button>{{
+                      end }}
+                      <button type="button" onclick="openModal('deleteAPIKeyModal{{ .ID }}')"
+                        class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+                <!-- Revoke Modal -->
+                <div id="revokeAPIKeyModal{{ .ID }}"
+                  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+                  onclick="if(event.target===this)closeModal('revokeAPIKeyModal{{ .ID }}')">
+                  <div data-modal-panel
+                    class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+                    <form action="/admin/apikeys/revoke" method="post">
+                      <div class="p-6 text-center"><i data-lucide="circle-x"
+                          class="w-12 h-12 text-txlog-golden mx-auto mb-3"></i>
+                        <h3 class="font-display font-semibold text-lg mb-2">Revoke API Key</h3><input type="hidden"
+                          name="key_id" value="{{ .ID }}">
+                        <p class="text-sm text-txlog-indigo/60 mb-1">Are you sure you want to revoke <strong>{{ .Name
+                            }}</strong>?</p>
+                        <p class="text-xs text-txlog-indigo/40">This will prevent the key from authenticating any API
+                          requests.</p>
+                      </div>
+                      <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3"><button type="button"
+                          onclick="closeModal('revokeAPIKeyModal{{ .ID }}')"
+                          class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button><button
+                          type="submit"
+                          class="bg-txlog-golden text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 transition-all">Revoke
+                          Key</button></div>
+                    </form>
+                  </div>
+                </div>
+                <!-- Delete Modal -->
+                <div id="deleteAPIKeyModal{{ .ID }}"
+                  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+                  onclick="if(event.target===this)closeModal('deleteAPIKeyModal{{ .ID }}')">
+                  <div data-modal-panel
+                    class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+                    <form action="/admin/apikeys/delete" method="post">
+                      <div class="h-1 bg-txlog-coral rounded-t-3xl"></div>
+                      <div class="p-6 text-center"><i data-lucide="trash-2"
+                          class="w-12 h-12 text-txlog-coral mx-auto mb-3"></i>
+                        <h3 class="font-display font-semibold text-lg mb-2">Delete API Key</h3><input type="hidden"
+                          name="key_id" value="{{ .ID }}">
+                        <p class="text-sm text-txlog-indigo/60 mb-1">Permanently delete <strong>{{ .Name }}</strong>?
+                        </p>
+                        <div
+                          class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-xl p-3 text-xs text-txlog-coral mt-2">
+                          <strong>Warning:</strong> This action cannot be undone.
+                        </div>
+                      </div>
+                      <div class="border-t border-txlog-lavender px-6 py-4 grid grid-cols-2 gap-3"><button type="button"
+                          onclick="closeModal('deleteAPIKeyModal{{ .ID }}')"
+                          class="border-2 border-txlog-lavender text-txlog-indigo font-medium py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Cancel</button><button
+                          type="submit"
+                          class="bg-txlog-coral text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 transition-all">Delete
+                          Permanently</button></div>
+                    </form>
+                  </div>
+                </div>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+          {{ else }}
+          <div class="p-8 text-center"><i data-lucide="key-round"
+              class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+            <p class="font-semibold mb-1">No API keys found</p>
+            <p class="text-sm text-txlog-indigo/50 mb-3">Generate your first API key to start authenticating API
+              requests.</p>
+            <button type="button" onclick="openModal('createAPIKeyModal')"
+              class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
+                data-lucide="plus" class="w-4 h-4"></i> Generate Your First API Key</button>
           </div>
           {{ end }}
-        </tbody>
-      </table>
-    </div>
-    {{ else }}
-    <div class="p-8 text-center"><i data-lucide="key-round" class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
-      <p class="font-semibold mb-1">No API keys found</p>
-      <p class="text-sm text-txlog-indigo/50 mb-3">Generate your first API key to start authenticating API requests.</p>
-      <button type="button" onclick="openModal('createAPIKeyModal')"
-        class="inline-flex items-center gap-2 bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"><i
-          data-lucide="plus" class="w-4 h-4"></i> Generate Your First API Key</button>
-    </div>
-    {{ end }}
-    <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">Showing {{ len .apiKeys }} total
-      key{{ if ne (len .apiKeys) 1 }}s{{ end }}</div>
-  </div>
-  </div>
-  {{ end }}
+          <div class="border-t border-txlog-lavender px-6 py-3 text-sm text-txlog-indigo/50">Showing {{ len .apiKeys }}
+            total
+            key{{ if ne (len .apiKeys) 1 }}s{{ end }}</div>
+        </div>
+      </div>
+      {{ end }}
 
-  <!-- Database Migrations -->
-  <div id="section-migrations" class="admin-section hidden">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Database Migrations</h3>
-      <div class="flex gap-2">
-        {{ if .migrations }}{{ if gt (len .migrations.Pending) 0 }}<span
-          class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-3 py-1 rounded-lg">{{ len .migrations.Pending
-          }} pending</span>{{ else }}<span
-          class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-3 py-1 rounded-lg">Up to date</span>{{ end }}{{
-        if .migrations.IsDirty }}<span
-          class="bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-3 py-1 rounded-lg">Dirty state</span>{{ end
-        }}{{ end }}
-      </div>
-    </div>
-    <div class="p-6">
-      {{ if .migrations }}
-      <div class="grid md:grid-cols-4 gap-4 mb-4">
-        <div class="flex items-center gap-3"><i data-lucide="lock" class="w-5 h-5 text-txlog-sky"></i>
-          <div><strong>Current Version:</strong> {{ .migrations.CurrentVersion }}</div>
-        </div>
-        <div class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-txlog-leaf"></i>
-          <div><strong>Applied:</strong> {{ len .migrations.Applied }}</div>
-        </div>
-        <div class="flex items-center gap-3"><i data-lucide="circle-check" class="w-5 h-5 text-txlog-golden"></i>
-          <div><strong>Pending:</strong> {{ len .migrations.Pending }}</div>
-        </div>
-        <div class="flex items-center gap-3">{{ if .migrations.IsDirty }}<i data-lucide="triangle-alert" class="w-5 h-5 text-txlog-coral"></i>
-          <div><strong>State:</strong> <span class="text-txlog-coral font-semibold">Dirty</span></div>{{ else }}<i data-lucide="shield-check" class="w-5 h-5 text-txlog-leaf"></i>
-          <div><strong>State:</strong> <span class="text-txlog-leaf font-semibold">Clean</span></div>{{ end }}
-        </div>
-      </div>
-      {{ if .migrations.IsDirty }}
-      <div class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-2xl p-4 mb-4">
-        <div class="flex gap-3"><i data-lucide="triangle-alert"
-            class="w-5 h-5 text-txlog-coral flex-shrink-0 mt-0.5"></i>
-          <div>
-            <h4 class="font-semibold text-sm mb-1">Database Migration in Dirty State</h4>
-            <p class="text-sm text-txlog-indigo/60 mb-3">The database is stuck at version <strong>{{
-                .migrations.CurrentVersion }}</strong> in a dirty state.</p>
-            <div class="flex gap-2">
-              <form action="/admin/migrations/force-clean" method="post" class="inline"><button type="submit"
-                  onclick="return confirm('This will force the database to clean state. Are you sure?')"
-                  class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
-                    data-lucide="refresh-cw" class="w-3 h-3"></i> Force Clean State</button></form>
-              <form action="/admin/migrations/run" method="post" class="inline"><button type="submit"
-                  onclick="return confirm('Force clean and run all pending migrations?')"
-                  class="bg-txlog-sky text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
-                    data-lucide="check" class="w-3 h-3"></i> Force Clean &amp; Run</button></form>
+      <!-- Topology -->
+      <div id="section-topology" class="admin-section hidden">
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-display font-semibold text-lg">Topology</h3>
+              <p class="text-xs text-txlog-indigo/50 mt-0.5">Define hostname templates to classify assets into
+                environments, services, and pods.</p>
             </div>
           </div>
-        </div>
-      </div>
-      {{ end }}
-      {{ if gt (len .migrations.Pending) 0 }}
-      <div class="bg-txlog-golden/5 border border-txlog-golden/20 rounded-2xl p-4 mb-4">
-        <div class="flex gap-3"><i data-lucide="triangle-alert"
-            class="w-5 h-5 text-txlog-golden flex-shrink-0 mt-0.5"></i>
+
+          <!-- Hostname Templates -->
+          <div class="border-b border-txlog-lavender">
+            <div class="px-6 py-4 flex items-center justify-between">
+              <div>
+                <h4 class="font-semibold text-sm">Hostname Templates</h4>
+                <p class="text-xs text-txlog-indigo/50 mt-0.5">Take a real hostname and replace variable parts with
+                  tags: <code class="bg-txlog-indigo/5 font-mono px-1 rounded">:env</code>, <code
+                    class="bg-txlog-indigo/5 font-mono px-1 rounded">:svc</code>, <code
+                    class="bg-txlog-indigo/5 font-mono px-1 rounded">:seq</code></p>
+                <div
+                  class="flex items-center gap-1.5 mt-2 text-[10px] bg-txlog-sky/5 text-txlog-sky px-2 py-1 rounded-lg border border-txlog-sky/10 w-fit">
+                  <i data-lucide="info" class="w-3 h-3"></i>
+                  <span><strong>Order = Priority:</strong> Lower numbers are evaluated first. Use low numbers for
+                    specific rules and high numbers for generic rules.</span>
+                </div>
+              </div>
+              <button type="button" onclick="addPattern()"
+                class="bg-txlog-sky text-white text-sm font-medium px-3 py-1.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add
+              </button>
+            </div>
+            {{ if .topologyPatterns }}
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-txlog-lavender/50 text-left">
+                    <th class="px-6 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Template
+                    </th>
+                    <th class="px-6 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Compiled
+                      Regex</th>
+                    <th class="px-6 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider w-12">Order
+                    </th>
+                    <th class="px-6 py-2 w-1">&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-txlog-lavender/30">
+                  {{ range .topologyPatterns }}
+                  <tr class="hover:bg-txlog-lavender/10 transition-colors">
+                    <td class="px-6 py-3">
+                      <code
+                        class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .Template }}</code>
+                    </td>
+                    <td class="px-6 py-3 max-w-[280px] truncate" title="{{ .CompiledPattern }}">
+                      <code class="text-txlog-indigo/40 text-xs font-mono">{{ .CompiledPattern }}</code>
+                    </td>
+                    <td class="px-6 py-3 text-center text-txlog-indigo/50">{{ .DisplayOrder }}</td>
+                    <td class="px-6 py-3">
+                      <div class="flex gap-2 justify-end">
+                        <button type="button" onclick="previewPattern('{{ .Template }}')"
+                          class="text-txlog-sky text-xs font-medium px-2 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors flex items-center gap-1">
+                          <i data-lucide="eye" class="w-3 h-3"></i> Preview
+                        </button>
+                        <button type="button" onclick="editPattern({{ .ID }}, '{{ .Template }}', {{ .DisplayOrder }})"
+                          class="text-txlog-indigo/60 text-xs font-medium px-2 py-1 rounded-lg border border-txlog-lavender hover:bg-txlog-lavender/30 transition-colors flex items-center gap-1">
+                          <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+                        </button>
+                        <form action="/admin/topology/patterns/delete" method="post" class="inline">
+                          <input type="hidden" name="id" value="{{ .ID }}">
+                          <button type="submit" onclick="return confirm('Delete this template?')"
+                            class="text-txlog-coral text-xs font-medium px-2 py-1 rounded-lg border border-txlog-coral/20 hover:bg-txlog-coral/10 transition-colors flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-3 h-3"></i>
+                          </button>
+                        </form>
+                      </div>
+                    </td>
+                  </tr>
+                  {{ end }}
+                </tbody>
+              </table>
+            </div>
+            {{ else }}
+            <div class="px-6 py-8 text-center">
+              <i data-lucide="network" class="w-10 h-10 text-txlog-indigo/20 mx-auto mb-3"></i>
+              <p class="font-semibold text-sm mb-1">No templates configured</p>
+              <p class="text-xs text-txlog-indigo/50">Add a hostname template to start classifying assets.</p>
+            </div>
+            {{ end }}
+          </div>
+
+          <!-- Environment Names -->
+          <div class="border-b border-txlog-lavender">
+            <div class="px-6 py-4 flex items-center justify-between">
+              <div>
+                <h4 class="font-semibold text-sm">Environment Names</h4>
+                <p class="text-xs text-txlog-indigo/50 mt-0.5">Map values captured by <code
+                    class="bg-txlog-indigo/5 font-mono px-1 rounded">:env</code> to friendly names. E.g. <code
+                    class="bg-txlog-indigo/5 font-mono px-1 rounded">prd</code> → Production</p>
+              </div>
+              <button type="button" onclick="openModal('modal-add-env')"
+                class="bg-txlog-sky text-white text-sm font-medium px-3 py-1.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add
+              </button>
+            </div>
+            {{ if .environmentNames }}
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-txlog-lavender/50 text-left">
+                    <th class="px-6 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Match
+                      Value</th>
+                    <th class="px-6 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Display
+                      Name</th>
+                    <th class="px-6 py-2 w-1">&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-txlog-lavender/30">
+                  {{ range .environmentNames }}
+                  <tr class="hover:bg-txlog-lavender/10 transition-colors">
+                    <td class="px-6 py-3">
+                      <code
+                        class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .MatchValue }}</code>
+                    </td>
+                    <td class="px-6 py-3 font-medium">{{ .Name }}</td>
+                    <td class="px-6 py-3">
+                      <form action="/admin/topology/environments/delete" method="post" class="inline">
+                        <input type="hidden" name="id" value="{{ .ID }}">
+                        <button type="submit" onclick="return confirm('Delete this environment mapping?')"
+                          class="text-txlog-coral text-xs font-medium px-2 py-1 rounded-lg border border-txlog-coral/20 hover:bg-txlog-coral/10 transition-colors flex items-center gap-1">
+                          <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {{ end }}
+                </tbody>
+              </table>
+            </div>
+            {{ else }}
+            <div class="px-6 py-6 text-center text-txlog-indigo/40 text-sm">No environment names configured.</div>
+            {{ end }}
+          </div>
+
+          <!-- Service Names -->
           <div>
-            <h4 class="font-semibold text-sm mb-1">Pending Migrations</h4>
-            <p class="text-sm text-txlog-indigo/60">There are {{ len .migrations.Pending }} pending migrations.</p>
+            <div class="px-6 py-4 flex items-center justify-between">
+              <div>
+                <h4 class="font-semibold text-sm">Service Names</h4>
+                <p class="text-xs text-txlog-indigo/50 mt-0.5">Map values captured by <code
+                    class="bg-txlog-indigo/5 font-mono px-1 rounded">:svc</code> to friendly names. E.g. <code
+                    class="bg-txlog-indigo/5 font-mono px-1 rounded">acme-system</code> → ACME System</p>
+              </div>
+              <button type="button" onclick="openModal('modal-add-svc')"
+                class="bg-txlog-sky text-white text-sm font-medium px-3 py-1.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Add
+              </button>
+            </div>
+            {{ if .serviceNames }}
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-txlog-lavender/50 text-left">
+                    <th class="px-6 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Match
+                      Value</th>
+                    <th class="px-6 py-2 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Display
+                      Name</th>
+                    <th class="px-6 py-2 w-1">&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-txlog-lavender/30">
+                  {{ range .serviceNames }}
+                  <tr class="hover:bg-txlog-lavender/10 transition-colors">
+                    <td class="px-6 py-3">
+                      <code
+                        class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .MatchValue }}</code>
+                    </td>
+                    <td class="px-6 py-3 font-medium">{{ .Name }}</td>
+                    <td class="px-6 py-3">
+                      <form action="/admin/topology/services/delete" method="post" class="inline">
+                        <input type="hidden" name="id" value="{{ .ID }}">
+                        <button type="submit" onclick="return confirm('Delete this service mapping?')"
+                          class="text-txlog-coral text-xs font-medium px-2 py-1 rounded-lg border border-txlog-coral/20 hover:bg-txlog-coral/10 transition-colors flex items-center gap-1">
+                          <i data-lucide="trash-2" class="w-3 h-3"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                  {{ end }}
+                </tbody>
+              </table>
+            </div>
+            {{ else }}
+            <div class="px-6 py-6 text-center text-txlog-indigo/40 text-sm">No service names configured.</div>
+            {{ end }}
           </div>
         </div>
       </div>
-      {{ if not .migrations.IsDirty }}
-      <button type="button" onclick="openModal('migrationsModal')"
-        class="bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2 mb-4"><i
-          data-lucide="check" class="w-4 h-4"></i> Run All Migrations ({{ len .migrations.Pending }})</button>
-      {{ end }}
-      {{ else }}{{ if not .migrations.IsDirty }}
-      <div class="bg-txlog-leaf/5 border border-txlog-leaf/20 rounded-2xl p-4 mb-4 flex gap-3"><i
-          data-lucide="check-circle" class="w-5 h-5 text-txlog-leaf flex-shrink-0 mt-0.5"></i>
-        <div>
-          <h4 class="font-semibold text-sm mb-1">Database Up to Date</h4>
-          <p class="text-sm text-txlog-indigo/60">All migrations have been applied successfully.</p>
+
+      <!-- Topology Modals -->
+      <!-- Pattern Modal (Add/Edit) -->
+      <div id="modal-pattern" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+        onclick="if(event.target===this)closeModal('modal-pattern')">
+        <div data-modal-panel
+          class="bg-white rounded-3xl shadow-soft max-w-lg w-full mx-4 transform transition-all scale-95 opacity-0">
+          <form id="pattern-form" action="/admin/topology/patterns" method="post">
+            <input type="hidden" name="id" id="pattern-id">
+            <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+              <h5 id="pattern-modal-title" class="font-display font-semibold">Add Hostname Template</h5>
+              <button type="button" onclick="closeModal('modal-pattern')"
+                class="text-txlog-indigo/40 hover:text-txlog-indigo"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-2">Template Builder <span
+                    class="text-txlog-coral">*</span></label>
+
+                <!-- Tag Bank -->
+                <div class="mb-3 p-3 bg-txlog-lavender/10 rounded-xl border border-txlog-lavender/30">
+                  <p class="text-[10px] uppercase tracking-wider font-bold text-txlog-indigo/40 mb-2">Available
+                    Placeholders</p>
+                  <div id="tag-bank" class="flex flex-wrap gap-2">
+                    <div data-tag=":env"
+                      class="tag-chip bg-white border-2 border-txlog-sky/30 text-txlog-sky px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 font-mono text-sm">
+                      <i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> :env
+                    </div>
+                    <div data-tag=":svc"
+                      class="tag-chip bg-white border-2 border-txlog-sky/30 text-txlog-sky px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 font-mono text-sm">
+                      <i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> :svc
+                    </div>
+                    <div data-tag=":seq"
+                      class="tag-chip bg-white border-2 border-txlog-sky/30 text-txlog-sky px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 font-mono text-sm">
+                      <i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> :seq
+                    </div>
+                    <button type="button" onclick="addLiteralSegment()"
+                      class="bg-txlog-indigo/5 hover:bg-txlog-indigo/10 text-txlog-indigo/60 px-3 py-1.5 rounded-xl transition-all flex items-center gap-2 text-sm border-2 border-dashed border-txlog-lavender">
+                      <i data-lucide="plus" class="w-3 h-3"></i> Add Text
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Construction Area -->
+                <div id="template-dropzone"
+                  class="min-h-[64px] p-4 bg-txlog-indigo/5 border-2 border-dashed border-txlog-lavender rounded-2xl flex flex-wrap items-center gap-3 transition-all focus-within:border-txlog-sky">
+                  <p id="drop-placeholder" class="text-sm text-txlog-indigo/30 pointer-events-none mx-auto italic">Drag
+                    placeholders here to build your template...</p>
+                </div>
+
+                <input type="hidden" name="template" id="new-pattern-input" required>
+                <p class="text-[10px] text-txlog-indigo/40 mt-2 flex items-center gap-1">
+                  <i data-lucide="mouse-pointer-2" class="w-3 h-3"></i>
+                  Drag items to reorder. Non-placeholder text acts as wildcards (.*)
+                </p>
+              </div>
+              <div id="preview-result" class="hidden">
+                <p class="text-xs font-semibold text-txlog-indigo/60 mb-1">Preview — matching hostnames:</p>
+                <div id="preview-list"
+                  class="bg-txlog-lavender/20 rounded-xl p-3 text-xs font-mono space-y-1 max-h-32 overflow-y-auto">
+                </div>
+                <p class="text-xs text-txlog-indigo/40 mt-1">Compiled regex: <code id="preview-compiled"
+                    class="font-mono"></code></p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Display Order</label>
+                <input type="number" name="display_order" id="pattern-display-order" value="0" min="0"
+                  class="w-24 border-2 border-txlog-lavender px-3 py-2 rounded-xl text-sm focus:border-txlog-sky focus:outline-none transition-all">
+              </div>
+            </div>
+            <div class="border-t border-txlog-lavender px-6 py-4 flex gap-3 justify-end">
+              <button type="button" onclick="closeModal('modal-pattern')"
+                class="border-2 border-txlog-lavender text-txlog-indigo font-medium px-4 py-2 rounded-xl hover:bg-txlog-lavender/20 transition-all text-sm">Cancel</button>
+              <button type="submit"
+                class="bg-txlog-sky text-white font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all text-sm">Save
+                Template</button>
+            </div>
+          </form>
         </div>
       </div>
-      {{ end }}{{ end }}
-      {{ else }}
-      <div class="bg-txlog-sky/5 border border-txlog-sky/20 rounded-2xl p-4">
-        <p class="text-sm text-txlog-indigo/60">Unable to load migration status.</p>
+
+      <!-- Add Environment Modal -->
+      <div id="modal-add-env" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+        onclick="if(event.target===this)closeModal('modal-add-env')">
+        <div data-modal-panel
+          class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+          <form action="/admin/topology/environments" method="post">
+            <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+              <h5 class="font-display font-semibold">Add Environment Name</h5>
+              <button type="button" onclick="closeModal('modal-add-env')"
+                class="text-txlog-indigo/40 hover:text-txlog-indigo"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Match Value <span
+                    class="text-txlog-coral">*</span></label>
+                <input type="text" name="match_value" required placeholder="prd"
+                  class="w-full border-2 border-txlog-lavender px-3 py-2 rounded-xl text-sm font-mono focus:border-txlog-sky focus:outline-none transition-all">
+                <p class="text-xs text-txlog-indigo/50 mt-1">The raw value extracted by the <code
+                    class="font-mono">:env</code> tag.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Display Name <span
+                    class="text-txlog-coral">*</span></label>
+                <input type="text" name="name" required placeholder="Production"
+                  class="w-full border-2 border-txlog-lavender px-3 py-2 rounded-xl text-sm focus:border-txlog-sky focus:outline-none transition-all">
+              </div>
+
+            </div>
+            <div class="border-t border-txlog-lavender px-6 py-4 flex gap-3 justify-end">
+              <button type="button" onclick="closeModal('modal-add-env')"
+                class="border-2 border-txlog-lavender text-txlog-indigo font-medium px-4 py-2 rounded-xl hover:bg-txlog-lavender/20 transition-all text-sm">Cancel</button>
+              <button type="submit"
+                class="bg-txlog-sky text-white font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all text-sm">Save</button>
+            </div>
+          </form>
+        </div>
       </div>
-      {{ end }}
-    </div>
-    {{ if .migrations }}
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-txlog-lavender/50 text-left">
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Version</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Description</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Filename</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-txlog-lavender/30">
-          {{ range .migrations.Applied }}<tr class="hover:bg-txlog-lavender/10 transition-colors">
-            <td class="px-6 py-3"><code
-                class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code></td>
-            <td class="px-6 py-3">{{ .Description }}</td>
-            <td class="px-6 py-3"><span
-                class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Applied</span></td>
-            <td class="px-6 py-3 text-txlog-indigo/40">{{ .Filename }}</td>
-          </tr>{{ end }}
-          {{ range .migrations.Pending }}<tr class="hover:bg-txlog-lavender/10 transition-colors">
-            <td class="px-6 py-3"><code
-                class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code></td>
-            <td class="px-6 py-3">{{ .Description }}</td>
-            <td class="px-6 py-3"><span
-                class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Pending</span>
-            </td>
-            <td class="px-6 py-3 text-txlog-indigo/40">{{ .Filename }}</td>
-          </tr>{{ end }}
-        </tbody>
-      </table>
-    </div>
-    {{ end }}
-  </div>
-  </div>
+
+      <!-- Add Service Modal -->
+      <div id="modal-add-svc" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+        onclick="if(event.target===this)closeModal('modal-add-svc')">
+        <div data-modal-panel
+          class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+          <form action="/admin/topology/services" method="post">
+            <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+              <h5 class="font-display font-semibold">Add Service Name</h5>
+              <button type="button" onclick="closeModal('modal-add-svc')"
+                class="text-txlog-indigo/40 hover:text-txlog-indigo"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Match Value <span
+                    class="text-txlog-coral">*</span></label>
+                <input type="text" name="match_value" required placeholder="acme-system"
+                  class="w-full border-2 border-txlog-lavender px-3 py-2 rounded-xl text-sm font-mono focus:border-txlog-sky focus:outline-none transition-all">
+                <p class="text-xs text-txlog-indigo/50 mt-1">The raw value extracted by the <code
+                    class="font-mono">:svc</code> tag.</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Display Name <span
+                    class="text-txlog-coral">*</span></label>
+                <input type="text" name="name" required placeholder="ACME System"
+                  class="w-full border-2 border-txlog-lavender px-3 py-2 rounded-xl text-sm focus:border-txlog-sky focus:outline-none transition-all">
+              </div>
+
+            </div>
+            <div class="border-t border-txlog-lavender px-6 py-4 flex gap-3 justify-end">
+              <button type="button" onclick="closeModal('modal-add-svc')"
+                class="border-2 border-txlog-lavender text-txlog-indigo font-medium px-4 py-2 rounded-xl hover:bg-txlog-lavender/20 transition-all text-sm">Cancel</button>
+              <button type="submit"
+                class="bg-txlog-sky text-white font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all text-sm">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Preview Modal -->
+      <div id="modal-preview-pattern" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+        onclick="if(event.target===this)closeModal('modal-preview-pattern')">
+        <div data-modal-panel
+          class="bg-white rounded-3xl shadow-soft max-w-lg w-full mx-4 transform transition-all scale-95 opacity-0">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h5 class="font-display font-semibold">Pattern Preview</h5>
+            <button type="button" onclick="closeModal('modal-preview-pattern')"
+              class="text-txlog-indigo/40 hover:text-txlog-indigo"><i data-lucide="x" class="w-5 h-5"></i></button>
+          </div>
+          <div class="p-6">
+            <p class="text-xs text-txlog-indigo/50 mb-1">Template:</p>
+            <code id="preview-modal-template"
+              class="text-sm font-mono bg-txlog-indigo/5 px-2 py-1 rounded-md block mb-4"></code>
+            <p class="text-xs font-semibold text-txlog-indigo/60 mb-2">Matching hostnames in your infrastructure:</p>
+            <div id="preview-modal-list"
+              class="bg-txlog-lavender/20 rounded-xl p-3 text-xs font-mono space-y-1 max-h-64 overflow-y-auto min-h-12">
+            </div>
+            <p class="text-xs text-txlog-indigo/40 mt-3">Compiled regex: <code id="preview-modal-compiled"
+                class="font-mono"></code></p>
+          </div>
+          <div class="border-t border-txlog-lavender px-6 py-4">
+            <button onclick="closeModal('modal-preview-pattern')"
+              class="w-full bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Database Migrations -->
+      <div id="section-migrations" class="admin-section hidden">
+
+        <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+          <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
+            <h3 class="font-display font-semibold text-lg">Database Migrations</h3>
+            <div class="flex gap-2">
+              {{ if .migrations }}{{ if gt (len .migrations.Pending) 0 }}<span
+                class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-3 py-1 rounded-lg">{{ len
+                .migrations.Pending
+                }} pending</span>{{ else }}<span
+                class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-3 py-1 rounded-lg">Up to date</span>{{ end
+              }}{{
+              if .migrations.IsDirty }}<span
+                class="bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-3 py-1 rounded-lg">Dirty state</span>{{
+              end
+              }}{{ end }}
+            </div>
+          </div>
+          <div class="p-6">
+            {{ if .migrations }}
+            <div class="grid md:grid-cols-4 gap-4 mb-4">
+              <div class="flex items-center gap-3"><i data-lucide="lock" class="w-5 h-5 text-txlog-sky"></i>
+                <div><strong>Current Version:</strong> {{ .migrations.CurrentVersion }}</div>
+              </div>
+              <div class="flex items-center gap-3"><i data-lucide="check" class="w-5 h-5 text-txlog-leaf"></i>
+                <div><strong>Applied:</strong> {{ len .migrations.Applied }}</div>
+              </div>
+              <div class="flex items-center gap-3"><i data-lucide="circle-check" class="w-5 h-5 text-txlog-golden"></i>
+                <div><strong>Pending:</strong> {{ len .migrations.Pending }}</div>
+              </div>
+              <div class="flex items-center gap-3">{{ if .migrations.IsDirty }}<i data-lucide="triangle-alert"
+                  class="w-5 h-5 text-txlog-coral"></i>
+                <div><strong>State:</strong> <span class="text-txlog-coral font-semibold">Dirty</span></div>{{ else }}<i
+                  data-lucide="shield-check" class="w-5 h-5 text-txlog-leaf"></i>
+                <div><strong>State:</strong> <span class="text-txlog-leaf font-semibold">Clean</span></div>{{ end }}
+              </div>
+            </div>
+            {{ if .migrations.IsDirty }}
+            <div class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-2xl p-4 mb-4">
+              <div class="flex gap-3"><i data-lucide="triangle-alert"
+                  class="w-5 h-5 text-txlog-coral flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="font-semibold text-sm mb-1">Database Migration in Dirty State</h4>
+                  <p class="text-sm text-txlog-indigo/60 mb-3">The database is stuck at version <strong>{{
+                      .migrations.CurrentVersion }}</strong> in a dirty state.</p>
+                  <div class="flex gap-2">
+                    <form action="/admin/migrations/force-clean" method="post" class="inline"><button type="submit"
+                        onclick="return confirm('This will force the database to clean state. Are you sure?')"
+                        class="bg-txlog-coral text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
+                          data-lucide="refresh-cw" class="w-3 h-3"></i> Force Clean State</button></form>
+                    <form action="/admin/migrations/run" method="post" class="inline"><button type="submit"
+                        onclick="return confirm('Force clean and run all pending migrations?')"
+                        class="bg-txlog-sky text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
+                          data-lucide="check" class="w-3 h-3"></i> Force Clean &amp; Run</button></form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {{ end }}
+            {{ if gt (len .migrations.Pending) 0 }}
+            <div class="bg-txlog-golden/5 border border-txlog-golden/20 rounded-2xl p-4 mb-4">
+              <div class="flex gap-3"><i data-lucide="triangle-alert"
+                  class="w-5 h-5 text-txlog-golden flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <h4 class="font-semibold text-sm mb-1">Pending Migrations</h4>
+                  <p class="text-sm text-txlog-indigo/60">There are {{ len .migrations.Pending }} pending migrations.
+                  </p>
+                </div>
+              </div>
+            </div>
+            {{ if not .migrations.IsDirty }}
+            <button type="button" onclick="openModal('migrationsModal')"
+              class="bg-txlog-sky text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2 mb-4"><i
+                data-lucide="check" class="w-4 h-4"></i> Run All Migrations ({{ len .migrations.Pending }})</button>
+            {{ end }}
+            {{ else }}{{ if not .migrations.IsDirty }}
+            <div class="bg-txlog-leaf/5 border border-txlog-leaf/20 rounded-2xl p-4 mb-4 flex gap-3"><i
+                data-lucide="check-circle" class="w-5 h-5 text-txlog-leaf flex-shrink-0 mt-0.5"></i>
+              <div>
+                <h4 class="font-semibold text-sm mb-1">Database Up to Date</h4>
+                <p class="text-sm text-txlog-indigo/60">All migrations have been applied successfully.</p>
+              </div>
+            </div>
+            {{ end }}{{ end }}
+            {{ else }}
+            <div class="bg-txlog-sky/5 border border-txlog-sky/20 rounded-2xl p-4">
+              <p class="text-sm text-txlog-indigo/60">Unable to load migration status.</p>
+            </div>
+            {{ end }}
+          </div>
+          {{ if .migrations }}
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-txlog-lavender/50 text-left">
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Version</th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Description
+                  </th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Status</th>
+                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Filename
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-txlog-lavender/30">
+                {{ range .migrations.Applied }}<tr class="hover:bg-txlog-lavender/10 transition-colors">
+                  <td class="px-6 py-3"><code
+                      class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code></td>
+                  <td class="px-6 py-3">{{ .Description }}</td>
+                  <td class="px-6 py-3"><span
+                      class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-2 py-0.5 rounded-md">Applied</span>
+                  </td>
+                  <td class="px-6 py-3 text-txlog-indigo/40">{{ .Filename }}</td>
+                </tr>{{ end }}
+                {{ range .migrations.Pending }}<tr class="hover:bg-txlog-lavender/10 transition-colors">
+                  <td class="px-6 py-3"><code
+                      class="bg-txlog-indigo/5 text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code></td>
+                  <td class="px-6 py-3">{{ .Description }}</td>
+                  <td class="px-6 py-3"><span
+                      class="bg-txlog-golden/10 text-txlog-golden text-xs font-bold px-2 py-0.5 rounded-md">Pending</span>
+                  </td>
+                  <td class="px-6 py-3 text-txlog-indigo/40">{{ .Filename }}</td>
+                </tr>{{ end }}
+              </tbody>
+            </table>
+          </div>
+          {{ end }}
+        </div>
+      </div>
 
     </div><!-- end content area -->
   </div><!-- end grid -->
@@ -883,8 +1372,8 @@
     class="bg-white rounded-3xl shadow-soft max-w-2xl w-full mx-4 transform transition-all scale-95 opacity-0 overflow-hidden">
     <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
       <h5 class="font-display font-semibold text-lg">Generate New API Key</h5><button type="button"
-        onclick="closeModal('createAPIKeyModal', function() { window.location.reload(); })" class="text-txlog-indigo/40 hover:text-txlog-indigo"><i
-          data-lucide="x" class="w-5 h-5"></i></button>
+        onclick="closeModal('createAPIKeyModal', function() { window.location.reload(); })"
+        class="text-txlog-indigo/40 hover:text-txlog-indigo"><i data-lucide="x" class="w-5 h-5"></i></button>
     </div>
     <div class="p-6">
       <div id="createAPIKeyForm">
@@ -918,7 +1407,8 @@
       </div>
     </div>
     <div class="border-t border-txlog-lavender px-6 py-4 flex justify-end gap-3">
-      <button type="button" onclick="closeModal('createAPIKeyModal', function() { window.location.reload(); })" id="closeModalBtn"
+      <button type="button" onclick="closeModal('createAPIKeyModal', function() { window.location.reload(); })"
+        id="closeModalBtn"
         class="border-2 border-txlog-lavender text-txlog-indigo font-medium px-4 py-2.5 rounded-xl hover:bg-txlog-lavender/20 transition-all">Close</button>
       <button type="button" id="generateAPIKeyBtn"
         class="bg-txlog-sky text-white font-medium px-4 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all flex items-center gap-2"><i
@@ -999,7 +1489,9 @@
     if (urlP.get('cleanup_success')) { hash = 'housekeeping'; showAdminAlert('Inactive assets cleanup completed successfully.'); }
     if (urlP.get('apikey_revoked')) { hash = 'apikeys'; showAdminAlert('API key revoked successfully.'); }
     if (urlP.get('apikey_deleted')) { hash = 'apikeys'; showAdminAlert('API key deleted successfully.'); }
-    var validSections = ['server', 'database', 'oidc', 'ldap', 'housekeeping', 'statistics', 'osv', 'users', 'apikeys', 'migrations'];
+    if (urlP.get('topology_saved')) { hash = 'topology'; showAdminAlert('Topology configuration saved successfully.'); }
+    if (urlP.get('topology_deleted')) { hash = 'topology'; showAdminAlert('Topology entry deleted successfully.'); }
+    var validSections = ['server', 'database', 'oidc', 'ldap', 'housekeeping', 'statistics', 'osv', 'users', 'apikeys', 'topology', 'migrations'];
     if (!hash || validSections.indexOf(hash) === -1 || !document.getElementById('section-' + hash)) hash = 'server';
     showSection(hash);
     var runBtn = document.getElementById('runMigrationsBtn');
@@ -1024,12 +1516,210 @@
       copyBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Copied!'; lucide.createIcons();
       setTimeout(function () { copyBtn.innerHTML = '<i data-lucide="copy" class="w-4 h-4"></i> Copy'; lucide.createIcons(); }, 2000);
     });
+    // --- Template Builder Logic ---
+    var tagBank = document.getElementById('tag-bank');
+    var dropzone = document.getElementById('template-dropzone');
+    var hiddenInput = document.getElementById('new-pattern-input');
+    var dropPlaceholder = document.getElementById('drop-placeholder');
+
+    if (tagBank && dropzone) {
+      // Tags in the bank are cloneable
+      new Sortable(tagBank, {
+        group: {
+          name: 'tags',
+          pull: 'clone',
+          put: false
+        },
+        sort: false,
+        animation: 150
+      });
+
+      // Dropzone is sortable and accepts tags
+      new Sortable(dropzone, {
+        group: 'tags',
+        animation: 150,
+        ghostClass: 'bg-txlog-sky/5',
+        onAdd: function (evt) {
+          if (dropPlaceholder) dropPlaceholder.classList.add('hidden');
+          // If a tag is dropped, ensure it has a remove button
+          var item = evt.item;
+          addRemoveButton(item);
+          syncTemplate();
+        },
+        onUpdate: function () {
+          syncTemplate();
+        },
+        onRemove: function () {
+          if (dropzone.children.length <= 1) { // 1 because of the hidden placeholder
+            if (dropPlaceholder) dropPlaceholder.classList.remove('hidden');
+          }
+          syncTemplate();
+        }
+      });
+    }
+
+    function addRemoveButton(el) {
+      if (el.querySelector('.remove-tag')) return;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'remove-tag ml-1 text-txlog-indigo/30 hover:text-txlog-coral transition-colors';
+      btn.innerHTML = '<i data-lucide="x" class="w-3 h-3"></i>';
+      btn.onclick = function () {
+        el.remove();
+        if (dropzone.querySelectorAll('.tag-chip, .literal-chip').length === 0) {
+          if (dropPlaceholder) dropPlaceholder.classList.remove('hidden');
+        }
+        syncTemplate();
+      };
+      el.appendChild(btn);
+      lucide.createIcons();
+    }
+
+    window.addLiteralSegment = function () {
+      var val = prompt("Enter text segment (e.g. '-', '.com'):");
+      if (!val) return;
+
+      var div = document.createElement('div');
+      div.className = 'literal-chip bg-white border-2 border-txlog-lavender text-txlog-indigo/60 px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-sm font-mono';
+      div.dataset.value = val;
+      div.innerHTML = '<i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> ' + val;
+
+      if (dropPlaceholder) dropPlaceholder.classList.add('hidden');
+      dropzone.appendChild(div);
+      addRemoveButton(div);
+      syncTemplate();
+    };
+
+    function syncTemplate() {
+      var template = '';
+      dropzone.querySelectorAll('.tag-chip, .literal-chip').forEach(function (el) {
+        if (el.classList.contains('tag-chip')) {
+          template += el.dataset.tag;
+        } else {
+          template += el.dataset.value;
+        }
+      });
+      hiddenInput.value = template;
+
+      // Trigger preview if input is valid
+      if (template) {
+        debouncedPreview(template);
+      } else {
+        document.getElementById('preview-result').classList.add('hidden');
+      }
+    }
+
+    var previewTimeout;
+    function debouncedPreview(template) {
+      clearTimeout(previewTimeout);
+      previewTimeout = setTimeout(function () {
+        fetchPreview(template);
+      }, 500);
+    }
+
+    function fetchPreview(template) {
+      var resultArea = document.getElementById('preview-result');
+      var listArea = document.getElementById('preview-list');
+      var compiledArea = document.getElementById('preview-compiled');
+
+      fetch('/admin/topology/preview?template=' + encodeURIComponent(template))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          resultArea.classList.remove('hidden');
+          compiledArea.textContent = data.compiled || '';
+          if (data.error) {
+            listArea.innerHTML = '<span class="text-txlog-coral">' + data.error + '</span>';
+          } else if (!data.hostnames || data.hostnames.length === 0) {
+            listArea.innerHTML = '<span class="text-txlog-indigo/40">No matching hostnames found.</span>';
+          } else {
+            listArea.innerHTML = data.hostnames.map(function (h) {
+              return '<div class="py-0.5">' + h + '</div>';
+            }).join('');
+          }
+        });
+    }
+
+    window.addPattern = function () {
+      document.getElementById('pattern-form').action = '/admin/topology/patterns';
+      document.getElementById('pattern-modal-title').textContent = 'Add Hostname Template';
+      document.getElementById('pattern-id').value = '';
+      document.getElementById('pattern-display-order').value = '0';
+      document.getElementById('new-pattern-input').value = '';
+      dropzone.querySelectorAll('.tag-chip, .literal-chip').forEach(function (el) { el.remove(); });
+      if (dropPlaceholder) dropPlaceholder.classList.remove('hidden');
+      document.getElementById('preview-result').classList.add('hidden');
+      openModal('modal-pattern');
+    };
+
+    window.editPattern = function (id, template, order) {
+      document.getElementById('pattern-form').action = '/admin/topology/patterns/update';
+      document.getElementById('pattern-modal-title').textContent = 'Edit Hostname Template';
+      document.getElementById('pattern-id').value = id;
+      document.getElementById('pattern-display-order').value = order;
+      document.getElementById('new-pattern-input').value = template;
+
+      // Populate builder from template string
+      dropzone.querySelectorAll('.tag-chip, .literal-chip').forEach(function (el) { el.remove(); });
+      if (dropPlaceholder) dropPlaceholder.classList.add('hidden');
+
+      // Basic parser to split tags and literals
+      var parts = template.split(/(:env|:svc|:seq)/).filter(function (p) { return p !== ''; });
+      parts.forEach(function (p) {
+        if (p === ':env' || p === ':svc' || p === ':seq') {
+          var bankChip = document.querySelector('#tag-bank [data-tag="' + p + '"]');
+          if (bankChip) {
+            var chip = bankChip.cloneNode(true);
+            dropzone.appendChild(chip);
+            addRemoveButton(chip);
+          }
+        } else {
+          var div = document.createElement('div');
+          div.className = 'literal-chip bg-white border-2 border-txlog-lavender text-txlog-indigo/60 px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-sm font-mono';
+          div.dataset.value = p;
+          div.innerHTML = '<i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> ' + p;
+          dropzone.appendChild(div);
+          addRemoveButton(div);
+        }
+      });
+
+      syncTemplate();
+      openModal('modal-pattern');
+    };
+
   });
+
   function showAdminAlert(msg) {
     var d = document.createElement('div');
     d.className = 'bg-txlog-leaf/10 border border-txlog-leaf/30 text-txlog-leaf px-4 py-3 rounded-xl mb-4 flex items-center gap-2';
     d.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i><span>' + msg + '</span>';
     var c = document.getElementById('alert-container'); if (c) c.appendChild(d); lucide.createIcons();
+  }
+  function previewPattern(template) {
+    document.getElementById('preview-modal-template').textContent = template;
+    document.getElementById('preview-modal-list').innerHTML = '<span class="text-txlog-indigo/40">Loading...</span>';
+    document.getElementById('preview-modal-compiled').textContent = '';
+    openModal('modal-preview-pattern');
+    fetch('/admin/topology/preview?template=' + encodeURIComponent(template))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        document.getElementById('preview-modal-compiled').textContent = data.compiled || '';
+        var list = document.getElementById('preview-modal-list');
+        if (data.error) {
+          list.innerHTML = '<span class="text-txlog-coral">' + data.error + '</span>';
+        } else if (!data.hostnames || data.hostnames.length === 0) {
+          list.innerHTML = '<span class="text-txlog-indigo/40">No matching hostnames found.</span>';
+        } else {
+          list.innerHTML = data.hostnames.map(function (h) {
+            return '<div class="py-0.5">' + h + '</div>';
+          }).join('');
+          if (data.count >= 20) {
+            list.innerHTML += '<div class="text-txlog-indigo/40 pt-1 border-t border-txlog-lavender/50 mt-1">Showing first 20 results.</div>';
+          }
+        }
+      })
+      .catch(function (e) {
+        document.getElementById('preview-modal-list').innerHTML = '<span class="text-txlog-coral">Error: ' + e.message + '</span>';
+      });
   }
 </script>
 {{ template "footer.html" . }}

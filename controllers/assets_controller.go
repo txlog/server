@@ -48,6 +48,12 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			search = strings.TrimSpace(search)
 		}
 
+		// Parse topology keywords: env:<name>, svc:<name>, pod:<id>
+		envFilter := extractKeyword(&search, "env:")
+		svcFilter := extractKeyword(&search, "svc:")
+		podFilter := extractKeyword(&search, "pod:")
+		search = strings.TrimSpace(search)
+
 		searchType := "hostname"
 		if len(search) == 32 && !util.ContainsSpecialCharacters(search) {
 			searchType = "machine_id"
@@ -90,6 +96,53 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		if copyFailFilter {
 			whereClause += " AND copy_fail IS TRUE"
+		}
+
+		// env:name → filter assets whose hostname matches the pattern of the named environment.
+		if envFilter != "" {
+			whereClause += ` AND EXISTS (
+				SELECT 1
+				FROM topology_patterns tp
+				WHERE assets.hostname ~ tp.compiled_pattern
+				  AND (regexp_match(assets.hostname, tp.compiled_pattern))[1] IN (
+					SELECT match_value FROM environment_names
+					WHERE name ILIKE $` + strconv.Itoa(paramNum) + `
+					   OR match_value ILIKE $` + strconv.Itoa(paramNum) + `
+				  )
+				LIMIT 1
+			)`
+			queryArgs = append(queryArgs, envFilter)
+			paramNum++
+		}
+
+		// svc:name → filter assets whose hostname matches a service pattern.
+		if svcFilter != "" {
+			whereClause += ` AND EXISTS (
+				SELECT 1
+				FROM topology_patterns tp
+				WHERE assets.hostname ~ tp.compiled_pattern
+				  AND (regexp_match(assets.hostname, tp.compiled_pattern))[2] IN (
+					SELECT match_value FROM service_names
+					WHERE name ILIKE $` + strconv.Itoa(paramNum) + `
+					   OR match_value ILIKE $` + strconv.Itoa(paramNum) + `
+				  )
+				LIMIT 1
+			)`
+			queryArgs = append(queryArgs, svcFilter)
+			paramNum++
+		}
+
+		// pod:id → filter assets whose hostname produces a matching :seq capture.
+		if podFilter != "" {
+			whereClause += ` AND EXISTS (
+				SELECT 1
+				FROM topology_patterns tp
+				WHERE assets.hostname ~ tp.compiled_pattern
+				  AND (regexp_match(assets.hostname, tp.compiled_pattern))[3] = $` + strconv.Itoa(paramNum) + `
+				LIMIT 1
+			)`
+			queryArgs = append(queryArgs, podFilter)
+			paramNum++
 		}
 
 		if inactive == "true" {
@@ -574,4 +627,32 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			"copy_fail":         displayCopyFail,
 		})
 	}
+}
+
+// extractKeyword finds and removes a "prefix<value>" token from the search string.
+// The value is terminated by a space or end of string.
+// Returns the extracted value (trimmed) and modifies *search in-place.
+//
+// Example:
+//
+//	search = "env:production webserver"
+//	extractKeyword(&search, "env:") → "production", search = "webserver"
+func extractKeyword(search *string, prefix string) string {
+	s := *search
+	idx := strings.Index(strings.ToLower(s), strings.ToLower(prefix))
+	if idx == -1 {
+		return ""
+	}
+	// Find end of value (space or EOL).
+	rest := s[idx+len(prefix):]
+	end := strings.IndexByte(rest, ' ')
+	var value string
+	if end == -1 {
+		value = rest
+		*search = strings.TrimSpace(s[:idx])
+	} else {
+		value = rest[:end]
+		*search = strings.TrimSpace(s[:idx] + rest[end:])
+	}
+	return strings.TrimSpace(value)
 }

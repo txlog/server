@@ -52,6 +52,24 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 			inactiveAssetsCount = 0
 		}
 
+		// Get topology configuration
+		tm := models.NewTopologyManager(db)
+		topologyPatterns, err := tm.ListPatterns()
+		if err != nil {
+			logger.Error("Failed to get topology patterns: " + err.Error())
+			topologyPatterns = []models.TopologyPattern{}
+		}
+		environmentNames, err := tm.ListEnvironmentNames()
+		if err != nil {
+			logger.Error("Failed to get environment names: " + err.Error())
+			environmentNames = []models.EnvironmentName{}
+		}
+		serviceNames, err := tm.ListServiceNames()
+		if err != nil {
+			logger.Error("Failed to get service names: " + err.Error())
+			serviceNames = []models.ServiceName{}
+		}
+
 		c.HTML(http.StatusOK, "admin.html", gin.H{
 			"Context":             c,
 			"title":               "Administration - Txlog Server",
@@ -60,6 +78,9 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 			"apiKeys":             apiKeys,
 			"osvIsRunning":        osvIsRunning,
 			"inactiveAssetsCount": inactiveAssetsCount,
+			"topologyPatterns":    topologyPatterns,
+			"environmentNames":    environmentNames,
+			"serviceNames":        serviceNames,
 		})
 	}
 }

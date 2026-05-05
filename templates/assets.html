@@ -2,6 +2,7 @@
 <div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
   <div class="max-w-7xl mx-auto px-6">
     <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
+    <p class="text-white/50 text-sm mt-0.5">Full inventory of servers and devices in your network</p>
   </div>
 </div>
 
@@ -24,10 +25,22 @@
         {{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
         {{ end }}
       </h3>
-      <div class="flex items-center gap-2">
-        <input type="text" autocomplete="off" aria-label="Search assets" placeholder="Search by hostname or id"
-          value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)"
-          class="border-2 border-txlog-lavender bg-white/50 px-3 py-2 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all placeholder:text-txlog-indigo/30 text-txlog-indigo text-sm font-medium w-48 sm:w-64">
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="relative group">
+          <input type="text" autocomplete="off" aria-label="Search assets" placeholder="Search by hostname or id"
+            value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)"
+            class="border-2 border-txlog-lavender bg-white/50 px-3 py-2 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all placeholder:text-txlog-indigo/30 text-txlog-indigo text-sm font-medium w-48 sm:w-72">
+          <!-- Keyword hint tooltip -->
+          <div class="absolute top-full left-0 mt-1 hidden group-focus-within:block bg-txlog-indigo text-white text-xs px-3 py-2 rounded-xl shadow-lg z-20 min-w-max">
+            <p class="font-semibold mb-1 text-white/70 uppercase tracking-wider text-[10px]">Search keywords</p>
+            <div class="space-y-0.5">
+              <div><code class="text-txlog-sky">env:</code><span class="text-white/70">Production</span></div>
+              <div><code class="text-txlog-sky">svc:</code><span class="text-white/70">acme-system</span></div>
+              <div><code class="text-txlog-sky">pod:</code><span class="text-white/70">01</span></div>
+              <div><code class="text-txlog-sky">copyfail:</code><span class="text-white/70">true</span></div>
+            </div>
+          </div>
+        </div>
         <div class="relative group">
           <label class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-xl border-2 transition-all"
             id="restart-label">

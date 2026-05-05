@@ -42,17 +42,22 @@
               <i data-lucide="package" class="w-4 h-4"></i>
               Packages
             </a>
+            <a href="/topology"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+              <i data-lucide="network" class="w-4 h-4"></i>
+              Topology
+            </a>
             <div class="relative" id="reports-dropdown">
               <button onclick="toggleDropdown('reports-menu')"
                 class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
                 <i data-lucide="chart-no-axes-combined" class="w-4 h-4"></i>
-                Reports
+                Analytics
                 <i data-lucide="chevron-down" class="w-3 h-3"></i>
               </button>
               <div id="reports-menu"
                 class="hidden absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-txlog-lavender/30 py-2 z-50">
                 <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
-                  href="/package-progression">Package Progression</a>
+                  href="/analytics/progression">Package Progression</a>
 
                 <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
                   href="/analytics/anomalies">Anomaly Detection</a>
@@ -147,11 +152,15 @@
           class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
           <i data-lucide="server" class="w-4 h-4"></i> Assets
         </a>
+        <a href="/topology"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
+          <i data-lucide="network" class="w-4 h-4"></i> Topology
+        </a>
         <a href="/packages"
           class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
           <i data-lucide="package" class="w-4 h-4"></i> Packages
         </a>
-        <a href="/package-progression"
+        <a href="/analytics/progression"
           class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
           Package Progression
         </a>

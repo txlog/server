@@ -1,4 +1,4 @@
-.PHONY: all help clean fmt vet build run doc css css-watch
+.PHONY: all help clean fmt vet build run doc css css-watch komparo
 
 all: help
 
@@ -45,3 +45,7 @@ run:
 doc:
 	@swag init --outputTypes go
 	@swag fmt
+
+## komparo: Write the swagger documentation based on method comments
+komparo:
+	@komparo snapshot -o docs/txlog_expected.json

@@ -103,12 +103,15 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			whereClause += ` AND EXISTS (
 				SELECT 1
 				FROM topology_patterns tp
+				LEFT JOIN LATERAL (
+					SELECT match_value, name
+					FROM environment_names
+					WHERE (regexp_match(assets.hostname, tp.compiled_pattern))[1] ILIKE '%' || match_value || '%'
+					ORDER BY length(match_value) DESC
+					LIMIT 1
+				) best_env ON true
 				WHERE assets.hostname ~ tp.compiled_pattern
-				  AND (regexp_match(assets.hostname, tp.compiled_pattern))[1] IN (
-					SELECT match_value FROM environment_names
-					WHERE name ILIKE $` + strconv.Itoa(paramNum) + `
-					   OR match_value ILIKE $` + strconv.Itoa(paramNum) + `
-				  )
+				  AND (best_env.name ILIKE $` + strconv.Itoa(paramNum) + ` OR best_env.match_value ILIKE $` + strconv.Itoa(paramNum) + `)
 				LIMIT 1
 			)`
 			queryArgs = append(queryArgs, envFilter)
@@ -120,12 +123,15 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			whereClause += ` AND EXISTS (
 				SELECT 1
 				FROM topology_patterns tp
+				LEFT JOIN LATERAL (
+					SELECT match_value, name
+					FROM service_names
+					WHERE (regexp_match(assets.hostname, tp.compiled_pattern))[2] ILIKE '%' || match_value || '%'
+					ORDER BY length(match_value) DESC
+					LIMIT 1
+				) best_svc ON true
 				WHERE assets.hostname ~ tp.compiled_pattern
-				  AND (regexp_match(assets.hostname, tp.compiled_pattern))[2] IN (
-					SELECT match_value FROM service_names
-					WHERE name ILIKE $` + strconv.Itoa(paramNum) + `
-					   OR match_value ILIKE $` + strconv.Itoa(paramNum) + `
-				  )
+				  AND (best_svc.name ILIKE $` + strconv.Itoa(paramNum) + ` OR best_svc.match_value ILIKE $` + strconv.Itoa(paramNum) + `)
 				LIMIT 1
 			)`
 			queryArgs = append(queryArgs, svcFilter)

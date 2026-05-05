@@ -6,8 +6,9 @@ import "time"
 // template to a friendly display name.
 // Example: MatchValue="acme-system" -> Name="ACME System"
 type ServiceName struct {
-	ID           int
-	MatchValue   string
-	Name         string
-	CreatedAt    time.Time
+	ID         int
+	MatchValue string
+	Name       string
+	HasPods    bool
+	CreatedAt  time.Time
 }

@@ -211,6 +211,7 @@ func PostAdminTopologyCreateService(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		matchValue := c.PostForm("match_value")
 		name := c.PostForm("name")
+		hasPods := c.PostForm("has_pods") == "on"
 
 		if matchValue == "" || name == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "match_value and name are required"})
@@ -218,7 +219,7 @@ func PostAdminTopologyCreateService(db *sql.DB) gin.HandlerFunc {
 		}
 
 		tm := models.NewTopologyManager(db)
-		s, err := tm.CreateServiceName(matchValue, name)
+		s, err := tm.CreateServiceName(matchValue, name, hasPods)
 		if err != nil {
 			logger.Error("Failed to create service name: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -243,9 +244,10 @@ func PostAdminTopologyUpdateService(db *sql.DB) gin.HandlerFunc {
 
 		matchValue := c.PostForm("match_value")
 		name := c.PostForm("name")
+		hasPods := c.PostForm("has_pods") == "on"
 
 		tm := models.NewTopologyManager(db)
-		if err := tm.UpdateServiceName(id, matchValue, name); err != nil {
+		if err := tm.UpdateServiceName(id, matchValue, name, hasPods); err != nil {
 			logger.Error("Failed to update service name: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

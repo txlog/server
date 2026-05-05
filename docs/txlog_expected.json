@@ -1,5 +1,5 @@
 {
-  "postgresql_version": "18.2",
+  "postgresql_version": "16.13",
   "tables": {
     "api_keys": {
       "name": "api_keys",
@@ -72,6 +72,11 @@
           "numeric_precision": 32,
           "numeric_scale": 0
         },
+        "copy_fail": {
+          "name": "copy_fail",
+          "type": "boolean",
+          "nullable": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -142,12 +147,46 @@
         }
       }
     },
+    "environment_names": {
+      "name": "environment_names",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('environment_names_id_seq'::regclass)",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "match_value": {
+          "name": "match_value",
+          "type": "text",
+          "nullable": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "nullable": false
+        }
+      }
+    },
     "executions": {
       "name": "executions",
       "columns": {
         "agent_version": {
           "name": "agent_version",
           "type": "text",
+          "nullable": true
+        },
+        "copy_fail": {
+          "name": "copy_fail",
+          "type": "boolean",
           "nullable": true
         },
         "details": {
@@ -268,6 +307,41 @@
         }
       }
     },
+    "service_names": {
+      "name": "service_names",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "has_pods": {
+          "name": "has_pods",
+          "type": "boolean",
+          "nullable": false,
+          "default": "false"
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('service_names_id_seq'::regclass)",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "match_value": {
+          "name": "match_value",
+          "type": "text",
+          "nullable": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "nullable": false
+        }
+      }
+    },
     "statistics": {
       "name": "statistics",
       "columns": {
@@ -294,6 +368,43 @@
           "nullable": false,
           "numeric_precision": 32,
           "numeric_scale": 0
+        }
+      }
+    },
+    "topology_patterns": {
+      "name": "topology_patterns",
+      "columns": {
+        "compiled_pattern": {
+          "name": "compiled_pattern",
+          "type": "text",
+          "nullable": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "nullable": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "display_order": {
+          "name": "display_order",
+          "type": "integer",
+          "nullable": false,
+          "default": "0",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "nullable": false,
+          "default": "nextval('topology_patterns_id_seq'::regclass)",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "template": {
+          "name": "template",
+          "type": "text",
+          "nullable": false
         }
       }
     },
@@ -716,6 +827,16 @@
       "table_name": "cron_lock",
       "definition": "CREATE UNIQUE INDEX cron_lock_pkey ON public.cron_lock USING btree (job_name)"
     },
+    "environment_names_match_value_key": {
+      "name": "environment_names_match_value_key",
+      "table_name": "environment_names",
+      "definition": "CREATE UNIQUE INDEX environment_names_match_value_key ON public.environment_names USING btree (match_value)"
+    },
+    "environment_names_pkey": {
+      "name": "environment_names_pkey",
+      "table_name": "environment_names",
+      "definition": "CREATE UNIQUE INDEX environment_names_pkey ON public.environment_names USING btree (id)"
+    },
     "executions_pkey": {
       "name": "executions_pkey",
       "table_name": "executions",
@@ -735,6 +856,11 @@
       "name": "idx_assets_agent_version",
       "table_name": "assets",
       "definition": "CREATE INDEX idx_assets_agent_version ON public.assets USING btree (agent_version) WHERE (agent_version IS NOT NULL)"
+    },
+    "idx_assets_copy_fail": {
+      "name": "idx_assets_copy_fail",
+      "table_name": "assets",
+      "definition": "CREATE INDEX idx_assets_copy_fail ON public.assets USING btree (copy_fail) WHERE (copy_fail = true)"
     },
     "idx_assets_deactivated_at": {
       "name": "idx_assets_deactivated_at",
@@ -801,11 +927,6 @@
       "table_name": "mv_package_listing",
       "definition": "CREATE UNIQUE INDEX idx_mv_package_listing_package ON public.mv_package_listing USING btree (package)"
     },
-    "idx_mv_package_listing_package_text": {
-      "name": "idx_mv_package_listing_package_text",
-      "table_name": "mv_package_listing",
-      "definition": "CREATE INDEX idx_mv_package_listing_package_text ON public.mv_package_listing USING gin (package gin_trgm_ops)"
-    },
     "idx_pv_pkg_ver_rel_eco": {
       "name": "idx_pv_pkg_ver_rel_eco",
       "table_name": "package_vulnerabilities",
@@ -815,11 +936,6 @@
       "name": "idx_ti_action_covering",
       "table_name": "transaction_items",
       "definition": "CREATE INDEX idx_ti_action_covering ON public.transaction_items USING btree (action) INCLUDE (transaction_id, machine_id, package)"
-    },
-    "idx_ti_package_gin": {
-      "name": "idx_ti_package_gin",
-      "table_name": "transaction_items",
-      "definition": "CREATE INDEX idx_ti_package_gin ON public.transaction_items USING gin (package gin_trgm_ops)"
     },
     "idx_ti_pkg_machid": {
       "name": "idx_ti_pkg_machid",
@@ -911,10 +1027,25 @@
       "table_name": "schema_migrations",
       "definition": "CREATE UNIQUE INDEX schema_migrations_pkey ON public.schema_migrations USING btree (version)"
     },
+    "service_names_match_value_key": {
+      "name": "service_names_match_value_key",
+      "table_name": "service_names",
+      "definition": "CREATE UNIQUE INDEX service_names_match_value_key ON public.service_names USING btree (match_value)"
+    },
+    "service_names_pkey": {
+      "name": "service_names_pkey",
+      "table_name": "service_names",
+      "definition": "CREATE UNIQUE INDEX service_names_pkey ON public.service_names USING btree (id)"
+    },
     "statistics_pkey": {
       "name": "statistics_pkey",
       "table_name": "statistics",
       "definition": "CREATE UNIQUE INDEX statistics_pkey ON public.statistics USING btree (name)"
+    },
+    "topology_patterns_pkey": {
+      "name": "topology_patterns_pkey",
+      "table_name": "topology_patterns",
+      "definition": "CREATE UNIQUE INDEX topology_patterns_pkey ON public.topology_patterns USING btree (id)"
     },
     "transaction_items_pkey": {
       "name": "transaction_items_pkey",
@@ -953,29 +1084,11 @@
     }
   },
   "constraints": {
-    "api_keys_created_at_not_null": {
-      "name": "api_keys_created_at_not_null",
-      "type": "n",
-      "table_name": "api_keys",
-      "definition": "NOT NULL created_at"
-    },
     "api_keys_created_by_fkey": {
       "name": "api_keys_created_by_fkey",
       "type": "f",
       "table_name": "api_keys",
       "definition": "FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL"
-    },
-    "api_keys_id_not_null": {
-      "name": "api_keys_id_not_null",
-      "type": "n",
-      "table_name": "api_keys",
-      "definition": "NOT NULL id"
-    },
-    "api_keys_is_active_not_null": {
-      "name": "api_keys_is_active_not_null",
-      "type": "n",
-      "table_name": "api_keys",
-      "definition": "NOT NULL is_active"
     },
     "api_keys_key_hash_key": {
       "name": "api_keys_key_hash_key",
@@ -983,29 +1096,11 @@
       "table_name": "api_keys",
       "definition": "UNIQUE (key_hash)"
     },
-    "api_keys_key_hash_not_null": {
-      "name": "api_keys_key_hash_not_null",
-      "type": "n",
-      "table_name": "api_keys",
-      "definition": "NOT NULL key_hash"
-    },
-    "api_keys_key_prefix_not_null": {
-      "name": "api_keys_key_prefix_not_null",
-      "type": "n",
-      "table_name": "api_keys",
-      "definition": "NOT NULL key_prefix"
-    },
     "api_keys_name_check": {
       "name": "api_keys_name_check",
       "type": "c",
       "table_name": "api_keys",
       "definition": "CHECK ((char_length((name)::text) \u003e= 3))"
-    },
-    "api_keys_name_not_null": {
-      "name": "api_keys_name_not_null",
-      "type": "n",
-      "table_name": "api_keys",
-      "definition": "NOT NULL name"
     },
     "api_keys_pkey": {
       "name": "api_keys_pkey",
@@ -1013,53 +1108,11 @@
       "table_name": "api_keys",
       "definition": "PRIMARY KEY (id)"
     },
-    "assets_asset_id_not_null": {
-      "name": "assets_asset_id_not_null",
-      "type": "n",
-      "table_name": "assets",
-      "definition": "NOT NULL asset_id"
-    },
-    "assets_created_at_not_null": {
-      "name": "assets_created_at_not_null",
-      "type": "n",
-      "table_name": "assets",
-      "definition": "NOT NULL created_at"
-    },
-    "assets_first_seen_not_null": {
-      "name": "assets_first_seen_not_null",
-      "type": "n",
-      "table_name": "assets",
-      "definition": "NOT NULL first_seen"
-    },
     "assets_hostname_machine_id_unique": {
       "name": "assets_hostname_machine_id_unique",
       "type": "u",
       "table_name": "assets",
       "definition": "UNIQUE (hostname, machine_id)"
-    },
-    "assets_hostname_not_null": {
-      "name": "assets_hostname_not_null",
-      "type": "n",
-      "table_name": "assets",
-      "definition": "NOT NULL hostname"
-    },
-    "assets_is_active_not_null": {
-      "name": "assets_is_active_not_null",
-      "type": "n",
-      "table_name": "assets",
-      "definition": "NOT NULL is_active"
-    },
-    "assets_last_seen_not_null": {
-      "name": "assets_last_seen_not_null",
-      "type": "n",
-      "table_name": "assets",
-      "definition": "NOT NULL last_seen"
-    },
-    "assets_machine_id_not_null": {
-      "name": "assets_machine_id_not_null",
-      "type": "n",
-      "table_name": "assets",
-      "definition": "NOT NULL machine_id"
     },
     "assets_pkey": {
       "name": "assets_pkey",
@@ -1067,41 +1120,23 @@
       "table_name": "assets",
       "definition": "PRIMARY KEY (asset_id)"
     },
-    "cron_lock_job_name_not_null": {
-      "name": "cron_lock_job_name_not_null",
-      "type": "n",
-      "table_name": "cron_lock",
-      "definition": "NOT NULL job_name"
-    },
     "cron_lock_pkey": {
       "name": "cron_lock_pkey",
       "type": "p",
       "table_name": "cron_lock",
       "definition": "PRIMARY KEY (job_name)"
     },
-    "executions_executed_at_not_null": {
-      "name": "executions_executed_at_not_null",
-      "type": "n",
-      "table_name": "executions",
-      "definition": "NOT NULL executed_at"
+    "environment_names_match_value_key": {
+      "name": "environment_names_match_value_key",
+      "type": "u",
+      "table_name": "environment_names",
+      "definition": "UNIQUE (match_value)"
     },
-    "executions_hostname_not_null": {
-      "name": "executions_hostname_not_null",
-      "type": "n",
-      "table_name": "executions",
-      "definition": "NOT NULL hostname"
-    },
-    "executions_id_not_null": {
-      "name": "executions_id_not_null",
-      "type": "n",
-      "table_name": "executions",
-      "definition": "NOT NULL id"
-    },
-    "executions_machine_id_not_null": {
-      "name": "executions_machine_id_not_null",
-      "type": "n",
-      "table_name": "executions",
-      "definition": "NOT NULL machine_id"
+    "environment_names_pkey": {
+      "name": "environment_names_pkey",
+      "type": "p",
+      "table_name": "environment_names",
+      "definition": "PRIMARY KEY (id)"
     },
     "executions_pkey": {
       "name": "executions_pkey",
@@ -1109,41 +1144,11 @@
       "table_name": "executions",
       "definition": "PRIMARY KEY (id)"
     },
-    "executions_success_not_null": {
-      "name": "executions_success_not_null",
-      "type": "n",
-      "table_name": "executions",
-      "definition": "NOT NULL success"
-    },
-    "package_vulnerabilities_ecosystem_not_null": {
-      "name": "package_vulnerabilities_ecosystem_not_null",
-      "type": "n",
-      "table_name": "package_vulnerabilities",
-      "definition": "NOT NULL ecosystem"
-    },
-    "package_vulnerabilities_package_name_not_null": {
-      "name": "package_vulnerabilities_package_name_not_null",
-      "type": "n",
-      "table_name": "package_vulnerabilities",
-      "definition": "NOT NULL package_name"
-    },
     "package_vulnerabilities_pkey": {
       "name": "package_vulnerabilities_pkey",
       "type": "p",
       "table_name": "package_vulnerabilities",
       "definition": "PRIMARY KEY (package_name, version, release, vulnerability_id, ecosystem)"
-    },
-    "package_vulnerabilities_release_not_null": {
-      "name": "package_vulnerabilities_release_not_null",
-      "type": "n",
-      "table_name": "package_vulnerabilities",
-      "definition": "NOT NULL release"
-    },
-    "package_vulnerabilities_version_not_null": {
-      "name": "package_vulnerabilities_version_not_null",
-      "type": "n",
-      "table_name": "package_vulnerabilities",
-      "definition": "NOT NULL version"
     },
     "package_vulnerabilities_vulnerability_id_fkey": {
       "name": "package_vulnerabilities_vulnerability_id_fkey",
@@ -1151,35 +1156,23 @@
       "table_name": "package_vulnerabilities",
       "definition": "FOREIGN KEY (vulnerability_id) REFERENCES vulnerabilities(id) ON DELETE CASCADE"
     },
-    "package_vulnerabilities_vulnerability_id_not_null": {
-      "name": "package_vulnerabilities_vulnerability_id_not_null",
-      "type": "n",
-      "table_name": "package_vulnerabilities",
-      "definition": "NOT NULL vulnerability_id"
-    },
-    "schema_migrations_dirty_not_null": {
-      "name": "schema_migrations_dirty_not_null",
-      "type": "n",
-      "table_name": "schema_migrations",
-      "definition": "NOT NULL dirty"
-    },
     "schema_migrations_pkey": {
       "name": "schema_migrations_pkey",
       "type": "p",
       "table_name": "schema_migrations",
       "definition": "PRIMARY KEY (version)"
     },
-    "schema_migrations_version_not_null": {
-      "name": "schema_migrations_version_not_null",
-      "type": "n",
-      "table_name": "schema_migrations",
-      "definition": "NOT NULL version"
+    "service_names_match_value_key": {
+      "name": "service_names_match_value_key",
+      "type": "u",
+      "table_name": "service_names",
+      "definition": "UNIQUE (match_value)"
     },
-    "statistics_name_not_null": {
-      "name": "statistics_name_not_null",
-      "type": "n",
-      "table_name": "statistics",
-      "definition": "NOT NULL name"
+    "service_names_pkey": {
+      "name": "service_names_pkey",
+      "type": "p",
+      "table_name": "service_names",
+      "definition": "PRIMARY KEY (id)"
     },
     "statistics_pkey": {
       "name": "statistics_pkey",
@@ -1187,17 +1180,11 @@
       "table_name": "statistics",
       "definition": "PRIMARY KEY (name)"
     },
-    "statistics_value_not_null": {
-      "name": "statistics_value_not_null",
-      "type": "n",
-      "table_name": "statistics",
-      "definition": "NOT NULL value"
-    },
-    "transaction_items_item_id_not_null": {
-      "name": "transaction_items_item_id_not_null",
-      "type": "n",
-      "table_name": "transaction_items",
-      "definition": "NOT NULL item_id"
+    "topology_patterns_pkey": {
+      "name": "topology_patterns_pkey",
+      "type": "p",
+      "table_name": "topology_patterns",
+      "definition": "PRIMARY KEY (id)"
     },
     "transaction_items_pkey": {
       "name": "transaction_items_pkey",
@@ -1211,35 +1198,11 @@
       "table_name": "transaction_items",
       "definition": "FOREIGN KEY (transaction_id, machine_id) REFERENCES transactions(transaction_id, machine_id)"
     },
-    "transactions_machine_id_not_null": {
-      "name": "transactions_machine_id_not_null",
-      "type": "n",
-      "table_name": "transactions",
-      "definition": "NOT NULL machine_id"
-    },
     "transactions_pkey": {
       "name": "transactions_pkey",
       "type": "p",
       "table_name": "transactions",
       "definition": "PRIMARY KEY (transaction_id, machine_id)"
-    },
-    "transactions_transaction_id_not_null": {
-      "name": "transactions_transaction_id_not_null",
-      "type": "n",
-      "table_name": "transactions",
-      "definition": "NOT NULL transaction_id"
-    },
-    "user_sessions_expires_at_not_null": {
-      "name": "user_sessions_expires_at_not_null",
-      "type": "n",
-      "table_name": "user_sessions",
-      "definition": "NOT NULL expires_at"
-    },
-    "user_sessions_id_not_null": {
-      "name": "user_sessions_id_not_null",
-      "type": "n",
-      "table_name": "user_sessions",
-      "definition": "NOT NULL id"
     },
     "user_sessions_pkey": {
       "name": "user_sessions_pkey",
@@ -1253,35 +1216,11 @@
       "table_name": "user_sessions",
       "definition": "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE"
     },
-    "user_sessions_user_id_not_null": {
-      "name": "user_sessions_user_id_not_null",
-      "type": "n",
-      "table_name": "user_sessions",
-      "definition": "NOT NULL user_id"
-    },
     "users_email_key": {
       "name": "users_email_key",
       "type": "u",
       "table_name": "users",
       "definition": "UNIQUE (email)"
-    },
-    "users_email_not_null": {
-      "name": "users_email_not_null",
-      "type": "n",
-      "table_name": "users",
-      "definition": "NOT NULL email"
-    },
-    "users_id_not_null": {
-      "name": "users_id_not_null",
-      "type": "n",
-      "table_name": "users",
-      "definition": "NOT NULL id"
-    },
-    "users_name_not_null": {
-      "name": "users_name_not_null",
-      "type": "n",
-      "table_name": "users",
-      "definition": "NOT NULL name"
     },
     "users_pkey": {
       "name": "users_pkey",
@@ -1294,18 +1233,6 @@
       "type": "u",
       "table_name": "users",
       "definition": "UNIQUE (sub)"
-    },
-    "users_sub_not_null": {
-      "name": "users_sub_not_null",
-      "type": "n",
-      "table_name": "users",
-      "definition": "NOT NULL sub"
-    },
-    "vulnerabilities_id_not_null": {
-      "name": "vulnerabilities_id_not_null",
-      "type": "n",
-      "table_name": "vulnerabilities",
-      "definition": "NOT NULL id"
     },
     "vulnerabilities_pkey": {
       "name": "vulnerabilities_pkey",
@@ -1331,8 +1258,32 @@
       "increment": 1,
       "cycle_option": false
     },
+    "environment_names_id_seq": {
+      "name": "environment_names_id_seq",
+      "start_value": 1,
+      "minimum_value": 1,
+      "maximum_value": 2147483647,
+      "increment": 1,
+      "cycle_option": false
+    },
     "executions_id_seq": {
       "name": "executions_id_seq",
+      "start_value": 1,
+      "minimum_value": 1,
+      "maximum_value": 2147483647,
+      "increment": 1,
+      "cycle_option": false
+    },
+    "service_names_id_seq": {
+      "name": "service_names_id_seq",
+      "start_value": 1,
+      "minimum_value": 1,
+      "maximum_value": 2147483647,
+      "increment": 1,
+      "cycle_option": false
+    },
+    "topology_patterns_id_seq": {
+      "name": "topology_patterns_id_seq",
       "start_value": 1,
       "minimum_value": 1,
       "maximum_value": 2147483647,
@@ -1376,231 +1327,9 @@
   },
   "views": {},
   "triggers": {},
-  "functions": {
-    "gin_extract_query_trgm(text, internal, smallint, internal, internal, internal, internal)": {
-      "name": "gin_extract_query_trgm",
-      "arguments": "text, internal, smallint, internal, internal, internal, internal",
-      "return_type": "internal",
-      "definition": "gin_extract_query_trgm",
-      "volatility": "IMMUTABLE"
-    },
-    "gin_extract_value_trgm(text, internal)": {
-      "name": "gin_extract_value_trgm",
-      "arguments": "text, internal",
-      "return_type": "internal",
-      "definition": "gin_extract_value_trgm",
-      "volatility": "IMMUTABLE"
-    },
-    "gin_trgm_consistent(internal, smallint, text, integer, internal, internal, internal, internal)": {
-      "name": "gin_trgm_consistent",
-      "arguments": "internal, smallint, text, integer, internal, internal, internal, internal",
-      "return_type": "boolean",
-      "definition": "gin_trgm_consistent",
-      "volatility": "IMMUTABLE"
-    },
-    "gin_trgm_triconsistent(internal, smallint, text, integer, internal, internal, internal)": {
-      "name": "gin_trgm_triconsistent",
-      "arguments": "internal, smallint, text, integer, internal, internal, internal",
-      "return_type": "\"char\"",
-      "definition": "gin_trgm_triconsistent",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_compress(internal)": {
-      "name": "gtrgm_compress",
-      "arguments": "internal",
-      "return_type": "internal",
-      "definition": "gtrgm_compress",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_consistent(internal, text, smallint, oid, internal)": {
-      "name": "gtrgm_consistent",
-      "arguments": "internal, text, smallint, oid, internal",
-      "return_type": "boolean",
-      "definition": "gtrgm_consistent",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_decompress(internal)": {
-      "name": "gtrgm_decompress",
-      "arguments": "internal",
-      "return_type": "internal",
-      "definition": "gtrgm_decompress",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_distance(internal, text, smallint, oid, internal)": {
-      "name": "gtrgm_distance",
-      "arguments": "internal, text, smallint, oid, internal",
-      "return_type": "double precision",
-      "definition": "gtrgm_distance",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_in(cstring)": {
-      "name": "gtrgm_in",
-      "arguments": "cstring",
-      "return_type": "USER-DEFINED",
-      "definition": "gtrgm_in",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_options(internal)": {
-      "name": "gtrgm_options",
-      "arguments": "internal",
-      "return_type": "void",
-      "definition": "gtrgm_options",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_out(gtrgm)": {
-      "name": "gtrgm_out",
-      "arguments": "gtrgm",
-      "return_type": "cstring",
-      "definition": "gtrgm_out",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_penalty(internal, internal, internal)": {
-      "name": "gtrgm_penalty",
-      "arguments": "internal, internal, internal",
-      "return_type": "internal",
-      "definition": "gtrgm_penalty",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_picksplit(internal, internal)": {
-      "name": "gtrgm_picksplit",
-      "arguments": "internal, internal",
-      "return_type": "internal",
-      "definition": "gtrgm_picksplit",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_same(gtrgm, gtrgm, internal)": {
-      "name": "gtrgm_same",
-      "arguments": "gtrgm, gtrgm, internal",
-      "return_type": "internal",
-      "definition": "gtrgm_same",
-      "volatility": "IMMUTABLE"
-    },
-    "gtrgm_union(internal, internal)": {
-      "name": "gtrgm_union",
-      "arguments": "internal, internal",
-      "return_type": "USER-DEFINED",
-      "definition": "gtrgm_union",
-      "volatility": "IMMUTABLE"
-    },
-    "set_limit(real)": {
-      "name": "set_limit",
-      "arguments": "real",
-      "return_type": "real",
-      "definition": "set_limit",
-      "volatility": "VOLATILE"
-    },
-    "show_limit()": {
-      "name": "show_limit",
-      "arguments": "",
-      "return_type": "real",
-      "definition": "show_limit",
-      "volatility": "STABLE"
-    },
-    "show_trgm(text)": {
-      "name": "show_trgm",
-      "arguments": "text",
-      "return_type": "ARRAY",
-      "definition": "show_trgm",
-      "volatility": "IMMUTABLE"
-    },
-    "similarity(text, text)": {
-      "name": "similarity",
-      "arguments": "text, text",
-      "return_type": "real",
-      "definition": "similarity",
-      "volatility": "IMMUTABLE"
-    },
-    "similarity_dist(text, text)": {
-      "name": "similarity_dist",
-      "arguments": "text, text",
-      "return_type": "real",
-      "definition": "similarity_dist",
-      "volatility": "IMMUTABLE"
-    },
-    "similarity_op(text, text)": {
-      "name": "similarity_op",
-      "arguments": "text, text",
-      "return_type": "boolean",
-      "definition": "similarity_op",
-      "volatility": "STABLE"
-    },
-    "strict_word_similarity(text, text)": {
-      "name": "strict_word_similarity",
-      "arguments": "text, text",
-      "return_type": "real",
-      "definition": "strict_word_similarity",
-      "volatility": "IMMUTABLE"
-    },
-    "strict_word_similarity_commutator_op(text, text)": {
-      "name": "strict_word_similarity_commutator_op",
-      "arguments": "text, text",
-      "return_type": "boolean",
-      "definition": "strict_word_similarity_commutator_op",
-      "volatility": "STABLE"
-    },
-    "strict_word_similarity_dist_commutator_op(text, text)": {
-      "name": "strict_word_similarity_dist_commutator_op",
-      "arguments": "text, text",
-      "return_type": "real",
-      "definition": "strict_word_similarity_dist_commutator_op",
-      "volatility": "IMMUTABLE"
-    },
-    "strict_word_similarity_dist_op(text, text)": {
-      "name": "strict_word_similarity_dist_op",
-      "arguments": "text, text",
-      "return_type": "real",
-      "definition": "strict_word_similarity_dist_op",
-      "volatility": "IMMUTABLE"
-    },
-    "strict_word_similarity_op(text, text)": {
-      "name": "strict_word_similarity_op",
-      "arguments": "text, text",
-      "return_type": "boolean",
-      "definition": "strict_word_similarity_op",
-      "volatility": "STABLE"
-    },
-    "word_similarity(text, text)": {
-      "name": "word_similarity",
-      "arguments": "text, text",
-      "return_type": "real",
-      "definition": "word_similarity",
-      "volatility": "IMMUTABLE"
-    },
-    "word_similarity_commutator_op(text, text)": {
-      "name": "word_similarity_commutator_op",
-      "arguments": "text, text",
-      "return_type": "boolean",
-      "definition": "word_similarity_commutator_op",
-      "volatility": "STABLE"
-    },
-    "word_similarity_dist_commutator_op(text, text)": {
-      "name": "word_similarity_dist_commutator_op",
-      "arguments": "text, text",
-      "return_type": "real",
-      "definition": "word_similarity_dist_commutator_op",
-      "volatility": "IMMUTABLE"
-    },
-    "word_similarity_dist_op(text, text)": {
-      "name": "word_similarity_dist_op",
-      "arguments": "text, text",
-      "return_type": "real",
-      "definition": "word_similarity_dist_op",
-      "volatility": "IMMUTABLE"
-    },
-    "word_similarity_op(text, text)": {
-      "name": "word_similarity_op",
-      "arguments": "text, text",
-      "return_type": "boolean",
-      "definition": "word_similarity_op",
-      "volatility": "STABLE"
-    }
-  },
+  "functions": {},
   "enums": {},
   "extensions": {
-    "pg_trgm": {
-      "name": "pg_trgm",
-      "version": "1.6"
-    },
     "plpgsql": {
       "name": "plpgsql",
       "version": "1.0"

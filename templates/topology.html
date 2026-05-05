@@ -80,6 +80,7 @@
 
       <!-- Summary (Right) -->
       <div class="flex flex-wrap items-center gap-3">
+        {{ if and .view.SelectedSvc .view.SelectedSvc.HasPods }}
         <div class="bg-txlog-indigo/5 rounded-xl px-4 py-2 flex items-center gap-3">
           <div class="w-8 h-8 rounded-lg bg-txlog-sky/10 flex items-center justify-center">
             <i data-lucide="layers" class="w-4 h-4 text-txlog-sky"></i>
@@ -89,6 +90,8 @@
             <div class="text-[10px] text-txlog-indigo/40 uppercase font-bold tracking-wider">Pods</div>
           </div>
         </div>
+        {{ end }}
+        {{ if .view.SelectedSvc }}
         <div class="bg-txlog-indigo/5 rounded-xl px-4 py-2 flex items-center gap-3">
           <div class="w-8 h-8 rounded-lg bg-txlog-leaf/10 flex items-center justify-center">
             <i data-lucide="server" class="w-4 h-4 text-txlog-leaf"></i>
@@ -98,6 +101,7 @@
             <div class="text-[10px] text-txlog-indigo/40 uppercase font-bold tracking-wider">Assets</div>
           </div>
         </div>
+        {{ end }}
         {{ if gt .view.TotalNeedsRestart 0 }}
         <div class="bg-txlog-golden/10 rounded-xl px-4 py-2 flex items-center gap-3">
           <div class="w-8 h-8 rounded-lg bg-txlog-golden/20 flex items-center justify-center">
@@ -105,7 +109,7 @@
           </div>
           <div>
             <div class="text-base font-bold text-txlog-golden leading-tight">{{ .view.TotalNeedsRestart }}</div>
-            <div class="text-[10px] text-txlog-golden/60 uppercase font-bold tracking-wider">Restart</div>
+            <div class="text-[10px] text-txlog-golden/60 uppercase font-bold tracking-wider">Need Restart</div>
           </div>
         </div>
         {{ end }}
@@ -143,13 +147,19 @@
       <div id="pod-card-{{ $i }}" class="hover:bg-txlog-lavender/5 transition-colors">
       <!-- Pod header -->
       <button type="button" onclick="togglePod('pod-body-{{ $i }}', this)"
-        class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-txlog-lavender/20 transition-colors group">
+        class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-txlog-lavender/20 transition-colors group {{ if not $.view.SelectedSvc.HasPods }}open{{ end }}">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 rounded-xl bg-txlog-sky/10 flex items-center justify-center flex-shrink-0">
             <i data-lucide="layers" class="w-4 h-4 text-txlog-sky"></i>
           </div>
           <div>
-            <span class="font-display font-semibold">Pod {{ $pod.PodID }}</span>
+            <span class="font-display font-semibold">
+              {{ if eq $pod.PodID "Default" }}
+              {{ $.view.SelectedSvc.Name }}
+              {{ else }}
+              Pod #{{ $pod.PodID }}
+              {{ end }}
+            </span>
             <span class="text-txlog-indigo/40 text-sm ml-2">{{ $pod.TotalAssets }} asset{{ if ne $pod.TotalAssets 1
               }}s{{ end }}</span>
           </div>
@@ -164,8 +174,7 @@
           {{ if gt $pod.NeedsRestart 0 }}
           <span
             class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-txlog-golden animate-pulse"></span>{{ $pod.NeedsRestart }} need
-            restart
+            <span class="w-1.5 h-1.5 rounded-full bg-txlog-golden animate-pulse"></span>{{ $pod.NeedsRestart }} need restart
           </span>
           {{ end }}
           <i data-lucide="chevron-down"
@@ -174,7 +183,7 @@
       </button>
 
       <!-- Pod body -->
-      <div id="pod-body-{{ $i }}" class="border-t border-txlog-lavender/50 hidden">
+      <div id="pod-body-{{ $i }}" class="border-t border-txlog-lavender/50 {{ if $.view.SelectedSvc.HasPods }}hidden{{ end }}">
         <table class="w-full text-sm">
           <tbody class="divide-y divide-txlog-lavender/20">
             {{ range $pod.Assets }}
@@ -199,23 +208,19 @@
                   }}</span>
                 {{ end }}
               </td>
-              <td class="px-3 py-3 hidden md:table-cell">
-                {{ if .AgentVersion }}
-                <span class="text-xs text-txlog-indigo/40">v{{ .AgentVersion }}</span>
+
+              <td class="px-3 py-3 text-right min-w-[80px]">
+                {{ if .CopyFail }}
+                <span
+                  class="bg-txlog-coral/10 text-txlog-coral text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Copy
+                  Fail</span>
                 {{ end }}
               </td>
-              <td class="px-3 py-3">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  {{ if .CopyFail }}
-                  <span
-                    class="bg-txlog-coral/10 text-txlog-coral text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Copy
-                    Fail</span>
-                  {{ end }}
-                  {{ if .NeedsRestarting }}
-                  <span
-                    class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Restart</span>
-                  {{ end }}
-                </div>
+              <td class="px-3 py-3 text-right min-w-[100px]">
+                {{ if .NeedsRestarting }}
+                <span
+                  class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider whitespace-nowrap">Need Restart</span>
+                {{ end }}
               </td>
               <td class="px-6 py-3 text-right">
                 <a href="/assets/{{ .MachineID }}"
@@ -314,11 +319,7 @@
     }
   }
 
-  // Auto-expand the first pod on load.
-  document.addEventListener('DOMContentLoaded', function () {
-    var firstBtn = document.querySelector('[onclick^="togglePod(\'pod-body-0\'"]');
-    if (firstBtn) firstBtn.click();
-  });
+  // Initial state logic handled by server-side classes
 </script>
 
 {{ template "footer.html" . }}

@@ -174,6 +174,10 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 			}
 
 			pid := podID.String
+			if selectedSvc != nil && !selectedSvc.HasPods {
+				pid = "Default"
+			}
+
 			if _, exists := podMap[pid]; !exists {
 				podMap[pid] = &PodView{PodID: pid}
 				podOrder = append(podOrder, pid)
@@ -225,10 +229,10 @@ func buildTopologyAssetsQuery(envFilter, svcFilter string) string {
 	envCond := ""
 	svcCond := ""
 	if envFilter != "" {
-		envCond = " AND (regexp_match(a.hostname, tp.compiled_pattern))[1] ILIKE '%" + sanitizePatternValue(envFilter) + "%'"
+		envCond = " AND best_env.match_value = '" + sanitizePatternValue(envFilter) + "'"
 	}
 	if svcFilter != "" {
-		svcCond = " AND (regexp_match(a.hostname, tp.compiled_pattern))[2] ILIKE '%" + sanitizePatternValue(svcFilter) + "%'"
+		svcCond = " AND best_svc.match_value = '" + sanitizePatternValue(svcFilter) + "'"
 	}
 
 	return `
@@ -236,23 +240,46 @@ func buildTopologyAssetsQuery(envFilter, svcFilter string) string {
 			a.asset_id,
 			a.hostname,
 			a.machine_id,
-			(regexp_match(a.hostname, tp.compiled_pattern))[1] AS env_val,
-			(regexp_match(a.hostname, tp.compiled_pattern))[2] AS svc_val,
-			COALESCE(NULLIF((regexp_match(a.hostname, tp.compiled_pattern))[3], ''), 'Default') AS pod_id,
+			resolved.env_val,
+			resolved.svc_val,
+			resolved.pod_id,
 			a.agent_version,
 			a.os,
 			a.needs_restarting,
 			a.copy_fail
 		FROM assets a
 		LEFT JOIN LATERAL (
-			SELECT compiled_pattern
+			SELECT compiled_pattern,
+				   (regexp_match(a.hostname, compiled_pattern))[1] as raw_env,
+				   (regexp_match(a.hostname, compiled_pattern))[2] as raw_svc,
+				   (regexp_match(a.hostname, compiled_pattern))[3] as raw_pod
 			FROM topology_patterns
 			WHERE a.hostname ~ compiled_pattern
 			ORDER BY display_order, id
 			LIMIT 1
 		) tp ON true
+		LEFT JOIN LATERAL (
+			SELECT match_value
+			FROM environment_names
+			WHERE tp.raw_env ILIKE '%' || match_value || '%'
+			ORDER BY length(match_value) DESC
+			LIMIT 1
+		) best_env ON true
+		LEFT JOIN LATERAL (
+			SELECT match_value
+			FROM service_names
+			WHERE tp.raw_svc ILIKE '%' || match_value || '%'
+			ORDER BY length(match_value) DESC
+			LIMIT 1
+		) best_svc ON true
+		CROSS JOIN LATERAL (
+			SELECT 
+				COALESCE(best_env.match_value, tp.raw_env) AS env_val,
+				COALESCE(best_svc.match_value, tp.raw_svc) AS svc_val,
+				COALESCE(NULLIF(tp.raw_pod, ''), 'Default') AS pod_id
+		) resolved
 		WHERE a.is_active = TRUE` + envCond + svcCond + `
-		ORDER BY pod_id NULLS LAST, a.hostname
+		ORDER BY resolved.pod_id NULLS LAST, a.hostname
 	`
 }
 

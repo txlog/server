@@ -29,7 +29,7 @@ func NewTopologyManager(db *sql.DB) *TopologyManager {
 var knownTags = map[string]string{
 	":env": `([^-]+)`,
 	":svc": `(.+)`,
-	":seq": `(\d+)`,
+	":seq": `(?<!\d)(\d+)`,
 }
 
 // tagOrder defines the order in which tags are replaced so that longer tags
@@ -269,7 +269,7 @@ func (tm *TopologyManager) DeleteEnvironmentName(id int) error {
 // ListServiceNames returns all service name mappings ordered by display_order.
 func (tm *TopologyManager) ListServiceNames() ([]ServiceName, error) {
 	rows, err := tm.db.Query(`
-		SELECT id, match_value, name, created_at
+		SELECT id, match_value, name, has_pods, created_at
 		FROM service_names
 		ORDER BY name, id
 	`)
@@ -281,7 +281,7 @@ func (tm *TopologyManager) ListServiceNames() ([]ServiceName, error) {
 	var svcs []ServiceName
 	for rows.Next() {
 		var s ServiceName
-		if err := rows.Scan(&s.ID, &s.MatchValue, &s.Name, &s.CreatedAt); err != nil {
+		if err := rows.Scan(&s.ID, &s.MatchValue, &s.Name, &s.HasPods, &s.CreatedAt); err != nil {
 			return nil, err
 		}
 		svcs = append(svcs, s)
@@ -290,13 +290,13 @@ func (tm *TopologyManager) ListServiceNames() ([]ServiceName, error) {
 }
 
 // CreateServiceName inserts a new service name mapping.
-func (tm *TopologyManager) CreateServiceName(matchValue, name string) (*ServiceName, error) {
+func (tm *TopologyManager) CreateServiceName(matchValue, name string, hasPods bool) (*ServiceName, error) {
 	var s ServiceName
 	err := tm.db.QueryRow(`
-		INSERT INTO service_names (match_value, name)
-		VALUES ($1, $2)
-		RETURNING id, match_value, name, created_at
-	`, matchValue, name).Scan(&s.ID, &s.MatchValue, &s.Name, &s.CreatedAt)
+		INSERT INTO service_names (match_value, name, has_pods)
+		VALUES ($1, $2, $3)
+		RETURNING id, match_value, name, has_pods, created_at
+	`, matchValue, name, hasPods).Scan(&s.ID, &s.MatchValue, &s.Name, &s.HasPods, &s.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -304,12 +304,12 @@ func (tm *TopologyManager) CreateServiceName(matchValue, name string) (*ServiceN
 }
 
 // UpdateServiceName updates an existing service name mapping.
-func (tm *TopologyManager) UpdateServiceName(id int, matchValue, name string) error {
+func (tm *TopologyManager) UpdateServiceName(id int, matchValue, name string, hasPods bool) error {
 	_, err := tm.db.Exec(`
 		UPDATE service_names
-		SET match_value = $1, name = $2
-		WHERE id = $3
-	`, matchValue, name, id)
+		SET match_value = $1, name = $2, has_pods = $3
+		WHERE id = $4
+	`, matchValue, name, hasPods, id)
 	return err
 }
 

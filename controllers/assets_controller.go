@@ -41,12 +41,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		restart := c.Query("restart")
 		inactive := c.Query("inactive")
 
-		copyFailFilter := false
-		if strings.Contains(search, "copyfail:true") {
-			copyFailFilter = true
-			search = strings.ReplaceAll(search, "copyfail:true", "")
-			search = strings.TrimSpace(search)
-		}
+		copyFailFilter := strings.ToLower(extractKeyword(&search, "copyfail:"))
 
 		// Parse topology keywords: env:<name>, svc:<name>, pod:<id>
 		envFilter := extractKeyword(&search, "env:")
@@ -94,8 +89,11 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			whereClause += " AND needs_restarting IS TRUE"
 		}
 
-		if copyFailFilter {
+		switch copyFailFilter {
+		case "true":
 			whereClause += " AND copy_fail IS TRUE"
+		case "false":
+			whereClause += " AND (copy_fail IS FALSE OR copy_fail IS NULL)"
 		}
 
 		// env:name → filter assets whose hostname matches the pattern of the named environment.

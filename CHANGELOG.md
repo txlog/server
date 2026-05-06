@@ -18,6 +18,18 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- Create topology dashboard asset classification using more robust hostname
+  regex patterns to isolate sequence numbers (pods).
+
+### Fixed
+
+- Fix `copyfail:false` search returning zero results by ensuring it correctly
+  identifies assets that are either not vulnerable or have no scan data (NULL).
+
 ## [1.29.0] - 2026-05-03
 
 ### Added

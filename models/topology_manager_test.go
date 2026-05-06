@@ -38,6 +38,11 @@ func TestCompileTemplate(t *testing.T) {
 			wantErr:  true,
 		},
 		{
+			name:        "with any placeholder",
+			template:    ":env:any:svc:any:seq",
+			wantPattern: `^(.+?).*?(.+?).*(?<!\d)(\d+)$`,
+		},
+		{
 			name:     "no tags",
 			template: "just-a-literal-hostname",
 			wantErr:  true,
@@ -59,8 +64,8 @@ func TestCompileTemplate(t *testing.T) {
 				t.Errorf("CompileTemplate(%q): unexpected error: %v", tt.template, err)
 				return
 			}
-			if got != tt.wantPattern {
-				t.Errorf("CompileTemplate(%q):\n  got  %q\n  want %q", tt.template, got, tt.wantPattern)
+			if got.CompiledPattern != tt.wantPattern {
+				t.Errorf("CompileTemplate(%q):\n  got  %q\n  want %q", tt.template, got.CompiledPattern, tt.wantPattern)
 			}
 		})
 	}

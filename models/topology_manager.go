@@ -140,10 +140,10 @@ func (tm *TopologyManager) CompileTemplate(template string) (*CompilationResult,
 	for i, loc := range matches {
 		tag := template[loc[0]:loc[1]]
 		tagPositions = append(tagPositions, tag)
-		
+
 		ph := fmt.Sprintf("%s%d%s", placeholder, i, placeholder)
 		regex := tagRegexes[tag]
-		
+
 		// Optimization: if :any is followed by :seq, make it greedy to find the last number.
 		// Otherwise, make it reluctant to not over-match the next tag.
 		if tag == ":any" {
@@ -160,7 +160,7 @@ func (tm *TopologyManager) CompileTemplate(template string) (*CompilationResult,
 		}
 
 		isCapture := tag != ":any"
-		
+
 		if isCapture {
 			captureGroupCount++
 			idx := captureGroupCount

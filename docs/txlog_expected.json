@@ -393,6 +393,21 @@
           "numeric_precision": 32,
           "numeric_scale": 0
         },
+        "env_group_index": {
+          "name": "env_group_index",
+          "type": "integer",
+          "nullable": true,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "env_index": {
+          "name": "env_index",
+          "type": "integer",
+          "nullable": false,
+          "default": "1",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
         "id": {
           "name": "id",
           "type": "integer",
@@ -400,6 +415,42 @@
           "default": "nextval('topology_patterns_id_seq'::regclass)",
           "numeric_precision": 32,
           "numeric_scale": 0
+        },
+        "seq_group_index": {
+          "name": "seq_group_index",
+          "type": "integer",
+          "nullable": true,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "seq_index": {
+          "name": "seq_index",
+          "type": "integer",
+          "nullable": false,
+          "default": "3",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "svc_group_index": {
+          "name": "svc_group_index",
+          "type": "integer",
+          "nullable": true,
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "svc_index": {
+          "name": "svc_index",
+          "type": "integer",
+          "nullable": false,
+          "default": "2",
+          "numeric_precision": 32,
+          "numeric_scale": 0
+        },
+        "tag_positions": {
+          "name": "tag_positions",
+          "type": "jsonb",
+          "nullable": false,
+          "default": "'[]'::jsonb"
         },
         "template": {
           "name": "template",

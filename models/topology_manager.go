@@ -27,8 +27,8 @@ func NewTopologyManager(db *sql.DB) *TopologyManager {
 
 // knownTags are the supported template tags and their regex capture groups.
 var knownTags = map[string]string{
-	":env": `([^-]+)`,
-	":svc": `(.+)`,
+	":env": `(.+?)`,
+	":svc": `(.+?)`,
 	":seq": `(?<!\d)(\d+)`,
 }
 
@@ -40,11 +40,11 @@ var tagOrder = []string{":env", ":svc", ":seq"}
 // PostgreSQL-compatible anchored regex string.
 //
 // Supported tags:
-//   - :env  → ([^-]+)   environment identifier
-//   - :svc  → (.+)      service identifier (greedy)
-//   - :seq  → (\d+)     pod sequence number
+//   - :env  → (.+?)      environment identifier (non-greedy)
+//   - :svc  → (.+?)      service identifier (non-greedy)
+//   - :seq  → (?<!\d)(\d+) pod sequence number
 //
-// Literal parts of the template are treated as non-greedy wildcards (.*?).
+// Literal parts of the template are preserved as exact matches (anchors).
 func CompileTemplate(template string) (string, error) {
 	if template == "" {
 		return "", errors.New("template must not be empty")
@@ -63,8 +63,7 @@ func CompileTemplate(template string) (string, error) {
 	}
 
 	// Split the template into segments of literal text and tags.
-	// We replace each tag with a unique placeholder, then replace all
-	// text between placeholders with '.*?'.
+	// We replace each tag with a unique placeholder.
 	const placeholder = "\x00"
 
 	// Build a replacement map: tag → placeholder+index so we can restore order.
@@ -92,9 +91,10 @@ func CompileTemplate(template string) (string, error) {
 
 	for _, loc := range matches {
 		// If there is text before the first placeholder, or between placeholders,
-		// replace it with '.*?'.
+		// preserve it as a literal anchor.
 		if loc[0] > last {
-			result.WriteString(".*?")
+			literal := work[last:loc[0]]
+			result.WriteString(regexp.QuoteMeta(literal))
 		}
 
 		// Restore the tag's regex.
@@ -108,9 +108,10 @@ func CompileTemplate(template string) (string, error) {
 		last = loc[1]
 	}
 
-	// If there is text after the last placeholder, replace it with '.*?'.
+	// If there is text after the last placeholder, preserve it.
 	if last < len(work) {
-		result.WriteString(".*?")
+		literal := work[last:]
+		result.WriteString(regexp.QuoteMeta(literal))
 	}
 	result.WriteString("$")
 
@@ -414,3 +415,50 @@ func (tm *TopologyManager) PreviewService(matchValue string) ([]string, error) {
 	return hostnames, rows.Err()
 }
 
+// SyncCompiledPatterns checks all stored topology patterns and recompiles their regexes.
+// If the newly compiled regex differs from the one stored in the database (e.g., due to an engine update),
+// it updates the database automatically. Returns the number of updated patterns.
+func (tm *TopologyManager) SyncCompiledPatterns() (int, error) {
+	rows, err := tm.db.Query("SELECT id, template, compiled_pattern FROM topology_patterns")
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	var updates []struct {
+		id       int
+		compiled string
+	}
+
+	for rows.Next() {
+		var id int
+		var template, storedCompiled string
+		if err := rows.Scan(&id, &template, &storedCompiled); err != nil {
+			return 0, err
+		}
+
+		newCompiled, err := CompileTemplate(template)
+		if err != nil {
+			continue // Skip invalid templates
+		}
+
+		if newCompiled != storedCompiled {
+			updates = append(updates, struct {
+				id       int
+				compiled string
+			}{id, newCompiled})
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+
+	for _, u := range updates {
+		_, err := tm.db.Exec("UPDATE topology_patterns SET compiled_pattern = $1 WHERE id = $2", u.compiled, u.id)
+		if err != nil {
+			return len(updates), err
+		}
+	}
+
+	return len(updates), nil
+}

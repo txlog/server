@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -19,6 +20,7 @@ import (
 	_ "github.com/txlog/server/docs"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/middleware"
+	"github.com/txlog/server/models"
 	"github.com/txlog/server/scheduler"
 	"github.com/txlog/server/util"
 	"github.com/txlog/server/version"
@@ -54,6 +56,17 @@ func main() {
 	}
 
 	database.ConnectDatabase()
+
+	// Sync topology pattern regular expressions
+	tm := models.NewTopologyManager(database.Db)
+	if count, err := tm.SyncCompiledPatterns(); err != nil {
+		logger.Error("Failed to sync compiled topology patterns at startup: " + err.Error())
+	} else if count > 0 {
+		logger.Info(fmt.Sprintf("Topology: %d patterns synchronized with the current template engine.", count))
+	} else {
+		logger.Info("Topology: all patterns are up to date.")
+	}
+
 	scheduler.StartScheduler(database.Db)
 
 	// Inject the background task trigger into controllers safely without direct package cycle

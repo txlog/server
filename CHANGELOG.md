@@ -18,6 +18,32 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Added
+
+- New `:any` placeholder for hostname templates, replacing the old "Add Text"
+  manual literals with a more flexible "ignore-and-pivoting" segment.
+- Dynamic capture group indexing in the database, allowing arbitrary ordering of
+  `:env`, `:svc`, and `:seq` tags within templates.
+
+### Changed
+
+- Refactored topology hostname matching engine to use a delimiter-agnostic,
+  positional resolution system ("grep-like").
+- Improved Environment and Service name lookup to prioritize the longest global
+  match in the hostname, increasing resolution robustness.
+- Updated Admin UI Template Builder to support the new `:any` chip and
+  simplified template construction.
+
+### Fixed
+
+- Resolve mixed pod numbering issues (e.g., Pod 18 being grouped into Pod 8) by
+  refining greedy/non-greedy wildcards and implementing negative lookbehind in
+  sequence extraction.
+- Fix broken environment/service previews in the administrative area caused by
+  overly restrictive regex capture groups.
+
 ## [1.30.0] - 2026-05-05
 
 ### Added

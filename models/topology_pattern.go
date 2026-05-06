@@ -10,6 +10,10 @@ type TopologyPattern struct {
 	ID              int
 	Template        string
 	CompiledPattern string
+	TagPositions    string // JSON array: [":env", ":any", ":svc", ":any", ":seq"]
+	EnvGroupIndex   *int   // nullable: capture group index for :env
+	SvcGroupIndex   *int   // nullable: capture group index for :svc
+	SeqGroupIndex   *int   // nullable: capture group index for :seq
 	DisplayOrder    int
 	CreatedAt       time.Time
 }

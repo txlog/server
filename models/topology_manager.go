@@ -25,62 +25,64 @@ func NewTopologyManager(db *sql.DB) *TopologyManager {
 // Template compilation
 // ─────────────────────────────────────────────────────────────────────────────
 
+// CompilationResult holds the result of compiling a template.
+type CompilationResult struct {
+	CompiledPattern string
+	TagPositions    string // JSON array
+	EnvGroupIndex   *int
+	SvcGroupIndex   *int
+	SeqGroupIndex   *int
+}
+
 // knownTags are the supported template tags and their regex capture groups.
 var knownTags = map[string]string{
 	":env": `(.+?)`,
 	":svc": `(.+?)`,
-	":seq": `(?<!\d)(\d+)`,
+	":seq": `(\d+)`,
+	":any": `.*`,
 }
 
 // tagOrder defines the order in which tags are replaced so that longer tags
 // are matched before shorter ones (avoids partial replacements).
-var tagOrder = []string{":env", ":svc", ":seq"}
+var tagOrder = []string{":env", ":svc", ":seq", ":any"}
 
 // CompileTemplate converts a user-friendly hostname template into a
-// PostgreSQL-compatible anchored regex string. It dynamically queries
-// configured environment and service names to prioritize exact positional
-// matches over wildcards.
+// PostgreSQL-compatible anchored regex string. It also calculates the
+// positions and capture group indices for each tag.
 //
 // Supported tags:
-//   - :env  → ((?:val1|val2)|.+?)      environment identifier (exact or fallback)
-//   - :svc  → ((?:val1|val2)|.+?)      service identifier (exact or fallback)
-//   - :seq  → (?<!\d)(\d+)             pod sequence number
+//   - :env  → (.+?)      environment identifier
+//   - :svc  → (.+?)      service identifier
+//   - :seq  → (\d+)      pod sequence number
+//   - :any  → .*         wildcard (not captured)
 //
 // Literal parts of the template are preserved as exact matches (anchors).
-func (tm *TopologyManager) CompileTemplate(template string) (string, error) {
+func (tm *TopologyManager) CompileTemplate(template string) (*CompilationResult, error) {
 	if template == "" {
-		return "", errors.New("template must not be empty")
+		return nil, errors.New("template must not be empty")
 	}
 
-	// Ensure the template contains at least one known tag.
+	// Ensure the template contains at least one known tag (excluding :any).
 	hasTag := false
-	for _, tag := range tagOrder {
+	for _, tag := range []string{":env", ":svc", ":seq"} {
 		if strings.Contains(template, tag) {
 			hasTag = true
 			break
 		}
 	}
 	if !hasTag {
-		return "", fmt.Errorf("template must contain at least one tag (:env, :svc or :seq), got: %q", template)
+		return nil, fmt.Errorf("template must contain at least one tag (:env, :svc or :seq), got: %q", template)
 	}
 
 	// Split the template into segments of literal text and tags.
 	// We replace each tag with a unique placeholder.
 	const placeholder = "\x00"
 
-	// Build a replacement map: tag → placeholder+index so we can restore order.
-	type tagEntry struct {
-		placeholder string
-		regex       string
-	}
-	var entries []tagEntry
-	work := template
-
-	// Fetch environment values ordered by length descending.
-	var envVals []string
+	// Fetch known values for sticky matching.
+	var envVals, svcVals []string
 	if tm.db != nil {
-		rows, err := tm.db.Query(`SELECT match_value FROM environment_names ORDER BY length(match_value) DESC`)
-		if err == nil {
+		rows, _ := tm.db.Query(`SELECT match_value FROM environment_names ORDER BY length(match_value) DESC`)
+		if rows != nil {
 			for rows.Next() {
 				var v string
 				if rows.Scan(&v) == nil {
@@ -89,13 +91,8 @@ func (tm *TopologyManager) CompileTemplate(template string) (string, error) {
 			}
 			rows.Close()
 		}
-	}
-
-	// Fetch service values ordered by length descending.
-	var svcVals []string
-	if tm.db != nil {
-		rows, err := tm.db.Query(`SELECT match_value FROM service_names ORDER BY length(match_value) DESC`)
-		if err == nil {
+		rows, _ = tm.db.Query(`SELECT match_value FROM service_names ORDER BY length(match_value) DESC`)
+		if rows != nil {
 			for rows.Next() {
 				var v string
 				if rows.Scan(&v) == nil {
@@ -110,60 +107,130 @@ func (tm *TopologyManager) CompileTemplate(template string) (string, error) {
 	if len(envVals) > 0 {
 		envRegex = fmt.Sprintf(`((?:%s)|.+?)`, strings.Join(envVals, "|"))
 	}
-
 	svcRegex := `(.+?)`
 	if len(svcVals) > 0 {
 		svcRegex = fmt.Sprintf(`((?:%s)|.+?)`, strings.Join(svcVals, "|"))
 	}
 
-	dynamicTags := map[string]string{
+	type tagOccurrence struct {
+		tag         string
+		placeholder string
+		regex       string
+		isCapture   bool
+	}
+	var occurrences []tagOccurrence
+	work := template
+
+	// Find all tag occurrences in order of appearance in the template string.
+	// We use a regex that matches any of our known tags.
+	tagRegex := regexp.MustCompile(`:env|:svc|:seq|:any`)
+	matches := tagRegex.FindAllStringIndex(template, -1)
+
+	var tagPositions []string
+	captureGroupCount := 0
+	var envIdx, svcIdx, seqIdx *int
+
+	tagRegexes := map[string]string{
 		":env": envRegex,
 		":svc": svcRegex,
-		":seq": `(?<!\d)(\d+)`,
+		":seq": `(\d+)`,
+		":any": `.*?`,
 	}
 
-	for _, tag := range tagOrder {
-		ph := fmt.Sprintf("%s%d%s", placeholder, len(entries), placeholder)
-		if strings.Contains(work, tag) {
-			entries = append(entries, tagEntry{placeholder: ph, regex: dynamicTags[tag]})
-			work = strings.ReplaceAll(work, tag, ph)
+	for i, loc := range matches {
+		tag := template[loc[0]:loc[1]]
+		tagPositions = append(tagPositions, tag)
+		
+		ph := fmt.Sprintf("%s%d%s", placeholder, i, placeholder)
+		regex := tagRegexes[tag]
+		
+		// Optimization: if :any is followed by :seq, make it greedy to find the last number.
+		// Otherwise, make it reluctant to not over-match the next tag.
+		if tag == ":any" {
+			if i+1 < len(matches) && template[matches[i+1][0]:matches[i+1][1]] == ":seq" {
+				regex = `.*`
+			} else {
+				regex = `.*?`
+			}
 		}
+
+		// Optimization: ensure :seq doesn't capture partial numbers if preceded by greedy any
+		if tag == ":seq" {
+			regex = `(?<!\d)(\d+)`
+		}
+
+		isCapture := tag != ":any"
+		
+		if isCapture {
+			captureGroupCount++
+			idx := captureGroupCount
+			switch tag {
+			case ":env":
+				envIdx = &idx
+			case ":svc":
+				svcIdx = &idx
+			case ":seq":
+				seqIdx = &idx
+			}
+		}
+
+		occurrences = append(occurrences, tagOccurrence{
+			tag:         tag,
+			placeholder: ph,
+			regex:       regex,
+			isCapture:   isCapture,
+		})
 	}
 
-	// Find placeholders.
+	// Replace tags with placeholders in the working string.
+	// We do this backwards to not mess up indices if we were using string replacement,
+	// but since we have the locations from the original template, we can just build it.
+	var workBuilder strings.Builder
+	last := 0
+	for i, loc := range matches {
+		workBuilder.WriteString(template[last:loc[0]])
+		workBuilder.WriteString(occurrences[i].placeholder)
+		last = loc[1]
+	}
+	workBuilder.WriteString(template[last:])
+	work = workBuilder.String()
+
+	// Re-build the final regex.
 	phRegex := regexp.MustCompile(`\x00\d+\x00`)
 	var result strings.Builder
 	result.WriteString("^")
-	last := 0
-	matches := phRegex.FindAllStringIndex(work, -1)
+	last = 0
+	phMatches := phRegex.FindAllStringIndex(work, -1)
 
-	for _, loc := range matches {
-		// If there is text before the first placeholder, or between placeholders,
-		// preserve it as a literal anchor.
+	for i, loc := range phMatches {
 		if loc[0] > last {
 			literal := work[last:loc[0]]
 			result.WriteString(regexp.QuoteMeta(literal))
 		}
 
-		// Restore the tag's regex.
-		ph := work[loc[0]:loc[1]]
-		for _, e := range entries {
-			if e.placeholder == ph {
-				result.WriteString(e.regex)
-				break
-			}
-		}
+		result.WriteString(occurrences[i].regex)
 		last = loc[1]
 	}
 
-	// If there is text after the last placeholder, preserve it.
 	if last < len(work) {
 		literal := work[last:]
 		result.WriteString(regexp.QuoteMeta(literal))
 	}
 	result.WriteString("$")
 
-	return result.String(), nil
+	// Convert tagPositions to JSON
+	tagPositionsJSON := "[]"
+	if len(tagPositions) > 0 {
+		tagPositionsJSON = `["` + strings.Join(tagPositions, `","`) + `"]`
+	}
+
+	return &CompilationResult{
+		CompiledPattern: result.String(),
+		TagPositions:    tagPositionsJSON,
+		EnvGroupIndex:   envIdx,
+		SvcGroupIndex:   svcIdx,
+		SeqGroupIndex:   seqIdx,
+	}, nil
 }
 
 // ValidateCompiledPattern checks whether a compiled regex is valid in
@@ -184,7 +251,9 @@ func (tm *TopologyManager) ValidateCompiledPattern(pattern string) error {
 // ListPatterns returns all topology patterns ordered by display_order.
 func (tm *TopologyManager) ListPatterns() ([]TopologyPattern, error) {
 	rows, err := tm.db.Query(`
-		SELECT id, template, compiled_pattern, display_order, created_at
+		SELECT id, template, compiled_pattern, tag_positions,
+		       env_group_index, svc_group_index, seq_group_index,
+		       display_order, created_at
 		FROM topology_patterns
 		ORDER BY display_order, id
 	`)
@@ -196,7 +265,9 @@ func (tm *TopologyManager) ListPatterns() ([]TopologyPattern, error) {
 	var patterns []TopologyPattern
 	for rows.Next() {
 		var p TopologyPattern
-		if err := rows.Scan(&p.ID, &p.Template, &p.CompiledPattern, &p.DisplayOrder, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.ID, &p.Template, &p.CompiledPattern, &p.TagPositions,
+			&p.EnvGroupIndex, &p.SvcGroupIndex, &p.SeqGroupIndex,
+			&p.DisplayOrder, &p.CreatedAt); err != nil {
 			return nil, err
 		}
 		patterns = append(patterns, p)
@@ -206,24 +277,28 @@ func (tm *TopologyManager) ListPatterns() ([]TopologyPattern, error) {
 
 // CreatePattern compiles the given template and inserts a new topology_pattern row.
 func (tm *TopologyManager) CreatePattern(template string, displayOrder int) (*TopologyPattern, error) {
-	compiled, err := tm.CompileTemplate(template)
+	res, err := tm.CompileTemplate(template)
 	if err != nil {
 		return nil, err
 	}
-	if err := tm.ValidateCompiledPattern(compiled); err != nil {
+	if err := tm.ValidateCompiledPattern(res.CompiledPattern); err != nil {
 		return nil, err
 	}
 
 	var p TopologyPattern
 	p.Template = template
-	p.CompiledPattern = compiled
+	p.CompiledPattern = res.CompiledPattern
+	p.TagPositions = res.TagPositions
+	p.EnvGroupIndex = res.EnvGroupIndex
+	p.SvcGroupIndex = res.SvcGroupIndex
+	p.SeqGroupIndex = res.SeqGroupIndex
 	p.DisplayOrder = displayOrder
 
 	err = tm.db.QueryRow(`
-		INSERT INTO topology_patterns (template, compiled_pattern, display_order)
-		VALUES ($1, $2, $3)
+		INSERT INTO topology_patterns (template, compiled_pattern, tag_positions, env_group_index, svc_group_index, seq_group_index, display_order)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id, created_at
-	`, template, compiled, displayOrder).Scan(&p.ID, &p.CreatedAt)
+	`, template, res.CompiledPattern, res.TagPositions, res.EnvGroupIndex, res.SvcGroupIndex, res.SeqGroupIndex, displayOrder).Scan(&p.ID, &p.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -232,19 +307,21 @@ func (tm *TopologyManager) CreatePattern(template string, displayOrder int) (*To
 
 // UpdatePattern recompiles and updates an existing topology_pattern row.
 func (tm *TopologyManager) UpdatePattern(id int, template string, displayOrder int) error {
-	compiled, err := tm.CompileTemplate(template)
+	res, err := tm.CompileTemplate(template)
 	if err != nil {
 		return err
 	}
-	if err := tm.ValidateCompiledPattern(compiled); err != nil {
+	if err := tm.ValidateCompiledPattern(res.CompiledPattern); err != nil {
 		return err
 	}
 
 	_, err = tm.db.Exec(`
 		UPDATE topology_patterns
-		SET template = $1, compiled_pattern = $2, display_order = $3
-		WHERE id = $4
-	`, template, compiled, displayOrder, id)
+		SET template = $1, compiled_pattern = $2, tag_positions = $3, 
+		    env_group_index = $4, svc_group_index = $5, seq_group_index = $6,
+		    display_order = $7
+		WHERE id = $8
+	`, template, res.CompiledPattern, res.TagPositions, res.EnvGroupIndex, res.SvcGroupIndex, res.SeqGroupIndex, displayOrder, id)
 	return err
 }
 
@@ -413,19 +490,17 @@ func (tm *TopologyManager) PreviewPattern(compiledPattern string) ([]string, err
 	return hostnames, rows.Err()
 }
 
-// PreviewEnvironment returns hostnames whose captured env group matches the given matchValue.
+// PreviewEnvironment returns hostnames that match any topology pattern and contain the given matchValue.
 func (tm *TopologyManager) PreviewEnvironment(matchValue string) ([]string, error) {
 	rows, err := tm.db.Query(`
 		SELECT a.hostname
 		FROM assets a
-		INNER JOIN LATERAL (
-			SELECT (regexp_match(a.hostname, compiled_pattern))[1] as raw_env
-			FROM topology_patterns
-			WHERE a.hostname ~ compiled_pattern
-			ORDER BY display_order, id
-			LIMIT 1
-		) tp ON tp.raw_env ILIKE '%' || $1 || '%'
 		WHERE a.is_active = TRUE
+		  AND a.hostname ILIKE '%' || $1 || '%'
+		  AND EXISTS (
+			  SELECT 1 FROM topology_patterns tp
+			  WHERE a.hostname ~ tp.compiled_pattern
+		  )
 		ORDER BY a.hostname
 		LIMIT 20
 	`, matchValue)
@@ -445,19 +520,17 @@ func (tm *TopologyManager) PreviewEnvironment(matchValue string) ([]string, erro
 	return hostnames, rows.Err()
 }
 
-// PreviewService returns hostnames whose captured svc group matches the given matchValue.
+// PreviewService returns hostnames that match any topology pattern and contain the given matchValue.
 func (tm *TopologyManager) PreviewService(matchValue string) ([]string, error) {
 	rows, err := tm.db.Query(`
 		SELECT a.hostname
 		FROM assets a
-		INNER JOIN LATERAL (
-			SELECT (regexp_match(a.hostname, compiled_pattern))[2] as raw_svc
-			FROM topology_patterns
-			WHERE a.hostname ~ compiled_pattern
-			ORDER BY display_order, id
-			LIMIT 1
-		) tp ON tp.raw_svc ILIKE '%' || $1 || '%'
 		WHERE a.is_active = TRUE
+		  AND a.hostname ILIKE '%' || $1 || '%'
+		  AND EXISTS (
+			  SELECT 1 FROM topology_patterns tp
+			  WHERE a.hostname ~ tp.compiled_pattern
+		  )
 		ORDER BY a.hostname
 		LIMIT 20
 	`, matchValue)
@@ -489,7 +562,7 @@ func (tm *TopologyManager) SyncCompiledPatterns() (int, error) {
 
 	var updates []struct {
 		id       int
-		compiled string
+		template string
 	}
 
 	for rows.Next() {
@@ -499,16 +572,16 @@ func (tm *TopologyManager) SyncCompiledPatterns() (int, error) {
 			return 0, err
 		}
 
-		newCompiled, err := tm.CompileTemplate(template)
+		res, err := tm.CompileTemplate(template)
 		if err != nil {
 			continue // Skip invalid templates
 		}
 
-		if newCompiled != storedCompiled {
+		if res.CompiledPattern != storedCompiled {
 			updates = append(updates, struct {
 				id       int
-				compiled string
-			}{id, newCompiled})
+				template string
+			}{id, template})
 		}
 	}
 	if err := rows.Err(); err != nil {
@@ -516,7 +589,16 @@ func (tm *TopologyManager) SyncCompiledPatterns() (int, error) {
 	}
 
 	for _, u := range updates {
-		_, err := tm.db.Exec("UPDATE topology_patterns SET compiled_pattern = $1 WHERE id = $2", u.compiled, u.id)
+		res, err := tm.CompileTemplate(u.template)
+		if err != nil {
+			continue
+		}
+		_, err = tm.db.Exec(`
+			UPDATE topology_patterns 
+			SET compiled_pattern = $1, tag_positions = $2, 
+			    env_group_index = $3, svc_group_index = $4, seq_group_index = $5 
+			WHERE id = $6`,
+			res.CompiledPattern, res.TagPositions, res.EnvGroupIndex, res.SvcGroupIndex, res.SeqGroupIndex, u.id)
 		if err != nil {
 			return len(updates), err
 		}

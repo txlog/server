@@ -102,12 +102,12 @@ func GetAdminTopologyPreview(db *sql.DB) gin.HandlerFunc {
 		}
 
 		tm := models.NewTopologyManager(db)
-		compiled, err := tm.CompileTemplate(template)
+		res, err := tm.CompileTemplate(template)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		hostnames, err := tm.PreviewPattern(compiled)
+		hostnames, err := tm.PreviewPattern(res.CompiledPattern)
 		if err != nil {
 			logger.Error("Failed to preview topology pattern: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -115,7 +115,7 @@ func GetAdminTopologyPreview(db *sql.DB) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"compiled":  compiled,
+			"compiled":  res.CompiledPattern,
 			"hostnames": hostnames,
 			"count":     len(hostnames),
 		})

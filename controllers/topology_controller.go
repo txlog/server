@@ -250,9 +250,9 @@ func buildTopologyAssetsQuery(envFilter, svcFilter string) string {
 		FROM assets a
 		LEFT JOIN LATERAL (
 			SELECT compiled_pattern,
-				   (regexp_match(a.hostname, compiled_pattern))[1] as raw_env,
-				   (regexp_match(a.hostname, compiled_pattern))[2] as raw_svc,
-				   (regexp_match(a.hostname, compiled_pattern))[3] as raw_pod
+				   (regexp_match(a.hostname, compiled_pattern))[env_group_index] as raw_env,
+				   (regexp_match(a.hostname, compiled_pattern))[svc_group_index] as raw_svc,
+				   (regexp_match(a.hostname, compiled_pattern))[seq_group_index] as raw_pod
 			FROM topology_patterns
 			WHERE a.hostname ~ compiled_pattern
 			ORDER BY display_order, id
@@ -261,14 +261,14 @@ func buildTopologyAssetsQuery(envFilter, svcFilter string) string {
 		LEFT JOIN LATERAL (
 			SELECT match_value
 			FROM environment_names
-			WHERE tp.raw_env ILIKE '%' || match_value || '%'
+			WHERE a.hostname ILIKE '%' || match_value || '%'
 			ORDER BY length(match_value) DESC
 			LIMIT 1
 		) best_env ON true
 		LEFT JOIN LATERAL (
 			SELECT match_value
 			FROM service_names
-			WHERE tp.raw_svc ILIKE '%' || match_value || '%'
+			WHERE a.hostname ILIKE '%' || match_value || '%'
 			ORDER BY length(match_value) DESC
 			LIMIT 1
 		) best_svc ON true

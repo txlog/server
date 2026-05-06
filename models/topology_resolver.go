@@ -25,9 +25,9 @@ func (tm *TopologyManager) ResolveHostname(hostname string) (*ResolvedTopology, 
 	// fixed order [:env, :svc, :seq], group 1=env, 2=svc, 3=seq.
 	const query = `
 		SELECT
-			COALESCE((regexp_match($1, tp.compiled_pattern))[1], '') AS env_val,
-			COALESCE((regexp_match($1, tp.compiled_pattern))[2], '') AS svc_val,
-			COALESCE((regexp_match($1, tp.compiled_pattern))[3], '') AS seq_val
+			COALESCE((regexp_match($1, tp.compiled_pattern))[tp.env_group_index], '') AS env_val,
+			COALESCE((regexp_match($1, tp.compiled_pattern))[tp.svc_group_index], '') AS svc_val,
+			COALESCE((regexp_match($1, tp.compiled_pattern))[tp.seq_group_index], '') AS seq_val
 		FROM topology_patterns tp
 		WHERE $1 ~ tp.compiled_pattern
 		ORDER BY tp.display_order, tp.id

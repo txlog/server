@@ -1089,7 +1089,7 @@
                 <div class="mb-3 p-3 bg-txlog-lavender/10 rounded-xl border border-txlog-lavender/30">
                   <p class="text-[10px] uppercase tracking-wider font-bold text-txlog-indigo/40 mb-2">Available
                     Placeholders</p>
-                  <div id="tag-bank" class="flex flex-wrap gap-2">
+                    <div id="tag-bank" class="flex flex-wrap gap-2">
                     <div data-tag=":env"
                       class="tag-chip bg-white border-2 border-txlog-sky/30 text-txlog-sky px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 font-mono text-sm">
                       <i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> :env
@@ -1102,10 +1102,10 @@
                       class="tag-chip bg-white border-2 border-txlog-sky/30 text-txlog-sky px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 font-mono text-sm">
                       <i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> :seq
                     </div>
-                    <button type="button" onclick="addLiteralSegment()"
-                      class="bg-txlog-indigo/5 hover:bg-txlog-indigo/10 text-txlog-indigo/60 px-3 py-1.5 rounded-xl transition-all flex items-center gap-2 text-sm border-2 border-dashed border-txlog-lavender">
-                      <i data-lucide="plus" class="w-3 h-3"></i> Add Text
-                    </button>
+                    <div data-tag=":any"
+                      class="tag-chip bg-white border-2 border-txlog-lavender text-txlog-indigo/60 px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 font-mono text-sm">
+                      <i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> :any
+                    </div>
                   </div>
                 </div>
 
@@ -1119,7 +1119,7 @@
                 <input type="hidden" name="template" id="new-pattern-input" required>
                 <p class="text-[10px] text-txlog-indigo/40 mt-2 flex items-center gap-1">
                   <i data-lucide="mouse-pointer-2" class="w-3 h-3"></i>
-                  Drag items to reorder. Non-placeholder text acts as wildcards (.*)
+                  Drag items to reorder. The :any tag acts as a wildcard (.*) for positional matching.
                 </p>
               </div>
               <div id="preview-result" class="hidden">
@@ -1661,7 +1661,7 @@
       btn.innerHTML = '<i data-lucide="x" class="w-3 h-3"></i>';
       btn.onclick = function () {
         el.remove();
-        if (dropzone.querySelectorAll('.tag-chip, .literal-chip').length === 0) {
+        if (dropzone.querySelectorAll('.tag-chip').length === 0) {
           if (dropPlaceholder) dropPlaceholder.classList.remove('hidden');
         }
         syncTemplate();
@@ -1670,29 +1670,10 @@
       lucide.createIcons();
     }
 
-    window.addLiteralSegment = function () {
-      var val = prompt("Enter text segment (e.g. '-', '.com'):");
-      if (!val) return;
-
-      var div = document.createElement('div');
-      div.className = 'literal-chip bg-white border-2 border-txlog-lavender text-txlog-indigo/60 px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-sm font-mono';
-      div.dataset.value = val;
-      div.innerHTML = '<i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> ' + val;
-
-      if (dropPlaceholder) dropPlaceholder.classList.add('hidden');
-      dropzone.appendChild(div);
-      addRemoveButton(div);
-      syncTemplate();
-    };
-
     function syncTemplate() {
       var template = '';
-      dropzone.querySelectorAll('.tag-chip, .literal-chip').forEach(function (el) {
-        if (el.classList.contains('tag-chip')) {
-          template += el.dataset.tag;
-        } else {
-          template += el.dataset.value;
-        }
+      dropzone.querySelectorAll('.tag-chip').forEach(function (el) {
+        template += el.dataset.tag;
       });
       hiddenInput.value = template;
 
@@ -1754,26 +1735,19 @@
       document.getElementById('new-pattern-input').value = template;
 
       // Populate builder from template string
-      dropzone.querySelectorAll('.tag-chip, .literal-chip').forEach(function (el) { el.remove(); });
+      dropzone.querySelectorAll('.tag-chip').forEach(function (el) { el.remove(); });
       if (dropPlaceholder) dropPlaceholder.classList.add('hidden');
 
-      // Basic parser to split tags and literals
-      var parts = template.split(/(:env|:svc|:seq)/).filter(function (p) { return p !== ''; });
+      // Basic parser to split tags
+      var parts = template.split(/(:env|:svc|:seq|:any)/).filter(function (p) { return p !== ''; });
       parts.forEach(function (p) {
-        if (p === ':env' || p === ':svc' || p === ':seq') {
+        if (p === ':env' || p === ':svc' || p === ':seq' || p === ':any') {
           var bankChip = document.querySelector('#tag-bank [data-tag="' + p + '"]');
           if (bankChip) {
             var chip = bankChip.cloneNode(true);
             dropzone.appendChild(chip);
             addRemoveButton(chip);
           }
-        } else {
-          var div = document.createElement('div');
-          div.className = 'literal-chip bg-white border-2 border-txlog-lavender text-txlog-indigo/60 px-3 py-1.5 rounded-xl cursor-move shadow-sm hover:shadow-md transition-all flex items-center gap-2 text-sm font-mono';
-          div.dataset.value = p;
-          div.innerHTML = '<i data-lucide="grip-vertical" class="w-3 h-3 opacity-30"></i> ' + p;
-          dropzone.appendChild(div);
-          addRemoveButton(div);
         }
       });
 

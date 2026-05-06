@@ -37,15 +37,17 @@ var knownTags = map[string]string{
 var tagOrder = []string{":env", ":svc", ":seq"}
 
 // CompileTemplate converts a user-friendly hostname template into a
-// PostgreSQL-compatible anchored regex string.
+// PostgreSQL-compatible anchored regex string. It dynamically queries
+// configured environment and service names to prioritize exact positional
+// matches over wildcards.
 //
 // Supported tags:
-//   - :env  → (.+?)      environment identifier (non-greedy)
-//   - :svc  → (.+?)      service identifier (non-greedy)
-//   - :seq  → (?<!\d)(\d+) pod sequence number
+//   - :env  → ((?:val1|val2)|.+?)      environment identifier (exact or fallback)
+//   - :svc  → ((?:val1|val2)|.+?)      service identifier (exact or fallback)
+//   - :seq  → (?<!\d)(\d+)             pod sequence number
 //
 // Literal parts of the template are preserved as exact matches (anchors).
-func CompileTemplate(template string) (string, error) {
+func (tm *TopologyManager) CompileTemplate(template string) (string, error) {
 	if template == "" {
 		return "", errors.New("template must not be empty")
 	}
@@ -74,10 +76,56 @@ func CompileTemplate(template string) (string, error) {
 	var entries []tagEntry
 	work := template
 
+	// Fetch environment values ordered by length descending.
+	var envVals []string
+	if tm.db != nil {
+		rows, err := tm.db.Query(`SELECT match_value FROM environment_names ORDER BY length(match_value) DESC`)
+		if err == nil {
+			for rows.Next() {
+				var v string
+				if rows.Scan(&v) == nil {
+					envVals = append(envVals, regexp.QuoteMeta(v))
+				}
+			}
+			rows.Close()
+		}
+	}
+
+	// Fetch service values ordered by length descending.
+	var svcVals []string
+	if tm.db != nil {
+		rows, err := tm.db.Query(`SELECT match_value FROM service_names ORDER BY length(match_value) DESC`)
+		if err == nil {
+			for rows.Next() {
+				var v string
+				if rows.Scan(&v) == nil {
+					svcVals = append(svcVals, regexp.QuoteMeta(v))
+				}
+			}
+			rows.Close()
+		}
+	}
+
+	envRegex := `(.+?)`
+	if len(envVals) > 0 {
+		envRegex = fmt.Sprintf(`((?:%s)|.+?)`, strings.Join(envVals, "|"))
+	}
+
+	svcRegex := `(.+?)`
+	if len(svcVals) > 0 {
+		svcRegex = fmt.Sprintf(`((?:%s)|.+?)`, strings.Join(svcVals, "|"))
+	}
+
+	dynamicTags := map[string]string{
+		":env": envRegex,
+		":svc": svcRegex,
+		":seq": `(?<!\d)(\d+)`,
+	}
+
 	for _, tag := range tagOrder {
 		ph := fmt.Sprintf("%s%d%s", placeholder, len(entries), placeholder)
 		if strings.Contains(work, tag) {
-			entries = append(entries, tagEntry{placeholder: ph, regex: knownTags[tag]})
+			entries = append(entries, tagEntry{placeholder: ph, regex: dynamicTags[tag]})
 			work = strings.ReplaceAll(work, tag, ph)
 		}
 	}
@@ -158,7 +206,7 @@ func (tm *TopologyManager) ListPatterns() ([]TopologyPattern, error) {
 
 // CreatePattern compiles the given template and inserts a new topology_pattern row.
 func (tm *TopologyManager) CreatePattern(template string, displayOrder int) (*TopologyPattern, error) {
-	compiled, err := CompileTemplate(template)
+	compiled, err := tm.CompileTemplate(template)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +232,7 @@ func (tm *TopologyManager) CreatePattern(template string, displayOrder int) (*To
 
 // UpdatePattern recompiles and updates an existing topology_pattern row.
 func (tm *TopologyManager) UpdatePattern(id int, template string, displayOrder int) error {
-	compiled, err := CompileTemplate(template)
+	compiled, err := tm.CompileTemplate(template)
 	if err != nil {
 		return err
 	}
@@ -244,6 +292,7 @@ func (tm *TopologyManager) CreateEnvironmentName(matchValue, name string) (*Envi
 	if err != nil {
 		return nil, err
 	}
+	_, _ = tm.SyncCompiledPatterns()
 	return &e, nil
 }
 
@@ -254,12 +303,18 @@ func (tm *TopologyManager) UpdateEnvironmentName(id int, matchValue, name string
 		SET match_value = $1, name = $2
 		WHERE id = $3
 	`, matchValue, name, id)
+	if err == nil {
+		_, _ = tm.SyncCompiledPatterns()
+	}
 	return err
 }
 
 // DeleteEnvironmentName removes an environment name mapping by ID.
 func (tm *TopologyManager) DeleteEnvironmentName(id int) error {
 	_, err := tm.db.Exec(`DELETE FROM environment_names WHERE id = $1`, id)
+	if err == nil {
+		_, _ = tm.SyncCompiledPatterns()
+	}
 	return err
 }
 
@@ -301,6 +356,7 @@ func (tm *TopologyManager) CreateServiceName(matchValue, name string, hasPods bo
 	if err != nil {
 		return nil, err
 	}
+	_, _ = tm.SyncCompiledPatterns()
 	return &s, nil
 }
 
@@ -311,12 +367,18 @@ func (tm *TopologyManager) UpdateServiceName(id int, matchValue, name string, ha
 		SET match_value = $1, name = $2, has_pods = $3
 		WHERE id = $4
 	`, matchValue, name, hasPods, id)
+	if err == nil {
+		_, _ = tm.SyncCompiledPatterns()
+	}
 	return err
 }
 
 // DeleteServiceName removes a service name mapping by ID.
 func (tm *TopologyManager) DeleteServiceName(id int) error {
 	_, err := tm.db.Exec(`DELETE FROM service_names WHERE id = $1`, id)
+	if err == nil {
+		_, _ = tm.SyncCompiledPatterns()
+	}
 	return err
 }
 
@@ -437,7 +499,7 @@ func (tm *TopologyManager) SyncCompiledPatterns() (int, error) {
 			return 0, err
 		}
 
-		newCompiled, err := CompileTemplate(template)
+		newCompiled, err := tm.CompileTemplate(template)
 		if err != nil {
 			continue // Skip invalid templates
 		}

@@ -101,13 +101,12 @@ func GetAdminTopologyPreview(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		compiled, err := models.CompileTemplate(template)
+		tm := models.NewTopologyManager(db)
+		compiled, err := tm.CompileTemplate(template)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-
-		tm := models.NewTopologyManager(db)
 		hostnames, err := tm.PreviewPattern(compiled)
 		if err != nil {
 			logger.Error("Failed to preview topology pattern: " + err.Error())

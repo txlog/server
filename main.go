@@ -175,6 +175,8 @@ func main() {
 
 		// Topology configuration routes
 		adminGroup.GET("/topology/preview", controllers.GetAdminTopologyPreview(database.Db))
+		adminGroup.GET("/topology/preview-env", controllers.GetAdminTopologyPreviewEnv(database.Db))
+		adminGroup.GET("/topology/preview-svc", controllers.GetAdminTopologyPreviewSvc(database.Db))
 		adminGroup.POST("/topology/patterns", controllers.PostAdminTopologyCreatePattern(database.Db))
 		adminGroup.POST("/topology/patterns/update", controllers.PostAdminTopologyUpdatePattern(database.Db))
 		adminGroup.POST("/topology/patterns/delete", controllers.PostAdminTopologyDeletePattern(database.Db))

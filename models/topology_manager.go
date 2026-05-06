@@ -349,3 +349,68 @@ func (tm *TopologyManager) PreviewPattern(compiledPattern string) ([]string, err
 	}
 	return hostnames, rows.Err()
 }
+
+// PreviewEnvironment returns hostnames whose captured env group matches the given matchValue.
+func (tm *TopologyManager) PreviewEnvironment(matchValue string) ([]string, error) {
+	rows, err := tm.db.Query(`
+		SELECT a.hostname
+		FROM assets a
+		INNER JOIN LATERAL (
+			SELECT (regexp_match(a.hostname, compiled_pattern))[1] as raw_env
+			FROM topology_patterns
+			WHERE a.hostname ~ compiled_pattern
+			ORDER BY display_order, id
+			LIMIT 1
+		) tp ON tp.raw_env ILIKE '%' || $1 || '%'
+		WHERE a.is_active = TRUE
+		ORDER BY a.hostname
+		LIMIT 20
+	`, matchValue)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var hostnames []string
+	for rows.Next() {
+		var h string
+		if err := rows.Scan(&h); err != nil {
+			return nil, err
+		}
+		hostnames = append(hostnames, h)
+	}
+	return hostnames, rows.Err()
+}
+
+// PreviewService returns hostnames whose captured svc group matches the given matchValue.
+func (tm *TopologyManager) PreviewService(matchValue string) ([]string, error) {
+	rows, err := tm.db.Query(`
+		SELECT a.hostname
+		FROM assets a
+		INNER JOIN LATERAL (
+			SELECT (regexp_match(a.hostname, compiled_pattern))[2] as raw_svc
+			FROM topology_patterns
+			WHERE a.hostname ~ compiled_pattern
+			ORDER BY display_order, id
+			LIMIT 1
+		) tp ON tp.raw_svc ILIKE '%' || $1 || '%'
+		WHERE a.is_active = TRUE
+		ORDER BY a.hostname
+		LIMIT 20
+	`, matchValue)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var hostnames []string
+	for rows.Next() {
+		var h string
+		if err := rows.Scan(&h); err != nil {
+			return nil, err
+		}
+		hostnames = append(hostnames, h)
+	}
+	return hostnames, rows.Err()
+}
+

@@ -123,6 +123,55 @@ func GetAdminTopologyPreview(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
+// GetAdminTopologyPreviewEnv returns hostnames that match an environment match_value.
+func GetAdminTopologyPreviewEnv(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		matchValue := c.Query("match_value")
+		if matchValue == "" {
+			c.JSON(http.StatusOK, gin.H{"hostnames": []string{}, "count": 0})
+			return
+		}
+
+		tm := models.NewTopologyManager(db)
+		hostnames, err := tm.PreviewEnvironment(matchValue)
+		if err != nil {
+			logger.Error("Failed to preview environment match: " + err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"hostnames": hostnames,
+			"count":     len(hostnames),
+		})
+	}
+}
+
+// GetAdminTopologyPreviewSvc returns hostnames that match a service match_value.
+func GetAdminTopologyPreviewSvc(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		matchValue := c.Query("match_value")
+		if matchValue == "" {
+			c.JSON(http.StatusOK, gin.H{"hostnames": []string{}, "count": 0})
+			return
+		}
+
+		tm := models.NewTopologyManager(db)
+		hostnames, err := tm.PreviewService(matchValue)
+		if err != nil {
+			logger.Error("Failed to preview service match: " + err.Error())
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"hostnames": hostnames,
+			"count":     len(hostnames),
+		})
+	}
+}
+
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Environment Names
 // ─────────────────────────────────────────────────────────────────────────────

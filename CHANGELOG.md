@@ -18,6 +18,14 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.30.2] - 2026-05-09
+
+### Added
+
+- Support for logical OR (`|`) in environment and service `match_value` fields,
+  allowing a single entry to match multiple hostname patterns (e.g.,
+  `api-xpto|db-xpto`).
+
 ## [1.30.1] - 2026-05-07
 
 ### Added

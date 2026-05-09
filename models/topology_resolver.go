@@ -54,7 +54,7 @@ func (tm *TopologyManager) ResolveHostname(hostname string) (*ResolvedTopology, 
 	if envVal != "" {
 		var name string
 		err := tm.db.QueryRow(
-			`SELECT name FROM environment_names WHERE $1 ILIKE '%' || match_value || '%' ORDER BY length(match_value) DESC LIMIT 1`,
+			`SELECT en.name FROM environment_names en, unnest(string_to_array(en.match_value, '|')) AS part WHERE $1 ILIKE '%' || part || '%' ORDER BY length(part) DESC LIMIT 1`,
 			envVal,
 		).Scan(&name)
 		if err == nil {
@@ -68,7 +68,7 @@ func (tm *TopologyManager) ResolveHostname(hostname string) (*ResolvedTopology, 
 	if svcVal != "" {
 		var name string
 		err := tm.db.QueryRow(
-			`SELECT name FROM service_names WHERE $1 ILIKE '%' || match_value || '%' ORDER BY length(match_value) DESC LIMIT 1`,
+			`SELECT sn.name FROM service_names sn, unnest(string_to_array(sn.match_value, '|')) AS part WHERE $1 ILIKE '%' || part || '%' ORDER BY length(part) DESC LIMIT 1`,
 			svcVal,
 		).Scan(&name)
 		if err == nil {

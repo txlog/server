@@ -259,17 +259,17 @@ func buildTopologyAssetsQuery(envFilter, svcFilter string) string {
 			LIMIT 1
 		) tp ON true
 		LEFT JOIN LATERAL (
-			SELECT match_value
-			FROM environment_names
-			WHERE a.hostname ILIKE '%' || match_value || '%'
-			ORDER BY length(match_value) DESC
+			SELECT en.match_value
+			FROM environment_names en, unnest(string_to_array(en.match_value, '|')) AS part
+			WHERE a.hostname ILIKE '%' || part || '%'
+			ORDER BY length(part) DESC
 			LIMIT 1
 		) best_env ON true
 		LEFT JOIN LATERAL (
-			SELECT match_value
-			FROM service_names
-			WHERE a.hostname ILIKE '%' || match_value || '%'
-			ORDER BY length(match_value) DESC
+			SELECT sn.match_value
+			FROM service_names sn, unnest(string_to_array(sn.match_value, '|')) AS part
+			WHERE a.hostname ILIKE '%' || part || '%'
+			ORDER BY length(part) DESC
 			LIMIT 1
 		) best_svc ON true
 		CROSS JOIN LATERAL (

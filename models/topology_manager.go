@@ -86,7 +86,11 @@ func (tm *TopologyManager) CompileTemplate(template string) (*CompilationResult,
 			for rows.Next() {
 				var v string
 				if rows.Scan(&v) == nil {
-					envVals = append(envVals, regexp.QuoteMeta(v))
+					for _, part := range strings.Split(v, "|") {
+						if part != "" {
+							envVals = append(envVals, regexp.QuoteMeta(part))
+						}
+					}
 				}
 			}
 			rows.Close()
@@ -96,7 +100,11 @@ func (tm *TopologyManager) CompileTemplate(template string) (*CompilationResult,
 			for rows.Next() {
 				var v string
 				if rows.Scan(&v) == nil {
-					svcVals = append(svcVals, regexp.QuoteMeta(v))
+					for _, part := range strings.Split(v, "|") {
+						if part != "" {
+							svcVals = append(svcVals, regexp.QuoteMeta(part))
+						}
+					}
 				}
 			}
 			rows.Close()
@@ -496,7 +504,10 @@ func (tm *TopologyManager) PreviewEnvironment(matchValue string) ([]string, erro
 		SELECT a.hostname
 		FROM assets a
 		WHERE a.is_active = TRUE
-		  AND a.hostname ILIKE '%' || $1 || '%'
+		  AND EXISTS (
+			  SELECT 1 FROM unnest(string_to_array($1, '|')) AS part
+			  WHERE a.hostname ILIKE '%' || part || '%'
+		  )
 		  AND EXISTS (
 			  SELECT 1 FROM topology_patterns tp
 			  WHERE a.hostname ~ tp.compiled_pattern
@@ -526,7 +537,10 @@ func (tm *TopologyManager) PreviewService(matchValue string) ([]string, error) {
 		SELECT a.hostname
 		FROM assets a
 		WHERE a.is_active = TRUE
-		  AND a.hostname ILIKE '%' || $1 || '%'
+		  AND EXISTS (
+			  SELECT 1 FROM unnest(string_to_array($1, '|')) AS part
+			  WHERE a.hostname ILIKE '%' || part || '%'
+		  )
 		  AND EXISTS (
 			  SELECT 1 FROM topology_patterns tp
 			  WHERE a.hostname ~ tp.compiled_pattern

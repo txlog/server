@@ -6,14 +6,14 @@ Welcome to the Txlog Server documentation. This documentation is divided into fo
 
 ### 1. Tutorials (Learning-oriented)
 
-*Start here if you are new to the project.*
+_Start here if you are new to the project._
 
 - **[Getting Started](tutorials/getting-started.md)**: Set up the server locally with Docker.
 - **[Your First API Request](tutorials/first-api-request.md)**: Learn how to interact with the API.
 
 ### 2. How-to Guides (Task-oriented)
 
-*Step-by-step guides to achieve specific goals.*
+_Step-by-step guides to achieve specific goals._
 
 #### Authentication & Security
 
@@ -27,7 +27,8 @@ Welcome to the Txlog Server documentation. This documentation is divided into fo
 
 - **[Configure Data Retention](how-to/configure-data-retention.md)**: Manage database cleanup policies.
 - **[Manage OSV Vulnerabilities](how-to/manage-osv-vulnerabilities.md)**: Update, fetch, and rebuild OSV threat data.
-- **[Search and Filter Assets](how-to/search-and-filter-assets.md)**: How to use the dashboard search and status filters.
+- **[Search and Filter Assets](how-to/search-and-filter-assets.md)**: How to use the dashboard search and status
+  filters.
 - **[Run Database Migrations](how-to/run-migrations.md)**: Apply schema changes safely.
 - **[Deploy to Kubernetes](how-to/deploy-kubernetes.md)**: Production deployment manifest.
 
@@ -42,7 +43,7 @@ Welcome to the Txlog Server documentation. This documentation is divided into fo
 
 ### 3. Reference (Information-oriented)
 
-*Technical descriptions and specifications.*
+_Technical descriptions and specifications._
 
 #### System
 
@@ -58,7 +59,7 @@ Welcome to the Txlog Server documentation. This documentation is divided into fo
 
 ### 4. Explanation (Understanding-oriented)
 
-*Background knowledge and design decisions.*
+_Background knowledge and design decisions._
 
 #### Architecture
 
@@ -70,7 +71,8 @@ Welcome to the Txlog Server documentation. This documentation is divided into fo
 #### Deep Dives
 
 - **[LDAP Authentication Deep Dive](explanation/ldap-deep-dive.md)**: Comprehensive guide to how LDAP auth works.
-- **[LDAP Implementation Details](explanation/ldap-implementation-details.md)**: Internal code structure of the LDAP module.
+- **[LDAP Implementation Details](explanation/ldap-implementation-details.md)**: Internal code structure of the LDAP
+  module.
 - **[LDAP Service Accounts FAQ](explanation/ldap-service-account-faq.md)**: Best practices for bind accounts.
 - **[Testing Strategy](explanation/testing-strategy.md)**: Overview of the test suite and coverage goals.
 
@@ -85,8 +87,7 @@ The `docs/` directory also contains useful scripts for administrators:
 
 ## 🔌 API Documentation (Swagger)
 
-When the server is running, interactive API documentation is available at:
-`http://localhost:8080/swagger/index.html`
+When the server is running, interactive API documentation is available at: `http://localhost:8080/swagger/index.html`
 
 - **Source**: `docs/docs.go` (Generated from code comments)
 - **Update**: Run `make doc` to regenerate.
@@ -95,4 +96,5 @@ When the server is running, interactive API documentation is available at:
 
 ## 🤝 Contributing
 
-When adding new features, please update the relevant documentation sections above. Ensure all Markdown files pass `markdownlint`.
+When adding new features, please update the relevant documentation sections above. Ensure all Markdown files pass
+`markdownlint`.

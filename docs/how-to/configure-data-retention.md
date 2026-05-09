@@ -26,13 +26,13 @@ Defines **when** the cleanup job runs (Cron syntax).
 1. Open your `.env` file (or deployment configuration).
 2. Add or update the variables:
 
-    ```bash
-    # Keep data for 30 days
-    CRON_RETENTION_DAYS=30
+   ```bash
+   # Keep data for 30 days
+   CRON_RETENTION_DAYS=30
 
-    # Run cleanup every Sunday at 3:00 AM
-    CRON_RETENTION_EXPRESSION=0 3 * * 0
-    ```
+   # Run cleanup every Sunday at 3:00 AM
+   CRON_RETENTION_EXPRESSION=0 3 * * 0
+   ```
 
 3. Restart the server for changes to take effect.
 

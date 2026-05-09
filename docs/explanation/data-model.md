@@ -75,8 +75,8 @@ erDiagram
 
 You might notice that `transactions` use a composite primary key (`transaction_id`, `machine_id`).
 
-- **Reason**: The `transaction_id` comes from the RPM database (BDB/Sqlite) on the client machine. It is unique *per
-  machine* but not globally.
+- **Reason**: The `transaction_id` comes from the RPM database (BDB/Sqlite) on the client machine. It is unique _per
+  machine_ but not globally.
 - **Impact**: To uniquely identify a transaction globally, we must combine the local ID with the machine's unique ID.
 
 ### Why Immutable History?

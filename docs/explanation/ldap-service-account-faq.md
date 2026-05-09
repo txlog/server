@@ -150,13 +150,13 @@ ldapsearch -H ldap://your-ldap:389 \
 
 ## Recommendations by server type
 
-| LDAP Server | Recommendation | Reason |
-| --- | --- | --- |
-| **OpenLDAP** (default) | ✅ WITHOUT service account | Anonymous bind enabled by default |
-| **OpenLDAP** (hardened) | ⚠️ WITH service account | Anonymous bind disabled |
-| **Active Directory** | ⚠️ WITH service account | Requires authentication for searches |
-| **FreeIPA** | ⚠️ WITH service account | More restrictive policies |
-| **389 Directory** | ✅ WITHOUT service account | Usually allows anonymous |
+| LDAP Server             | Recommendation             | Reason                               |
+| ----------------------- | -------------------------- | ------------------------------------ |
+| **OpenLDAP** (default)  | ✅ WITHOUT service account | Anonymous bind enabled by default    |
+| **OpenLDAP** (hardened) | ⚠️ WITH service account    | Anonymous bind disabled              |
+| **Active Directory**    | ⚠️ WITH service account    | Requires authentication for searches |
+| **FreeIPA**             | ⚠️ WITH service account    | More restrictive policies            |
+| **389 Directory**       | ✅ WITHOUT service account | Usually allows anonymous             |
 
 ## Can I change later?
 
@@ -231,13 +231,13 @@ LDAP_BIND_PASSWORD=service_account_password
 
 ## Conclusion
 
-| Criteria | WITHOUT Service Account | WITH Service Account |
-| --- | --- | --- |
-| **Simplicity** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **Security** | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Compatibility** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Auditing** | ⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Maintenance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ |
+| Criteria          | WITHOUT Service Account | WITH Service Account |
+| ----------------- | ----------------------- | -------------------- |
+| **Simplicity**    | ⭐⭐⭐⭐⭐              | ⭐⭐⭐               |
+| **Security**      | ⭐⭐⭐⭐                | ⭐⭐⭐⭐⭐           |
+| **Compatibility** | ⭐⭐⭐                  | ⭐⭐⭐⭐⭐           |
+| **Auditing**      | ⭐⭐                    | ⭐⭐⭐⭐⭐           |
+| **Maintenance**   | ⭐⭐⭐⭐⭐              | ⭐⭐⭐               |
 
 **Quick Answer:**
 

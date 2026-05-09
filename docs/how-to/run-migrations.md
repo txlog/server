@@ -13,7 +13,7 @@ This is the safest and easiest way to apply migrations.
 
 1. Log in to the **Admin Panel** (`/admin`) as an administrator.
 2. Locate the **Migration Status** section.
-    - It will show the "Current Version" and a list of "Pending Migrations".
+   - It will show the "Current Version" and a list of "Pending Migrations".
 3. If there are pending migrations, a **Run Migrations** button will be visible.
 4. Click **Run Migrations**.
 5. The page will reload, and the status should show all migrations as "Applied".

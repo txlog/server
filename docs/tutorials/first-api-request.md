@@ -14,8 +14,8 @@ retrieve a list of registered machines.
 By default, when running in development mode (without OIDC or LDAP configured), the API endpoints are **open** and do
 not require an API key.
 
-If you were running in production with authentication enabled, you would need to include the `X-API-Key` header in
-your requests.
+If you were running in production with authentication enabled, you would need to include the `X-API-Key` header in your
+requests.
 
 ## Step 1: Check Server Version
 
@@ -35,7 +35,7 @@ curl http://localhost:8080/v1/version
 }
 ```
 
-*(Note: The actual version number may vary depending on the build).*
+_(Note: The actual version number may vary depending on the build)._
 
 ## Step 2: List Machines
 

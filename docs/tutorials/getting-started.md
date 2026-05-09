@@ -44,8 +44,8 @@ This command:
 
 ## Step 3: Configure the Environment
 
-Create a `.env` file in the root of the project to configure the server. You can copy the following configuration,
-which matches the database we just started:
+Create a `.env` file in the root of the project to configure the server. You can copy the following configuration, which
+matches the database we just started:
 
 ```bash
 # Server Configuration
@@ -69,7 +69,8 @@ CRON_STATS_EXPRESSION=0 * * * *
 CRON_OSV_EXPRESSION=0 4 * * *
 ```
 
-> **Note**: We set `PGSQL_SSLMODE=disable` because the standard Postgres Docker image does not have SSL configured by default.
+> **Note**: We set `PGSQL_SSLMODE=disable` because the standard Postgres Docker image does not have SSL configured by
+> default.
 
 ## Step 4: Install Dependencies and Tools
 

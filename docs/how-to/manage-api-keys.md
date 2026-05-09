@@ -6,7 +6,8 @@ revoke, and delete them.
 ## Prerequisites
 
 - You must be logged in as an **Admin** (via OIDC or LDAP).
-- If no authentication is configured on the server, API keys are **not required** for agents, and this section is not applicable.
+- If no authentication is configured on the server, API keys are **not required** for agents, and this section is not
+  applicable.
 
 ## Creating an API Key
 
@@ -16,7 +17,7 @@ revoke, and delete them.
 4. Enter a **Name** for the new key (e.g., "Production Cluster A").
 5. Click **Create API Key**.
 6. **IMPORTANT**: A modal or message will appear showing the full API Key (e.g., `txlog_sk_...`). **Copy this key
-    immediately**. It will never be shown again.
+   immediately**. It will never be shown again.
 
 ## Revoking an API Key
 
@@ -38,5 +39,5 @@ Deleting a key removes it permanently from the database.
 
 ## Using the API Key
 
-Configure your Txlog Agent to use the key by setting the `TXLOG_API_KEY` environment variable or configuration option
-on the agent side.
+Configure your Txlog Agent to use the key by setting the `TXLOG_API_KEY` environment variable or configuration option on
+the agent side.

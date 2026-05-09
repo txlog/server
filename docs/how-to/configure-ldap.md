@@ -1,6 +1,7 @@
 # How to Configure LDAP Authentication
 
-This guide explains how to connect Txlog Server to an LDAP directory (like Active Directory or OpenLDAP) for user authentication.
+This guide explains how to connect Txlog Server to an LDAP directory (like Active Directory or OpenLDAP) for user
+authentication.
 
 ## Prerequisites
 
@@ -14,39 +15,38 @@ This guide explains how to connect Txlog Server to an LDAP directory (like Activ
 
 2. **Set the LDAP connection variables**:
 
-    ```bash
-    # Connection details
-    LDAP_HOST=ldap.example.com
-    LDAP_PORT=389 # or 636 for LDAPS
-    LDAP_USE_TLS=false # Set to true for LDAPS
+   ```bash
+   # Connection details
+   LDAP_HOST=ldap.example.com
+   LDAP_PORT=389 # or 636 for LDAPS
+   LDAP_USE_TLS=false # Set to true for LDAPS
 
-    LDAP_BIND_DN=cn=admin,dc=example,dc=com
-    LDAP_BIND_PASSWORD=secret
-    ```
+   LDAP_BIND_DN=cn=admin,dc=example,dc=com
+   LDAP_BIND_PASSWORD=secret
+   ```
 
-    > [!IMPORTANT]
-    > Txlog Server always verifies the TLS certificate when `LDAP_USE_TLS=true`.
-    > Ensure your server's certificate is valid and trusted by the Txlog Server
-    > host. Insecure/skip-verify modes are not supported for security reasons.
+   > [!IMPORTANT] Txlog Server always verifies the TLS certificate when `LDAP_USE_TLS=true`. Ensure your server's
+   > certificate is valid and trusted by the Txlog Server host. Insecure/skip-verify modes are not supported for
+   > security reasons.
 
 3. **Set the Search and Group variables**:
 
-    ```bash
-    # Where to search for users
-    LDAP_BASE_DN=ou=users,dc=example,dc=com
+   ```bash
+   # Where to search for users
+   LDAP_BASE_DN=ou=users,dc=example,dc=com
 
-    # Filter to find a user by their username (input from login form)
-    LDAP_USER_FILTER=(uid=%s)
-    # For Active Directory, often: (sAMAccountName=%s)
+   # Filter to find a user by their username (input from login form)
+   LDAP_USER_FILTER=(uid=%s)
+   # For Active Directory, often: (sAMAccountName=%s)
 
-    # Group Mapping (At least one is required)
-    LDAP_ADMIN_GROUP=cn=txlog-admins,ou=groups,dc=example,dc=com
-    LDAP_VIEWER_GROUP=cn=txlog-viewers,ou=groups,dc=example,dc=com
+   # Group Mapping (At least one is required)
+   LDAP_ADMIN_GROUP=cn=txlog-admins,ou=groups,dc=example,dc=com
+   LDAP_VIEWER_GROUP=cn=txlog-viewers,ou=groups,dc=example,dc=com
 
-    # Filter to check group membership
-    LDAP_GROUP_FILTER=(member=%s)
-    # For Active Directory with nested groups, you might need a custom filter.
-    ```
+   # Filter to check group membership
+   LDAP_GROUP_FILTER=(member=%s)
+   # For Active Directory with nested groups, you might need a custom filter.
+   ```
 
 4. **Restart the Server**.
 

@@ -30,21 +30,21 @@ The tests require a PostgreSQL database. By default, they expect a database name
 
 1. **Create the Test Database**:
 
-    ```bash
-    createdb txlog_test
-    ```
+   ```bash
+   createdb txlog_test
+   ```
 
-    *(Or use your preferred method to create a Postgres DB)*.
+   _(Or use your preferred method to create a Postgres DB)_.
 
-2. **Connection String**:
-    The tests use the following default connection string:
-    `host=localhost port=5432 user=postgres password=postgres dbname=txlog_test sslmode=disable`
+2. **Connection String**: The tests use the following default connection string:
+   `host=localhost port=5432 user=postgres password=postgres dbname=txlog_test sslmode=disable`
 
-    If your local setup is different, you may need to modify the `setupTestDB` helper in the test files.
+   If your local setup is different, you may need to modify the `setupTestDB` helper in the test files.
 
 ## Integration Tests
 
-Integration tests in the `tests/` directory simulate full user scenarios. They are slower but verify the system end-to-end.
+Integration tests in the `tests/` directory simulate full user scenarios. They are slower but verify the system
+end-to-end.
 
 ```bash
 go test ./tests -v

@@ -8,7 +8,7 @@ distributed agents.
 The system follows a classic **Client-Server** architecture:
 
 1. **Agents (Clients)**: Installed on servers (Linux RPM-based). They collect DNF/YUM transaction history and system
-    metadata and push it to the server via HTTP/JSON.
+   metadata and push it to the server via HTTP/JSON.
 2. **Server**: A monolithic Go application that receives data, processes it, and stores it in a relational database.
 3. **Database**: PostgreSQL serves as the single source of truth for all data.
 
@@ -32,33 +32,42 @@ graph LR
 
 ### 1. Asset Management (Logical vs. Physical Identity)
 
-One of the core challenges in infrastructure monitoring is distinguishing between a *logical* server
-(e.g., "web-01") and its *physical* instantiation.
+One of the core challenges in infrastructure monitoring is distinguishing between a _logical_ server (e.g., "web-01")
+and its _physical_ instantiation.
 
-- **Problem**: If "web-01" is re-imaged, it generates a new `/etc/machine-id`. To a naive system,
-    this looks like a new server, breaking history continuity.
-- **Solution**: The `AssetManager` (`models/asset_manager.go`) implements a logic to link
-    `hostname` (logical ID) with `machine_id` (physical ID).
-  - When a new `machine_id` reports with an existing `hostname`, the system automatically
-        "deactivates" the old asset and creates a new active one.
-  - This preserves the history of "web-01" across re-installations while maintaining an accurate
-        audit trail of physical changes.
+- **Problem**: If "web-01" is re-imaged, it generates a new `/etc/machine-id`. To a naive system, this looks like a new
+  server, breaking history continuity.
+- **Solution**: The `AssetManager` (`models/asset_manager.go`) implements a logic to link `hostname` (logical ID) with
+  `machine_id` (physical ID).
+  - When a new `machine_id` reports with an existing `hostname`, the system automatically "deactivates" the old asset
+    and creates a new active one.
+  - This preserves the history of "web-01" across re-installations while maintaining an accurate audit trail of physical
+    changes.
 
 ### 2. Distributed Scheduler
 
-The server includes a built-in scheduler (`scheduler/main.go`) for background tasks like data
-retention cleanup and statistics calculation.
+The server includes a built-in scheduler (`scheduler/main.go`) for background tasks like data retention cleanup and
+statistics calculation.
 
-- **Challenge**: In a high-availability deployment (e.g., Kubernetes with 3 replicas), we cannot
-    have all 3 instances running the cleanup job simultaneously.
+- **Challenge**: In a high-availability deployment (e.g., Kubernetes with 3 replicas), we cannot have all 3 instances
+  running the cleanup job simultaneously.
 - **Solution**: **Distributed Locking via Database**.
   - Before running a job, the instance attempts to acquire a named lock in the `cron_lock` table
-        (`INSERT ... ON CONFLICT DO NOTHING`).
+    (`INSERT ... ON CONFLICT DO NOTHING`).
   - Only the instance that successfully inserts the row executes the job.
-  - This allows the scheduler to be simple (no external dependencies like Redis) yet robust for
-        clustered deployments.
+  - This allows the scheduler to be simple (no external dependencies like Redis) yet robust for clustered deployments.
 
-### 3. Authentication Strategy
+### 3. Context-Aware Database Operations
+
+To ensure system resilience under heavy load and prevent resource exhaustion:
+
+- All database queries and transactions are strictly context-aware (`QueryContext`, `BeginTx`).
+- This allows operations to be immediately canceled if the client disconnects or if a request times out, preventing
+  goroutine leaks and database connection pool starvation.
+- The architecture uses dependency injection for database connections, decoupling controllers and scheduled jobs from
+  global state and improving testability.
+
+### 4. Authentication Strategy
 
 The system supports a hybrid authentication model to cater to different user needs:
 
@@ -69,22 +78,18 @@ The system supports a hybrid authentication model to cater to different user nee
 
 The server implements several layers of security hardening:
 
-1. **Cookie Security**: All session and authentication cookies are protected
-   with `SameSite=Lax`. When the server is running in production mode
-   (`GIN_MODE=release`), cookies are also marked as `Secure`.
-2. **CSRF Mitigation**: State-mutating operations use `POST` requests, which are
-   protected by the `SameSite=Lax` cookie policy.
-3. **No-Leak Error Handling**: API responses to clients use generic error
-   messages. Detailed database or internal errors are only visible in
-   server-side logs.
-4. **Mandatory TLS Verification**: The server always verifies TLS certificates
-   when connecting to external OIDC providers or LDAP servers. Insecure "skip
-   verify" modes are not supported.
-5. **RBAC for Destructive Actions**: Destructive operations, such as deleting an
-   asset or running database migrations, are strictly restricted to the
-   Administrator role.
-6. **Credential Masking**: Sensitive configuration values are masked in the UI
-   with fixed-length strings to prevent leaking credential lengths.
+1. **Cookie Security**: All session and authentication cookies are protected with `SameSite=Lax`. When the server is
+   running in production mode (`GIN_MODE=release`), cookies are also marked as `Secure`.
+2. **CSRF Mitigation**: State-mutating operations use `POST` requests, which are protected by the `SameSite=Lax` cookie
+   policy.
+3. **No-Leak Error Handling**: API responses to clients use generic error messages. Detailed database or internal errors
+   are only visible in server-side logs.
+4. **Mandatory TLS Verification**: The server always verifies TLS certificates when connecting to external OIDC
+   providers or LDAP servers. Insecure "skip verify" modes are not supported.
+5. **RBAC for Destructive Actions**: Destructive operations, such as deleting an asset or running database migrations,
+   are strictly restricted to the Administrator role.
+6. **Credential Masking**: Sensitive configuration values are masked in the UI with fixed-length strings to prevent
+   leaking credential lengths.
 
 ### Ingestion Pipeline
 

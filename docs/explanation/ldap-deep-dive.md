@@ -1,33 +1,27 @@
 # LDAP Authentication Guide
 
-This document explains how to configure and use LDAP authentication with Txlog
-Server.
+This document explains how to configure and use LDAP authentication with Txlog Server.
 
 ## Overview
 
-Txlog Server now supports LDAP (Lightweight Directory Access Protocol)
-authentication in addition to the existing OIDC authentication. LDAP
-authentication allows users to log in using their enterprise directory
-credentials with group-based access control.
+Txlog Server now supports LDAP (Lightweight Directory Access Protocol) authentication in addition to the existing OIDC
+authentication. LDAP authentication allows users to log in using their enterprise directory credentials with group-based
+access control.
 
 ## Features
 
-- **Username/Password Authentication**: Users authenticate with their LDAP
-  credentials
+- **Username/Password Authentication**: Users authenticate with their LDAP credentials
 - **Group-Based Authorization**: Define admin and viewer groups in LDAP
 - **Flexible Configuration**: Support for various LDAP server configurations
 - **TLS Support**: Optional TLS/LDAPS connections
-- **Service Account Binding**: Optional service account for group membership
-  lookups
-- **Dual Authentication**: Can be enabled alongside OIDC, allowing users to
-  choose their preferred method
+- **Service Account Binding**: Optional service account for group membership lookups
+- **Dual Authentication**: Can be enabled alongside OIDC, allowing users to choose their preferred method
 
 ## Configuration
 
 ### Required Environment Variables
 
-The following environment variables are **required** to enable LDAP
-authentication:
+The following environment variables are **required** to enable LDAP authentication:
 
 ```bash
 LDAP_HOST=ldap.example.com          # LDAP server hostname
@@ -81,8 +75,8 @@ Users in the **viewer group** have read-only access to:
 - View assets and packages
 - View insights and statistics
 
-**Note**: A user can be a member of both groups. If a user is in the admin
-group, they will have admin privileges regardless of viewer group membership.
+**Note**: A user can be a member of both groups. If a user is in the admin group, they will have admin privileges
+regardless of viewer group membership.
 
 ## Configuration Examples
 
@@ -188,7 +182,8 @@ LDAP_ADMIN_GROUP=cn=admins,ou=groups,dc=example,dc=com
 LDAP_VIEWER_GROUP=cn=viewers,ou=groups,dc=example,dc=com
 ```
 
-When both are enabled, users will see a login page where they can choose between LDAP (username/password) or OIDC authentication.
+When both are enabled, users will see a login page where they can choose between LDAP (username/password) or OIDC
+authentication.
 
 ## LDAP Attribute Mapping
 
@@ -336,7 +331,7 @@ docker run -d -p 8080:8080 \
 Or use Docker Compose:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   txlog-server:
     image: ghcr.io/txlog/server:main

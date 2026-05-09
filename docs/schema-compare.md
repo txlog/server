@@ -2,31 +2,25 @@
 
 ## 1. Problem Statement
 
-The Txlog Server uses [golang-migrate](https://github.com/golang-migrate/migrate)
-for database schema management. This tool tracks only the **version number** of
-the most recently applied migration in a `schema_migrations` table. It does not
-validate whether the actual database schema matches the expected state.
+The Txlog Server uses [golang-migrate](https://github.com/golang-migrate/migrate) for database schema management. This
+tool tracks only the **version number** of the most recently applied migration in a `schema_migrations` table. It does
+not validate whether the actual database schema matches the expected state.
 
 This leads to several failure modes:
 
-- A migration is marked as applied but **failed mid-execution** (dirty state
-  with partial changes)
-- A migration was applied to a **different database** than the one currently
-  connected
-- Manual `ALTER TABLE` statements were executed directly, **diverging** from the
-  migration history
-- The `schema_migrations` table shows version N, but a migration between 1 and
-  N was **skipped** or only partially applied
+- A migration is marked as applied but **failed mid-execution** (dirty state with partial changes)
+- A migration was applied to a **different database** than the one currently connected
+- Manual `ALTER TABLE` statements were executed directly, **diverging** from the migration history
+- The `schema_migrations` table shows version N, but a migration between 1 and N was **skipped** or only partially
+  applied
 
-Currently, the application discovers these issues at runtime through PostgreSQL
-errors like `column X does not exist (42703)`, which result in 500 errors for
-end users.
+Currently, the application discovers these issues at runtime through PostgreSQL errors like
+`column X does not exist (42703)`, which result in 500 errors for end users.
 
 ## 2. Proposed Solution
 
-Embed a **schema snapshot** (JSON) into the compiled binary at build time. At
-runtime, compare this expected schema against the actual production database
-using `information_schema` and `pg_catalog` queries.
+Embed a **schema snapshot** (JSON) into the compiled binary at build time. At runtime, compare this expected schema
+against the actual production database using `information_schema` and `pg_catalog` queries.
 
 ### 2.1 Architecture Overview
 
@@ -58,14 +52,12 @@ using `information_schema` and `pg_catalog` queries.
 
 ### 2.2 Why Not pgdiff/migra?
 
-Both [pgdiff](https://github.com/joncrlsn/pgdiff) and
-[migra](https://github.com/djrobstep/migra) require **two live database
-connections simultaneously**. They cannot work with a schema snapshot file.
-Since CI/CD does not have access to the production database, these tools cannot
-be used in the build pipeline.
+Both [pgdiff](https://github.com/joncrlsn/pgdiff) and [migra](https://github.com/djrobstep/migra) require **two live
+database connections simultaneously**. They cannot work with a schema snapshot file. Since CI/CD does not have access to
+the production database, these tools cannot be used in the build pipeline.
 
-Our approach achieves the same result by splitting the comparison into two
-phases: **capture** (CI) and **validate** (runtime).
+Our approach achieves the same result by splitting the comparison into two phases: **capture** (CI) and **validate**
+(runtime).
 
 ## 3. Data Structures
 
@@ -221,9 +213,8 @@ type SchemaDiff struct {
 
 ### 4.1 Purpose
 
-A standalone Go program that connects to a database, queries the schema
-metadata, and writes a JSON snapshot file. This runs in CI after all
-migrations are applied to an ephemeral database.
+A standalone Go program that connects to a database, queries the schema metadata, and writes a JSON snapshot file. This
+runs in CI after all migrations are applied to an ephemeral database.
 
 ### 4.2 Location
 
@@ -387,8 +378,8 @@ DATABASE_URL="postgres://postgres:check@localhost:5433/txlog_expected?sslmode=di
 
 ### 5.1 Purpose
 
-Runs at application runtime. Loads the embedded JSON snapshot, queries the
-production database's `information_schema`, and returns a list of differences.
+Runs at application runtime. Loads the embedded JSON snapshot, queries the production database's `information_schema`,
+and returns a list of differences.
 
 ### 5.2 Location
 
@@ -670,63 +661,59 @@ func queryActualMatViews(db *sql.DB) ([]MatViewSchema, error) {
 
 ### 6.1 GitHub Actions Changes
 
-Add the following steps to `.github/workflows/build.yml`, **before** the
-Go compile step:
+Add the following steps to `.github/workflows/build.yml`, **before** the Go compile step:
 
 ```yaml
-    - name: Start ephemeral PostgreSQL
-      run: |
-        docker run -d --name pg_schema \
-          -e POSTGRES_DB=txlog_expected \
-          -e POSTGRES_USER=postgres \
-          -e POSTGRES_PASSWORD=check \
-          -p 5433:5432 \
-          postgres:17
-        # Wait for PostgreSQL to be ready
-        for i in $(seq 1 30); do
-          docker exec pg_schema pg_isready -U postgres && break
-          sleep 1
-        done
+- name: Start ephemeral PostgreSQL
+  run: |
+    docker run -d --name pg_schema \
+      -e POSTGRES_DB=txlog_expected \
+      -e POSTGRES_USER=postgres \
+      -e POSTGRES_PASSWORD=check \
+      -p 5433:5432 \
+      postgres:17
+    # Wait for PostgreSQL to be ready
+    for i in $(seq 1 30); do
+      docker exec pg_schema pg_isready -U postgres && break
+      sleep 1
+    done
 
-    - name: Run migrations on ephemeral DB
-      run: |
-        go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-        migrate -path database/migrations \
-          -database "postgres://postgres:check@localhost:5433/txlog_expected?sslmode=disable" up
+- name: Run migrations on ephemeral DB
+  run: |
+    go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+    migrate -path database/migrations \
+      -database "postgres://postgres:check@localhost:5433/txlog_expected?sslmode=disable" up
 
-    - name: Generate schema snapshot
-      run: |
-        DATABASE_URL="postgres://postgres:check@localhost:5433/txlog_expected?sslmode=disable" \
-          go run tools/schema-snapshot/main.go database/expected_schema.json
+- name: Generate schema snapshot
+  run: |
+    DATABASE_URL="postgres://postgres:check@localhost:5433/txlog_expected?sslmode=disable" \
+      go run tools/schema-snapshot/main.go database/expected_schema.json
 
-    - name: Cleanup ephemeral PostgreSQL
-      run: docker rm -f pg_schema
-      if: always()
+- name: Cleanup ephemeral PostgreSQL
+  run: docker rm -f pg_schema
+  if: always()
 ```
 
 Alternatively, use GitHub Actions' built-in `services` for PostgreSQL:
 
 ```yaml
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_DB: txlog_expected
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: check
-        ports:
-          - 5433:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+services:
+  postgres:
+    image: postgres:17
+    env:
+      POSTGRES_DB: txlog_expected
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: check
+    ports:
+      - 5433:5432
+    options: >-
+      --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 ```
 
 ### 6.2 Build Order
 
-The build order is critical. The schema snapshot must be generated **before**
-`go build` so that `//go:embed` includes the JSON in the binary:
+The build order is critical. The schema snapshot must be generated **before** `go build` so that `//go:embed` includes
+the JSON in the binary:
 
 ```text
 1. Build Tailwind CSS         (make css)
@@ -740,9 +727,8 @@ The build order is critical. The schema snapshot must be generated **before**
 
 ### 6.3 Development Builds
 
-For local development, `expected_schema.json` won't exist unless the developer
-runs the snapshot tool manually. The `LoadExpectedSchema()` function returns
-`nil` in this case, and the validator is simply skipped. No impact on dev
+For local development, `expected_schema.json` won't exist unless the developer runs the snapshot tool manually. The
+`LoadExpectedSchema()` function returns `nil` in this case, and the validator is simply skipped. No impact on dev
 workflow.
 
 To generate it locally:
@@ -778,8 +764,7 @@ schema-snapshot:
 
 ### 7.1 Controller Changes
 
-In `controllers/admin_controller.go`, add schema validation to the admin
-handler:
+In `controllers/admin_controller.go`, add schema validation to the admin handler:
 
 ```go
 // In the admin handler, after getting migration status:
@@ -795,8 +780,7 @@ data["schemaValidated"] = (err == nil && schemaDiffs != nil)
 
 ### 7.2 Template Changes
 
-Add a new section in `templates/admin.html` after the Database Migrations
-section:
+Add a new section in `templates/admin.html` after the Database Migrations section:
 
 ```html
 <!-- Schema Validation -->
@@ -806,9 +790,7 @@ section:
     <h3 class="font-display font-semibold text-lg">Schema Validation</h3>
     <div class="flex gap-2">
       {{ if eq (len .schemaDiffs) 0 }}
-      <span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-3 py-1 rounded-lg">
-        Schema OK
-      </span>
+      <span class="bg-txlog-leaf/10 text-txlog-leaf text-xs font-bold px-3 py-1 rounded-lg"> Schema OK </span>
       {{ else }}
       <span class="bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-3 py-1 rounded-lg">
         {{ len .schemaDiffs }} differences
@@ -823,21 +805,18 @@ section:
       <div>
         <h4 class="font-semibold text-sm mb-1">Schema Verified</h4>
         <p class="text-sm text-txlog-indigo/60">
-          The database schema matches the expected state from build
-          {{ .schemaVersion }}.
+          The database schema matches the expected state from build {{ .schemaVersion }}.
         </p>
       </div>
     </div>
     {{ else }}
     <div class="bg-txlog-coral/5 border border-txlog-coral/20 rounded-2xl p-4 mb-4">
       <div class="flex gap-3">
-        <i data-lucide="triangle-alert"
-           class="w-5 h-5 text-txlog-coral flex-shrink-0 mt-0.5"></i>
+        <i data-lucide="triangle-alert" class="w-5 h-5 text-txlog-coral flex-shrink-0 mt-0.5"></i>
         <div>
           <h4 class="font-semibold text-sm mb-1">Schema Divergence Detected</h4>
           <p class="text-sm text-txlog-indigo/60">
-            The production database does not match the expected schema.
-            This may indicate failed or missing migrations.
+            The production database does not match the expected schema. This may indicate failed or missing migrations.
           </p>
         </div>
       </div>
@@ -846,14 +825,30 @@ section:
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-txlog-lavender/50 text-left">
-            <th class="px-4 py-3 font-semibold text-txlog-indigo/70
-                       text-xs uppercase tracking-wider">Status</th>
-            <th class="px-4 py-3 font-semibold text-txlog-indigo/70
-                       text-xs uppercase tracking-wider">Type</th>
-            <th class="px-4 py-3 font-semibold text-txlog-indigo/70
-                       text-xs uppercase tracking-wider">Object</th>
-            <th class="px-4 py-3 font-semibold text-txlog-indigo/70
-                       text-xs uppercase tracking-wider">Details</th>
+            <th
+              class="px-4 py-3 font-semibold text-txlog-indigo/70
+                       text-xs uppercase tracking-wider"
+            >
+              Status
+            </th>
+            <th
+              class="px-4 py-3 font-semibold text-txlog-indigo/70
+                       text-xs uppercase tracking-wider"
+            >
+              Type
+            </th>
+            <th
+              class="px-4 py-3 font-semibold text-txlog-indigo/70
+                       text-xs uppercase tracking-wider"
+            >
+              Object
+            </th>
+            <th
+              class="px-4 py-3 font-semibold text-txlog-indigo/70
+                       text-xs uppercase tracking-wider"
+            >
+              Details
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-txlog-lavender/30">
@@ -861,21 +856,29 @@ section:
           <tr>
             <td class="px-4 py-3">
               {{ if eq .Status "missing" }}
-              <span class="bg-txlog-coral/10 text-txlog-coral text-xs
-                          font-bold px-2 py-0.5 rounded-md">Missing</span>
+              <span
+                class="bg-txlog-coral/10 text-txlog-coral text-xs
+                          font-bold px-2 py-0.5 rounded-md"
+                >Missing</span
+              >
               {{ else if eq .Status "extra" }}
-              <span class="bg-txlog-golden/10 text-txlog-golden text-xs
-                          font-bold px-2 py-0.5 rounded-md">Extra</span>
+              <span
+                class="bg-txlog-golden/10 text-txlog-golden text-xs
+                          font-bold px-2 py-0.5 rounded-md"
+                >Extra</span
+              >
               {{ else }}
-              <span class="bg-txlog-sky/10 text-txlog-sky text-xs
-                          font-bold px-2 py-0.5 rounded-md">Mismatch</span>
+              <span
+                class="bg-txlog-sky/10 text-txlog-sky text-xs
+                          font-bold px-2 py-0.5 rounded-md"
+                >Mismatch</span
+              >
               {{ end }}
             </td>
             <td class="px-4 py-3 text-txlog-indigo/60">{{ .Type }}</td>
             <td class="px-4 py-3 font-mono text-sm">{{ .Object }}</td>
             <td class="px-4 py-3 text-txlog-indigo/60 text-xs">
-              {{ if .Expected }}Expected: {{ .Expected }}{{ end }}
-              {{ if .Actual }}Actual: {{ .Actual }}{{ end }}
+              {{ if .Expected }}Expected: {{ .Expected }}{{ end }} {{ if .Actual }}Actual: {{ .Actual }}{{ end }}
             </td>
           </tr>
           {{ end }}
@@ -922,9 +925,8 @@ When differences are found:
 
 ### 8.1 Development Builds Without Snapshot
 
-When building locally without running the snapshot tool, the
-`expected_schema.json` file won't exist. The `//go:embed` directive will cause
-a **compile error**.
+When building locally without running the snapshot tool, the `expected_schema.json` file won't exist. The `//go:embed`
+directive will cause a **compile error**.
 
 Solution: Always keep a placeholder file in the repository:
 
@@ -932,9 +934,8 @@ Solution: Always keep a placeholder file in the repository:
 {}
 ```
 
-The `LoadExpectedSchema()` function detects empty/minimal JSON and returns
-`nil`, disabling validation for dev builds. Only CI-generated snapshots with
-populated data trigger validation.
+The `LoadExpectedSchema()` function detects empty/minimal JSON and returns `nil`, disabling validation for dev builds.
+Only CI-generated snapshots with populated data trigger validation.
 
 Alternatively, use a build tag:
 
@@ -959,60 +960,54 @@ CI builds with `-tags schema_check`, dev builds without.
 
 ### 8.2 Schema Changes Between Build and Deploy
 
-If a migration is applied between the time the binary is built and when it's
-deployed, the validator will report "extra" columns/indices. This is expected
-and not harmful — it means the database is *ahead* of the binary.
+If a migration is applied between the time the binary is built and when it's deployed, the validator will report "extra"
+columns/indices. This is expected and not harmful — it means the database is _ahead_ of the binary.
 
 ### 8.3 Sequences and Constraints
 
-The current design intentionally **excludes** sequences, constraints (foreign
-keys, check constraints), and triggers. These are harder to compare
-meaningfully and rarely the source of migration failures. They can be added
-later if needed.
+The current design intentionally **excludes** sequences, constraints (foreign keys, check constraints), and triggers.
+These are harder to compare meaningfully and rarely the source of migration failures. They can be added later if needed.
 
 ### 8.4 Column Order
 
-PostgreSQL does not guarantee column order. The comparison should be done by
-**column name**, not by position. The provided implementation already does
-this (uses maps keyed by column name).
+PostgreSQL does not guarantee column order. The comparison should be done by **column name**, not by position. The
+provided implementation already does this (uses maps keyed by column name).
 
 ## 9. Files to Create
 
-| File | Purpose |
-| --- | --- |
-| `database/schema.go` | Type definitions (SchemaSnapshot, SchemaDiff, etc.) |
-| `database/schema_validator.go` | Comparison logic + embed directive |
-| `database/expected_schema.json` | Placeholder (empty JSON `{}`) |
-| `tools/schema-snapshot/main.go` | CLI tool to generate snapshot |
+| File                            | Purpose                                             |
+| ------------------------------- | --------------------------------------------------- |
+| `database/schema.go`            | Type definitions (SchemaSnapshot, SchemaDiff, etc.) |
+| `database/schema_validator.go`  | Comparison logic + embed directive                  |
+| `database/expected_schema.json` | Placeholder (empty JSON `{}`)                       |
+| `tools/schema-snapshot/main.go` | CLI tool to generate snapshot                       |
 
 ## 10. Files to Modify
 
-| File | Change |
-| --- | --- |
-| `.github/workflows/build.yml` | Add PostgreSQL service + snapshot generation steps |
-| `Makefile` | Add `schema-snapshot` target |
-| `controllers/admin_controller.go` | Call validator, pass results to template |
-| `templates/admin.html` | Add Schema Validation section |
-| `.gitignore` | Optionally ignore `expected_schema.json` (generated file) |
+| File                              | Change                                                    |
+| --------------------------------- | --------------------------------------------------------- |
+| `.github/workflows/build.yml`     | Add PostgreSQL service + snapshot generation steps        |
+| `Makefile`                        | Add `schema-snapshot` target                              |
+| `controllers/admin_controller.go` | Call validator, pass results to template                  |
+| `templates/admin.html`            | Add Schema Validation section                             |
+| `.gitignore`                      | Optionally ignore `expected_schema.json` (generated file) |
 
 ## 11. Estimated Effort
 
-| Component | Lines of Code | Complexity |
-| --- | --- | --- |
-| Type definitions | ~50 | Low |
-| Snapshot tool | ~120 | Low |
-| Validator | ~180 | Medium |
-| CI/CD changes | ~25 | Low |
-| Admin template | ~60 | Low |
-| Admin controller | ~15 | Low |
-| **Total** | **~450** | **Medium** |
+| Component        | Lines of Code | Complexity |
+| ---------------- | ------------- | ---------- |
+| Type definitions | ~50           | Low        |
+| Snapshot tool    | ~120          | Low        |
+| Validator        | ~180          | Medium     |
+| CI/CD changes    | ~25           | Low        |
+| Admin template   | ~60           | Low        |
+| Admin controller | ~15           | Low        |
+| **Total**        | **~450**      | **Medium** |
 
 ## 12. Future Enhancements
 
-- **Constraint validation**: Compare foreign keys, unique constraints, check
-  constraints
+- **Constraint validation**: Compare foreign keys, unique constraints, check constraints
 - **Auto-fix**: Generate and offer to run the SQL needed to fix divergences
 - **API endpoint**: `/api/v1/schema/validate` for monitoring/alerting
 - **Scheduled checks**: Run validation periodically and log warnings
-- **Notification**: Send alert (webhook/email) when schema divergence is
-  detected at startup
+- **Notification**: Send alert (webhook/email) when schema divergence is detected at startup

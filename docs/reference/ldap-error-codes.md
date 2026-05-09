@@ -4,8 +4,8 @@
 
 ### 🔍 What does it mean?
 
-The error **"LDAP Result Code 32: No Such Object"** means that the LDAP server **could not find the object**
-(user, group, or DN) you are trying to access. It is like looking for a file that does not exist in a directory.
+The error **"LDAP Result Code 32: No Such Object"** means that the LDAP server **could not find the object** (user,
+group, or DN) you are trying to access. It is like looking for a file that does not exist in a directory.
 
 ### 📍 Where Can It Occur?
 
@@ -182,13 +182,13 @@ time=... level=ERROR msg="LDAP search failed: LDAP Result Code 32 \"No Such Obje
 
 The logs show which operation failed:
 
-| Log Message | Incorrect DN | .env Variable |
-| --- | --- | --- |
-| "LDAP user search: baseDN=..." | Base DN | `LDAP_BASE_DN` |
-| "Binding with service account: ..." | Bind DN | `LDAP_BIND_DN` |
-| "LDAP search failed: ... filter=(uid=...)" | Base DN | `LDAP_BASE_DN` |
-| "Failed to check admin group membership" | Admin Group | `LDAP_ADMIN_GROUP` |
-| "Failed to check viewer group membership" | Viewer Group | `LDAP_VIEWER_GROUP` |
+| Log Message                                | Incorrect DN | .env Variable       |
+| ------------------------------------------ | ------------ | ------------------- |
+| "LDAP user search: baseDN=..."             | Base DN      | `LDAP_BASE_DN`      |
+| "Binding with service account: ..."        | Bind DN      | `LDAP_BIND_DN`      |
+| "LDAP search failed: ... filter=(uid=...)" | Base DN      | `LDAP_BASE_DN`      |
+| "Failed to check admin group membership"   | Admin Group  | `LDAP_ADMIN_GROUP`  |
+| "Failed to check viewer group membership"  | Viewer Group | `LDAP_VIEWER_GROUP` |
 
 ### Step 3: Validate the Correct DN
 
@@ -410,16 +410,16 @@ make run
 
 ## 📊 LDAP Codes Summary Table
 
-| Code | Name | Meaning | Common Solution |
-| --- | --- | --- | --- |
-| 0 | Success | Operation successful | N/A |
-| 32 | No Such Object | DN does not exist | Check DNs in .env |
-| 34 | Invalid DN Syntax | Incorrect DN format | Check commas and format |
-| 49 | Invalid Credentials | Incorrect username/password | Check credentials |
-| 50 | Insufficient Access | No permission | Adjust account ACLs |
-| 52 | Unavailable | Server unavailable | Check connectivity |
-| 53 | Unwilling to Perform | Operation not allowed | Check server policies |
-| 65 | Object Class Violation | Issue with objectClass | Check schema |
+| Code | Name                   | Meaning                     | Common Solution         |
+| ---- | ---------------------- | --------------------------- | ----------------------- |
+| 0    | Success                | Operation successful        | N/A                     |
+| 32   | No Such Object         | DN does not exist           | Check DNs in .env       |
+| 34   | Invalid DN Syntax      | Incorrect DN format         | Check commas and format |
+| 49   | Invalid Credentials    | Incorrect username/password | Check credentials       |
+| 50   | Insufficient Access    | No permission               | Adjust account ACLs     |
+| 52   | Unavailable            | Server unavailable          | Check connectivity      |
+| 53   | Unwilling to Perform   | Operation not allowed       | Check server policies   |
+| 65   | Object Class Violation | Issue with objectClass      | Check schema            |
 
 ---
 

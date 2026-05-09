@@ -4,8 +4,8 @@ This document describes the test suite for the Txlog Server asset management sys
 
 ## Overview
 
-The test suite covers the complete asset management lifecycle introduced in the v2 branch,
-including asset creation, updates, replacements, and deactivation logic.
+The test suite covers the complete asset management lifecycle introduced in the v2 branch, including asset creation,
+updates, replacements, and deactivation logic.
 
 ## Test Categories
 

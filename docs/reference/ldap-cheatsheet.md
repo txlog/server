@@ -70,19 +70,19 @@ LDAP_GROUP_FILTER=(memberUid=%s)
 
 ## Environment Variable Reference
 
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `LDAP_HOST` | Yes | - | LDAP server hostname |
-| `LDAP_PORT` | No | 389/636 | LDAP server port |
-| `LDAP_USE_TLS` | No | false | Enable TLS connection |
-| `LDAP_SKIP_TLS_VERIFY` | No | false | Skip TLS cert verification |
-| `LDAP_BIND_DN` | No | - | Service account DN (optional) |
-| `LDAP_BIND_PASSWORD` | No | - | Service account password (optional) |
-| `LDAP_BASE_DN` | Yes | - | Base DN for user searches |
-| `LDAP_USER_FILTER` | No | (uid=%s) | User search filter |
-| `LDAP_ADMIN_GROUP` | Yes* | - | Admin group DN |
-| `LDAP_VIEWER_GROUP` | Yes* | - | Viewer group DN |
-| `LDAP_GROUP_FILTER` | No | (member=%s) | Group membership filter |
+| Variable               | Required | Default     | Description                         |
+| ---------------------- | -------- | ----------- | ----------------------------------- |
+| `LDAP_HOST`            | Yes      | -           | LDAP server hostname                |
+| `LDAP_PORT`            | No       | 389/636     | LDAP server port                    |
+| `LDAP_USE_TLS`         | No       | false       | Enable TLS connection               |
+| `LDAP_SKIP_TLS_VERIFY` | No       | false       | Skip TLS cert verification          |
+| `LDAP_BIND_DN`         | No       | -           | Service account DN (optional)       |
+| `LDAP_BIND_PASSWORD`   | No       | -           | Service account password (optional) |
+| `LDAP_BASE_DN`         | Yes      | -           | Base DN for user searches           |
+| `LDAP_USER_FILTER`     | No       | (uid=%s)    | User search filter                  |
+| `LDAP_ADMIN_GROUP`     | Yes\*    | -           | Admin group DN                      |
+| `LDAP_VIEWER_GROUP`    | Yes\*    | -           | Viewer group DN                     |
+| `LDAP_GROUP_FILTER`    | No       | (member=%s) | Group membership filter             |
 
 \* At least one of `LDAP_ADMIN_GROUP` or `LDAP_VIEWER_GROUP` is required
 

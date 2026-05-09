@@ -68,23 +68,23 @@ LDAP_GROUP_FILTER=(memberUid=%s)
 
 ### USER_FILTER - By System
 
-| System | Attribute | Filter |
-| --- | --- | --- |
-| OpenLDAP | `uid` | `(uid=%s)` |
-| Active Directory | `sAMAccountName` | `(sAMAccountName=%s)` |
+| System           | Attribute           | Filter                   |
+| ---------------- | ------------------- | ------------------------ |
+| OpenLDAP         | `uid`               | `(uid=%s)`               |
+| Active Directory | `sAMAccountName`    | `(sAMAccountName=%s)`    |
 | AD (email login) | `userPrincipalName` | `(userPrincipalName=%s)` |
-| FreeIPA | `uid` | `(uid=%s)` |
-| Legacy | `cn` | `(cn=%s)` |
-| Email login | `mail` | `(mail=%s)` |
+| FreeIPA          | `uid`               | `(uid=%s)`               |
+| Legacy           | `cn`                | `(cn=%s)`                |
+| Email login      | `mail`              | `(mail=%s)`              |
 
 ### GROUP_FILTER - By Group Type
 
-| ObjectClass | Member Attribute | Filter | Expected Value |
-| --- | --- | --- | --- |
-| `groupOfNames` | `member` | `(member=%s)` | Full DN |
-| `groupOfUniqueNames` | `uniqueMember` | `(uniqueMember=%s)` | Full DN |
-| `posixGroup` | `memberUid` | `(memberUid=%s)` | uid only |
-| `group` (AD) | `member` | `(member=%s)` | Full DN |
+| ObjectClass          | Member Attribute | Filter              | Expected Value |
+| -------------------- | ---------------- | ------------------- | -------------- |
+| `groupOfNames`       | `member`         | `(member=%s)`       | Full DN        |
+| `groupOfUniqueNames` | `uniqueMember`   | `(uniqueMember=%s)` | Full DN        |
+| `posixGroup`         | `memberUid`      | `(memberUid=%s)`    | uid only       |
+| `group` (AD)         | `member`         | `(member=%s)`       | Full DN        |
 
 ---
 
@@ -144,8 +144,7 @@ memberUid: john.doe    ← Just the uid, no DN
 memberUid: jane.doe
 ```
 
-**Result:** `LDAP_GROUP_FILTER=(memberUid=%s)`
-⚠️ **Requires code modification to extract only the uid from the DN**
+**Result:** `LDAP_GROUP_FILTER=(memberUid=%s)` ⚠️ **Requires code modification to extract only the uid from the DN**
 
 ---
 
@@ -211,12 +210,12 @@ LDAP_GROUP_FILTER=(member=%s)
 
 ## Common Errors
 
-| Error | Cause | Solution |
-| --- | --- | --- |
-| "user not found" | Wrong LDAP_USER_FILTER | Use `ldapsearch` to test the filter |
+| Error                                  | Cause                                      | Solution                                  |
+| -------------------------------------- | ------------------------------------------ | ----------------------------------------- |
+| "user not found"                       | Wrong LDAP_USER_FILTER                     | Use `ldapsearch` to test the filter       |
 | "not a member of any authorized group" | Wrong LDAP_GROUP_FILTER or incorrect group | Check if user is in group and test filter |
-| "failed to bind" | Incorrect LDAP_BIND_DN or password | Test bind manually |
-| "connection refused" | Incorrect Host/Port or firewall | Check connectivity with `telnet` |
+| "failed to bind"                       | Incorrect LDAP_BIND_DN or password         | Test bind manually                        |
+| "connection refused"                   | Incorrect Host/Port or firewall            | Check connectivity with `telnet`          |
 
 ---
 

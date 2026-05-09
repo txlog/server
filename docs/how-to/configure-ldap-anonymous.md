@@ -4,17 +4,14 @@
 
 Authentication **WITHOUT service account** works when:
 
-✅ Your LDAP server allows anonymous bind for searches.
-✅ Authenticated users can read their own groups.
-✅ You are using OpenLDAP with default configuration.
-✅ You want a simpler configuration with fewer credentials.
+✅ Your LDAP server allows anonymous bind for searches. ✅ Authenticated users can read their own groups. ✅ You are
+using OpenLDAP with default configuration. ✅ You want a simpler configuration with fewer credentials.
 
 ## When NOT to Use (Needs Service Account)
 
-❌ Active Directory (usually requires authentication for searches).
-❌ LDAP with restricted ACLs that block anonymous bind.
-❌ Production environments with strict security policies.
-❌ LDAP that does not allow users to read their own groups.
+❌ Active Directory (usually requires authentication for searches). ❌ LDAP with restricted ACLs that block anonymous
+bind. ❌ Production environments with strict security policies. ❌ LDAP that does not allow users to read their own
+groups.
 
 ## Example 1: Basic OpenLDAP (No Service Account)
 
@@ -56,8 +53,8 @@ ldapsearch -H ldap://ldap.mycompany.com:389 \
   "(uid=myuser)"
 ```
 
-**If it works**: ✅ Can use without service account.
-**If fails with "No such object" or "Insufficient access"**: ❌ Needs service account.
+**If it works**: ✅ Can use without service account. **If fails with "No such object" or "Insufficient access"**: ❌
+Needs service account.
 
 ### Test 2: Verify group reading
 
@@ -70,8 +67,7 @@ ldapsearch -H ldap://ldap.mycompany.com:389 \
   "(member=uid=myuser,ou=users,dc=mycompany,dc=com)"
 ```
 
-**If returns the group**: ✅ Group verification will work.
-**If fails**: ❌ Needs service account with read permissions.
+**If returns the group**: ✅ Group verification will work. **If fails**: ❌ Needs service account with read permissions.
 
 ## OpenLDAP Configuration to Allow Anonymous Bind
 
@@ -258,7 +254,7 @@ Same problem with or without service account - check:
 ### Without Service Account (OpenLDAP)
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   txlog-server:
     image: ghcr.io/txlog/server:main
@@ -281,7 +277,7 @@ services:
 ### With Service Account (Active Directory)
 
 ```yaml
-version: '3.8'
+version: "3.8"
 services:
   txlog-server:
     image: ghcr.io/txlog/server:main
@@ -314,5 +310,5 @@ Authentication **WITHOUT service account** is:
 - ❌ **Does not work** with typical Active Directory.
 - ❌ **May not meet** corporate security policies.
 
-**Recommendation:** Start without service account. If it works and meets your security needs, great!
-If it doesn't work or if you need more control, add the service account.
+**Recommendation:** Start without service account. If it works and meets your security needs, great! If it doesn't work
+or if you need more control, add the service account.

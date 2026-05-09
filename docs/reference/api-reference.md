@@ -16,46 +16,46 @@ the Swagger UI at `/swagger/index.html`.
 
 ### Assets (Machines)
 
-| Method | Path | Description | Query Params |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/machines` | List active machines. | `os`, `agent_version` |
-| `GET` | `/machines/ids` | Get machine IDs for a hostname. | `hostname` (Required) |
-| `GET` | `/assets/requiring-restart` | List assets flagged for restart. | - |
-| `DELETE` | `/admin/assets/:machine_id` | Delete a machine and its data (**Admin Only**). | - |
+| Method   | Path                        | Description                                     | Query Params                                                     |
+| :------- | :-------------------------- | :---------------------------------------------- | :--------------------------------------------------------------- |
+| `GET`    | `/machines`                 | List active machines.                           | `os`, `agent_version`, `search` (supports `copyfail:true/false`) |
+| `GET`    | `/machines/ids`             | Get machine IDs for a hostname.                 | `hostname` (Required)                                            |
+| `GET`    | `/assets/requiring-restart` | List assets flagged for restart.                | -                                                                |
+| `DELETE` | `/admin/assets/:machine_id` | Delete a machine and its data (**Admin Only**). | -                                                                |
 
 ### Executions
 
-| Method | Path | Description | Body |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/executions` | List recent executions. | - |
+| Method | Path          | Description             | Body                    |
+| :----- | :------------ | :---------------------- | :---------------------- |
+| `GET`  | `/executions` | List recent executions. | -                       |
 | `POST` | `/executions` | Report a new execution. | JSON (Execution object) |
 
 ### Transactions
 
-| Method | Path | Description | Body |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/transactions` | List transactions. | - |
-| `GET` | `/transactions/ids` | Get transaction IDs. | - |
-| `POST` | `/transactions` | Upload transaction data. | JSON (Transaction object) |
+| Method | Path                | Description              | Body                      |
+| :----- | :------------------ | :----------------------- | :------------------------ |
+| `GET`  | `/transactions`     | List transactions.       | -                         |
+| `GET`  | `/transactions/ids` | Get transaction IDs.     | -                         |
+| `POST` | `/transactions`     | Upload transaction data. | JSON (Transaction object) |
 
 ### Packages
 
-| Method | Path | Description | Query Params |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/packages/:name/:version/:release/assets` | List assets with specific package. | - |
+| Method | Path                                       | Description                        | Query Params |
+| :----- | :----------------------------------------- | :--------------------------------- | :----------- |
+| `GET`  | `/packages/:name/:version/:release/assets` | List assets with specific package. | -            |
 
 ### Reports
 
-| Method | Path | Description | Query Params |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/reports/monthly` | Monthly package update report. | `month`, `year` |
-| `GET` | `/reports/anomalies` | Detect unusual transaction patterns. | `days` (1-90), `severity` (low/medium/high) |
+| Method | Path                 | Description                          | Query Params                                |
+| :----- | :------------------- | :----------------------------------- | :------------------------------------------ |
+| `GET`  | `/reports/monthly`   | Monthly package update report.       | `month`, `year`                             |
+| `GET`  | `/reports/anomalies` | Detect unusual transaction patterns. | `days` (1-90), `severity` (low/medium/high) |
 
 ### System
 
-| Method | Path | Description |
-| :--- | :--- | :--- |
-| `GET` | `/version` | Get server version. |
+| Method | Path       | Description         |
+| :----- | :--------- | :------------------ |
+| `GET`  | `/version` | Get server version. |
 
 ## Error Responses
 
@@ -65,4 +65,3 @@ The API uses generic error messages to prevent leaking internal system details:
 - `500 Database error`: Generic database connectivity or execution failure.
 
 Detailed error logs are available on the server for troubleshooting.
-

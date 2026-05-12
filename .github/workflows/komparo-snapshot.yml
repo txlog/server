@@ -1,0 +1,79 @@
+name: Generate Komparo Snapshot
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'database/migrations/**'
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: txlog
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: '1.26.2'
+
+      - name: Run Migrations
+        env:
+          PGSQL_HOST: localhost
+          PGSQL_PORT: 5432
+          PGSQL_USER: postgres
+          PGSQL_PASSWORD: postgres
+          PGSQL_DB: txlog
+          PGSQL_SSLMODE: disable
+        run: |
+          cat <<EOF > migrate_db.go
+          package main
+          import (
+            "github.com/txlog/server/database"
+            "github.com/txlog/server/logger"
+            "os"
+          )
+          func main() {
+            logger.InitLogger()
+            database.ConnectDatabase()
+            os.Exit(0)
+          }
+          EOF
+          go run migrate_db.go
+
+      - name: Install Komparo
+        run: curl -fsSL https://install.rda.run/rda-run/komparo@latest! | bash
+
+      - name: Generate Snapshot
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: txlog
+          SSLMODE: disable
+        run: |
+          # Gera o snapshot do banco de dados
+          komparo snapshot -o txlog_schema_snapshot.json
+
+      - name: Upload Snapshot Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: txlog-db-snapshot
+          path: txlog_schema_snapshot.json

@@ -58,7 +58,7 @@ jobs:
           go run migrate_db.go
 
       - name: Install Komparo
-        run: curl -fsSL https://install.rda.run/rda-run/komparo@latest! | bash
+        run: curl -fsSL https://i.jpillora.com/rda-run/komparo@latest! | bash
 
       - name: Generate Snapshot
         env:

@@ -18,6 +18,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.31.0] - 2026-05-15
+
+### Added
+
+- Support for **Dirty Frag** and **Fragnesia** kernel vulnerability detection,
+  expanding the security auditing capabilities beyond Copy Fail.
+- New visual indicators in the Topology view using "CF", "DF", and "FN" badges
+  for real-time vulnerability status.
+- Consolidated "Vulnerabilities Found" panel in Asset details with quick-access
+  links to technical documentation.
+
 ## [1.30.2] - 2026-05-09
 
 ### Added

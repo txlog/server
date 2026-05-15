@@ -88,10 +88,22 @@
           "type": "timestamp with time zone",
           "nullable": true
         },
+        "dirty_frag": {
+          "name": "dirty_frag",
+          "type": "boolean",
+          "nullable": true,
+          "default": "false"
+        },
         "first_seen": {
           "name": "first_seen",
           "type": "timestamp with time zone",
           "nullable": false
+        },
+        "fragnesia": {
+          "name": "fragnesia",
+          "type": "boolean",
+          "nullable": true,
+          "default": "false"
         },
         "hostname": {
           "name": "hostname",
@@ -194,10 +206,22 @@
           "type": "text",
           "nullable": true
         },
+        "dirty_frag": {
+          "name": "dirty_frag",
+          "type": "boolean",
+          "nullable": true,
+          "default": "false"
+        },
         "executed_at": {
           "name": "executed_at",
           "type": "timestamp with time zone",
           "nullable": false
+        },
+        "fragnesia": {
+          "name": "fragnesia",
+          "type": "boolean",
+          "nullable": true,
+          "default": "false"
         },
         "hostname": {
           "name": "hostname",

@@ -34,6 +34,8 @@ type PodView struct {
 	TotalAssets  int
 	NeedsRestart int
 	HasCopyFail  bool
+	HasDirtyFrag bool
+	HasFragnesia bool
 }
 
 // PodAsset is a single asset row within a pod.
@@ -45,6 +47,8 @@ type PodAsset struct {
 	AgentVersion    string
 	NeedsRestarting bool
 	CopyFail        bool
+	DirtyFrag       bool
+	Fragnesia       bool
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -145,13 +149,13 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 			var hostname, machineID string
 			var envVal, svcVal, podID sql.NullString
 			var agentVersion, os sql.NullString
-			var needsRestarting, copyFail sql.NullBool
+			var needsRestarting, copyFail, dirtyFrag, fragnesia sql.NullBool
 
 			if err := rows.Scan(
 				&assetID, &hostname, &machineID,
 				&envVal, &svcVal, &podID,
 				&agentVersion, &os,
-				&needsRestarting, &copyFail,
+				&needsRestarting, &copyFail, &dirtyFrag, &fragnesia,
 			); err != nil {
 				logger.Error("Failed to scan topology row: " + err.Error())
 				continue
@@ -165,6 +169,8 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 				AgentVersion:    agentVersion.String,
 				NeedsRestarting: needsRestarting.Bool,
 				CopyFail:        copyFail.Bool,
+				DirtyFrag:       dirtyFrag.Bool,
+				Fragnesia:       fragnesia.Bool,
 			}
 
 			if !podID.Valid || podID.String == "" {
@@ -190,6 +196,12 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 			}
 			if asset.CopyFail {
 				pv.HasCopyFail = true
+			}
+			if asset.DirtyFrag {
+				pv.HasDirtyFrag = true
+			}
+			if asset.Fragnesia {
+				pv.HasFragnesia = true
 			}
 		}
 
@@ -246,7 +258,9 @@ func buildTopologyAssetsQuery(envFilter, svcFilter string) string {
 			a.agent_version,
 			a.os,
 			a.needs_restarting,
-			a.copy_fail
+			a.copy_fail,
+			a.dirty_frag,
+			a.fragnesia
 		FROM assets a
 		LEFT JOIN LATERAL (
 			SELECT compiled_pattern,

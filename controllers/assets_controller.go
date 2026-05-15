@@ -183,7 +183,9 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				machine_id,
 				os,
 				needs_restarting,
-				copy_fail
+				copy_fail,
+				dirty_frag,
+				fragnesia
 			FROM assets
 			WHERE ` + activeFilter + whereClause + `
 			ORDER BY hostname
@@ -207,6 +209,8 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			var executedAt sql.NullTime
 			var os sql.NullString
 			var copyFail sql.NullBool
+			var dirtyFrag sql.NullBool
+			var fragnesia sql.NullBool
 			err := rows.Scan(
 				&asset.ExecutionID,
 				&asset.Hostname,
@@ -215,6 +219,8 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				&os,
 				&asset.NeedsRestarting,
 				&copyFail,
+				&dirtyFrag,
+				&fragnesia,
 			)
 			if err != nil {
 				logger.Error("Error iterating assets:" + err.Error())
@@ -231,6 +237,12 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			}
 			if copyFail.Valid {
 				asset.CopyFail = &copyFail.Bool
+			}
+			if dirtyFrag.Valid {
+				asset.DirtyFrag = &dirtyFrag.Bool
+			}
+			if fragnesia.Valid {
+				asset.Fragnesia = &fragnesia.Bool
 			}
 			assets = append(assets, asset)
 		}
@@ -589,12 +601,14 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 		var needsRestarting sql.NullBool
 		var restartingReason sql.NullString
 		var copyFail sql.NullBool
+		var dirtyFrag sql.NullBool
+		var fragnesia sql.NullBool
 		err = database.QueryRowContext(c.Request.Context(), `
-      SELECT needs_restarting, restarting_reason, copy_fail
+      SELECT needs_restarting, restarting_reason, copy_fail, dirty_frag, fragnesia
       FROM assets
       WHERE machine_id = $1
       LIMIT 1
-      `, machineID).Scan(&needsRestarting, &restartingReason, &copyFail)
+      `, machineID).Scan(&needsRestarting, &restartingReason, &copyFail, &dirtyFrag, &fragnesia)
 		if err != nil && err != sql.ErrNoRows {
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
@@ -632,6 +646,8 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			"needs_restarting":  displayNeedsRestarting,
 			"restarting_reason": restartingReason.String,
 			"copy_fail":         displayCopyFail,
+			"dirty_frag":        dirtyFrag.Bool && dirtyFrag.Valid,
+			"fragnesia":         fragnesia.Bool && fragnesia.Valid,
 		})
 	}
 }

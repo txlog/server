@@ -20,7 +20,7 @@ func GetExecutionID(database *sql.DB) gin.HandlerFunc {
 		row := database.QueryRow(`
       SELECT id, machine_id, hostname, executed_at, success,
         details, transactions_processed, transactions_sent,
-        agent_version, os
+        agent_version, os, copy_fail, dirty_frag, fragnesia
       FROM executions
       WHERE id = $1`,
 			execution.ExecutionID)
@@ -28,6 +28,9 @@ func GetExecutionID(database *sql.DB) gin.HandlerFunc {
 		var executedAt sql.NullTime
 		var agentVersion sql.NullString
 		var os sql.NullString
+		var copyFail sql.NullBool
+		var dirtyFrag sql.NullBool
+		var fragnesia sql.NullBool
 		execution = models.Execution{}
 		err := row.Scan(
 			&execution.ExecutionID,
@@ -40,6 +43,9 @@ func GetExecutionID(database *sql.DB) gin.HandlerFunc {
 			&execution.TransactionsSent,
 			&agentVersion,
 			&os,
+			&copyFail,
+			&dirtyFrag,
+			&fragnesia,
 		)
 		if err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
@@ -53,6 +59,15 @@ func GetExecutionID(database *sql.DB) gin.HandlerFunc {
 		}
 		if os.Valid {
 			execution.OS = os.String
+		}
+		if copyFail.Valid {
+			execution.CopyFail = &copyFail.Bool
+		}
+		if dirtyFrag.Valid {
+			execution.DirtyFrag = &dirtyFrag.Bool
+		}
+		if fragnesia.Valid {
+			execution.Fragnesia = &fragnesia.Bool
 		}
 
 		c.HTML(http.StatusOK, "execution_id.html", gin.H{

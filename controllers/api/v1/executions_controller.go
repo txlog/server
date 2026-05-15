@@ -70,6 +70,20 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			copyFail.Valid = true
 		}
 
+		// Convert *bool to sql.NullBool
+		var dirtyFrag sql.NullBool
+		if body.DirtyFrag != nil {
+			dirtyFrag.Bool = *body.DirtyFrag
+			dirtyFrag.Valid = true
+		}
+
+		// Convert *bool to sql.NullBool
+		var fragnesia sql.NullBool
+		if body.Fragnesia != nil {
+			fragnesia.Bool = *body.Fragnesia
+			fragnesia.Valid = true
+		}
+
 		// Start database transaction
 		tx, err := database.BeginTx(c.Request.Context(), nil)
 		if err != nil {
@@ -82,9 +96,9 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
       INSERT INTO executions (
         machine_id, hostname, executed_at, success, details,
         transactions_processed, transactions_sent, agent_version, os, needs_restarting,
-        restarting_reason, copy_fail
+        restarting_reason, copy_fail, dirty_frag, fragnesia
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
       )`,
 			body.MachineID,
 			body.Hostname,
@@ -98,6 +112,8 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			needsRestarting,
 			restartingReason,
 			copyFail,
+			dirtyFrag,
+			fragnesia,
 		)
 
 		if err != nil {
@@ -113,7 +129,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			now := executedAt.Time
 			timestamp = &now
 		}
-		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, needsRestarting, restartingReason, body.OS, body.AgentVersion, copyFail)
+		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, needsRestarting, restartingReason, body.OS, body.AgentVersion, copyFail, dirtyFrag, fragnesia)
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error upserting asset:" + err.Error())
@@ -180,7 +196,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 				`SELECT
           id, machine_id, hostname, executed_at, success,
           details, transactions_processed, transactions_sent,
-          agent_version, os
+          agent_version, os, copy_fail, dirty_frag, fragnesia
         FROM executions WHERE machine_id = $1 AND success = $2
         ORDER BY executed_at DESC LIMIT $3 OFFSET $4;`,
 				machineID, success, limit, offset,
@@ -190,7 +206,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 				`SELECT
           id, machine_id, hostname, executed_at, success,
           details, transactions_processed, transactions_sent,
-          agent_version, os
+          agent_version, os, copy_fail, dirty_frag, fragnesia
         FROM executions WHERE machine_id = $1
         ORDER BY executed_at DESC LIMIT $2 OFFSET $3;`,
 				machineID, limit, offset,
@@ -210,6 +226,9 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 			var executedAt sql.NullTime
 			var agentVersion sql.NullString
 			var os sql.NullString
+			var copyFail sql.NullBool
+			var dirtyFrag sql.NullBool
+			var fragnesia sql.NullBool
 			err := rows.Scan(
 				&execution.ExecutionID,
 				&execution.MachineID,
@@ -221,9 +240,21 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 				&execution.TransactionsSent,
 				&agentVersion,
 				&os,
+				&copyFail,
+				&dirtyFrag,
+				&fragnesia,
 			)
 			execution.AgentVersion = agentVersion.String
 			execution.OS = os.String
+			if copyFail.Valid {
+				execution.CopyFail = &copyFail.Bool
+			}
+			if dirtyFrag.Valid {
+				execution.DirtyFrag = &dirtyFrag.Bool
+			}
+			if fragnesia.Valid {
+				execution.Fragnesia = &fragnesia.Bool
+			}
 			if err != nil {
 				logger.Error("Error iterating executions:" + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})

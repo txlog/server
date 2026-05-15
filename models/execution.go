@@ -16,4 +16,6 @@ type Execution struct {
 	NeedsRestarting       *bool      `json:"needs_restarting,omitempty"`
 	RestartingReason      *string    `json:"restarting_reason,omitempty"`
 	CopyFail              *bool      `json:"copy_fail,omitempty"`
+	DirtyFrag             *bool      `json:"dirty_frag,omitempty"`
+	Fragnesia             *bool      `json:"fragnesia,omitempty"`
 }

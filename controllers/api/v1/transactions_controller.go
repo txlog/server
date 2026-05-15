@@ -296,7 +296,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			now := beginTime.Time
 			timestamp = &now
 		}
-		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, sql.NullBool{}, sql.NullString{}, "", "", sql.NullBool{})
+		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, sql.NullBool{}, sql.NullString{}, "", "", sql.NullBool{}, sql.NullBool{}, sql.NullBool{})
 		if err != nil {
 			tx.Rollback()
 			logger.Error("Error upserting asset:" + err.Error())

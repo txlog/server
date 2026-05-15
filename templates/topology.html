@@ -166,10 +166,13 @@
         </div>
         <div class="flex items-center gap-2">
           {{ if $pod.HasCopyFail }}
-          <span
-            class="bg-txlog-coral/10 text-txlog-coral text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-txlog-coral animate-pulse"></span>Copy Fail
-          </span>
+          <span class="bg-txlog-coral text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md animate-pulse" title="Copy Fail (CVE-2026-31431)">CF</span>
+          {{ end }}
+          {{ if $pod.HasDirtyFrag }}
+          <span class="bg-txlog-purple text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md animate-pulse" title="Dirty Frag">DF</span>
+          {{ end }}
+          {{ if $pod.HasFragnesia }}
+          <span class="bg-txlog-indigo text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md animate-pulse" title="Fragnesia">FN</span>
           {{ end }}
           {{ if gt $pod.NeedsRestart 0 }}
           <span
@@ -189,9 +192,9 @@
             {{ range $pod.Assets }}
             <tr class="hover:bg-txlog-lavender/10 transition-colors">
               <td class="px-6 py-3 w-8">
-                {{ if .CopyFail }}
+                {{ if or .CopyFail .DirtyFrag .Fragnesia }}
                 <span class="flex w-2 h-2 rounded-full bg-txlog-coral animate-pulse"
-                  title="Copy Fail vulnerability"></span>
+                  title="Vulnerabilities Found"></span>
                 {{ else if .NeedsRestarting }}
                 <span class="flex w-2 h-2 rounded-full bg-txlog-golden animate-pulse" title="Needs restart"></span>
                 {{ else }}
@@ -210,11 +213,17 @@
               </td>
 
               <td class="px-3 py-3 text-right min-w-[80px]">
-                {{ if .CopyFail }}
-                <span
-                  class="bg-txlog-coral/10 text-txlog-coral text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Copy
-                  Fail</span>
-                {{ end }}
+                <div class="flex justify-end gap-1">
+                  {{ if .CopyFail }}
+                  <span class="bg-txlog-coral text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Copy Fail (CVE-2026-31431)">CF</span>
+                  {{ end }}
+                  {{ if .DirtyFrag }}
+                  <span class="bg-txlog-purple text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Dirty Frag">DF</span>
+                  {{ end }}
+                  {{ if .Fragnesia }}
+                  <span class="bg-txlog-indigo text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Fragnesia">FN</span>
+                  {{ end }}
+                </div>
               </td>
               <td class="px-3 py-3 text-right min-w-[100px]">
                 {{ if .NeedsRestarting }}

@@ -8,12 +8,25 @@
       </div>
       <div class="flex items-center gap-3">
 
-        {{ if .copy_fail }}
+        {{ if or .copy_fail .dirty_frag .fragnesia }}
         <div
-          class="bg-txlog-coral/20 border border-txlog-coral/40 text-white px-4 py-2 rounded-xl flex items-center gap-2 text-sm">
-          <i data-lucide="shield-alert" class="w-4 h-4 text-txlog-coral"></i>
-          Vulnerable to CVE-2026-31431 (Copy Fail)
-          <a href="https://copy.fail" target="_blank" class="underline text-txlog-coral ml-1">Learn more</a>
+          class="bg-txlog-coral/20 border border-txlog-coral/40 text-white px-4 py-2 rounded-xl flex items-center gap-3 text-sm">
+          <div class="flex items-center gap-2">
+            <i data-lucide="shield-alert" class="w-4 h-4 text-txlog-coral"></i>
+            Vulnerabilities Found
+          </div>
+          <div class="flex items-center gap-1.5 ml-2 border-l border-white/20 pl-3">
+            {{ if .copy_fail }}
+            <span class="bg-txlog-coral text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Copy Fail (CVE-2026-31431)">CF</span>
+            {{ end }}
+            {{ if .dirty_frag }}
+            <span class="bg-txlog-purple text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Dirty Frag">DF</span>
+            {{ end }}
+            {{ if .fragnesia }}
+            <span class="bg-txlog-indigo text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Fragnesia">FN</span>
+            {{ end }}
+          </div>
+          <a href="https://txlog.rda.run/docs/server/explanation/copy-fail-detection" target="_blank" class="underline text-white/50 hover:text-white transition-colors text-xs ml-auto">Learn more</a>
         </div>
         {{ end }}
 

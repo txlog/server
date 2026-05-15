@@ -73,7 +73,8 @@ jobs:
           /usr/local/bin/komparo snapshot -o txlog_schema_snapshot.json
 
       - name: Upload Snapshot Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: txlog-db-snapshot
           path: txlog_schema_snapshot.json
+          archive: false

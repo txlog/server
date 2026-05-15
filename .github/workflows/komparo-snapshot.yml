@@ -31,7 +31,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.26.2'
+          go-version: '1.26.3'
 
       - name: Run Migrations
         env:
@@ -62,15 +62,15 @@ jobs:
 
       - name: Generate Snapshot
         env:
-          PGHOST: localhost
-          PGPORT: 5432
-          PGUSER: postgres
-          PGPASSWORD: postgres
-          PGDATABASE: txlog
-          SSLMODE: disable
+          PGSQL_HOST: localhost
+          PGSQL_PORT: 5432
+          PGSQL_USER: postgres
+          PGSQL_PASSWORD: postgres
+          PGSQL_DB: txlog
+          PGSQL_SSLMODE: disable
         run: |
           # Gera o snapshot do banco de dados
-          komparo snapshot -o txlog_schema_snapshot.json
+          /usr/local/bin/komparo snapshot -o txlog_schema_snapshot.json
 
       - name: Upload Snapshot Artifact
         uses: actions/upload-artifact@v4

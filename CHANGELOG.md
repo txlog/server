@@ -18,6 +18,18 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.31.1] - 2026-05-21
+
+### Changed
+
+- Update Go version to 1.26.3 and rename PGSQL environment variable.
+- Update Komparo installation URL to use jpillora installer.
+- Update `upload-artifact` GitHub action to v7 and disable archiving.
+
+### Fixed
+
+- Adjust grid padding and optimize xaxis label rendering for better visibility in the Package Progression chart.
+
 ## [1.31.0] - 2026-05-15
 
 ### Added

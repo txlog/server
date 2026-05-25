@@ -142,7 +142,22 @@ func PostLDAPLogin(ldapService *auth.LDAPService) gin.HandlerFunc {
 
 			// Categorize the error for better user feedback
 			errorCode := auth.CategorizeAuthError(err)
-			c.Redirect(http.StatusSeeOther, "/login?error="+errorCode)
+			var redirectPath string
+			switch errorCode {
+			case "ldap_config_error":
+				redirectPath = "/login?error=ldap_config_error"
+			case "ldap_connection_error":
+				redirectPath = "/login?error=ldap_connection_error"
+			case "ldap_bind_error":
+				redirectPath = "/login?error=ldap_bind_error"
+			case "invalid_credentials", "user_not_found":
+				redirectPath = "/login?error=invalid_credentials"
+			case "unauthorized_group":
+				redirectPath = "/login?error=unauthorized_group"
+			default:
+				redirectPath = "/login?error=auth_failed"
+			}
+			c.Redirect(http.StatusSeeOther, redirectPath)
 			return
 		}
 

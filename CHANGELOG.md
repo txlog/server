@@ -18,6 +18,33 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.32.0] - 2026-06-13
+
+### Changed
+
+- Update Go version to 1.26.4.
+- Bump `golang.org/x/arch` from 0.24.0 to 0.28.0.
+- Bump `golang.org/x/crypto` from 0.48.0 to 0.53.0.
+- Bump `golang.org/x/mod` from 0.33.0 to 0.37.0.
+- Bump `golang.org/x/net` from 0.51.0 to 0.56.0.
+- Bump `golang.org/x/sync` from 0.20.0 to 0.21.0.
+- Bump `golang.org/x/sys` from 0.42.0 to 0.46.0.
+- Bump `golang.org/x/text` from 0.34.0 to 0.38.0.
+- Bump `golang.org/x/tools` from 0.42.0 to 0.46.0.
+- Bump `github.com/bytedance/sonic` from 1.15.0 to 1.15.2.
+- Bump `github.com/gin-contrib/sse` from 1.1.0 to 1.1.1.
+- Bump `github.com/go-openapi/jsonpointer` from 0.22.4 to 0.23.1.
+- Bump `github.com/go-openapi/spec` from 0.22.3 to 0.22.5.
+- Bump `github.com/go-openapi/swag/*` from 0.25.4 to 0.26.1.
+- Bump `github.com/go-playground/validator/v10` from 10.30.1 to 10.30.3.
+- Bump `github.com/klauspost/compress` from 1.18.5 to 1.18.6.
+- Bump `github.com/montanaflynn/stats` from 0.7.1 to 0.9.0.
+- Bump `github.com/pelletier/go-toml/v2` from 2.2.4 to 2.3.1.
+- Bump `github.com/quic-go/quic-go` from 0.59.0 to 0.60.0.
+- Bump `github.com/rabbitmq/amqp091-go` from 1.10.0 to 1.11.0.
+- Bump `github.com/redis/go-redis/v9` from 9.18.0 to 9.20.1.
+- Bump `go.mongodb.org/mongo-driver/v2` from 2.5.0 to 2.6.0.
+
 ## [1.31.1] - 2026-05-21
 
 ### Changed

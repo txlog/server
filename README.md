@@ -19,9 +19,6 @@
       <img src="https://img.shields.io/badge/Contributor%20Covenant-3.0-4baaaa.svg" alt="Contributor Covenant">
     </a>
     <br/>
-    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2Ftxlog%2Fserver?ref=badge_shield&issueType=security">
-      <img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftxlog%2Fserver.svg?type=shield&issueType=security" alt="FOSSA Status"/>
-    </a>
     <a href="https://newreleases.io/github/txlog/server">
       <img src="https://newreleases.io/badge.svg" alt="NewReleases">
     </a>
@@ -164,12 +161,12 @@ To make changes on this project, you need:
 <summary>Golang</summary>
 
 ```bash
-wget https://go.dev/dl/go1.26.2.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.26.4.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.26.2.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.26.4.linux-amd64.tar.gz
 echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 source ~/.bashrc
-rm go1.26.2.linux-amd64.tar.gz
+rm go1.26.4.linux-amd64.tar.gz
 ```
 
 </details>

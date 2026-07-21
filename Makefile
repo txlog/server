@@ -27,7 +27,7 @@ vet:
 ## css: Build the Tailwind CSS (minified)
 css:
 	@npx @tailwindcss/cli -i static/css/input.css -o static/css/style.css --minify
-	@python3 tools/embed_uikit_css.py
+	@python3 scripts/embed_uikit_css.py
 
 ## css-watch: Watch and rebuild Tailwind CSS on changes
 css-watch:

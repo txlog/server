@@ -1,74 +1,77 @@
 {{ template "header.html" . }}
-<div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
+<div class="py-6 mb-6 print:hidden">
   <div class="max-w-7xl mx-auto px-6">
-    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
-    <p class="text-white/50 text-sm mt-0.5">Track installed software, updates, and vulnerabilities</p>
+    <h2 class="font-bold text-2xl text-kumo-default">{{ .title }}</h2>
+    <p class="text-kumo-subtle text-sm mt-0.5">Track installed software, updates, and vulnerabilities</p>
   </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-6 pb-8">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+  <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
     <div
-      class="border-b border-txlog-lavender px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <h3 class="font-display font-semibold text-lg">
+      class="border-b border-kumo-line px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <h3 class="font-semibold text-lg text-kumo-default">
         {{ if .search }}
         Registered packages containing <kbd
-          class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .search }}</kbd>
+          class="bg-kumo-tint border border-kumo-line text-kumo-default text-xs font-mono px-2 py-1 rounded-md">{{ .search }}</kbd>
         {{ else }}
         Registered packages
         {{ end }}
       </h3>
       <div class="flex items-center gap-2">
-        <input type="text" autocomplete="off" aria-label="Search packages" placeholder="Search by package name"
+        <input data-kumo-component="Input" type="text" autocomplete="off" aria-label="Search packages" placeholder="Search by package name"
           value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)"
-          class="border-2 border-txlog-lavender bg-white/50 px-3 py-2 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all placeholder:text-txlog-indigo/30 text-txlog-indigo text-sm font-medium w-48 sm:w-64">
-        <button onclick="search()"
-          class="bg-txlog-sky text-white p-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"
-          aria-label="Search">
-          <i data-lucide="search" class="w-4 h-4"></i>
+          class="border-0 bg-kumo-control text-kumo-default ring ring-kumo-line outline-none focus:outline-none kumo-input-placeholder disabled:text-kumo-disabled h-9 gap-1.5 rounded-lg px-3 text-base focus:ring-kumo-focus/50 focus:ring-[1.5px] w-48 sm:w-64">
+        <button data-kumo-component="Button" onclick="search()"
+          class="group flex shrink-0 items-center justify-center font-medium select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 cursor-pointer disabled:cursor-not-allowed disabled:text-kumo-subtle size-9 gap-1.5 rounded-lg p-0 text-base relative overflow-hidden bg-(--kumo-button-emphasis-bg) !text-white ring ring-(--kumo-button-emphasis-ring) focus:ring-(--kumo-button-emphasis-ring) focus-visible:ring-(--kumo-button-emphasis-ring) active:ring-(--kumo-button-emphasis-ring) disabled:opacity-50"
+          style="--kumo-button-emphasis-ring:color-mix(in oklch, var(--color-kumo-brand), black 10%);--kumo-button-emphasis-bg:color-mix(in oklch, var(--color-kumo-brand), white 30%);--kumo-button-emphasis-gradient-start:color-mix(in oklch, var(--color-kumo-brand), white 15%);--kumo-button-emphasis-gradient-end:var(--color-kumo-brand)" aria-label="Search">
+          <span aria-hidden="true" class="absolute inset-0 rounded-[inherit] bg-linear-to-b from-(--kumo-button-emphasis-gradient-start) to-(--kumo-button-emphasis-gradient-end) shadow-[inset_0_1px_0_0_var(--kumo-button-emphasis-bg)] group-hover:from-(--kumo-button-emphasis-bg)"></span>
+          <span class="relative flex items-center justify-center"><span class="contents">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="112" cy="112" r="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="168.57" y1="168.57" x2="224" y2="224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+          </span></span>
         </button>
       </div>
     </div>
 
     {{ if eq (len .packageNames) 0 }}
     <div class="py-16 text-center">
-      <i data-lucide="frown" class="w-12 h-12 text-txlog-indigo/20 mx-auto mb-4"></i>
-      <p class="font-display font-semibold text-lg mb-2">No packages found{{ if .search }} containing <kbd
-          class="bg-txlog-indigo/5 text-xs font-mono px-2 py-1 rounded-md">{{ .search }}</kbd>{{ end }}</p>
-      <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
-          target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+      
+      <p class="font-semibold text-lg text-kumo-default mb-2">No packages found{{ if .search }} containing <kbd
+          class="bg-kumo-tint border border-kumo-line text-xs font-mono px-2 py-1 rounded-md">{{ .search }}</kbd>{{ end }}</p>
+      <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
+          target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
     </div>
     {{ else }}
     <div class="overflow-x-auto">
-      <table class="w-full text-sm">
+      <table class="kumo-table">
         <thead>
-          <tr class="border-b border-txlog-lavender/50 text-left">
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">
-              Name <i data-lucide="chevron-up" class="w-3 h-3 inline-block"></i>
+          <tr>
+            <th>
+              Name <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256" class="inline-block align-middle ml-1"><rect width="256" height="256" fill="none"/><polyline points="168 152 128 192 88 152" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 104 128 64 168 104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
             </th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">
+            <th>
               Version-Release-Arch</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Repo</th>
-            <th class="px-6 py-3 w-1">&nbsp;</th>
+            <th>Assets</th>
+            <th>Repo</th>
+            <th class="w-1">&nbsp;</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-txlog-lavender/30">
+        <tbody>
           {{ with .packageNames }}
           {{ range . }}
-          <tr class="hover:bg-txlog-lavender/10 transition-colors">
-            <td class="px-6 py-3 font-medium">{{ .Package }}</td>
-            <td class="px-6 py-3">
-              <span class="font-semibold">{{ .Version }}-{{ .Release }}</span><span class="text-txlog-indigo/50">-{{
+          <tr class="group">
+            <td class="font-medium text-kumo-default">{{ .Package }}</td>
+            <td>
+              <span class="font-semibold text-kumo-default">{{ .Version }}-{{ .Release }}</span><span class="text-kumo-subtle">-{{
                 .Arch }}</span>
               {{ if ne .TotalVersions 0 }}
-              <span class="text-txlog-indigo/50 text-xs"> (and {{ .TotalVersions }} more)</span>
+              <span class="text-kumo-muted text-xs"> (and {{ .TotalVersions }} more)</span>
               {{ end }}
             </td>
-            <td class="px-6 py-3 text-txlog-indigo/60">{{ .MachineCount }}</td>
-            <td class="px-6 py-3 text-txlog-indigo/60">{{ .Repo }}</td>
-            <td class="px-6 py-3">
-              <a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="/packages/{{ .Package }}">Details</a>
+            <td class="text-kumo-subtle">{{ .MachineCount }}</td>
+            <td class="text-kumo-subtle">{{ .Repo }}</td>
+            <td>
+              <a class="text-kumo-brand text-sm font-medium px-3 py-1 rounded-md border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors whitespace-nowrap" href="/packages/{{ .Package }}">Details</a>
             </td>
           </tr>
           {{ end }}
@@ -77,22 +80,35 @@
       </table>
     </div>
 
-    <div class="border-t border-txlog-lavender/50 px-6 py-4 flex items-center justify-between">
-      <p class="text-sm text-txlog-indigo/50">Showing <span>{{ add $.offset 1 }}</span> to <span>{{ min (add $.offset
-          $.limit) $.totalRecords }}</span> of <span>{{ .totalRecords }}</span> entries</p>
-      <div class="flex items-center gap-1">
-        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page 1 }}text-txlog-indigo/30 pointer-events-none{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
-          href="?page={{ .page | add -1 }}">
-          <i data-lucide="chevron-left" class="w-4 h-4 inline-block"></i> prev
-        </a>
-        {{ range $i := iterate 1 .totalPages }}
-        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page $i }}bg-txlog-sky text-white{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
-          href="?page={{ $i }}">{{ $i }}</a>
-        {{ end }}
-        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page $.totalPages }}text-txlog-indigo/30 pointer-events-none{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
-          href="?page={{ .page | add 1 }}">
-          next <i data-lucide="chevron-right" class="w-4 h-4 inline-block"></i>
-        </a>
+    <div class="border-t border-kumo-line px-6 py-4 flex flex-wrap gap-4 items-center justify-between">
+      <div class="grow text-sm text-kumo-subtle">
+        Showing <span class="tabular-nums font-medium text-kumo-default">{{ add $.offset 1 }}-{{ min (add $.offset $.limit) $.totalRecords }}</span> of <span class="tabular-nums font-medium text-kumo-default">{{ .totalRecords }}</span>
+      </div>
+      <div class="grow flex flex-col sm:items-end">
+        <nav aria-label="Pagination">
+          <div class="relative w-full sm:w-auto cursor-text border-0 bg-kumo-control text-kumo-default ring-kumo-line h-9 rounded-lg text-base flex items-center px-0">
+            <a aria-label="First page" href="?page=1"
+              class="group flex w-max shrink-0 items-center font-medium select-none shadow-xs h-9 gap-1.5 px-3 text-base bg-kumo-base !text-kumo-default not-disabled:hover:bg-kumo-tint ring-kumo-line relative h-full! rounded-l-lg ring-0 border border-kumo-line hover:z-1 {{ if eq $.page 1 }}opacity-50 pointer-events-none bg-kumo-overlay{{ end }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L131.31,128ZM51.31,128l74.35-74.34a8,8,0,0,0-11.32-11.32l-80,80a8,8,0,0,0,0,11.32l80,80a8,8,0,0,0,11.32-11.32Z"></path></svg>
+            </a>
+            <a aria-label="Previous page" href="?page={{ .page | add -1 }}"
+              class="group flex w-max shrink-0 items-center font-medium select-none shadow-xs h-9 gap-1.5 px-3 text-base bg-kumo-base !text-kumo-default not-disabled:hover:bg-kumo-tint ring-kumo-line relative h-full! rounded-none ring-0 border border-kumo-line border-l-0 hover:z-1 {{ if eq $.page 1 }}opacity-50 pointer-events-none bg-kumo-overlay{{ end }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path></svg>
+            </a>
+            <input aria-label="Page number" type="text"
+              value="{{ .page }}"
+              onkeydown="if(event.key==='Enter') window.location.href='?page='+this.value"
+              class="text-kumo-default ring-kumo-line outline-none h-9 min-w-0 grow items-center rounded-none bg-transparent px-3 relative ring-0 border border-kumo-line border-l-0 hover:z-1 text-center" style="width:50px" />
+            <a aria-label="Next page" href="?page={{ .page | add 1 }}"
+              class="group flex w-max shrink-0 items-center font-medium select-none shadow-xs h-9 gap-1.5 px-3 text-base bg-kumo-base !text-kumo-default not-disabled:hover:bg-kumo-tint ring-kumo-line relative h-full! rounded-none ring-0 border border-kumo-line border-l-0 hover:z-1 {{ if eq $.page $.totalPages }}opacity-50 pointer-events-none bg-kumo-overlay{{ end }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg>
+            </a>
+            <a aria-label="Last page" href="?page={{ .totalPages }}"
+              class="group flex w-max shrink-0 items-center font-medium select-none shadow-xs h-9 gap-1.5 px-3 text-base bg-kumo-base !text-kumo-default not-disabled:hover:bg-kumo-tint ring-kumo-line relative h-full! rounded-r-lg ring-0 border border-kumo-line border-l-0 hover:z-1 {{ if eq $.page $.totalPages }}opacity-50 pointer-events-none bg-kumo-overlay{{ end }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M141.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L124.69,128,50.34,53.66A8,8,0,0,1,61.66,42.34l80,80A8,8,0,0,1,141.66,133.66Zm80-11.32-80-80a8,8,0,0,0-11.32,11.32L204.69,128l-74.35,74.34a8,8,0,0,0,11.32,11.32l80-80A8,8,0,0,0,221.66,122.34Z"></path></svg>
+            </a>
+          </div>
+        </nav>
       </div>
     </div>
     {{ end }}

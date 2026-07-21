@@ -10,3 +10,4 @@ server.log
 .go-cache/
 .gopath/
 RELEASE.md
+node_modules/

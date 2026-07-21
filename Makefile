@@ -4,7 +4,6 @@ all: help
 
 VERSION := $(shell cat .version)
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-TAILWIND := ./tools/tailwindcss
 
 ## help: You know what this target does
 help:
@@ -27,11 +26,12 @@ vet:
 
 ## css: Build the Tailwind CSS (minified)
 css:
-	@$(TAILWIND) -i static/css/input.css -o static/css/style.css --minify
+	@npx @tailwindcss/cli -i static/css/input.css -o static/css/style.css --minify
+	@python3 tools/embed_uikit_css.py
 
 ## css-watch: Watch and rebuild Tailwind CSS on changes
 css-watch:
-	@$(TAILWIND) -i static/css/input.css -o static/css/style.css --watch
+	@npx @tailwindcss/cli -i static/css/input.css -o static/css/style.css --watch
 
 ## build: Compile a binary
 build: css

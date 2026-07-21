@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-mode="light">
 
 <head>
   <meta charset="utf-8">
@@ -8,32 +8,31 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body
-  class="font-sans antialiased min-h-screen flex flex-col items-center justify-center border-t-4 border-txlog-coral">
+  class="font-sans antialiased min-h-screen flex flex-col items-center justify-center border-t-4 border-kumo-danger bg-kumo-canvas text-kumo-default">
   <div class="max-w-lg mx-auto px-4 py-8 text-center">
-    <div class="font-display font-bold text-8xl text-txlog-indigo/10 mb-4">500</div>
-    <h1 class="font-display font-bold text-2xl mb-2">Oops… You just found an error page</h1>
-    <p class="text-txlog-indigo/60 mb-8">We are sorry but our server encountered an internal error</p>
+    <div class="font-bold text-8xl text-kumo-muted mb-4">500</div>
+    <h1 class="font-bold text-2xl mb-2">Oops… You just found an error page</h1>
+    <p class="text-kumo-subtle mb-8">We are sorry but our server encountered an internal error</p>
     <a href="/"
-      class="inline-flex items-center gap-2 bg-txlog-sky text-white font-medium px-6 py-3 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">
-      <i data-lucide="arrow-left" class="w-4 h-4"></i>
+       data-kumo-component="Button"
+       class="inline-flex items-center gap-2 bg-kumo-brand text-white font-medium px-6 py-3 rounded-lg hover:bg-kumo-brand/90 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-kumo-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="144" y1="72" x2="216" y2="72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M156.39,153.34a8,8,0,0,1,7.59-.69l47.16,21.13a8,8,0,0,1,4.8,8.3A48.33,48.33,0,0,1,168,224,136,136,0,0,1,32,88,48.33,48.33,0,0,1,73.92,40.06a8,8,0,0,1,8.3,4.8l21.13,47.2a8,8,0,0,1-.66,7.53L81.32,125a7.93,7.93,0,0,0-.54,7.81c8.27,16.93,25.77,34.22,42.75,42.41a7.92,7.92,0,0,0,7.83-.59Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="184 40 216 72 184 104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
       Take me home
     </a>
   </div>
-  <div class="max-w-4xl w-full mx-auto px-4 mt-8">
-    <div class="bg-white rounded-3xl shadow-soft p-6">
-      <h4 class="font-display font-semibold text-lg mb-3">Reported error</h4>
+  <div class="max-w-4xl w-full mx-auto px-4 mt-8 text-left">
+    <div class="bg-kumo-control rounded-lg shadow-sm border border-kumo-line p-6">
+      <h4 class="font-semibold text-lg mb-3">Reported error</h4>
       <pre
-        class="bg-txlog-indigo text-white p-4 rounded-xl overflow-x-auto font-mono text-sm"><code>{{ .error }}</code></pre>
+        class="bg-kumo-control text-kumo-default border border-kumo-line p-4 rounded-lg overflow-x-auto font-mono text-sm"><code>{{ .error }}</code></pre>
     </div>
   </div>
-  <script>lucide.createIcons();</script>
 </body>
 
 </html>

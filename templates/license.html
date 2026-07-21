@@ -1,18 +1,18 @@
 {{ template "header.html" . }}
-<div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
+<div class="bg-kumo-canvas border-b border-kumo-line -mt-4 pt-4 pb-6 mb-6 print:hidden">
   <div class="max-w-7xl mx-auto px-6">
-    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
+    <h2 class="font-bold text-2xl text-kumo-default">{{ .title }}</h2>
   </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-6 pb-8">
   <div class="grid md:grid-cols-3 gap-6">
     <div class="md:col-span-2">
-      <div class="bg-white rounded-3xl shadow-soft p-8">
-        <h3 class="font-display font-semibold text-xl mb-4">Txlog License</h3>
-        <p class="text-txlog-indigo/80 mb-3">Txlog is available under MIT License</p>
-        <p class="text-txlog-indigo/80 mb-3">Copyright (c) 2024-2026 Rodrigo de Avila</p>
-        <p class="text-txlog-indigo/80 mb-3">
+      <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-8">
+        <h3 class="font-semibold text-xl mb-4">Txlog License</h3>
+        <p class="text-kumo-default mb-3">Txlog is available under MIT License</p>
+        <p class="text-kumo-default mb-3">Copyright (c) 2024-2026 Rodrigo de Avila</p>
+        <p class="text-kumo-default mb-3">
           Permission is hereby granted, free of charge, to any person
           obtaining a copy of this software and associated documentation
           files (the "Software"), to deal in the Software without
@@ -22,9 +22,9 @@
           Software is furnished to do so, subject to the following
           conditions:
         </p>
-        <p class="text-txlog-indigo/80 mb-3">The above copyright notice and this permission notice shall be
+        <p class="text-kumo-default mb-3">The above copyright notice and this permission notice shall be
           included in all copies or substantial portions of the Software.</p>
-        <p class="text-txlog-indigo/80">
+        <p class="text-kumo-default">
           THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
           EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
           OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -37,15 +37,15 @@
       </div>
     </div>
     <div>
-      <div class="bg-white rounded-3xl shadow-soft p-6">
+      <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-6">
         <div class="flex items-center gap-3 mb-4">
-          <i data-lucide="scale" class="w-6 h-6 text-txlog-sky"></i>
+          <i data-lucide="scale" class="w-6 h-6 text-kumo-brand"></i>
           <div>
-            <p class="text-sm text-txlog-indigo/60">Txlog is licensed under the</p>
-            <h3 class="font-display font-semibold text-lg leading-tight">MIT License</h3>
+            <p class="text-sm text-kumo-muted">Txlog is licensed under the</p>
+            <h3 class="font-semibold text-lg leading-tight">MIT License</h3>
           </div>
         </div>
-        <p class="text-sm text-txlog-indigo/60 mb-5">
+        <p class="text-sm text-kumo-muted mb-5">
           A short and simple permissive license with conditions only
           requiring preservation of copyright and license notices. Licensed
           works, modifications, and larger works may be distributed under
@@ -54,37 +54,37 @@
         <h4 class="font-semibold text-sm mb-2">Permissions</h4>
         <ul class="space-y-1.5 mb-4">
           <li class="flex items-center gap-2 text-sm">
-            <i data-lucide="check" class="w-4 h-4 text-txlog-leaf"></i> Commercial use
+            <svg class="w-4 h-4 text-kumo-success" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Commercial use
           </li>
           <li class="flex items-center gap-2 text-sm">
-            <i data-lucide="check" class="w-4 h-4 text-txlog-leaf"></i> Modification
+            <svg class="w-4 h-4 text-kumo-success" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Modification
           </li>
           <li class="flex items-center gap-2 text-sm">
-            <i data-lucide="check" class="w-4 h-4 text-txlog-leaf"></i> Distribution
+            <svg class="w-4 h-4 text-kumo-success" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Distribution
           </li>
           <li class="flex items-center gap-2 text-sm">
-            <i data-lucide="check" class="w-4 h-4 text-txlog-leaf"></i> Private use
+            <svg class="w-4 h-4 text-kumo-success" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Private use
           </li>
         </ul>
         <h4 class="font-semibold text-sm mb-2">Limitations</h4>
         <ul class="space-y-1.5 mb-4">
           <li class="flex items-center gap-2 text-sm">
-            <i data-lucide="x" class="w-4 h-4 text-txlog-coral"></i> Liability
+            <svg class="w-4 h-4 text-kumo-danger" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg> Liability
           </li>
           <li class="flex items-center gap-2 text-sm">
-            <i data-lucide="x" class="w-4 h-4 text-txlog-coral"></i> Warranty
+            <svg class="w-4 h-4 text-kumo-danger" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg> Warranty
           </li>
         </ul>
         <h4 class="font-semibold text-sm mb-2">Conditions</h4>
         <ul class="space-y-1.5 mb-4">
           <li class="flex items-center gap-2 text-sm">
-            <i data-lucide="info" class="w-4 h-4 text-txlog-sky"></i> License and copyright notice
+            <svg class="w-4 h-4 text-kumo-brand" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M120,120a8,8,0,0,1,8,8v40a8,8,0,0,0,8,8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="124" cy="84" r="12"/></svg> License and copyright notice
           </li>
         </ul>
-        <div class="border-t border-txlog-lavender pt-4 text-sm text-txlog-indigo/60">
+        <div class="border-t border-kumo-line pt-4 text-sm text-kumo-muted">
           This is not legal advice.
           <a href="https://choosealicense.com/licenses/mit/" target="_blank"
-            class="text-txlog-sky hover:underline">Learn more about MIT License.</a>
+            class="text-kumo-brand hover:underline">Learn more about MIT License.</a>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-mode="light">
 
 <head>
   <meta charset="utf-8">
@@ -10,65 +10,64 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
-  <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.css">
 </head>
 
-<body class="font-sans antialiased">
-  <nav class="fixed top-0 left-0 right-0 bg-txlog-navy z-50 print:hidden">
+<body class="font-sans antialiased bg-kumo-canvas text-kumo-default">
+  <nav class="fixed top-0 left-0 right-0 bg-kumo-control border-b border-kumo-line z-50 print:hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="flex items-center justify-between h-16">
         <div class="flex items-center gap-6">
           <a href="/" class="flex items-center gap-3">
             <img src="/images/logbook.png" class="h-8 w-auto" alt="Txlog Server">
-            <span class="text-white font-display font-semibold text-lg hidden sm:inline">Txlog Server</span>
+            <span class="text-kumo-default font-semibold text-lg hidden sm:inline">Txlog Server</span>
           </a>
           <div class="hidden md:flex items-center gap-1">
             <a href="/"
-              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-              <i data-lucide="home" class="w-4 h-4"></i>
+              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M104,216V152h48v64h64V120a8,8,0,0,0-2.34-5.66l-80-80a8,8,0,0,0-11.32,0l-80,80A8,8,0,0,0,40,120v96Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
               Home
             </a>
             <a href="/assets"
-              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-              <i data-lucide="server" class="w-4 h-4"></i>
+              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><rect x="40" y="144" width="176" height="64" rx="8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><rect x="40" y="48" width="176" height="64" rx="8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="180" cy="80" r="12"/><circle cx="180" cy="176" r="12"/></svg>
               Assets
             </a>
             <a href="/packages"
-              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-              <i data-lucide="package" class="w-4 h-4"></i>
+              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="128" y1="129.09" x2="128" y2="231.97" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="32.7 76.92 128 129.08 223.3 76.92" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M219.84,182.84l-88,48.18a8,8,0,0,1-7.68,0l-88-48.18a8,8,0,0,1-4.16-7V80.18a8,8,0,0,1,4.16-7l88-48.18a8,8,0,0,1,7.68,0l88,48.18a8,8,0,0,1,4.16,7v95.64A8,8,0,0,1,219.84,182.84Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="81.56 48.31 176 100 176 152" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
               Packages
             </a>
             <a href="/topology"
-              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-              <i data-lucide="network" class="w-4 h-4"></i>
+              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="128" cy="128" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="96" cy="56" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="200" cy="104" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="200" cy="184" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="56" cy="192" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="118.25" y1="106.07" x2="105.75" y2="77.93" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="177.23" y1="111.59" x2="150.77" y2="120.41" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="181.06" y1="169.27" x2="146.94" y2="142.73" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="110.06" y1="143.94" x2="73.94" y2="176.06" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
               Topology
             </a>
             <div class="relative" id="reports-dropdown">
               <button onclick="toggleDropdown('reports-menu')"
-                class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-                <i data-lucide="chart-no-axes-combined" class="w-4 h-4"></i>
+                class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="48 208 48 136 96 136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="224" y1="208" x2="32" y2="208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="96 208 96 88 152 88" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="152 208 152 40 208 40 208 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                 Analytics
-                <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M94.77,213.23a36.77,36.77,0,0,1-52,0h0a36.77,36.77,0,0,1,0-52L172,32l60,60-24,8Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M72.82,131.18c9.37-3.65,25.78-6.36,47.18,4.82s37.81,8.47,47.18,4.82" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
               </button>
               <div id="reports-menu"
-                class="hidden absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-txlog-lavender/30 py-2 z-50">
-                <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                class="hidden absolute top-full left-0 mt-1 w-52 bg-kumo-control rounded-lg shadow-lg border border-kumo-line py-2 z-50">
+                <a class="block px-4 py-2 text-sm text-kumo-default hover:bg-kumo-tint transition-colors"
                   href="/analytics/progression">Package Progression</a>
 
-                <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                <a class="block px-4 py-2 text-sm text-kumo-default hover:bg-kumo-tint transition-colors"
                   href="/analytics/anomalies">Anomaly Detection</a>
-                <a class="block px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+                <a class="block px-4 py-2 text-sm text-kumo-default hover:bg-kumo-tint transition-colors"
                   href="/analytics/security">Security & Mitigations</a>
               </div>
             </div>
             {{ if not (or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled) }}
             <a href="/admin"
-              class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-              <i data-lucide="settings" class="w-4 h-4"></i>
+              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><rect x="21.49" y="82.75" width="213.02" height="90.51" rx="8" transform="translate(-53.02 128) rotate(-45)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="64" x2="160" y2="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="96" y1="96" x2="128" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="64" y1="128" x2="96" y2="160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
               Admin
             </a>
             {{ end }}
@@ -79,57 +78,57 @@
           {{ $latestVersion := .Context.Keys.env.latestVersion }}
           {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
           <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
-            class="hidden xl:inline-flex items-center gap-1.5 bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2.5 py-1 rounded-md hover:bg-txlog-coral/20 transition-colors">
+            class="hidden xl:inline-flex items-center gap-1.5 bg-kumo-brand/10 text-kumo-brand text-xs font-bold px-2.5 py-1 rounded-md hover:bg-kumo-brand/20 transition-colors">
             New version: {{ $latestVersion }}
-            <i data-lucide="external-link" class="w-3 h-3"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 256 256"><path d="M224,104a8,8,0,0,1-16,0V59.31L139.31,128a8,8,0,0,1-11.32-11.32L196.69,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V48h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"></path></svg>
           </a>
           {{ end }}
-          <span class="hidden xl:inline-block bg-white/15 text-white/90 text-xs font-medium px-2.5 py-1 rounded-md">{{
+          <span class="hidden xl:inline-block bg-kumo-tint text-kumo-subtle border border-kumo-line text-xs font-medium px-2.5 py-1 rounded-md">{{
             .Context.Keys.env.instance }}</span>
           {{ end }}
           {{ if .Context.Keys.user }}
           {{ $latestVersion := .Context.Keys.env.latestVersion }}
           {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
           <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
-            class="hidden xl:inline-flex items-center gap-1.5 bg-txlog-coral/10 text-txlog-coral text-xs font-bold px-2.5 py-1 rounded-md hover:bg-txlog-coral/20 transition-colors">
+            class="hidden xl:inline-flex items-center gap-1.5 bg-kumo-brand/10 text-kumo-brand text-xs font-bold px-2.5 py-1 rounded-md hover:bg-kumo-brand/20 transition-colors">
             New version: {{ $latestVersion }}
-            <i data-lucide="external-link" class="w-3 h-3"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 256 256"><path d="M224,104a8,8,0,0,1-16,0V59.31L139.31,128a8,8,0,0,1-11.32-11.32L196.69,48H152a8,8,0,0,1,0-16h64a8,8,0,0,1,8,8Zm-40,24a8,8,0,0,0-8,8v72H48V48h72a8,8,0,0,0,0-16H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H176a16,16,0,0,0,16-16V136A8,8,0,0,0,184,128Z"></path></svg>
           </a>
           {{ end }}
           <div class="relative" id="user-dropdown">
             <button onclick="toggleDropdown('user-menu')"
-              class="flex items-center gap-2 text-white p-0 hover:opacity-90 transition-opacity">
+              class="flex items-center gap-2 text-kumo-default p-0 hover:opacity-80 transition-opacity cursor-pointer">
               {{ if .Context.Keys.user.Picture }}
-              <span class="w-8 h-8 rounded-lg overflow-hidden bg-txlog-lavender">
+              <span class="w-8 h-8 rounded-lg overflow-hidden bg-kumo-tint">
                 <img src="{{ .Context.Keys.user.Picture }}" class="w-full h-full object-cover" alt="">
               </span>
               {{ else }}
               <span
-                class="w-8 h-8 rounded-lg bg-txlog-lavender flex items-center justify-center text-xs font-bold text-txlog-indigo">{{
+                class="w-8 h-8 rounded-lg bg-kumo-tint flex items-center justify-center text-xs font-bold text-kumo-default border border-kumo-line">{{
                 initial .Context.Keys.user.Name }}</span>
               {{ end }}
               <div class="hidden xl:block text-left">
                 <div class="text-sm font-medium leading-none">{{ .Context.Keys.user.Name }}</div>
-                <div class="text-xs text-white/60 mt-0.5">{{ .Context.Keys.user.Email }}</div>
+                <div class="text-xs text-kumo-subtle mt-0.5">{{ .Context.Keys.user.Email }}</div>
               </div>
             </button>
             <div id="user-menu"
-              class="hidden absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-txlog-lavender/30 py-2 z-50">
-              <div class="px-4 py-1 text-xs font-bold text-txlog-indigo/50 uppercase">{{ .Context.Keys.env.instance }}
+              class="hidden absolute top-full right-0 mt-2 w-56 bg-kumo-control rounded-lg shadow-lg border border-kumo-line py-2 z-50">
+              <div class="px-4 py-1 text-xs font-bold text-kumo-muted uppercase">{{ .Context.Keys.env.instance }}
               </div>
               {{ if .Context.Keys.user.IsAdmin }}
-              <div class="border-t border-txlog-lavender/50 my-1"></div>
-              <a class="flex items-center gap-2 px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors"
+              <div class="border-t border-kumo-line my-1"></div>
+              <a class="flex items-center gap-2 px-4 py-2 text-sm text-kumo-default hover:bg-kumo-tint transition-colors"
                 href="/admin">
-                <i data-lucide="settings" class="w-4 h-4"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><rect x="21.49" y="82.75" width="213.02" height="90.51" rx="8" transform="translate(-53.02 128) rotate(-45)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="64" x2="160" y2="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="96" y1="96" x2="128" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="64" y1="128" x2="96" y2="160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                 Administration
               </a>
               {{ end }}
-              <div class="border-t border-txlog-lavender/50 my-1"></div>
+              <div class="border-t border-kumo-line my-1"></div>
               <form action="/auth/logout" method="post">
                 <button type="submit"
-                  class="flex items-center gap-2 px-4 py-2 text-sm text-txlog-indigo hover:bg-txlog-lavender/30 transition-colors w-full text-left">
-                  <i data-lucide="log-out" class="w-4 h-4"></i>
+                  class="flex items-center gap-2 px-4 py-2 text-sm text-kumo-default hover:bg-kumo-tint transition-colors w-full text-left cursor-pointer">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="112 40 48 40 48 216 112 216" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="112" y1="128" x2="224" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="184 88 224 128 184 168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                   Logout
                 </button>
               </form>
@@ -137,46 +136,46 @@
           </div>
           {{ end }}
           <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
-            class="md:hidden text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+            class="md:hidden text-kumo-default p-1.5 rounded-lg hover:bg-kumo-tint transition-colors cursor-pointer"
             aria-label="Toggle navigation">
-            <i data-lucide="menu" class="w-5 h-5"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="80" cy="104" r="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="160" y1="80" x2="248" y2="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="160" y1="128" x2="248" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="184" y1="176" x2="248" y2="176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M16,192c7.1-27.6,34.18-48,64-48s56.9,20.4,64,48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
           </button>
         </div>
       </div>
-      <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-white/10 mt-2 pt-3 space-y-1">
+      <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-kumo-line mt-2 pt-3 space-y-1">
         <a href="/"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-          <i data-lucide="home" class="w-4 h-4"></i> Home
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M104,216V152h48v64h64V120a8,8,0,0,0-2.34-5.66l-80-80a8,8,0,0,0-11.32,0l-80,80A8,8,0,0,0,40,120v96Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Home
         </a>
         <a href="/assets"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-          <i data-lucide="server" class="w-4 h-4"></i> Assets
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><rect x="40" y="144" width="176" height="64" rx="8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><rect x="40" y="48" width="176" height="64" rx="8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="180" cy="80" r="12"/><circle cx="180" cy="176" r="12"/></svg> Assets
         </a>
         <a href="/topology"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-          <i data-lucide="network" class="w-4 h-4"></i> Topology
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="128" cy="128" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="96" cy="56" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="200" cy="104" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="200" cy="184" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="56" cy="192" r="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="118.25" y1="106.07" x2="105.75" y2="77.93" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="177.23" y1="111.59" x2="150.77" y2="120.41" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="181.06" y1="169.27" x2="146.94" y2="142.73" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="110.06" y1="143.94" x2="73.94" y2="176.06" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Topology
         </a>
         <a href="/packages"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-          <i data-lucide="package" class="w-4 h-4"></i> Packages
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="128" y1="129.09" x2="128" y2="231.97" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="32.7 76.92 128 129.08 223.3 76.92" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M219.84,182.84l-88,48.18a8,8,0,0,1-7.68,0l-88-48.18a8,8,0,0,1-4.16-7V80.18a8,8,0,0,1,4.16-7l88-48.18a8,8,0,0,1,7.68,0l88,48.18a8,8,0,0,1,4.16,7v95.64A8,8,0,0,1,219.84,182.84Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="81.56 48.31 176 100 176 152" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Packages
         </a>
         <a href="/analytics/progression"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium pl-6">
           Package Progression
         </a>
 
         <a href="/analytics/anomalies"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium pl-6">
           Anomaly Detection
         </a>
         <a href="/analytics/security"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium pl-6">
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium pl-6">
           Security & Mitigations
         </a>
         {{ if not (or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled) }}
         <a href="/admin"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl text-white/80 hover:text-white hover:bg-white/10 transition-all text-sm font-medium">
-          <i data-lucide="settings" class="w-4 h-4"></i> Admin
+          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><rect x="21.49" y="82.75" width="213.02" height="90.51" rx="8" transform="translate(-53.02 128) rotate(-45)" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="64" x2="160" y2="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="96" y1="96" x2="128" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="64" y1="128" x2="96" y2="160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Admin
         </a>
         {{ end }}
       </div>

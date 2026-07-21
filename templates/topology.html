@@ -1,12 +1,12 @@
 {{ template "header.html" . }}
-<div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
+<div class="py-6 mb-6 print:hidden">
   <div class="max-w-7xl mx-auto px-6">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
-        <h2 class="font-display font-bold text-2xl text-white flex items-center gap-2">
+        <h2 class="font-bold text-2xl text-kumo-default flex items-center gap-2">
           Topology
         </h2>
-        <p class="text-white/50 text-sm mt-0.5">Hierarchical view of environments, services, and pods</p>
+        <p class="text-kumo-subtle text-sm mt-0.5">Hierarchical view of environments, services, and pods</p>
       </div>
 
       {{ if .view.HasPatterns }}
@@ -20,32 +20,30 @@
 
   {{ if not .view.HasPatterns }}
   <!-- Empty state: no patterns configured -->
-  <div class="bg-white rounded-3xl shadow-soft p-16 text-center">
-    <div class="w-16 h-16 bg-txlog-indigo/5 rounded-full flex items-center justify-center mx-auto mb-4">
-      <i data-lucide="network" class="w-8 h-8 text-txlog-indigo/20"></i>
-    </div>
-    <h3 class="font-display font-bold text-xl text-txlog-navy mb-2">No Topology Patterns Configured</h3>
-    <p class="text-txlog-indigo/50 text-sm mb-6 max-w-md mx-auto">
+  <div class="bg-kumo-control border border-kumo-line rounded-xl shadow-sm p-16 text-center">
+    
+    <h3 class="font-bold text-xl text-kumo-default mb-2">No Topology Patterns Configured</h3>
+    <p class="text-kumo-subtle text-sm mb-6 max-w-md mx-auto">
       Define hostname templates to automatically classify your assets into environments, services, and pods.
     </p>
-    <a href="/admin#topology"
-      class="inline-flex items-center gap-2 bg-txlog-sky text-white font-medium px-5 py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all text-sm">
-      <i data-lucide="settings" class="w-4 h-4"></i>
+    <a href="/admin#topology" data-kumo-component="Button"
+      class="inline-flex items-center gap-2 bg-kumo-brand text-white font-medium px-5 py-2.5 rounded-lg hover:-translate-y-0.5 hover:shadow-lg hover:shadow-kumo-brand/30 transition-all text-sm">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="128" cy="128" r="12"/></svg>
       Configure Topology
     </a>
   </div>
 
   {{ else }}
   <!-- Main Topology Container -->
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
+  <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
     <!-- Top bar with filters and summary -->
-    <div class="border-b border-txlog-lavender px-6 py-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+    <div class="border-b border-kumo-line px-6 py-4 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
       <!-- Filters (Left) -->
       <form method="GET" action="/topology" class="flex flex-wrap items-center gap-3">
         <div class="flex items-center gap-2">
-          <label class="text-txlog-indigo/40 text-[10px] font-bold uppercase tracking-widest">Environment</label>
-          <select name="env" id="env-select"
-            class="bg-white border-2 border-txlog-lavender px-3 py-1.5 rounded-xl text-sm font-semibold text-txlog-indigo focus:border-txlog-sky focus:outline-none transition-all min-w-[140px]"
+          <label class="text-kumo-subtle text-[10px] font-bold uppercase tracking-widest">Environment</label>
+          <select name="env" id="env-select" data-kumo-component="Select"
+            class="min-w-[140px]"
             onchange="this.form.submit()">
             <option value="" disabled {{ if not .view.SelectedEnv }}selected{{ end }}>Select</option>
             {{ range .view.Environments }}
@@ -57,9 +55,9 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <label class="text-txlog-indigo/40 text-[10px] font-bold uppercase tracking-widest">Service</label>
-          <select name="svc" id="svc-select"
-            class="bg-white border-2 border-txlog-lavender px-3 py-1.5 rounded-xl text-sm font-semibold text-txlog-indigo focus:border-txlog-sky focus:outline-none transition-all min-w-[140px]"
+          <label class="text-kumo-subtle text-[10px] font-bold uppercase tracking-widest">Service</label>
+          <select name="svc" id="svc-select" data-kumo-component="Select"
+            class="min-w-[140px]"
             onchange="this.form.submit()">
             <option value="" disabled {{ if not .view.SelectedSvc }}selected{{ end }}>Select</option>
             {{ range .view.Services }}
@@ -72,8 +70,8 @@
 
         {{ if or .view.SelectedEnv .view.SelectedSvc }}
         <a href="/topology"
-          class="text-txlog-indigo/30 hover:text-txlog-coral text-xs flex items-center gap-1 transition-colors ml-1">
-          <i data-lucide="rotate-ccw" class="w-3 h-3"></i> Clear
+          class="text-kumo-muted hover:text-kumo-danger text-xs flex items-center gap-1 transition-colors ml-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="79.8 99.7 31.8 99.7 31.8 51.7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M65.8,190.2a88,88,0,1,0,0-124.4l-34,33.9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Clear
         </a>
         {{ end }}
       </form>
@@ -81,35 +79,35 @@
       <!-- Summary (Right) -->
       <div class="flex flex-wrap items-center gap-3">
         {{ if and .view.SelectedSvc .view.SelectedSvc.HasPods }}
-        <div class="bg-txlog-indigo/5 rounded-xl px-4 py-2 flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-txlog-sky/10 flex items-center justify-center">
-            <i data-lucide="layers" class="w-4 h-4 text-txlog-sky"></i>
+        <div class="bg-kumo-tint border border-kumo-line rounded-xl px-4 py-2 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-kumo-brand/10 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-brand"><rect width="256" height="256" fill="none"/><polygon points="128 24 24 80 128 136 232 80 128 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="24 128 128 184 232 128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="24 176 128 232 232 176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
           </div>
           <div>
-            <div class="text-base font-bold text-txlog-indigo leading-tight">{{ len .view.Pods }}</div>
-            <div class="text-[10px] text-txlog-indigo/40 uppercase font-bold tracking-wider">Pods</div>
+            <div class="text-base font-bold text-kumo-default leading-tight">{{ len .view.Pods }}</div>
+            <div class="text-[10px] text-kumo-subtle uppercase font-bold tracking-wider">Pods</div>
           </div>
         </div>
         {{ end }}
         {{ if .view.SelectedSvc }}
-        <div class="bg-txlog-indigo/5 rounded-xl px-4 py-2 flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-txlog-leaf/10 flex items-center justify-center">
-            <i data-lucide="server" class="w-4 h-4 text-txlog-leaf"></i>
+        <div class="bg-kumo-tint border border-kumo-line rounded-xl px-4 py-2 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-kumo-success/10 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-success"><rect width="256" height="256" fill="none"/><path d="M32,56H224a0,0,0,0,1,0,0V192a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V56A0,0,0,0,1,32,56Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="32" y1="104" x2="224" y2="104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="32" y1="152" x2="224" y2="152" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="88" y1="104" x2="88" y2="200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
           </div>
           <div>
-            <div class="text-base font-bold text-txlog-indigo leading-tight">{{ .view.TotalAssets }}</div>
-            <div class="text-[10px] text-txlog-indigo/40 uppercase font-bold tracking-wider">Assets</div>
+            <div class="text-base font-bold text-kumo-default leading-tight">{{ .view.TotalAssets }}</div>
+            <div class="text-[10px] text-kumo-subtle uppercase font-bold tracking-wider">Assets</div>
           </div>
         </div>
         {{ end }}
         {{ if gt .view.TotalNeedsRestart 0 }}
-        <div class="bg-txlog-golden/10 rounded-xl px-4 py-2 flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-txlog-golden/20 flex items-center justify-center">
-            <i data-lucide="refresh-cw" class="w-4 h-4 text-txlog-golden"></i>
+        <div class="bg-kumo-warning/10 border border-kumo-warning/20 rounded-xl px-4 py-2 flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-kumo-warning/20 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-warning"><rect width="256" height="256" fill="none"/><path d="M108.11,28.11A96.09,96.09,0,0,0,227.89,147.89,96,96,0,1,1,108.11,28.11Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
           </div>
           <div>
-            <div class="text-base font-bold text-txlog-golden leading-tight">{{ .view.TotalNeedsRestart }}</div>
-            <div class="text-[10px] text-txlog-golden/60 uppercase font-bold tracking-wider">Need Restart</div>
+            <div class="text-base font-bold text-kumo-warning leading-tight">{{ .view.TotalNeedsRestart }}</div>
+            <div class="text-[10px] text-kumo-warning uppercase font-bold tracking-wider">Need Restart</div>
           </div>
         </div>
         {{ end }}
@@ -119,122 +117,117 @@
     {{ if .view.SelectionRequired }}
     <!-- Empty state: selection required -->
     <div class="py-24 text-center">
-      <div class="w-16 h-16 bg-txlog-indigo/5 rounded-full flex items-center justify-center mx-auto mb-4">
-        <i data-lucide="mouse-pointer-2" class="w-8 h-8 text-txlog-indigo/20"></i>
-      </div>
-      <h3 class="font-display font-bold text-xl text-txlog-navy mb-2">Topology Insight</h3>
-      <p class="text-txlog-indigo/50 text-sm max-w-md mx-auto leading-relaxed">
-        Please select an <strong>Environment</strong> and a <strong>Service</strong> to visualize the topology.
+      
+      <h3 class="font-bold text-xl text-kumo-default mb-2">Topology Insight</h3>
+      <p class="text-kumo-subtle text-sm max-w-md mx-auto leading-relaxed">
+        Please select an <strong class="text-kumo-default">Environment</strong> and a <strong class="text-kumo-default">Service</strong> to visualize the topology.
       </p>
     </div>
 
     {{ else if and (eq (len .view.Pods) 0) (eq (len .view.OutOfTopology) 0) }}
     <!-- Empty state: patterns exist but no assets matched -->
     <div class="py-24 text-center">
-      <div class="w-16 h-16 bg-txlog-indigo/5 rounded-full flex items-center justify-center mx-auto mb-4">
-        <i data-lucide="frown" class="w-8 h-8 text-txlog-indigo/20"></i>
-      </div>
-      <h3 class="font-display font-bold text-xl text-txlog-navy mb-2">No Assets Found</h3>
-      <p class="text-txlog-indigo/50 text-sm max-w-md mx-auto">
+      
+      <h3 class="font-bold text-xl text-kumo-default mb-2">No Assets Found</h3>
+      <p class="text-kumo-subtle text-sm max-w-md mx-auto">
         No active assets matched the selected filters.
       </p>
     </div>
 
     {{ else }}
     <!-- Pod accordions -->
-    <div class="divide-y divide-txlog-lavender/50">
+    <div >
       {{ range $i, $pod := .view.Pods }}
-      <div id="pod-card-{{ $i }}" class="hover:bg-txlog-lavender/5 transition-colors">
+      <div id="pod-card-{{ $i }}" class="hover:bg-kumo-tint transition-colors">
       <!-- Pod header -->
       <button type="button" onclick="togglePod('pod-body-{{ $i }}', this)"
-        class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-txlog-lavender/20 transition-colors group {{ if not $.view.SelectedSvc.HasPods }}open{{ end }}">
+        class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-kumo-line/20 transition-colors group {{ if not $.view.SelectedSvc.HasPods }}open{{ end }}">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-txlog-sky/10 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="layers" class="w-4 h-4 text-txlog-sky"></i>
+          <div class="w-8 h-8 rounded-lg bg-kumo-brand/10 flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-brand"><rect width="256" height="256" fill="none"/><polygon points="128 24 24 80 128 136 232 80 128 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="24 128 128 184 232 128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="24 176 128 232 232 176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
           </div>
           <div>
-            <span class="font-display font-semibold">
+            <span class="font-semibold text-kumo-default">
               {{ if eq $pod.PodID "Default" }}
               {{ $.view.SelectedSvc.Name }}
               {{ else }}
               Pod #{{ $pod.PodID }}
               {{ end }}
             </span>
-            <span class="text-txlog-indigo/40 text-sm ml-2">{{ $pod.TotalAssets }} asset{{ if ne $pod.TotalAssets 1
+            <span class="text-kumo-subtle text-sm ml-2">{{ $pod.TotalAssets }} asset{{ if ne $pod.TotalAssets 1
               }}s{{ end }}</span>
           </div>
         </div>
         <div class="flex items-center gap-2">
           {{ if $pod.HasCopyFail }}
-          <span class="bg-txlog-coral text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md animate-pulse" title="Copy Fail (CVE-2026-31431)">CF</span>
+          <span class="bg-kumo-danger text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm animate-pulse" title="Copy Fail (CVE-2026-31431)">CF</span>
           {{ end }}
           {{ if $pod.HasDirtyFrag }}
-          <span class="bg-txlog-purple text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md animate-pulse" title="Dirty Frag">DF</span>
+          <span class="bg-kumo-accent text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm animate-pulse" title="Dirty Frag">DF</span>
           {{ end }}
           {{ if $pod.HasFragnesia }}
-          <span class="bg-txlog-indigo text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md animate-pulse" title="Fragnesia">FN</span>
+          <span class="bg-kumo-brand text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm animate-pulse" title="Fragnesia">FN</span>
           {{ end }}
           {{ if gt $pod.NeedsRestart 0 }}
           <span
-            class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-txlog-golden animate-pulse"></span>{{ $pod.NeedsRestart }} need restart
+            class="bg-kumo-warning/10 text-kumo-warning text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider flex items-center gap-1 border border-kumo-warning/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-kumo-warning animate-pulse"></span>{{ $pod.NeedsRestart }} need restart
           </span>
           {{ end }}
-          <i data-lucide="chevron-down"
-            class="w-4 h-4 text-txlog-indigo/40 transition-transform group-[.open]:rotate-180 pod-chevron"></i>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-muted transition-transform group-[.open]:rotate-180 pod-chevron"><rect width="256" height="256" fill="none"/><polyline points="208 96 128 176 48 96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
         </div>
       </button>
 
       <!-- Pod body -->
-      <div id="pod-body-{{ $i }}" class="border-t border-txlog-lavender/50 {{ if $.view.SelectedSvc.HasPods }}hidden{{ end }}">
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/20">
+      <div id="pod-body-{{ $i }}" class="border-t border-kumo-line {{ if $.view.SelectedSvc.HasPods }}hidden{{ end }}">
+        <table class="kumo-table">
+          <tbody>
             {{ range $pod.Assets }}
-            <tr class="hover:bg-txlog-lavender/10 transition-colors">
-              <td class="px-6 py-3 w-8">
+            <tr>
+              <td class="w-8">
                 {{ if or .CopyFail .DirtyFrag .Fragnesia }}
-                <span class="flex w-2 h-2 rounded-full bg-txlog-coral animate-pulse"
+                <span class="flex w-2 h-2 rounded-full bg-kumo-danger animate-pulse"
                   title="Vulnerabilities Found"></span>
                 {{ else if .NeedsRestarting }}
-                <span class="flex w-2 h-2 rounded-full bg-txlog-golden animate-pulse" title="Needs restart"></span>
+                <span class="flex w-2 h-2 rounded-full bg-kumo-warning animate-pulse" title="Needs restart"></span>
                 {{ else }}
-                <span class="flex w-2 h-2 rounded-full bg-txlog-leaf" title="OK"></span>
+                <span class="flex w-2 h-2 rounded-full bg-kumo-success" title="OK"></span>
                 {{ end }}
               </td>
-              <td class="px-3 py-3">
-                <div class="font-medium text-txlog-indigo">{{ .Hostname }}</div>
-                <div class="text-xs text-txlog-indigo/40 font-mono">{{ .MachineID }}</div>
+              <td>
+                <div class="font-medium text-kumo-default">{{ .Hostname }}</div>
+                <div class="text-xs text-kumo-muted font-mono">{{ .MachineID }}</div>
               </td>
-              <td class="px-3 py-3 hidden sm:table-cell">
+              <td class="hidden sm:table-cell">
                 {{ if .OS }}
-                <span class="text-xs bg-txlog-indigo/5 text-txlog-indigo/60 px-2 py-0.5 rounded-md font-mono">{{ .OS
+                <span class="text-xs bg-kumo-tint border border-kumo-line text-kumo-subtle px-2 py-0.5 rounded-md font-mono">{{ .OS
                   }}</span>
                 {{ end }}
               </td>
 
-              <td class="px-3 py-3 text-right min-w-[80px]">
+              <td class="text-right min-w-[80px]">
                 <div class="flex justify-end gap-1">
                   {{ if .CopyFail }}
-                  <span class="bg-txlog-coral text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Copy Fail (CVE-2026-31431)">CF</span>
+                  <span class="bg-kumo-danger text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm" title="Copy Fail (CVE-2026-31431)">CF</span>
                   {{ end }}
                   {{ if .DirtyFrag }}
-                  <span class="bg-txlog-purple text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Dirty Frag">DF</span>
+                  <span class="bg-kumo-accent text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm" title="Dirty Frag">DF</span>
                   {{ end }}
                   {{ if .Fragnesia }}
-                  <span class="bg-txlog-indigo text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-md" title="Fragnesia">FN</span>
+                  <span class="bg-kumo-brand text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm" title="Fragnesia">FN</span>
                   {{ end }}
                 </div>
               </td>
-              <td class="px-3 py-3 text-right min-w-[100px]">
+              <td class="text-right min-w-[100px]">
                 {{ if .NeedsRestarting }}
                 <span
-                  class="bg-txlog-golden/10 text-txlog-golden text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider whitespace-nowrap">Need Restart</span>
+                  class="bg-kumo-warning/10 text-kumo-warning text-[10px] font-bold px-1.5 py-0.5 rounded-sm border border-kumo-warning/20 uppercase tracking-wider whitespace-nowrap">Need Restart</span>
                 {{ end }}
               </td>
-              <td class="px-6 py-3 text-right">
+              <td class="text-right">
                 <a href="/assets/{{ .MachineID }}"
-                  class="inline-flex items-center gap-1.5 text-txlog-sky text-xs font-semibold px-3 py-1.5 rounded-xl border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-all">
-                  Details <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  class="inline-flex items-center gap-1.5 text-kumo-brand text-xs font-semibold px-3 py-1.5 rounded-md border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-all">
+                  Details <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="144 56 216 128 144 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                 </a>
               </td>
             </tr>
@@ -247,57 +240,57 @@
 
     <!-- Out of Topology group -->
     {{ if gt (len .view.OutOfTopology) 0 }}
-    <div id="pod-card-oot" class="bg-txlog-lavender/5">
+    <div id="pod-card-oot" class="bg-kumo-tint">
       <button type="button" onclick="togglePod('pod-body-oot', this)"
-        class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-txlog-lavender/20 transition-colors group">
+        class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-kumo-line/20 transition-colors group">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-txlog-indigo/5 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="help-circle" class="w-4 h-4 text-txlog-indigo/30"></i>
+          <div class="w-8 h-8 rounded-lg bg-kumo-canvas border border-kumo-line flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-muted"><rect width="256" height="256" fill="none"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="180" r="12"/><path d="M128,144v-8a28,28,0,1,0-28-28" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
           </div>
           <div>
-            <span class="font-display font-semibold text-txlog-indigo/60">Out of Topology</span>
-            <span class="text-txlog-indigo/40 text-sm ml-2">{{ len .view.OutOfTopology }} asset{{ if ne (len
+            <span class="font-semibold text-kumo-subtle">Out of Topology</span>
+            <span class="text-kumo-muted text-sm ml-2">{{ len .view.OutOfTopology }} asset{{ if ne (len
               .view.OutOfTopology) 1 }}s{{ end }}</span>
           </div>
         </div>
-        <i data-lucide="chevron-down" class="w-4 h-4 text-txlog-indigo/30 transition-transform pod-chevron"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-muted transition-transform pod-chevron"><rect width="256" height="256" fill="none"/><polyline points="208 96 128 176 48 96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
       </button>
-      <div id="pod-body-oot" class="border-t border-txlog-lavender/50 hidden">
-        <div class="px-6 py-3 bg-txlog-lavender/10">
-          <p class="text-xs text-txlog-indigo/50">
+      <div id="pod-body-oot" class="border-t border-kumo-line hidden">
+        <div class="bg-kumo-canvas">
+          <p class="text-xs text-kumo-subtle">
             These assets did not match any configured hostname template.
-            The system evaluates templates based on <strong>Display Order</strong> (priority) defined in
-            <a href="/admin#topology" class="text-txlog-sky hover:underline">Admin → Topology</a>.
+            The system evaluates templates based on <strong class="text-kumo-default">Display Order</strong> (priority) defined in
+            <a href="/admin#topology" class="text-kumo-brand hover:underline">Admin → Topology</a>.
             Consider adding a generic "catch-all" pattern with a high order value.
           </p>
         </div>
-        <table class="w-full text-sm">
-          <tbody class="divide-y divide-txlog-lavender/20">
+        <table class="kumo-table">
+          <tbody>
             {{ range .view.OutOfTopology }}
-            <tr class="hover:bg-txlog-lavender/10 transition-colors">
-              <td class="px-6 py-3 w-8">
-                <span class="flex w-2 h-2 rounded-full bg-txlog-indigo/20"></span>
+            <tr>
+              <td class="w-8">
+                <span class="flex w-2 h-2 rounded-full bg-kumo-muted"></span>
               </td>
-              <td class="px-3 py-3">
-                <div class="font-medium text-txlog-indigo/70">{{ .Hostname }}</div>
-                <div class="text-xs text-txlog-indigo/30 font-mono">{{ .MachineID }}</div>
+              <td>
+                <div class="font-medium text-kumo-default">{{ .Hostname }}</div>
+                <div class="text-xs text-kumo-muted font-mono">{{ .MachineID }}</div>
               </td>
-              <td class="px-3 py-3 hidden sm:table-cell">
+              <td class="hidden sm:table-cell">
                 {{ if .OS }}
-                <span class="text-xs bg-txlog-indigo/5 text-txlog-indigo/50 px-2 py-0.5 rounded-md font-mono">{{ .OS
+                <span class="text-xs bg-kumo-tint border border-kumo-line text-kumo-subtle px-2 py-0.5 rounded-md font-mono">{{ .OS
                   }}</span>
                 {{ end }}
               </td>
-              <td class="px-3 py-3 hidden md:table-cell">
+              <td class="hidden md:table-cell">
                 {{ if .AgentVersion }}
-                <span class="text-xs text-txlog-indigo/30">v{{ .AgentVersion }}</span>
+                <span class="text-xs text-kumo-muted">v{{ .AgentVersion }}</span>
                 {{ end }}
               </td>
-              <td class="px-3 py-3"></td>
-              <td class="px-6 py-3 text-right">
+              <td></td>
+              <td class="text-right">
                 <a href="/assets/{{ .MachineID }}"
-                  class="inline-flex items-center gap-1.5 text-txlog-sky text-xs font-semibold px-3 py-1.5 rounded-xl border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-all">
-                  Details <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  class="inline-flex items-center gap-1.5 text-kumo-brand text-xs font-semibold px-3 py-1.5 rounded-md border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-all">
+                  Details <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="144 56 216 128 144 200" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                 </a>
               </td>
             </tr>

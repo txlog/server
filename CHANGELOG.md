@@ -18,6 +18,36 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.33.0] - 2026-07-21
+
+### Changed
+
+- **UI Overhaul**: Complete transition of the frontend interface to the Kumo UI
+  design system for a neutral, corporate, and data-dense aesthetic.
+- **Styling**: Migrated all templates and components to semantic CSS tokens.
+- **Iconography**: Replaced the entire icon library from Lucide to Phosphor.
+- **Typography**: Removed the `Poppins` display font to unify all application
+  typography under `Inter`.
+- Update Go version to 1.26.5.
+- Bump `github.com/coreos/go-oidc/v3` from 3.19.0 to 3.20.0.
+- Bump `github.com/go-openapi/jsonpointer` from 0.23.1 to 1.0.0.
+- Bump `github.com/go-openapi/jsonreference` from 0.21.6 to 1.0.0.
+- Bump `github.com/go-openapi/spec` from 0.22.5 to 0.22.9.
+- Bump `github.com/go-openapi/swag/*` from 0.26.1 to 0.27.3.
+- Bump `github.com/klauspost/compress` from 1.18.6 to 1.19.1.
+- Bump `github.com/klauspost/cpuid/v2` from 2.3.0 to 2.4.0.
+- Bump `github.com/mattn/go-isatty` from 0.0.22 to 0.0.23.
+- Bump `github.com/montanaflynn/stats` from 0.9.0 to 0.12.2.
+- Bump `github.com/oapi-codegen/runtime` from 1.4.1 to 1.6.0.
+- Bump `github.com/pelletier/go-toml/v2` from 2.3.1 to 2.4.3.
+- Bump `github.com/rabbitmq/amqp091-go` from 1.11.0 to 1.12.0.
+- Bump `github.com/redis/go-redis/v9` from 9.20.1 to 9.21.0.
+- Bump `github.com/tavsec/gin-healthcheck` from 1.7.15 to 1.7.16.
+- Bump `go.mongodb.org/mongo-driver/v2` from 2.6.0 to 2.8.0.
+- Bump `golang.org/x/arch` from 0.28.0 to 0.29.0.
+- Bump `golang.org/x/mod` from 0.37.0 to 0.38.0.
+- Bump `golang.org/x/tools` from 0.47.0 to 0.48.0.
+
 ## [1.32.0] - 2026-06-13
 
 ### Changed

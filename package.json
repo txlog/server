@@ -1,0 +1,30 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "<!-- markdownlint-disable MD033 MD013 --> <p align=\"center\">   <p align=\"center\">     <img width=\"100\" height=\"100\" src=\"https://raw.githubusercontent.com/txlog/.github/refs/heads/main/profile/logbook.png\" alt=\"The Logo\">   </p>   <p align=\"center\">     <strong>Server to receive data from Txlog Agent</strong>   </p>   <p align=\"center\">     <a href=\"https://semver.org\">       <img src=\"https://img.shields.io/badge/SemVer-2.0.0-22bfda.svg\" alt=\"SemVer Format\">     </a>     <a href=\"./CHANGELOG.md\">       <img src=\"https://img.shields.io/badge/changelog-Keep_a_Changelog_v1.1.0-E05735\" alt=\"Keep a Changelog\">     </a>     <a href=\"https://github.com/txlog/.github/blob/main/profile/CODE_OF_CONDUCT.md\">       <img src=\"https://img.shields.io/badge/Contributor%20Covenant-3.0-4baaaa.svg\" alt=\"Contributor Covenant\">     </a>     <br/>     <a href=\"https://newreleases.io/github/txlog/server\">       <img src=\"https://newreleases.io/badge.svg\" alt=\"NewReleases\">     </a>     <a href=\"https://deepwiki.com/txlog/server\">       <img src=\"https://deepwiki.com/badge.svg\" alt=\"Ask DeepWiki\">     </a>   </p> </p>",
+  "main": "tailwind.config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/txlog/server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/txlog/server/issues"
+  },
+  "homepage": "https://github.com/txlog/server#readme",
+  "devDependencies": {
+    "@cloudflare/kumo": "^2.8.0",
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

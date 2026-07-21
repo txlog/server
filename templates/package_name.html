@@ -1,42 +1,42 @@
 {{ template "header.html" . }}
-<div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
+<div class="py-6 mb-6 print:hidden">
   <div class="max-w-7xl mx-auto px-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div>
-        <h2 class="font-display font-bold text-2xl text-white">Package details</h2>
-        <p class="text-white/50 text-sm mt-0.5">Deep dive into versions, architecture, and asset distribution</p>
+        <h2 class="font-bold text-2xl text-kumo-default">Package details</h2>
+        <p class="text-kumo-subtle text-sm mt-0.5">Deep dive into versions, architecture, and asset distribution</p>
       </div>
-      <a class="inline-flex items-center gap-2 border-2 border-white/30 text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-white/10 transition-all"
+      <a data-kumo-component="Button" class="group flex shrink-0 font-medium select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-kumo-brand cursor-pointer gap-2 rounded-lg text-sm items-center justify-center px-4 py-2 text-kumo-default bg-kumo-control border border-kumo-line hover:bg-kumo-tint shadow-sm transition-colors"
         href="https://pkgs.org/search/?q={{ .name }}" target="_blank">
         Search for this package on pkgs.org
-        <i data-lucide="external-link" class="w-4 h-4"></i>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="216 104 216 40 152 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="136" y1="120" x2="216" y2="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,136v72a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8h72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
       </a>
     </div>
   </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4">
-      <h3 class="font-display font-semibold text-lg">{{ .name }}</h3>
+  <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+    <div class="border-b border-kumo-line px-6 py-4">
+      <h3 class="font-semibold text-lg text-kumo-default">{{ .name }}</h3>
     </div>
     <div class="p-6">
       <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
         <div>
-          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Architecture</div>
-          <div class="font-medium">
+          <div class="text-xs font-bold text-kumo-muted uppercase tracking-wider mb-1">Architecture</div>
+          <div class="font-medium text-kumo-default">
             {{ range $index, $arch := .archList }}{{- if $index }}, {{ end -}}{{ $arch }}{{- end }}
           </div>
         </div>
         <div>
-          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Repository</div>
-          <div class="font-medium">
+          <div class="text-xs font-bold text-kumo-muted uppercase tracking-wider mb-1">Repository</div>
+          <div class="font-medium text-kumo-default">
             {{ range $index, $repo := .repoList }}{{- if $index }}, {{ end -}}{{ $repo }}{{- end }}
           </div>
         </div>
         <div>
-          <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Last seen</div>
-          <div class="font-medium">
+          <div class="text-xs font-bold text-kumo-muted uppercase tracking-wider mb-1">Last seen</div>
+          <div class="font-medium text-kumo-default">
             {{ if .packages }}{{ formatDateTime (index .packages 0).LastSeen }}{{ end }}
           </div>
         </div>
@@ -45,39 +45,39 @@
   </div>
 
   <div class="grid md:grid-cols-2 gap-6">
-    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-      <div class="border-b border-txlog-lavender px-6 py-4">
-        <h3 class="font-display font-semibold text-lg">Version timeline</h3>
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+      <div class="border-b border-kumo-line px-6 py-4">
+        <h3 class="font-semibold text-lg text-kumo-default">Version timeline</h3>
       </div>
       <div class="p-6">
         <div class="relative pl-8 space-y-6">
-          <div class="absolute left-[13px] top-2 bottom-2 w-0.5 bg-txlog-lavender"></div>
+          <div class="absolute left-[13px] top-2 bottom-2 w-px bg-kumo-line"></div>
           {{ range .packages }}
           <div class="relative">
             <div class="absolute -left-8 top-5 w-7 flex items-center justify-center">
-              <div class="w-3 h-3 rounded-full bg-txlog-sky ring-4 ring-white"></div>
+              <div class="w-3 h-3 rounded-full bg-kumo-brand ring-4 ring-kumo-control"></div>
             </div>
-            <div class="bg-txlog-bg rounded-2xl p-4 border border-txlog-lavender/30">
+            <div class="bg-kumo-canvas rounded-lg p-4 border border-kumo-line">
               <div class="flex items-start justify-between gap-3">
-                <h4 class="font-semibold">{{ .Version }}<span class="text-txlog-indigo/50">-{{ .Release }}-{{ .Arch
+                <h4 class="font-semibold text-kumo-default">{{ .Version }}<span class="text-kumo-subtle">-{{ .Release }}-{{ .Arch
                     }}</span></h4>
                 <div class="flex items-center gap-2">
                   {{ if gt (len .Vulnerabilities) 0 }}
-                    <span class="bg-txlog-coral text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <i data-lucide="shield-alert" class="w-3 h-3"></i> {{ len .Vulnerabilities }} Vulns
+                    <span class="bg-kumo-danger text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.57,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.82,91-124.39V56A16,16,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="104" x2="128" y2="144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="180" r="12"/></svg> {{ len .Vulnerabilities }} Vulns
                     </span>
                   {{ else }}
-                    <span class="bg-txlog-leaf text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
-                      <i data-lucide="shield-check" class="w-3 h-3"></i> Safe
+                    <span class="bg-kumo-success text-white text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.57,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.82,91-124.39V56A16,16,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="86 132 116.47 162.47 170 108.94" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Safe
                     </span>
                   {{ end }}
                   <a href="javascript:loadPackageAssets('{{ $.name }}', '{{ .Version }}', '{{ .Release }}', [{{ range $i, $v := .Vulnerabilities }}{{ if $i }}, {{ end }}'{{ $v }}'{{ end }}])"
-                    class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors flex items-center gap-1">
-                    List assets <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    class="text-kumo-brand text-sm font-medium px-3 py-1 rounded-md border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors flex items-center gap-1">
+                    List assets <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                   </a>
                 </div>
               </div>
-              <p class="text-sm text-txlog-indigo/60 mt-1">
+              <p class="text-sm text-kumo-subtle mt-1">
                 <strong>Repo:</strong> {{ .Repo }}<br />
                 <strong>Last seen:</strong> {{ formatDateTime .LastSeen }}
               </p>
@@ -89,44 +89,44 @@
     </div>
 
     <div>
-      <div id="table-placeholder" class="bg-white rounded-3xl shadow-soft p-6 hidden">
+      <div id="table-placeholder" class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-6 hidden">
         <div class="space-y-3 animate-pulse">
-          <div class="h-4 bg-txlog-lavender rounded w-3/4"></div>
-          <div class="h-4 bg-txlog-lavender rounded w-1/2"></div>
-          <div class="h-4 bg-txlog-lavender rounded w-2/3"></div>
-          <div class="h-4 bg-txlog-lavender rounded w-1/3"></div>
+          <div class="h-4 bg-kumo-line rounded w-3/4"></div>
+          <div class="h-4 bg-kumo-line rounded w-1/2"></div>
+          <div class="h-4 bg-kumo-line rounded w-2/3"></div>
+          <div class="h-4 bg-kumo-line rounded w-1/3"></div>
         </div>
       </div>
 
-      <div id="table-assets" class="bg-white rounded-3xl shadow-soft overflow-hidden hidden">
-        <div class="border-b border-txlog-lavender px-6 py-4">
-          <h3 class="font-display font-semibold text-lg">Assets running version <kbd id="version-display"
-              class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">loading...</kbd></h3>
+      <div id="table-assets" class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden hidden">
+        <div class="border-b border-kumo-line px-6 py-4">
+          <h3 class="font-semibold text-lg text-kumo-default">Assets running version <kbd id="version-display"
+              class="bg-kumo-tint border border-kumo-line text-kumo-default text-xs font-mono px-2 py-1 rounded-md">loading...</kbd></h3>
         </div>
         <div id="vulns-container" class="hidden"></div>
         <div id="assets-table-container">
           <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="kumo-table">
               <thead>
-                <tr class="border-b border-txlog-lavender/50 text-left">
-                  <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Hostname
+                <tr>
+                  <th>Hostname
                   </th>
-                  <th class="px-6 py-3">&nbsp;</th>
+                  <th>&nbsp;</th>
                 </tr>
               </thead>
-              <tbody id="assets-table-body" class="divide-y divide-txlog-lavender/30">
+              <tbody id="assets-table-body">
               </tbody>
             </table>
           </div>
-          <div class="border-t border-txlog-lavender/50 px-6 py-3 hidden" id="table-footer">
-            <p class="text-sm text-txlog-indigo/50">Showing <strong id="entries-count">0</strong> entries</p>
+          <div class="border-t border-kumo-line px-6 py-3 hidden" id="table-footer">
+            <p class="text-sm text-kumo-subtle">Showing <strong class="text-kumo-default" id="entries-count">0</strong> entries</p>
           </div>
         </div>
         <div id="empty-state-container" class="hidden">
           <div class="py-12 text-center">
-            <i data-lucide="package" class="w-12 h-12 text-txlog-indigo/20 mx-auto mb-4"></i>
-            <p class="font-semibold mb-1">No assets found</p>
-            <p class="text-sm text-txlog-indigo/50" id="empty-state-subtitle"></p>
+            
+            <p class="font-semibold text-kumo-default mb-1">No assets found</p>
+            <p class="text-sm text-kumo-subtle" id="empty-state-subtitle"></p>
           </div>
         </div>
       </div>
@@ -146,9 +146,11 @@
           var vulnsContainer = document.getElementById('vulns-container');
 
           if (vulns && vulns.length > 0) {
-            var vulnsHtml = '<div class="px-6 py-4 bg-txlog-coral/5 border-b border-txlog-coral/20"><h4 class="font-semibold text-txlog-coral text-sm mb-3 flex items-center gap-1.5"><i data-lucide="shield-alert" class="w-4 h-4"></i> Known Vulnerabilities (' + vulns.length + ')</h4><div class="flex flex-wrap gap-2">';
+            var shieldSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.57,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.82,91-124.39V56A16,16,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="104" x2="128" y2="144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="180" r="12"/></svg>';
+            var extLinkSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="216 104 216 40 152 40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="136" y1="120" x2="216" y2="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M184,136v72a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8h72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>';
+            var vulnsHtml = '<div class="px-6 py-4 bg-kumo-danger/5 border-b border-kumo-danger/20"><h4 class="font-semibold text-kumo-danger text-sm mb-3 flex items-center gap-1.5">' + shieldSvg + ' Known Vulnerabilities (' + vulns.length + ')</h4><div class="flex flex-wrap gap-2">';
             vulns.forEach(function(v) {
-                vulnsHtml += '<a href="https://osv.dev/vulnerability/' + v + '" target="_blank" class="bg-white hover:bg-txlog-coral/10 text-txlog-coral text-xs font-mono px-2 py-1 rounded border border-txlog-coral/30 hover:border-txlog-coral transition-colors flex items-center gap-1">' + v + ' <i data-lucide="external-link" class="w-2.5 h-2.5"></i></a>';
+                vulnsHtml += '<a href="https://osv.dev/vulnerability/' + v + '" target="_blank" class="bg-kumo-canvas hover:bg-kumo-danger/10 text-kumo-danger text-xs font-mono px-2 py-1 rounded border border-kumo-danger/30 hover:border-kumo-danger transition-colors flex items-center gap-1">' + v + ' ' + extLinkSvg + '</a>';
             });
             vulnsHtml += '</div></div>';
             vulnsContainer.innerHTML = vulnsHtml;
@@ -174,8 +176,8 @@
               if (assets && assets.length > 0) {
                 assets.forEach(function (asset) {
                   var row = document.createElement('tr');
-                  row.className = 'hover:bg-txlog-lavender/10 transition-colors';
-                  row.innerHTML = '<td class="px-6 py-3">' + (asset.hostname || 'Unknown') + '</td><td class="px-6 py-3 text-right"><a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="/assets/' + asset.machine_id + '">Details</a></td>';
+                  row.className = '';
+                  row.innerHTML = '<td class="text-kumo-default">' + (asset.hostname || 'Unknown') + '</td><td class="text-right"><a class="text-kumo-brand text-sm font-medium px-3 py-1 rounded-md border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors" href="/assets/' + asset.machine_id + '">Details</a></td>';
                   tableBody.appendChild(row);
                 });
                 entriesCount.textContent = assets.length;
@@ -190,9 +192,9 @@
             })
             .catch(function (error) {
               if (error.message.indexOf('404') !== -1) {
-                tableBody.innerHTML = '<tr><td colspan="2" class="px-6 py-4 text-center text-txlog-indigo/50">No assets found for this version</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="2" class="px-6 py-4 text-center text-kumo-subtle">No assets found for this version</td></tr>';
               } else {
-                tableBody.innerHTML = '<tr><td colspan="2" class="px-6 py-4 text-center text-txlog-coral">Error loading assets data</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="2" class="px-6 py-4 text-center text-kumo-danger">Error loading assets data</td></tr>';
               }
               assetsTableContainer.classList.remove('hidden');
               emptyStateContainer.classList.add('hidden');
@@ -200,7 +202,6 @@
             .finally(function () {
               document.getElementById('table-placeholder').classList.add('hidden');
               isLoadingAssets = false;
-              if (window.lucide) window.lucide.createIcons();
             });
         }
       </script>

@@ -1,22 +1,22 @@
 {{ template "header.html" . }}
-<div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
+<div class="py-6 mb-6 print:hidden">
   <div class="max-w-7xl mx-auto px-6">
-    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
-    <p class="text-white/50 text-sm mt-0.5">Full inventory of servers and devices in your network</p>
+    <h2 class="font-bold text-2xl text-kumo-default">{{ .title }}</h2>
+    <p class="text-kumo-subtle text-sm mt-0.5">Full inventory of servers and devices in your network</p>
   </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-6 pb-8">
-  <div class="bg-white rounded-3xl shadow-soft">
+  <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line">
     <div
-      class="border-b border-txlog-lavender px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-      <h3 class="font-display font-semibold text-lg">
+      class="border-b border-kumo-line px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <h3 class="font-semibold text-lg text-kumo-default">
         {{ if .search }}
         Assets
         {{ if eq .restart "true" }}that need to be restarted{{ end }}
         {{ if and (eq .restart "true") (eq .inactive "true") }} and{{ end }}
         {{ if eq .inactive "true" }} without data in the last 15 days{{ end }}
-        containing <kbd class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .search
+        containing <kbd class="bg-kumo-tint border border-kumo-line text-kumo-default text-xs font-mono px-2 py-1 rounded-md">{{ .search
           }}</kbd>
         {{ else }}
         Registered assets
@@ -27,100 +27,97 @@
       </h3>
       <div class="flex items-center gap-2 flex-wrap">
         <div class="relative group">
-          <input type="text" autocomplete="off" aria-label="Search assets" placeholder="Search by hostname or id"
+          <input data-kumo-component="Input" type="text" autocomplete="off" aria-label="Search assets" placeholder="Search by hostname or id"
             value="{{ .search }}" id="search" name="search" onkeydown="handleSearch(event)"
-            class="border-2 border-txlog-lavender bg-white/50 px-3 py-2 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all placeholder:text-txlog-indigo/30 text-txlog-indigo text-sm font-medium w-48 sm:w-72">
+            class="border-0 bg-kumo-control text-kumo-default ring ring-kumo-line outline-none focus:outline-none kumo-input-placeholder disabled:text-kumo-disabled h-9 gap-1.5 rounded-lg px-3 text-base focus:ring-kumo-focus/50 focus:ring-[1.5px] w-48 sm:w-72">
           <!-- Keyword hint tooltip -->
-          <div class="absolute top-full left-0 mt-1 hidden group-focus-within:block bg-txlog-indigo text-white text-xs px-3 py-2 rounded-xl shadow-lg z-20 min-w-max">
-            <p class="font-semibold mb-1 text-white/70 uppercase tracking-wider text-[10px]">Search keywords</p>
+          <div class="absolute top-full left-0 mt-1 hidden group-focus-within:block bg-kumo-control border border-kumo-line text-kumo-default text-xs px-3 py-2 rounded-lg shadow-lg z-20 min-w-max">
+            <p class="font-semibold mb-1 text-kumo-muted uppercase tracking-wider text-[10px]">Search keywords</p>
             <div class="space-y-0.5">
-              <div><code class="text-txlog-sky">env:</code><span class="text-white/70">Production</span></div>
-              <div><code class="text-txlog-sky">svc:</code><span class="text-white/70">acme-system</span></div>
-              <div><code class="text-txlog-sky">pod:</code><span class="text-white/70">01</span></div>
-              <div><code class="text-txlog-sky">copyfail:</code><span class="text-white/70">true/false</span></div>
+              <div><code class="text-kumo-brand">env:</code><span class="text-kumo-subtle">Production</span></div>
+              <div><code class="text-kumo-brand">svc:</code><span class="text-kumo-subtle">acme-system</span></div>
+              <div><code class="text-kumo-brand">pod:</code><span class="text-kumo-subtle">01</span></div>
+              <div><code class="text-kumo-brand">copyfail:</code><span class="text-kumo-subtle">true/false</span></div>
             </div>
           </div>
         </div>
         <div class="relative group">
-          <label class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-xl border-2 transition-all"
-            id="restart-label">
-            <input type="checkbox" id="restart" name="restart" value="true" class="sr-only peer" {{ if eq
-              .restart "true" }} checked{{ end }}>
-            <i data-lucide="refresh-cw-off" class="w-4 h-4 text-txlog-indigo/50 peer-checked:text-txlog-golden"></i>
+          <label data-kumo-component="Button" class="group flex shrink-0 font-medium select-none border-0 shadow-xs focus:outline-none focus-within:ring-kumo-focus/50 focus-within:ring-[1.5px] focus-within:ring-kumo-brand cursor-pointer disabled:cursor-not-allowed gap-1.5 rounded-lg text-base items-center justify-center p-0 size-9 bg-kumo-base ring ring-kumo-line hover:bg-kumo-tint has-[:checked]:bg-kumo-tint has-[:checked]:ring-kumo-brand/30 transition-all" id="restart-label" title="Reload">
+            <input type="checkbox" id="restart" name="restart" value="true" class="sr-only peer" {{ if eq .restart "true" }} checked{{ end }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-subtle peer-checked:text-kumo-warning"><rect width="256" height="256" fill="none"/><polyline points="176.2 99.7 224.2 99.7 224.2 51.7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M190.2,190.2a88,88,0,1,1,0-124.4l34,33.9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
           </label>
-          <div
-            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-txlog-indigo text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">
+          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-kumo-control border border-kumo-line text-kumo-default text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10 shadow-lg">
             Show only assets that need to be restarted</div>
         </div>
         <div class="relative group">
-          <label class="cursor-pointer flex items-center justify-center w-9 h-9 rounded-xl border-2 transition-all"
-            id="inactive-label">
-            <input type="checkbox" id="inactive" name="inactive" value="true" class="sr-only peer" {{ if eq
-              .inactive "true" }} checked{{ end }}>
-            <i data-lucide="power" class="w-4 h-4 text-txlog-indigo/50 peer-checked:text-txlog-coral"></i>
+          <label data-kumo-component="Button" class="group flex shrink-0 font-medium select-none border-0 shadow-xs focus:outline-none focus-within:ring-kumo-focus/50 focus-within:ring-[1.5px] focus-within:ring-kumo-brand cursor-pointer disabled:cursor-not-allowed gap-1.5 rounded-lg text-base items-center justify-center p-0 size-9 bg-kumo-base ring ring-kumo-line hover:bg-kumo-tint has-[:checked]:bg-kumo-tint has-[:checked]:ring-kumo-brand/30 transition-all" id="inactive-label" title="Show Inactive">
+            <input type="checkbox" id="inactive" name="inactive" value="true" class="sr-only peer" {{ if eq .inactive "true" }} checked{{ end }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" class="text-kumo-subtle peer-checked:text-kumo-danger"><rect width="256" height="256" fill="none"/><line x1="128" y1="48" x2="128" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M176,54.2a88,88,0,1,1-96,0" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
           </label>
-          <div
-            class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-txlog-indigo text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">
+          <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-kumo-control border border-kumo-line text-kumo-default text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10 shadow-lg">
             Show only inactive assets (15+ days)</div>
         </div>
-        <button onclick="search()"
-          class="bg-txlog-sky text-white p-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all"
-          aria-label="Search">
-          <i data-lucide="search" class="w-4 h-4"></i>
+        <button data-kumo-component="Button" onclick="search()"
+          class="group flex shrink-0 items-center justify-center font-medium select-none border-0 shadow-xs focus:outline-none focus-visible:ring-2 cursor-pointer disabled:cursor-not-allowed disabled:text-kumo-subtle size-9 gap-1.5 rounded-lg p-0 text-base relative overflow-hidden bg-(--kumo-button-emphasis-bg) !text-white ring ring-(--kumo-button-emphasis-ring) focus:ring-(--kumo-button-emphasis-ring) focus-visible:ring-(--kumo-button-emphasis-ring) active:ring-(--kumo-button-emphasis-ring) disabled:opacity-50"
+          style="--kumo-button-emphasis-ring:color-mix(in oklch, var(--color-kumo-brand), black 10%);--kumo-button-emphasis-bg:color-mix(in oklch, var(--color-kumo-brand), white 30%);--kumo-button-emphasis-gradient-start:color-mix(in oklch, var(--color-kumo-brand), white 15%);--kumo-button-emphasis-gradient-end:var(--color-kumo-brand)" aria-label="Search">
+          <span aria-hidden="true" class="absolute inset-0 rounded-[inherit] bg-linear-to-b from-(--kumo-button-emphasis-gradient-start) to-(--kumo-button-emphasis-gradient-end) shadow-[inset_0_1px_0_0_var(--kumo-button-emphasis-bg)] group-hover:from-(--kumo-button-emphasis-bg)"></span>
+          <span class="relative flex items-center justify-center"><span class="contents">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="112" cy="112" r="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="168.57" y1="168.57" x2="224" y2="224" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+          </span></span>
         </button>
       </div>
     </div>
 
     {{ if eq (len .assets) 0 }}
     <div class="py-16 text-center">
-      <i data-lucide="frown" class="w-12 h-12 text-txlog-indigo/20 mx-auto mb-4"></i>
-      <p class="font-display font-semibold text-lg mb-2">No assets found{{ if .search }} containing <kbd
-          class="bg-txlog-indigo/5 text-xs font-mono px-2 py-1 rounded-md">{{ .search }}</kbd>{{ end }}</p>
-      <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
-          target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+      
+      <p class="font-semibold text-lg text-kumo-default mb-2">No assets found{{ if .search }} containing <kbd
+          class="bg-kumo-tint border border-kumo-line text-xs font-mono px-2 py-1 rounded-md">{{ .search }}</kbd>{{ end }}</p>
+      <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
+          target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
     </div>
     {{ else }}
     <div class="overflow-x-auto">
-      <table class="w-full text-sm">
+      <table class="kumo-table">
         <thead>
-          <tr class="border-b border-txlog-lavender/50 text-left">
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">
-              Hostname <i data-lucide="chevron-up" class="w-3 h-3 inline-block"></i>
+          <tr>
+            <th>
+              Hostname <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256" class="inline-block align-middle ml-1"><rect width="256" height="256" fill="none"/><polyline points="168 152 128 192 88 152" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 104 128 64 168 104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
             </th>
-            <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Last Seen</th>
-            <th class="px-6 py-3 w-1">&nbsp;</th>
+            <th>Last Seen</th>
+            <th class="w-1">&nbsp;</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-txlog-lavender/30">
+        <tbody>
           {{ with .assets }}
           {{ range . }}
-          <tr class="hover:bg-txlog-lavender/10 transition-colors">
-            <td class="px-6 py-3">
+          <tr class="group">
+            <td>
               <div class="flex items-center gap-3">
-                <span class="w-8 h-8 rounded-lg bg-txlog-lavender flex-shrink-0 relative">
+                <span class="w-8 h-8 rounded-lg bg-kumo-tint border border-kumo-line flex-shrink-0 relative">
                   <img src="/images/{{ brand .OS }}" class="w-full h-full object-cover rounded-lg" alt="">
                   {{ if or (derefBool .CopyFail) (derefBool .DirtyFrag) (derefBool .Fragnesia) }}
-                  <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-txlog-coral rounded-full animate-pulse"
+                  <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-kumo-danger rounded-full animate-pulse"
                     title="Vulnerabilities Found"></span>
                   {{ else if derefBool .NeedsRestarting }}
-                  <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-txlog-golden rounded-full animate-pulse"
+                  <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-kumo-warning rounded-full animate-pulse"
                     title="Asset must be restarted"></span>
                   {{ end }}
                 </span>
                 <div>
-                  <div class="font-medium">{{ .Hostname }}</div>
-                  <div class="text-txlog-indigo/50 text-xs">{{ .MachineID }}</div>
+                  <div class="font-medium text-kumo-default">{{ .Hostname }}</div>
+                  <div class="text-kumo-subtle text-xs">{{ .MachineID }}</div>
                 </div>
               </div>
             </td>
-            <td class="px-6 py-3">
+            <td>
               <div class="flex items-center gap-2">
                 <span class="{{ timeStatusClass .ExecutedAt }}"></span>
-                <span class="text-txlog-indigo/60">{{ formatDateTime .ExecutedAt }}</span>
+                <span class="text-kumo-subtle">{{ formatDateTime .ExecutedAt }}</span>
               </div>
             </td>
-            <td class="px-6 py-3">
-              <a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="/assets/{{ .MachineID }}">Details</a>
+            <td>
+              <a class="text-kumo-brand text-sm font-medium px-3 py-1 rounded-md border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors whitespace-nowrap" href="/assets/{{ .MachineID }}">Details</a>
             </td>
           </tr>
           {{ end }}
@@ -129,42 +126,55 @@
       </table>
     </div>
 
-    <div class="border-t border-txlog-lavender/50 px-6 py-4 flex items-center justify-between">
-      <p class="text-sm text-txlog-indigo/50">Showing <span>{{ add $.offset 1 }}</span> to <span>{{ min (add $.offset
-          $.limit) $.totalRecords }}</span> of <span>{{ .totalRecords }}</span> entries</p>
-      <div class="flex items-center gap-1">
-        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page 1 }}text-txlog-indigo/30 pointer-events-none{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
-          href="?page={{ .page | add -1 }}">
-          <i data-lucide="chevron-left" class="w-4 h-4 inline-block"></i> prev
-        </a>
-        {{ range $i := iterate 1 .totalPages }}
-        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page $i }}bg-txlog-sky text-white{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
-          href="?page={{ $i }}">{{ $i }}</a>
-        {{ end }}
-        <a class="px-3 py-1.5 rounded-lg text-sm font-medium {{ if eq $.page $.totalPages }}text-txlog-indigo/30 pointer-events-none{{ else }}text-txlog-indigo hover:bg-txlog-lavender/30{{ end }} transition-colors"
-          href="?page={{ .page | add 1 }}">
-          next <i data-lucide="chevron-right" class="w-4 h-4 inline-block"></i>
-        </a>
+    <div class="border-t border-kumo-line px-6 py-4 flex flex-wrap gap-4 items-center justify-between">
+      <div class="grow text-sm text-kumo-subtle">
+        Showing <span class="tabular-nums font-medium text-kumo-default">{{ add $.offset 1 }}-{{ min (add $.offset $.limit) $.totalRecords }}</span> of <span class="tabular-nums font-medium text-kumo-default">{{ .totalRecords }}</span>
+      </div>
+      <div class="grow flex flex-col sm:items-end">
+        <nav aria-label="Pagination">
+          <div class="relative w-full sm:w-auto cursor-text border-0 bg-kumo-control text-kumo-default ring-kumo-line h-9 rounded-lg text-base flex items-center px-0">
+            <a aria-label="First page" href="?page=1"
+              class="group flex w-max shrink-0 items-center font-medium select-none shadow-xs h-9 gap-1.5 px-3 text-base bg-kumo-base !text-kumo-default not-disabled:hover:bg-kumo-tint ring-kumo-line relative h-full! rounded-l-lg ring-0 border border-kumo-line hover:z-1 {{ if eq $.page 1 }}opacity-50 pointer-events-none bg-kumo-overlay{{ end }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L131.31,128ZM51.31,128l74.35-74.34a8,8,0,0,0-11.32-11.32l-80,80a8,8,0,0,0,0,11.32l80,80a8,8,0,0,0,11.32-11.32Z"></path></svg>
+            </a>
+            <a aria-label="Previous page" href="?page={{ .page | add -1 }}"
+              class="group flex w-max shrink-0 items-center font-medium select-none shadow-xs h-9 gap-1.5 px-3 text-base bg-kumo-base !text-kumo-default not-disabled:hover:bg-kumo-tint ring-kumo-line relative h-full! rounded-none ring-0 border border-kumo-line border-l-0 hover:z-1 {{ if eq $.page 1 }}opacity-50 pointer-events-none bg-kumo-overlay{{ end }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"></path></svg>
+            </a>
+            <input aria-label="Page number" type="text"
+              value="{{ .page }}"
+              onkeydown="if(event.key==='Enter') window.location.href='?page='+this.value"
+              class="text-kumo-default ring-kumo-line outline-none h-9 min-w-0 grow items-center rounded-none bg-transparent px-3 relative ring-0 border border-kumo-line border-l-0 hover:z-1 text-center" style="width:50px" />
+            <a aria-label="Next page" href="?page={{ .page | add 1 }}"
+              class="group flex w-max shrink-0 items-center font-medium select-none shadow-xs h-9 gap-1.5 px-3 text-base bg-kumo-base !text-kumo-default not-disabled:hover:bg-kumo-tint ring-kumo-line relative h-full! rounded-none ring-0 border border-kumo-line border-l-0 hover:z-1 {{ if eq $.page $.totalPages }}opacity-50 pointer-events-none bg-kumo-overlay{{ end }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"></path></svg>
+            </a>
+            <a aria-label="Last page" href="?page={{ .totalPages }}"
+              class="group flex w-max shrink-0 items-center font-medium select-none shadow-xs h-9 gap-1.5 px-3 text-base bg-kumo-base !text-kumo-default not-disabled:hover:bg-kumo-tint ring-kumo-line relative h-full! rounded-r-lg ring-0 border border-kumo-line border-l-0 hover:z-1 {{ if eq $.page $.totalPages }}opacity-50 pointer-events-none bg-kumo-overlay{{ end }}">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M141.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L124.69,128,50.34,53.66A8,8,0,0,1,61.66,42.34l80,80A8,8,0,0,1,141.66,133.66Zm80-11.32-80-80a8,8,0,0,0-11.32,11.32L204.69,128l-74.35,74.34a8,8,0,0,0,11.32,11.32l80-80A8,8,0,0,0,221.66,122.34Z"></path></svg>
+            </a>
+          </div>
+        </nav>
       </div>
     </div>
     {{ end }}
   </div>
 </div>
 
-<div id="modal-success" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+<div id="modal-success" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm"
   onclick="if(event.target===this)closeModal('modal-success')">
   <div data-modal-panel
-    class="bg-white rounded-3xl shadow-soft max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
-    <div class="h-1 bg-txlog-leaf rounded-t-3xl"></div>
+    class="bg-kumo-control rounded-xl shadow-lg border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
+    <div class="h-1 bg-kumo-success rounded-t-xl"></div>
     <div class="p-6 text-center">
-      <i data-lucide="check-circle" class="w-12 h-12 text-txlog-leaf mx-auto mb-3"></i>
-      <h3 class="font-display font-semibold text-lg mb-2">Asset deleted successfully</h3>
-      <p class="text-sm text-txlog-indigo/60">All data for asset <code id="deleted-asset-id"
-          class="bg-txlog-indigo/5 text-xs font-mono px-2 py-1 rounded-md"></code> has been permanently removed.</p>
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 256 256" class="text-kumo-success mx-auto mb-3"><rect width="256" height="256" fill="none"/><polyline points="88 136 112 160 168 104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+      <h3 class="font-semibold text-lg mb-2 text-kumo-default">Asset deleted successfully</h3>
+      <p class="text-sm text-kumo-subtle">All data for asset <code id="deleted-asset-id"
+          class="bg-kumo-tint border border-kumo-line text-xs font-mono px-2 py-1 rounded-md text-kumo-default"></code> has been permanently removed.</p>
     </div>
-    <div class="border-t border-txlog-lavender px-6 py-4">
-      <button onclick="closeModal('modal-success')"
-        class="w-full bg-txlog-leaf text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-leaf/30 transition-all">Close</button>
+    <div class="border-t border-kumo-line px-6 py-4">
+      <button onclick="closeModal('modal-success')" data-kumo-component="Button"
+        class="w-full group flex shrink-0 font-medium select-none border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-kumo-success cursor-pointer rounded-lg items-center justify-center px-4 py-2 text-white bg-kumo-success hover:bg-kumo-success/90 shadow-sm transition-colors">Close</button>
     </div>
   </div>
 </div>

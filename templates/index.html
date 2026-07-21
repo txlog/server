@@ -1,90 +1,96 @@
 {{ template "header.html" . }}
-<div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
+<div class="py-6 mb-6 print:hidden">
   <div class="max-w-7xl mx-auto px-6">
-    <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
-    <p class="text-white/50 text-sm mt-0.5">Global infrastructure overview and real-time statistics</p>
+    <h2 class="font-bold text-2xl text-kumo-default">{{ .title }}</h2>
+    <p class="text-kumo-subtle text-sm mt-0.5">Global infrastructure overview and real-time statistics</p>
   </div>
 </div>
 
 <div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-    <div class="bg-white rounded-2xl shadow-soft p-5">
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-5">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider">Assets</span>
-        <span class="text-xs text-txlog-indigo/40">Total</span>
+        <span class="text-xs font-bold text-kumo-subtle uppercase tracking-wider">Assets</span>
+        <span class="text-xs text-kumo-muted">Total</span>
       </div>
-      <div class="font-display font-bold text-3xl">{{ printf "%s" (formatInteger .totalActiveAssets) }}</div>
+      <div class="font-bold text-3xl text-kumo-default">{{ printf "%s" (formatInteger .totalActiveAssets) }}</div>
     </div>
-    <div class="bg-white rounded-2xl shadow-soft p-5">
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-5">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider">Executions</span>
-        <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
+        <span class="text-xs font-bold text-kumo-subtle uppercase tracking-wider">Executions</span>
+        <span class="text-xs text-kumo-muted">Last 30 days</span>
       </div>
       <div class="flex items-baseline gap-2">
-        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
+        <div class="font-bold text-3xl text-kumo-default">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
           {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-          <i data-lucide="{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}" class="w-4 h-4"></i>
+          {{ range .statistics }}{{ if eq .Name "executions-30-days" }}
+          {{ if gt .Percentage 0.0 }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="192" x2="192" y2="64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 64 192 64 192 168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ else if lt .Percentage 0.0 }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="64" x2="192" y2="192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="192 88 192 192 88 192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ else }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ end }}
+          {{ end }}{{ end }}
         </span>
       </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-soft p-5">
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-5">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider">Installed packages</span>
-        <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
+        <span class="text-xs font-bold text-kumo-subtle uppercase tracking-wider">Installed packages</span>
+        <span class="text-xs text-kumo-muted">Last 30 days</span>
       </div>
       <div class="flex items-baseline gap-2">
-        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
+        <div class="font-bold text-3xl text-kumo-default">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
           {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-          <i data-lucide="{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}" class="w-4 h-4"></i>
+          {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}
+          {{ if gt .Percentage 0.0 }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="192" x2="192" y2="64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 64 192 64 192 168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ else if lt .Percentage 0.0 }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="64" x2="192" y2="192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="192 88 192 192 88 192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ else }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ end }}
+          {{ end }}{{ end }}
         </span>
       </div>
     </div>
-    <div class="bg-white rounded-2xl shadow-soft p-5">
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-5">
       <div class="flex items-center justify-between mb-2">
-        <span class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider">Upgraded Packages</span>
-        <span class="text-xs text-txlog-indigo/40">Last 30 days</span>
+        <span class="text-xs font-bold text-kumo-subtle uppercase tracking-wider">Upgraded Packages</span>
+        <span class="text-xs text-kumo-muted">Last 30 days</span>
       </div>
       <div class="flex items-baseline gap-2">
-        <div class="font-display font-bold text-3xl">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-txlog-leaf{{ else if lt .Percentage 0.0 }}text-txlog-coral{{ else }}text-txlog-golden{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
+        <div class="font-bold text-3xl text-kumo-default">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
+        <span class="{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
           {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-          <i data-lucide="{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}trending-up{{ else if lt .Percentage 0.0 }}trending-down{{ else }}minus{{ end }}{{ end }}{{ end }}" class="w-4 h-4"></i>
+          {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}
+          {{ if gt .Percentage 0.0 }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="192" x2="192" y2="64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 64 192 64 192 168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ else if lt .Percentage 0.0 }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="64" x2="192" y2="192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="192 88 192 192 88 192" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ else }}<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="40" y1="128" x2="216" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>{{ end }}
+          {{ end }}{{ end }}
         </span>
       </div>
     </div>
   </div>
 
   <div class="grid md:grid-cols-2 gap-6">
-    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-      <div class="border-b border-txlog-lavender px-6 py-4">
-        <h3 class="font-display font-semibold text-lg">OS distribution</h3>
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+      <div class="border-b border-kumo-line px-6 py-4">
+        <h3 class="font-semibold text-lg text-kumo-default">OS distribution</h3>
       </div>
       {{ if eq (len .assetsByOS) 0 }}
       <div class="py-12 text-center">
-        <p class="font-semibold mb-1">No assets found</p>
-        <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
-            target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+        <p class="font-semibold text-kumo-default mb-1">No assets found</p>
+        <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
+            target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
       </div>
       {{ else }}
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="kumo-table">
           <thead>
-            <tr class="border-b border-txlog-lavender/50 text-left">
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">OS name</th>
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th>
+            <tr>
+              <th>OS name</th>
+              <th>Assets</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-txlog-lavender/30">
+          <tbody>
             {{ with .assetsByOS }}
             {{ range . }}
-            <tr class="hover:bg-txlog-lavender/10 transition-colors">
-              <td class="px-6 py-3 font-medium">{{ if eq .OS "" }}Undefined OS{{ else }}{{ .OS }}{{ end }}</td>
-              <td class="px-6 py-3 whitespace-nowrap">
-                <a href="#" class="text-txlog-sky hover:underline flex items-center gap-1"
+            <tr>
+              <td class="font-medium text-kumo-default">{{ if eq .OS "" }}Undefined OS{{ else }}{{ .OS }}{{ end }}</td>
+              <td class="whitespace-nowrap">
+                <a href="#" class="text-kumo-brand hover:underline flex items-center gap-1 font-medium"
                   onclick="showOSModal('{{ .OS }}')">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> {{ .NumMachines }}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="192" x2="192" y2="64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 64 192 64 192 168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> {{ .NumMachines }}
                 </a>
               </td>
             </tr>
@@ -95,36 +101,36 @@
       </div>
       {{ end }}
     </div>
-    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-      <div class="border-b border-txlog-lavender px-6 py-4">
-        <h3 class="font-display font-semibold text-lg">Agent distribution</h3>
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+      <div class="border-b border-kumo-line px-6 py-4">
+        <h3 class="font-semibold text-lg text-kumo-default">Agent distribution</h3>
       </div>
       {{ if eq (len .assetsByAgentVersion) 0 }}
       <div class="py-12 text-center">
-        <p class="font-semibold mb-1">No assets found</p>
-        <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
-            target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+        <p class="font-semibold text-kumo-default mb-1">No assets found</p>
+        <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
+            target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
       </div>
       {{ else }}
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="kumo-table">
           <thead>
-            <tr class="border-b border-txlog-lavender/50 text-left">
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Agent version
+            <tr>
+              <th>Agent version
               </th>
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th>
+              <th>Assets</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-txlog-lavender/30">
+          <tbody>
             {{ with .assetsByAgentVersion }}
             {{ range . }}
-            <tr class="hover:bg-txlog-lavender/10 transition-colors">
-              <td class="px-6 py-3 font-medium">{{ if eq .AgentVersion "" }}Undefined Agent Version{{ else }}{{
+            <tr>
+              <td class="font-medium text-kumo-default">{{ if eq .AgentVersion "" }}Undefined Agent Version{{ else }}{{
                 .AgentVersion }}{{ end }}</td>
-              <td class="px-6 py-3 whitespace-nowrap">
-                <a href="#" class="text-txlog-sky hover:underline flex items-center gap-1"
+              <td class="whitespace-nowrap">
+                <a href="#" class="text-kumo-brand hover:underline flex items-center gap-1 font-medium"
                   onclick="showAgentModal('{{ .AgentVersion }}')">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> {{ .NumMachines }}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="192" x2="192" y2="64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 64 192 64 192 168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> {{ .NumMachines }}
                 </a>
               </td>
             </tr>
@@ -138,34 +144,34 @@
   </div>
 
   <div class="grid md:grid-cols-2 gap-6">
-    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-      <div class="border-b border-txlog-lavender px-6 py-4">
-        <h3 class="font-display font-semibold text-lg">Replaced assets <span
-            class="text-sm text-txlog-indigo/50 font-normal ml-1">last 30 days</span></h3>
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+      <div class="border-b border-kumo-line px-6 py-4">
+        <h3 class="font-semibold text-lg text-kumo-default">Replaced assets <span
+            class="text-sm text-kumo-subtle font-normal ml-1">last 30 days</span></h3>
       </div>
       {{ if eq (len .duplicatedAssets) 0 }}
       <div class="py-12 text-center">
-        <p class="font-semibold mb-1">No replaced assets</p>
-        <p class="text-sm text-txlog-indigo/50">in the last 30 days.</p>
+        <p class="font-semibold text-kumo-default mb-1">No replaced assets</p>
+        <p class="text-sm text-kumo-subtle">in the last 30 days.</p>
       </div>
       {{ else }}
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="kumo-table">
           <thead>
-            <tr class="border-b border-txlog-lavender/50 text-left">
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Hostname</th>
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets</th>
+            <tr>
+              <th>Hostname</th>
+              <th>Assets</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-txlog-lavender/30">
+          <tbody>
             {{ with .duplicatedAssets }}
             {{ range . }}
-            <tr class="hover:bg-txlog-lavender/10 transition-colors">
-              <td class="px-6 py-3 font-medium">{{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}</td>
-              <td class="px-6 py-3 whitespace-nowrap">
+            <tr>
+              <td class="font-medium text-kumo-default">{{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}</td>
+              <td class="whitespace-nowrap">
                 <a href="/assets?search={{ if eq .Hostname "" }}Undefined{{ else }}{{ .Hostname }}{{ end }}"
-                  class="text-txlog-sky hover:underline flex items-center gap-1">
-                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i> {{ .NumMachines }}
+                  class="text-kumo-brand hover:underline flex items-center gap-1 font-medium">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="64" y1="192" x2="192" y2="64" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 64 192 64 192 168" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> {{ .NumMachines }}
                 </a>
               </td>
             </tr>
@@ -176,38 +182,38 @@
       </div>
       {{ end }}
     </div>
-    <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-      <div class="border-b border-txlog-lavender px-6 py-4">
-        <h3 class="font-display font-semibold text-lg">Most updated packages <span
-            class="text-sm text-txlog-indigo/50 font-normal ml-1">last 30 days</span></h3>
+    <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+      <div class="border-b border-kumo-line px-6 py-4">
+        <h3 class="font-semibold text-lg text-kumo-default">Most updated packages <span
+            class="text-sm text-kumo-subtle font-normal ml-1">last 30 days</span></h3>
       </div>
       {{ if eq (len .mostUpdatedPackages) 0 }}
       <div class="py-12 text-center">
-        <p class="font-semibold mb-1">No packages to list</p>
-        <p class="text-sm text-txlog-indigo/50">Start by running <a href="https://txlog.rda.run/docs/agent"
-            target="_blank" class="text-txlog-sky hover:underline">Txlog Agent</a> in one of your servers.</p>
+        <p class="font-semibold text-kumo-default mb-1">No packages to list</p>
+        <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
+            target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
       </div>
       {{ else }}
       <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table class="kumo-table">
           <thead>
-            <tr class="border-b border-txlog-lavender/50 text-left">
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Package</th>
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Times Updated
+            <tr>
+              <th>Package</th>
+              <th>Times Updated
               </th>
-              <th class="px-6 py-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Assets Affected
+              <th>Assets Affected
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-txlog-lavender/30">
+          <tbody>
             {{ with .mostUpdatedPackages }}
             {{ range . }}
-            <tr class="hover:bg-txlog-lavender/10 transition-colors">
-              <td class="px-6 py-3"><kbd
-                  class="bg-txlog-indigo/5 text-txlog-indigo text-xs font-mono px-2 py-1 rounded-md">{{ .Package
+            <tr>
+              <td><kbd
+                  class="bg-kumo-tint border border-kumo-line text-kumo-default text-xs font-mono px-2 py-1 rounded-md">{{ .Package
                   }}</kbd></td>
-              <td class="px-6 py-3">{{ .TotalUpdates }}</td>
-              <td class="px-6 py-3 text-txlog-indigo/60">{{ .DistinctHostsUpdated }}</td>
+              <td class="text-kumo-default">{{ .TotalUpdates }}</td>
+              <td class="text-kumo-subtle">{{ .DistinctHostsUpdated }}</td>
             </tr>
             {{ end }}
             {{ end }}
@@ -218,55 +224,54 @@
     </div>
   </div>
 
-  <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between">
-      <h3 class="font-display font-semibold text-lg">Recent Anomalies <span
-          class="text-sm text-txlog-indigo/50 font-normal ml-1">last 7 days</span></h3>
-      <a href="/analytics/anomalies"
-        class="border-2 border-txlog-sky text-txlog-sky text-sm font-medium px-4 py-1.5 rounded-xl hover:bg-txlog-sky hover:text-white transition-all">View
-        All</a>
+  <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+    <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between">
+      <h3 class="font-semibold text-lg text-kumo-default">Recent Anomalies <span
+          class="text-sm text-kumo-subtle font-normal ml-1">last 7 days</span></h3>
+      <a href="/analytics/anomalies" data-kumo-component="Button"
+        class="group flex shrink-0 font-medium select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-kumo-brand cursor-pointer rounded-lg items-center justify-center px-4 py-1.5 text-kumo-default bg-kumo-control border border-kumo-line hover:bg-kumo-tint shadow-sm transition-colors text-sm">View All</a>
     </div>
     <div class="p-6" id="anomalies-panel">
-      <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
-        <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
+      <div class="h-2 bg-kumo-line rounded-full overflow-hidden">
+        <div class="h-full bg-kumo-brand rounded-full animate-pulse w-2/3"></div>
       </div>
     </div>
   </div>
 </div>
 
-<div id="modal-scrollable" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+<div id="modal-scrollable" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm"
   onclick="if(event.target===this)closeModal('modal-scrollable')">
   <div data-modal-panel
-    class="bg-white rounded-3xl shadow-soft max-w-lg w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">
-    <div class="border-b border-txlog-lavender px-6 py-4 flex items-center justify-between flex-shrink-0">
-      <h5 class="font-display font-semibold text-lg" id="modal-title">Loading...</h5>
+    class="bg-kumo-control rounded-xl shadow-lg border border-kumo-line max-w-lg w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">
+    <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between flex-shrink-0">
+      <h5 class="font-semibold text-lg text-kumo-default" id="modal-title">Loading...</h5>
       <button onclick="closeModal('modal-scrollable')"
-        class="text-txlog-indigo/40 hover:text-txlog-indigo transition-colors">
-        <i data-lucide="x" class="w-5 h-5"></i>
+        class="text-kumo-muted hover:text-kumo-default transition-colors cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg>
       </button>
     </div>
     <div class="overflow-y-auto flex-1 p-6">
-      <table class="w-full text-sm">
+      <table class="kumo-table">
         <thead>
-          <tr class="border-b border-txlog-lavender/50 text-left">
-            <th class="pb-3 font-semibold text-txlog-indigo/70 text-xs uppercase tracking-wider">Hostname</th>
-            <th class="pb-3">&nbsp;</th>
+          <tr>
+            <th>Hostname</th>
+            <th>&nbsp;</th>
           </tr>
         </thead>
-        <tbody id="modal-table-body" class="divide-y divide-txlog-lavender/30">
+        <tbody id="modal-table-body">
           <tr>
             <td colspan="2" class="py-4">
-              <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
-                <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
+              <div class="h-2 bg-kumo-line rounded-full overflow-hidden">
+                <div class="h-full bg-kumo-brand rounded-full animate-pulse w-2/3"></div>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <div class="border-t border-txlog-lavender px-6 py-4 flex-shrink-0">
-      <button onclick="closeModal('modal-scrollable')"
-        class="w-full bg-txlog-sky text-white font-medium py-2.5 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-txlog-sky/30 transition-all">Close</button>
+    <div class="border-t border-kumo-line px-6 py-4 flex-shrink-0">
+      <button onclick="closeModal('modal-scrollable')" data-kumo-component="Button"
+        class="w-full group flex shrink-0 font-medium select-none border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-kumo-brand cursor-pointer rounded-lg items-center justify-center px-4 py-2.5 text-white bg-kumo-brand hover:bg-kumo-brand/90 shadow-sm transition-colors">Close</button>
     </div>
   </div>
 </div>
@@ -278,33 +283,32 @@
       .then(function (data) {
         var panel = document.getElementById('anomalies-panel');
         if (data.error) {
-          panel.innerHTML = '<p class="text-txlog-indigo/50 text-sm">Unable to load anomalies.</p>';
+          panel.innerHTML = '<p class="text-kumo-subtle text-sm">Unable to load anomalies.</p>';
           return;
         }
         if (!data.anomalies || data.anomalies.length === 0) {
-          panel.innerHTML = '<div class="flex items-center gap-2 text-txlog-leaf"><i data-lucide="check" class="w-5 h-5"></i> No anomalies detected in the last 7 days</div>';
-          lucide.createIcons();
+          panel.innerHTML = '<div class="py-8 text-center"><p class="text-sm font-medium text-kumo-default">No anomalies detected in the last 7 days</p></div>';
           return;
         }
-        var html = '<div class="divide-y divide-txlog-lavender/30">';
+        var html = '<div >';
         data.anomalies.slice(0, 5).forEach(function (a) {
-          var color = a.severity === 'high' ? 'txlog-coral' : (a.severity === 'medium' ? 'txlog-golden' : 'txlog-sky');
-          html += '<div class="py-3 flex items-center gap-3"><span class="bg-' + color + '/10 text-' + color + ' text-xs font-bold px-2.5 py-1 rounded-md">' + a.severity + '</span><span><strong>' + a.hostname + '</strong>: ' + a.description + '</span></div>';
+          var color = a.severity === 'high' ? 'kumo-danger' : (a.severity === 'medium' ? 'kumo-warning' : 'kumo-brand');
+          html += '<div class="py-3 flex items-center gap-3"><span class="bg-' + color + '/10 border border-' + color + '/20 text-' + color + ' text-xs font-bold px-2.5 py-1 rounded-md">' + a.severity + '</span><span class="text-kumo-default"><strong class="font-medium">' + a.hostname + '</strong>: ' + a.description + '</span></div>';
         });
         if (data.anomalies.length > 5) {
-          html += '<div class="py-3 text-sm text-txlog-indigo/50">... and ' + (data.anomalies.length - 5) + ' more</div>';
+          html += '<div class="py-3 text-sm text-kumo-subtle">... and ' + (data.anomalies.length - 5) + ' more</div>';
         }
         html += '</div>';
         panel.innerHTML = html;
       })
       .catch(function () {
-        document.getElementById('anomalies-panel').innerHTML = '<p class="text-txlog-indigo/50 text-sm">Unable to load anomalies.</p>';
+        document.getElementById('anomalies-panel').innerHTML = '<p class="text-kumo-subtle text-sm">Unable to load anomalies.</p>';
       });
   });
 
   function showAgentModal(agentVersion) {
     var tableBody = document.getElementById('modal-table-body');
-    tableBody.innerHTML = '<tr><td colspan="2" class="py-4"><div class="h-2 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div></div></td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="2" class="py-4"><div class="h-2 bg-kumo-line rounded-full overflow-hidden"><div class="h-full bg-kumo-brand rounded-full animate-pulse w-2/3"></div></div></td></tr>';
     if (agentVersion == "") agentVersion = "with undefined version";
     fetch('/v1/machines?agent_version=' + agentVersion)
       .then(function (response) { return response.json(); })
@@ -314,12 +318,12 @@
           tb.innerHTML = '';
           data.forEach(function (item) {
             var row = document.createElement('tr');
-            row.className = 'hover:bg-txlog-lavender/10 transition-colors';
-            row.innerHTML = '<td class="py-3">' + item.hostname + '</td><td class="py-3 text-right"><a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="/assets/' + item.machine_id + '">Details</a></td>';
+            row.className = '';
+            row.innerHTML = '<td class="text-kumo-default">' + item.hostname + '</td><td class="text-right"><a class="text-kumo-brand text-sm font-medium px-3 py-1 rounded-md border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors" href="/assets/' + item.machine_id + '">Details</a></td>';
             tb.appendChild(row);
           });
         } else {
-          tb.innerHTML = '<tr><td colspan="2" class="py-4 text-txlog-indigo/50">No assets found using this agent version.</td></tr>';
+          tb.innerHTML = '<tr><td colspan="2" class="py-4 text-kumo-subtle">No assets found using this agent version.</td></tr>';
         }
       })
       .catch(function (error) { console.error('Error:', error); });
@@ -329,7 +333,7 @@
 
   function showOSModal(os) {
     var tableBody = document.getElementById('modal-table-body');
-    tableBody.innerHTML = '<tr><td colspan="2" class="py-4"><div class="h-2 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div></div></td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="2" class="py-4"><div class="h-2 bg-kumo-line rounded-full overflow-hidden"><div class="h-full bg-kumo-brand rounded-full animate-pulse w-2/3"></div></div></td></tr>';
     if (os == "") os = "Undefined OS";
     fetch('/v1/machines?os=' + os)
       .then(function (response) { return response.json(); })
@@ -339,12 +343,12 @@
           tb.innerHTML = '';
           data.forEach(function (item) {
             var row = document.createElement('tr');
-            row.className = 'hover:bg-txlog-lavender/10 transition-colors';
-            row.innerHTML = '<td class="py-3">' + item.hostname + '</td><td class="py-3 text-right"><a class="text-txlog-sky text-sm font-medium px-3 py-1 rounded-lg border border-txlog-sky/20 hover:bg-txlog-sky/10 transition-colors" href="/assets/' + item.machine_id + '">Details</a></td>';
+            row.className = '';
+            row.innerHTML = '<td class="text-kumo-default">' + item.hostname + '</td><td class="text-right"><a class="text-kumo-brand text-sm font-medium px-3 py-1 rounded-md border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors" href="/assets/' + item.machine_id + '">Details</a></td>';
             tb.appendChild(row);
           });
         } else {
-          tb.innerHTML = '<tr><td colspan="2" class="py-4 text-txlog-indigo/50">No assets found using this operating system.</td></tr>';
+          tb.innerHTML = '<tr><td colspan="2" class="py-4 text-kumo-subtle">No assets found using this operating system.</td></tr>';
         }
       })
       .catch(function (error) { console.error('Error:', error); });

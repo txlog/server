@@ -1,128 +1,128 @@
 # **Txlog: Visual Identity & UI Style Guide**
 
-## **1\. Brand Overview**
+## **1. Brand Overview**
 
-**Txlog** represents organization, creativity, and seamless tracking. Inspired by the visual of a well-kept notebook and
-pencil, the brand identity is designed to feel approachable, friendly, and highly structured.
+**Txlog** represents organization, seamless tracking, and infrastructure
+management. Following the adoption of the Kumo UI design system, the brand
+identity has evolved to a neutral, corporate, and highly structured
+aesthetic—inspired by modern dashboards.
 
-- **Brand Personality:** Friendly, Reliable, Organized, Creative, Accessible.
-- **Design Style:** Flat design, soft geometry, highly rounded corners, clean and modern.
+- **Brand Personality:** Professional, Reliable, Organized, Neutral, Accessible.
+- **Design Style:** Clean layout, semantic token-based styling, subtle borders,
+  data-dense but readable.
 
-## **2\. Color Palette**
+## **2. Color Palette (Kumo UI Tokens)**
 
-The color palette is directly extracted from the brand's primary iconography. It balances a grounded dark tone with a
-soft background and vibrant accents used for categorization and highlights. All text colors comply with **WCAG AA**
-contrast requirements (minimum 4.5:1 ratio on white backgrounds).
+The color palette is built entirely on **Kumo UI semantic tokens**. We do not
+use hardcoded hex values or arbitrary Tailwind color classes; everything maps to
+`--kumo-*` variables (e.g., `text-kumo-default`, `bg-kumo-canvas`).
 
-### **Primary Colors**
+### **Surfaces & Backgrounds**
 
-These form the foundation of the Txlog UI.
+- **Canvas (`bg-kumo-canvas`):** The base background of the application. Light
+  and neutral.
+- **Control (`bg-kumo-control`):** Background for interactive elements, cards,
+  and primary containers on top of canvas.
+- **Tint (`bg-kumo-tint`):** Subtle background for hovers, selected states, or
+  secondary container highlights.
 
-- **Indigo Slate (Primary Dark):** \#424565
-  - _Usage:_ Text, headers, main navigation, sidebar backgrounds, tooltips, and high-emphasis borders (inspired by the
-    notebook spine and pencil lead).
-  - _Contrast:_ ~10.5:1 on white ✅
-- **Lavender Frost (Primary Light):** \#E6E6FA
-  - _Usage:_ Borders, separators, table dividers, subtle interactive states, and muted background highlights (inspired
-    by the notebook cover).
-- **Soft Background:** \#F8F9FE
-  - _Usage:_ App body background. A near-white with a subtle blue tint that harmonizes with the indigo text.
-- **White (Base Surface):** \#FFFFFF
-  - _Usage:_ Primary container backgrounds (cards, modals) to ensure high contrast and readability.
+### **Text Colors**
 
-### **Accent & Semantic Colors**
+- **Default (`text-kumo-default`):** Primary text color. Used for headings, body
+  text, and critical information.
+- **Subtle (`text-kumo-subtle`):** Secondary text color. Used for descriptions,
+  table headers, and less emphasized data.
+- **Muted (`text-kumo-muted`):** Tertiary text color. Used for placeholders,
+  disabled states, and very minor metadata.
 
-Used for actions, status indicators, and categorization tags.
+### **Borders**
 
-- **Coral Bookmark (Action/Destructive):** \#D9556A
-  - _Usage:_ Destructive actions (delete, deactivate), error states, warning bars on modals, and important highlights.
-  - _Contrast:_ ~4.6:1 on white ✅
-- **Golden Label (Warning/Highlight):** \#F4B54B
-  - _Usage:_ Warning alerts, "needs restart" indicators, badges, and the Reinstall action icon. **Not used as text on
-    white** due to low contrast; always paired with a colored background.
-  - _Contrast:_ ~1.9:1 on white ⚠️ (use on backgrounds only)
-- **Sky Blue (Info/Active):** \#4A8AE8
-  - _Usage:_ Primary call-to-action (CTA) buttons, active states, text links, search buttons, informational banners, and
-    progress bars.
-  - _Contrast:_ ~4.6:1 on white ✅
-- **Leaf Green (Success):** \#4A9E42
-  - _Usage:_ Success messages, Install/Upgrade action icons, "active" status dots, and positive feedback modals.
-  - _Contrast:_ ~4.5:1 on white ✅
-- **Purple (Metadata/Tertiary):** \#8B5CF6
-  - _Usage:_ Obsolete and Reason Change action icons, Administrator role badge. Provides visual distinction from the
-    main semantic colors.
-  - _Contrast:_ ~4.6:1 on white ✅
+- **Line (`border-kumo-line`):** Standard borders for cards, inputs, and
+  structural separation.
+- **Hairline (`border-kumo-hairline`):** Very subtle dividers (like table rows
+  or navbar bottom border).
 
-## **3\. Typography**
+### **Semantic & Accent Colors**
 
-To match the soft, rounded aesthetic of the logo, the typography must be clean, legible, and slightly geometric with
-friendly curves.
+Used for actions, status indicators, and alerts.
 
-- **Primary Font (Headings & Titles):** _Poppins_
-  - _Weight:_ Semi-Bold (600) to Bold (700)
-  - _Characteristics:_ Round, welcoming, excellent for large display text.
-- **Secondary Font (Body Text & UI):** _Inter_
-  - _Weight:_ Regular (400) to Medium (500)
-  - _Characteristics:_ Highly legible at small sizes, neutral, balances the playfulness of the primary font.
+- **Brand (`kumo-brand`):** Primary actions, text links, active tabs, and main
+  CTAs.
+- **Danger (`kumo-danger`):** Errors, destructive actions (Delete), and critical
+  vulnerabilities.
+- **Warning (`kumo-warning`):** Warnings, pending states, and medium/high
+  severity indicators.
+- **Success (`kumo-success`):** Success messages, positive trends, and "Fixed"
+  statuses.
 
-## **4\. Iconography & Shapes**
+## **3. Typography**
 
-The Txlog visual language relies heavily on its shapes.
+To match the neutral, data-heavy aesthetic, the typography is highly legible and
+standardized.
 
-- **Icon Library:** [Lucide Icons](https://lucide.dev) — a modern, stroke-based icon set with 1500+ icons. Used via CDN
-  with `data-lucide` attributes and initialized with `lucide.createIcons()`.
-- **Border Radius:** \* _Global UI:_ All cards, modals, and buttons must use a large border radius to match the notebook
-  icon.
-  - _Value:_ 12px to 16px for standard elements (buttons, inputs). 24px for larger layout containers or cards.
-  - **NO sharp edges.** Everything should feel smooth and safe.
-- **Icons:** \* Use solid, flat-style icons or thick stroke icons (min. 2px width) with rounded caps and joints.
-  - Keep details minimal to match the simplicity of the Txlog logo.
+- **Primary & Secondary Font:** _Inter_
+- **Weights:**
+  - Regular (400) for body and secondary text (`font-normal`).
+  - Medium (500) for most UI controls, buttons, and subtle emphasis
+    (`font-medium`).
+  - Semi-Bold (600) and Bold (700) for headings and important numeric data
+    (`font-semibold`, `font-bold`).
+- **Note:** The previous `Poppins` display font has been completely removed in
+  favor of a unified `Inter` experience.
 
-## **5\. UI Elements**
+## **4. Iconography**
+
+- **Icon Library:** [Phosphor Icons](https://phosphoricons.com/)
+- **Style:** Outlined/Vazado (`weight="regular"`).
+- **Implementation:** Inline SVG. We do not use CDNs or JS libraries to render
+  icons.
+- **Stroke Width:** `stroke-width="16"` on a `viewBox="0 0 256 256"`.
+- **Note:** The previous `Lucide` icon library has been entirely removed.
+
+## **5. UI Elements**
 
 ### **Buttons**
 
-- **Primary Button:** \* Background: Coral Bookmark (\#D9556A) or Sky Blue (\#4A8AE8).
-  - Text Color: White.
-  - Border Radius: 12px.
-  - Hover State: Slight upward lift transform (translateY(-2px)) with a colored shadow glow.
-- **Secondary Button:**
-  - Background: Transparent.
-  - Border: 2px solid Lavender Frost (\#E6E6FA) or Indigo Slate (\#424565).
-  - Text Color: Indigo Slate (\#424565).
-  - Border Radius: 12px.
+All buttons use the `data-kumo-component="Button"` styling pattern.
 
-### **Input Fields**
+- **Primary Button:** `bg-kumo-brand` text `white`, rounded-lg.
+- **Ghost/Secondary Button:** Transparent background, `text-kumo-brand` or
+  `text-kumo-danger`, `hover:bg-kumo-tint`.
+- **Focus:** Must have `focus-visible:ring-2 focus-visible:ring-kumo-brand`.
 
-- Background: White or very light gray.
-- Border: 2px solid Lavender Frost (\#E6E6FA).
-- Focus State: Border changes to Sky Blue (\#4A8AE8) with a soft glow (box-shadow).
-- Border Radius: 12px.
+### **Inputs & Selects**
+
+All form elements use `data-kumo-component="Input"` or
+`data-kumo-component="Select"`.
+
+- **Background:** `bg-kumo-canvas` or `bg-kumo-control`.
+- **Border:** `border-kumo-line` with `rounded-lg`.
+- **Text:** `text-kumo-default` (sm or base size).
+- **Focus:** `focus:border-kumo-brand focus:ring-2 focus:ring-kumo-brand/20`.
 
 ### **Cards & Containers**
 
-- Background: White.
-- Border Radius: 16px or 24px.
-- Shadow: Soft, diffused drop shadow to create depth without making it look heavy.
-  - _CSS Example:_ box-shadow: 0 8px 24px rgba(66, 69, 101, 0.08);
+- **Background:** `bg-kumo-control`
+- **Border:** `border-kumo-line`
+- **Border Radius:** `rounded-xl` or `rounded-lg`.
+- **Shadow:** `shadow-sm` (minimal depth).
 
-### **Modals**
+### **Tables**
 
-- Border Radius: 24px (rounded-3xl).
-- Use `overflow-hidden` to clip top colored status bars.
-- Destructive modals include a thin Coral bar at the top.
-- Success modals include a thin Leaf Green bar at the top.
-- Animated entrance: scale-95 → scale-100 with opacity transition.
+- Tables are structured using the `<table class="kumo-table">` utility.
+- No borders between columns, only horizontal hairline dividers.
+- Header text is usually `text-kumo-subtle` and capitalized.
+- Hover rows change background to `bg-kumo-tint`.
 
-### **Tooltips**
+### **Empty States**
 
-- Background: Indigo Slate (\#424565).
-- Text: White, text-xs.
-- Appear on hover via `group-hover:block` pattern.
-- Positioned above the element with centered arrow alignment.
+- Minimalist text-only or single-graphic design.
+- We avoid arbitrary icons for empty states. We rely on clear, concise
+  `text-kumo-default` messages inside padded containers.
 
-### **Status Dots**
+### **Modals & Dialogs**
 
-- Green (animated pulse): Asset seen in the last 24 hours.
-- Golden (static): Asset seen between 1–15 days ago.
-- Coral (static): Asset not seen for 15+ days.
+- **Border Radius:** `rounded-xl`.
+- **Backdrop:** Blurred or dark semi-transparent overlay.
+- Modal headers have a subtle bottom border (`border-kumo-line`) and a standard
+  `X` icon for closing.

@@ -1,9 +1,9 @@
 {{ template "header.html" . }}
-<div class="bg-txlog-navy -mt-4 pt-4 pb-6 mb-6 print:hidden">
+<div class="py-6 mb-6 print:hidden">
     <div class="max-w-7xl mx-auto px-6">
-        <p class="text-white/60 text-sm mb-1">Analytics</p>
-        <h2 class="font-display font-bold text-2xl text-white">{{ .title }}</h2>
-        <p class="text-white/50 text-sm mt-1">Detect unusual patterns in package transactions such as high-volume
+        <p class="text-kumo-subtle text-sm mb-1">Analytics</p>
+        <h2 class="font-bold text-2xl text-kumo-default">{{ .title }}</h2>
+        <p class="text-kumo-subtle text-sm mt-1">Detect unusual patterns in package transactions such as high-volume
             changes, rapid package updates, or version downgrades.</p>
     </div>
 </div>
@@ -11,15 +11,15 @@
 <div class="max-w-7xl mx-auto px-6 pb-8">
     <div class="grid lg:grid-cols-3 gap-6">
         <div class="space-y-6">
-            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-                <div class="border-b border-txlog-lavender px-6 py-4">
-                    <h3 class="font-display font-semibold text-lg">Filters</h3>
+            <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+                <div class="border-b border-kumo-line px-6 py-4">
+                    <h3 class="font-semibold text-lg text-kumo-default">Filters</h3>
                 </div>
                 <div class="p-6 space-y-4">
                     <div>
-                        <label class="font-medium text-sm pl-1 block mb-1.5">Time Period</label>
-                        <select id="days-filter" onchange="loadAnomalies()"
-                            class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-3 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all text-txlog-indigo font-medium">
+                        <label class="font-medium text-sm pl-1 block mb-1.5 text-kumo-default">Time Period</label>
+                        <select id="days-filter" onchange="loadAnomalies()" data-kumo-component="Select"
+                            class="w-full">
                             <option value="7">Last 7 days</option>
                             <option value="14">Last 14 days</option>
                             <option value="30">Last 30 days</option>
@@ -28,9 +28,9 @@
                         </select>
                     </div>
                     <div>
-                        <label class="font-medium text-sm pl-1 block mb-1.5">Minimum Severity</label>
-                        <select id="severity-filter" onchange="loadAnomalies()"
-                            class="w-full border-2 border-txlog-lavender bg-white/50 px-4 py-3 rounded-xl outline-none focus:border-txlog-sky focus:ring-4 focus:ring-txlog-sky/20 transition-all text-txlog-indigo font-medium">
+                        <label class="font-medium text-sm pl-1 block mb-1.5 text-kumo-default">Minimum Severity</label>
+                        <select id="severity-filter" onchange="loadAnomalies()" data-kumo-component="Select"
+                            class="w-full">
                             <option value="">All Severities</option>
                             <option value="low">Low+</option>
                             <option value="medium">Medium+</option>
@@ -39,50 +39,50 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-                <div class="border-b border-txlog-lavender px-6 py-4">
-                    <h3 class="font-display font-semibold text-lg">Summary</h3>
+            <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+                <div class="border-b border-kumo-line px-6 py-4">
+                    <h3 class="font-semibold text-lg text-kumo-default">Summary</h3>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Total
+                            <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">Total
                                 Anomalies</div>
-                            <div class="font-display font-bold text-2xl" id="total-anomalies">-</div>
+                            <div class="font-bold text-2xl text-kumo-default" id="total-anomalies">-</div>
                         </div>
                         <div>
-                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Affected
+                            <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">Affected
                                 Hosts</div>
-                            <div class="font-display font-bold text-2xl" id="affected-hosts">-</div>
+                            <div class="font-bold text-2xl text-kumo-default" id="affected-hosts">-</div>
                         </div>
                         <div>
-                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">High
+                            <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">High
                                 Severity</div>
-                            <div class="font-display font-bold text-2xl text-txlog-coral" id="high-count">-</div>
+                            <div class="font-bold text-2xl text-kumo-danger" id="high-count">-</div>
                         </div>
                         <div>
-                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Medium
+                            <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">Medium
                                 Severity</div>
-                            <div class="font-display font-bold text-2xl text-txlog-golden" id="medium-count">-</div>
+                            <div class="font-bold text-2xl text-kumo-warning" id="medium-count">-</div>
                         </div>
                         <div class="col-span-2">
-                            <div class="text-xs font-bold text-txlog-indigo/50 uppercase tracking-wider mb-1">Low
+                            <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">Low
                                 Severity</div>
-                            <div class="font-display font-bold text-2xl text-txlog-sky" id="low-count">-</div>
+                            <div class="font-bold text-2xl text-kumo-brand" id="low-count">-</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="lg:col-span-2">
-            <div class="bg-white rounded-3xl shadow-soft overflow-hidden">
-                <div class="border-b border-txlog-lavender px-6 py-4">
-                    <h3 class="font-display font-semibold text-lg">Detected Anomalies <span
-                            class="text-sm text-txlog-indigo/50 font-normal ml-1" id="time-window"></span></h3>
+            <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+                <div class="border-b border-kumo-line px-6 py-4">
+                    <h3 class="font-semibold text-lg text-kumo-default">Detected Anomalies <span
+                            class="text-sm text-kumo-subtle font-normal ml-1" id="time-window"></span></h3>
                 </div>
                 <div class="p-6" id="anomalies-body">
-                    <div class="h-2 bg-txlog-lavender rounded-full overflow-hidden">
-                        <div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div>
+                    <div class="h-2 bg-kumo-line rounded-full overflow-hidden">
+                        <div class="h-full bg-kumo-brand rounded-full animate-pulse w-2/3"></div>
                     </div>
                 </div>
             </div>
@@ -96,12 +96,12 @@
         var severity = document.getElementById('severity-filter').value;
         var url = '/v1/reports/anomalies?days=' + days;
         if (severity) url += '&severity=' + severity;
-        document.getElementById('anomalies-body').innerHTML = '<div class="h-2 bg-txlog-lavender rounded-full overflow-hidden"><div class="h-full bg-txlog-sky rounded-full animate-pulse w-2/3"></div></div>';
+        document.getElementById('anomalies-body').innerHTML = '<div class="h-2 bg-kumo-line rounded-full overflow-hidden"><div class="h-full bg-kumo-brand rounded-full animate-pulse w-2/3"></div></div>';
         fetch(url)
             .then(function (response) { return response.json(); })
             .then(function (data) {
                 if (data.error) {
-                    document.getElementById('anomalies-body').innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">' + data.error + '</div>';
+                    document.getElementById('anomalies-body').innerHTML = '<div class="bg-kumo-danger/10 text-kumo-danger text-sm px-4 py-3 rounded-lg border border-kumo-danger/20">' + data.error + '</div>';
                     return;
                 }
                 document.getElementById('time-window').textContent = data.time_window;
@@ -113,21 +113,19 @@
                 if (data.anomalies && data.anomalies.length > 0) {
                     var html = '<div class="space-y-3">';
                     data.anomalies.forEach(function (anomaly) {
-                        var color = anomaly.severity === 'high' ? 'txlog-coral' : (anomaly.severity === 'medium' ? 'txlog-golden' : 'txlog-sky');
+                        var color = anomaly.severity === 'high' ? 'kumo-danger' : (anomaly.severity === 'medium' ? 'kumo-warning' : 'kumo-brand');
                         var typeName = anomaly.type === 'high_volume' ? 'High Volume' : (anomaly.type === 'rapid_change' ? 'Rapid Change' : 'Downgrade');
                         var detectedAt = new Date(anomaly.detected_at).toLocaleString();
-                        html += '<div class="bg-' + color + '/5 border border-' + color + '/20 rounded-2xl p-4"><div class="flex items-start gap-3"><i data-lucide="triangle-alert" class="w-5 h-5 text-' + color + ' flex-shrink-0 mt-0.5"></i><div><h4 class="font-semibold text-sm mb-1">' + anomaly.hostname + ' - ' + typeName + '</h4><p class="text-sm text-txlog-indigo/60">' + anomaly.description + '</p><div class="flex items-center gap-2 mt-2"><span class="text-xs text-txlog-indigo/40">Detected: ' + detectedAt + '</span><span class="bg-' + color + '/10 text-' + color + ' text-xs font-bold px-2 py-0.5 rounded-md">' + anomaly.severity + '</span></div></div></div></div>';
+                        html += '<div class="bg-' + color + '/5 border border-' + color + '/20 rounded-xl p-4"><div class="flex items-start gap-3"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256" class="text-' + color + ' flex-shrink-0 mt-0.5"><path d="M236.8,188.09L149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,104v40a8,8,0,0,0,16,0V104a8,8,0,0,0-16,0Zm20,80a12,12,0,1,1-12-12A12,12,0,0,1,140,184Z"></path></svg><div><h4 class="font-semibold text-sm mb-1 text-kumo-default">' + anomaly.hostname + ' - ' + typeName + '</h4><p class="text-sm text-kumo-subtle">' + anomaly.description + '</p><div class="flex items-center gap-2 mt-2"><span class="text-xs text-kumo-muted">Detected: ' + detectedAt + '</span><span class="bg-' + color + '/10 text-' + color + ' border border-' + color + '/20 text-xs font-bold px-2 py-0.5 rounded-sm">' + anomaly.severity + '</span></div></div></div></div>';
                     });
                     html += '</div>';
                     document.getElementById('anomalies-body').innerHTML = html;
-                    lucide.createIcons();
                 } else {
-                    document.getElementById('anomalies-body').innerHTML = '<div class="py-12 text-center"><i data-lucide="check" class="w-12 h-12 text-txlog-leaf/40 mx-auto mb-4"></i><p class="font-semibold mb-1">No anomalies detected</p><p class="text-sm text-txlog-indigo/50">No unusual activity found in the selected time period.</p></div>';
-                    lucide.createIcons();
+                    document.getElementById('anomalies-body').innerHTML = '<div class="py-12 text-center"><p class="font-semibold mb-1 text-kumo-default">No anomalies detected</p><p class="text-sm text-kumo-subtle">No unusual activity found in the selected time period.</p></div>';
                 }
             })
             .catch(function (error) {
-                document.getElementById('anomalies-body').innerHTML = '<div class="bg-txlog-coral/10 text-txlog-coral text-sm px-4 py-3 rounded-xl">Error: ' + error.message + '</div>';
+                document.getElementById('anomalies-body').innerHTML = '<div class="bg-kumo-danger/10 text-kumo-danger text-sm px-4 py-3 rounded-lg border border-kumo-danger/20">Error: ' + error.message + '</div>';
             });
     }
     document.addEventListener('DOMContentLoaded', loadAnomalies);

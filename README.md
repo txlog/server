@@ -161,12 +161,12 @@ To make changes on this project, you need:
 <summary>Golang</summary>
 
 ```bash
-wget https://go.dev/dl/go1.26.4.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.26.5.linux-amd64.tar.gz
 sudo rm -rf /usr/local/go
-sudo tar -C /usr/local -xzf go1.26.4.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.26.5.linux-amd64.tar.gz
 echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
 source ~/.bashrc
-rm go1.26.4.linux-amd64.tar.gz
+rm go1.26.5.linux-amd64.tar.gz
 ```
 
 </details>
@@ -231,21 +231,16 @@ LDAP_GROUP_FILTER=(member=%s)
 </details>
 
 <details>
-<summary>Tailwind CSS</summary>
+<summary>UI & CSS</summary>
 
-The UI uses [Tailwind CSS](https://tailwindcss.com/) compiled locally via the
-standalone CLI (no Node.js required). Download the CLI binary to the `tools/`
-directory:
+The UI uses [Kumo UI](https://kumo-ui.com/) and [Tailwind CSS v4](https://tailwindcss.com/) compiled via `npm`.
+Ensure you have `npm` installed, and run:
 
 ```bash
-mkdir -p tools
-curl -sL https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 \
-  -o tools/tailwindcss
-chmod +x tools/tailwindcss
+npm install
 ```
 
-The configuration lives in `tailwind.config.js` and the source CSS in
-`static/css/input.css`. The compiled output is `static/css/style.css`.
+The source CSS is in `static/css/input.css`. The compiled output is `static/css/style.css`.
 
 </details>
 

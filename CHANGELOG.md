@@ -18,6 +18,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.33.1] - 2026-07-23
+
+### Fixed
+
+- **Header**: Standardize dropdown chevron icon next to Analytics menu item.
+- **Header**: Restrict user avatar picture display to when OIDC is enabled and picture is present.
+
 ## [1.33.0] - 2026-07-21
 
 ### Changed

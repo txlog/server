@@ -98,7 +98,7 @@
           <div class="relative" id="user-dropdown">
             <button onclick="toggleDropdown('user-menu')"
               class="flex items-center gap-2 text-kumo-default p-0 hover:opacity-80 transition-opacity cursor-pointer">
-              {{ if .Context.Keys.user.Picture }}
+              {{ if and .Context.Keys.user.Picture .Context.Keys.oidc_enabled }}
               <span class="w-8 h-8 rounded-lg overflow-hidden bg-kumo-tint">
                 <img src="{{ .Context.Keys.user.Picture }}" class="w-full h-full object-cover" alt="">
               </span>

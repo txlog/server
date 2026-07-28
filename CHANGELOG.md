@@ -18,6 +18,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [Unreleased]
+
+### Fixed
+
+- **Assets**: The `/assets` page and search no longer return inactive assets when searching by `machine_id`.
+- **Assets**: Fixed an issue where the same hostname could appear multiple times in the active assets list if a machine was reprovisioned with a new `machine_id`. Re-claiming a hostname now correctly deactivates the old asset.
+
 ## [1.33.1] - 2026-07-23
 
 ### Fixed

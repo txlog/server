@@ -1,0 +1,3 @@
+-- We cannot easily reverse the deactivation without knowing exactly which ones were deactivated by this migration,
+-- but since this is just enforcing data consistency (one active asset per hostname), an empty down migration is acceptable.
+-- If needed, we could set is_active = TRUE for assets deactivated in the last few minutes, but it's risky and unnecessary.

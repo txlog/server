@@ -31,6 +31,11 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 			return err
 		}
 
+		err = am.deactivateAssetsByHostname(tx, hostname)
+		if err != nil {
+			return err
+		}
+
 		// Try INSERT with agent_version, fallback without if column doesn't exist
 		tx.Exec("SAVEPOINT upsert_agent_version")
 		_, err = tx.Exec(`
@@ -88,6 +93,11 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 			return err
 		}
 
+		err = am.deactivateAssetsByHostname(tx, hostname)
+		if err != nil {
+			return err
+		}
+
 		_, err = tx.Exec(`
 			UPDATE assets
 			SET is_active = TRUE, deactivated_at = NULL
@@ -115,6 +125,22 @@ func (am *AssetManager) deactivateAssetsByMachineID(tx *sql.Tx, machineID string
 
 	if err != nil {
 		logger.Error("Error deactivating old assets by machine_id: " + err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (am *AssetManager) deactivateAssetsByHostname(tx *sql.Tx, hostname string) error {
+	_, err := tx.Exec(`
+		UPDATE assets
+		SET is_active = FALSE, deactivated_at = CURRENT_TIMESTAMP
+		WHERE hostname = $1
+		AND is_active = TRUE
+	`, hostname)
+
+	if err != nil {
+		logger.Error("Error deactivating old assets by hostname: " + err.Error())
 		return err
 	}
 

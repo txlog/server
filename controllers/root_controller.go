@@ -155,6 +155,10 @@ func getStatistics(ctx context.Context, database *sql.DB) ([]models.Statistic, e
 		statistics = append(statistics, statistic)
 	}
 
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return statistics, nil
 }
 
@@ -190,7 +194,7 @@ func getAssetsByOS(ctx context.Context, database *sql.DB) ([]OSStats, error) {
 	rows, err := database.QueryContext(ctx, `
    SELECT
     COALESCE(os, '') AS os,
-    COUNT(*) AS num_machines
+    COUNT(DISTINCT hostname) AS num_machines
   FROM assets
   WHERE is_active = TRUE
   GROUP BY COALESCE(os, '')
@@ -210,6 +214,10 @@ func getAssetsByOS(ctx context.Context, database *sql.DB) ([]OSStats, error) {
 		assetsByOS = append(assetsByOS, stat)
 	}
 
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return assetsByOS, nil
 }
 
@@ -222,7 +230,7 @@ func getAssetsByAgentVersion(ctx context.Context, database *sql.DB) ([]AgentStat
 	rows, err := database.QueryContext(ctx, `
    SELECT
     COALESCE(agent_version, '') AS agent_version,
-    COUNT(*) AS num_machines
+    COUNT(DISTINCT hostname) AS num_machines
   FROM assets
   WHERE is_active = TRUE
   GROUP BY COALESCE(agent_version, '')
@@ -257,6 +265,10 @@ func getAssetsByAgentVersion(ctx context.Context, database *sql.DB) ([]AgentStat
 			return nil, err
 		}
 		assetsByAgentVersion = append(assetsByAgentVersion, stat)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return assetsByAgentVersion, nil
@@ -343,12 +355,12 @@ func getMostUpdatedPackages(ctx context.Context, database *sql.DB) ([]UpdatedPac
       public.transaction_items AS ti
   JOIN
       public.transactions AS t ON ti.transaction_id = t.transaction_id AND ti.machine_id = t.machine_id
-  JOIN
-      public.assets AS a ON t.machine_id = a.machine_id AND t.hostname = a.hostname
   WHERE
       ti.action = 'Upgrade'
       AND t.end_time >= NOW() - INTERVAL '30 days'
-      AND a.is_active = TRUE
+      AND EXISTS (
+          SELECT 1 FROM public.assets a WHERE a.hostname = t.hostname AND a.is_active = TRUE
+      )
   GROUP BY
       ti.package
   ORDER BY

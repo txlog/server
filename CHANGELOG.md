@@ -22,15 +22,24 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- **Assets**: The `/assets` page and search no longer return inactive assets when searching by `machine_id`.
-- **Assets**: Fixed an issue where the same hostname could appear multiple times in the active assets list if a machine was reprovisioned with a new `machine_id`. Re-claiming a hostname now correctly deactivates the old asset.
+- **Assets**: The `/assets` page and search no longer return inactive assets
+  when searching by `machine_id`.
+- **Assets**: Fixed an issue where the same hostname could appear multiple times
+  in the active assets list if a machine was reprovisioned with a new
+  `machine_id`. Re-claiming a hostname now correctly deactivates the old asset.
+- **Dashboard**: The OS distribution, Agent distribution, and Most updated
+  packages charts now correctly consider only the most recent active hostname
+  when a machine has been reprovisioned.
+- **Controllers**: Fixed missing `rows.Err()` checks in `root_controller.go` to
+  ensure proper error handling during database row iteration.
 
 ## [1.33.1] - 2026-07-23
 
 ### Fixed
 
 - **Header**: Standardize dropdown chevron icon next to Analytics menu item.
-- **Header**: Restrict user avatar picture display to when OIDC is enabled and picture is present.
+- **Header**: Restrict user avatar picture display to when OIDC is enabled and
+  picture is present.
 
 ## [1.33.0] - 2026-07-21
 

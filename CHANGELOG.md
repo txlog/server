@@ -20,7 +20,37 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- Update Go version to 1.26.6.
+- Bump `@cloudflare/kumo` from 2.8.0 to 2.10.0 and regenerate the minified
+  Tailwind CSS and the UI Kit reference page.
+- Bump `github.com/bytedance/sonic/loader` from 0.5.1 to 0.5.2.
+- Bump `github.com/gabriel-vasile/mimetype` from 1.4.13 to 1.4.15.
+- Bump `github.com/go-openapi/swag/*` from 0.27.3 to 0.28.0.
+- Bump `github.com/klauspost/compress` from 1.19.1 to 1.19.2.
+- Bump `github.com/leodido/go-urn` from 1.4.0 to 1.5.0.
+- Bump `github.com/mattn/go-isatty` from 0.0.23 to 0.0.24.
+- Bump `github.com/montanaflynn/stats` from 0.12.2 to 0.12.3.
+- Bump `github.com/oapi-codegen/runtime` from 1.6.0 to 1.7.0.
+- Bump `github.com/quic-go/quic-go` from 0.60.0 to 0.61.0.
+- Bump `github.com/rabbitmq/amqp091-go` from 1.12.0 to 1.13.0.
+- Bump `github.com/redis/go-redis/v9` from 9.21.0 to 9.22.0.
+- Bump `github.com/ugorji/go/codec` from 1.3.1 to 1.3.2.
+- Bump `go.yaml.in/yaml/v3` from 3.0.4 to 3.0.5.
+- Bump `golang.org/x/arch` from 0.29.0 to 0.30.0.
+- Bump `golang.org/x/crypto` from 0.54.0 to 0.55.0.
+- Bump `golang.org/x/mod` from 0.38.0 to 0.40.0.
+- Bump `golang.org/x/net` from 0.57.0 to 0.58.0.
+- Bump `golang.org/x/text` from 0.40.0 to 0.41.0.
+- Bump `golang.org/x/tools` from 0.48.0 to 0.49.0.
+- Bump `google.golang.org/protobuf` from 1.36.11 to 1.36.12.
+
 ### Fixed
+
+- **Tests**: Fixed `UpsertAsset` calls in the integration test suite that were
+  still missing the `dirty_frag` and `fragnesia` arguments, restoring `go vet`
+  on the `tests` package.
 
 - **Assets**: The `/assets` page and search no longer return inactive assets
   when searching by `machine_id`.

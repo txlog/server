@@ -37,7 +37,6 @@
               <div><code class="text-kumo-brand">env:</code><span class="text-kumo-subtle">Production</span></div>
               <div><code class="text-kumo-brand">svc:</code><span class="text-kumo-subtle">acme-system</span></div>
               <div><code class="text-kumo-brand">pod:</code><span class="text-kumo-subtle">01</span></div>
-              <div><code class="text-kumo-brand">copyfail:</code><span class="text-kumo-subtle">true/false</span></div>
             </div>
           </div>
         </div>
@@ -96,10 +95,7 @@
               <div class="flex items-center gap-3">
                 <span class="w-8 h-8 rounded-lg bg-kumo-tint border border-kumo-line flex-shrink-0 relative">
                   <img src="/images/{{ brand .OS }}" class="w-full h-full object-cover rounded-lg" alt="">
-                  {{ if or (derefBool .CopyFail) (derefBool .DirtyFrag) (derefBool .Fragnesia) }}
-                  <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-kumo-danger rounded-full animate-pulse"
-                    title="Vulnerabilities Found"></span>
-                  {{ else if derefBool .NeedsRestarting }}
+                  {{ if derefBool .NeedsRestarting }}
                   <span class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-kumo-warning rounded-full animate-pulse"
                     title="Asset must be restarted"></span>
                   {{ end }}

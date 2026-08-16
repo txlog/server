@@ -15,7 +15,7 @@ func NewAssetManager(db *sql.DB) *AssetManager {
 	return &AssetManager{db: db}
 }
 
-func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID string, timestamp time.Time, needsRestarting sql.NullBool, restartingReason sql.NullString, os string, agentVersion string, copyFail sql.NullBool, dirtyFrag sql.NullBool, fragnesia sql.NullBool) error {
+func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID string, timestamp time.Time, needsRestarting sql.NullBool, restartingReason sql.NullString, os string, agentVersion string) error {
 	var existingAssetID int
 	var existingIsActive bool
 
@@ -39,16 +39,16 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 		// Try INSERT with agent_version, fallback without if column doesn't exist
 		tx.Exec("SAVEPOINT upsert_agent_version")
 		_, err = tx.Exec(`
-			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os, agent_version, copy_fail, dirty_frag, fragnesia)
-			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6, $7, $8, $9, $10)
-		`, hostname, machineID, timestamp, needsRestarting, restartingReason, os, agentVersion, copyFail, dirtyFrag, fragnesia)
+			INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os, agent_version)
+			VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6, $7)
+		`, hostname, machineID, timestamp, needsRestarting, restartingReason, os, agentVersion)
 
 		if err != nil {
 			tx.Exec("ROLLBACK TO SAVEPOINT upsert_agent_version")
 			_, err = tx.Exec(`
-				INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os, copy_fail, dirty_frag, fragnesia)
-				VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6, $7, $8, $9)
-			`, hostname, machineID, timestamp, needsRestarting, restartingReason, os, copyFail, dirtyFrag, fragnesia)
+				INSERT INTO assets (hostname, machine_id, first_seen, last_seen, is_active, created_at, needs_restarting, restarting_reason, os)
+				VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6)
+			`, hostname, machineID, timestamp, needsRestarting, restartingReason, os)
 			if err != nil {
 				logger.Error("Error inserting asset: " + err.Error())
 				return err
@@ -68,17 +68,17 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 	tx.Exec("SAVEPOINT upsert_agent_version")
 	_, err = tx.Exec(`
 		UPDATE assets
-		SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4, agent_version = $5, copy_fail = $6, dirty_frag = $7, fragnesia = $8
-		WHERE asset_id = $9
-	`, timestamp, needsRestarting, restartingReason, os, agentVersion, copyFail, dirtyFrag, fragnesia, existingAssetID)
+		SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4, agent_version = $5
+		WHERE asset_id = $6
+	`, timestamp, needsRestarting, restartingReason, os, agentVersion, existingAssetID)
 
 	if err != nil {
 		tx.Exec("ROLLBACK TO SAVEPOINT upsert_agent_version")
 		_, err = tx.Exec(`
 			UPDATE assets
-			SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4, copy_fail = $5, dirty_frag = $6, fragnesia = $7
-			WHERE asset_id = $8
-		`, timestamp, needsRestarting, restartingReason, os, copyFail, dirtyFrag, fragnesia, existingAssetID)
+			SET last_seen = $1, needs_restarting = $2, restarting_reason = $3, os = $4
+			WHERE asset_id = $5
+		`, timestamp, needsRestarting, restartingReason, os, existingAssetID)
 		if err != nil {
 			logger.Error("Error updating asset last_seen: " + err.Error())
 			return err
@@ -152,12 +152,9 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 	var deactivatedAt sql.NullTime
 	var needsRestarting sql.NullBool
 	var restartingReason sql.NullString
-	var copyFail sql.NullBool
-	var dirtyFrag sql.NullBool
-	var fragnesia sql.NullBool
 
 	err := am.db.QueryRow(`
-		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason, copy_fail, dirty_frag, fragnesia
+		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason
 		FROM assets
 		WHERE hostname = $1 AND is_active = TRUE
 		LIMIT 1
@@ -172,9 +169,6 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 		&deactivatedAt,
 		&needsRestarting,
 		&restartingReason,
-		&copyFail,
-		&dirtyFrag,
-		&fragnesia,
 	)
 
 	if err != nil {
@@ -193,18 +187,6 @@ func (am *AssetManager) GetActiveAsset(hostname string) (*Asset, error) {
 		asset.RestartingReason = &restartingReason.String
 	}
 
-	if copyFail.Valid {
-		asset.CopyFail = &copyFail.Bool
-	}
-
-	if dirtyFrag.Valid {
-		asset.DirtyFrag = &dirtyFrag.Bool
-	}
-
-	if fragnesia.Valid {
-		asset.Fragnesia = &fragnesia.Bool
-	}
-
 	return &asset, nil
 }
 
@@ -213,12 +195,9 @@ func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 	var deactivatedAt sql.NullTime
 	var needsRestarting sql.NullBool
 	var restartingReason sql.NullString
-	var copyFail sql.NullBool
-	var dirtyFrag sql.NullBool
-	var fragnesia sql.NullBool
 
 	err := am.db.QueryRow(`
-		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason, copy_fail, dirty_frag, fragnesia
+		SELECT asset_id, hostname, machine_id, first_seen, last_seen, is_active, created_at, deactivated_at, needs_restarting, restarting_reason
 		FROM assets
 		WHERE machine_id = $1
 		LIMIT 1
@@ -233,9 +212,6 @@ func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 		&deactivatedAt,
 		&needsRestarting,
 		&restartingReason,
-		&copyFail,
-		&dirtyFrag,
-		&fragnesia,
 	)
 
 	if err != nil {
@@ -252,18 +228,6 @@ func (am *AssetManager) GetAssetByMachineID(machineID string) (*Asset, error) {
 
 	if restartingReason.Valid {
 		asset.RestartingReason = &restartingReason.String
-	}
-
-	if copyFail.Valid {
-		asset.CopyFail = &copyFail.Bool
-	}
-
-	if dirtyFrag.Valid {
-		asset.DirtyFrag = &dirtyFrag.Bool
-	}
-
-	if fragnesia.Valid {
-		asset.Fragnesia = &fragnesia.Bool
 	}
 
 	return &asset, nil
@@ -280,7 +244,4 @@ type Asset struct {
 	DeactivatedAt    *time.Time
 	NeedsRestarting  *bool
 	RestartingReason *string
-	CopyFail         *bool
-	DirtyFrag        *bool
-	Fragnesia        *bool
 }

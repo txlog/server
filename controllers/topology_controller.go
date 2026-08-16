@@ -33,9 +33,6 @@ type PodView struct {
 	Assets       []PodAsset
 	TotalAssets  int
 	NeedsRestart int
-	HasCopyFail  bool
-	HasDirtyFrag bool
-	HasFragnesia bool
 }
 
 // PodAsset is a single asset row within a pod.
@@ -46,9 +43,6 @@ type PodAsset struct {
 	OS              string
 	AgentVersion    string
 	NeedsRestarting bool
-	CopyFail        bool
-	DirtyFrag       bool
-	Fragnesia       bool
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -149,13 +143,13 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 			var hostname, machineID string
 			var envVal, svcVal, podID sql.NullString
 			var agentVersion, os sql.NullString
-			var needsRestarting, copyFail, dirtyFrag, fragnesia sql.NullBool
+			var needsRestarting sql.NullBool
 
 			if err := rows.Scan(
 				&assetID, &hostname, &machineID,
 				&envVal, &svcVal, &podID,
 				&agentVersion, &os,
-				&needsRestarting, &copyFail, &dirtyFrag, &fragnesia,
+				&needsRestarting,
 			); err != nil {
 				logger.Error("Failed to scan topology row: " + err.Error())
 				continue
@@ -168,9 +162,6 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 				OS:              os.String,
 				AgentVersion:    agentVersion.String,
 				NeedsRestarting: needsRestarting.Bool,
-				CopyFail:        copyFail.Bool,
-				DirtyFrag:       dirtyFrag.Bool,
-				Fragnesia:       fragnesia.Bool,
 			}
 
 			if !podID.Valid || podID.String == "" {
@@ -193,15 +184,6 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 			pv.TotalAssets++
 			if asset.NeedsRestarting {
 				pv.NeedsRestart++
-			}
-			if asset.CopyFail {
-				pv.HasCopyFail = true
-			}
-			if asset.DirtyFrag {
-				pv.HasDirtyFrag = true
-			}
-			if asset.Fragnesia {
-				pv.HasFragnesia = true
 			}
 		}
 
@@ -257,10 +239,7 @@ func buildTopologyAssetsQuery(envFilter, svcFilter string) string {
 			resolved.pod_id,
 			a.agent_version,
 			a.os,
-			a.needs_restarting,
-			a.copy_fail,
-			a.dirty_frag,
-			a.fragnesia
+			a.needs_restarting
 		FROM assets a
 		LEFT JOIN LATERAL (
 			SELECT compiled_pattern,

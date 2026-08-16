@@ -20,6 +20,20 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Removed
+
+- Kernel vulnerability flags **Copy Fail (CVE-2026-31431)**, **Dirty Frag** and
+  **Fragnesia**, along with the CF/DF/FN badges, the "Vulnerabilities Found"
+  panel, the `copyfail:true/false` search keyword and the
+  `explanation/copy-fail-detection` documentation page. These three were only
+  the first of a large and still growing group of kernel vulnerabilities, and
+  keeping up with all of them was not feasible — tracking only the first three
+  gave a false sense of coverage. Vulnerability tracking is now handled
+  exclusively by the OSV pipeline. A migration drops the `copy_fail`,
+  `dirty_frag` and `fragnesia` columns from the `assets` and `executions`
+  tables, so the historical values are discarded on upgrade. Agents still
+  sending these fields keep working: the unknown JSON keys are ignored.
+
 ### Changed
 
 - Update Go version to 1.26.6.

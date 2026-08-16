@@ -41,8 +41,6 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		restart := c.Query("restart")
 		inactive := c.Query("inactive")
 
-		copyFailFilter := strings.ToLower(extractKeyword(&search, "copyfail:"))
-
 		// Parse topology keywords: env:<name>, svc:<name>, pod:<id>
 		envFilter := extractKeyword(&search, "env:")
 		svcFilter := extractKeyword(&search, "svc:")
@@ -81,13 +79,6 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		if restart == "true" {
 			whereClause += " AND needs_restarting IS TRUE"
-		}
-
-		switch copyFailFilter {
-		case "true":
-			whereClause += " AND copy_fail IS TRUE"
-		case "false":
-			whereClause += " AND (copy_fail IS FALSE OR copy_fail IS NULL)"
 		}
 
 		// env:name → filter assets whose hostname matches the pattern of the named environment.
@@ -176,10 +167,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				last_seen,
 				machine_id,
 				os,
-				needs_restarting,
-				copy_fail,
-				dirty_frag,
-				fragnesia
+				needs_restarting
 			FROM assets
 			WHERE ` + activeFilter + whereClause + `
 			ORDER BY hostname
@@ -202,9 +190,6 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			var asset models.Execution
 			var executedAt sql.NullTime
 			var os sql.NullString
-			var copyFail sql.NullBool
-			var dirtyFrag sql.NullBool
-			var fragnesia sql.NullBool
 			err := rows.Scan(
 				&asset.ExecutionID,
 				&asset.Hostname,
@@ -212,9 +197,6 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				&asset.MachineID,
 				&os,
 				&asset.NeedsRestarting,
-				&copyFail,
-				&dirtyFrag,
-				&fragnesia,
 			)
 			if err != nil {
 				logger.Error("Error iterating assets:" + err.Error())
@@ -228,15 +210,6 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 			}
 			if os.Valid {
 				asset.OS = os.String
-			}
-			if copyFail.Valid {
-				asset.CopyFail = &copyFail.Bool
-			}
-			if dirtyFrag.Valid {
-				asset.DirtyFrag = &dirtyFrag.Bool
-			}
-			if fragnesia.Valid {
-				asset.Fragnesia = &fragnesia.Bool
 			}
 			assets = append(assets, asset)
 		}
@@ -594,15 +567,12 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 		// query if this asset must be restarted
 		var needsRestarting sql.NullBool
 		var restartingReason sql.NullString
-		var copyFail sql.NullBool
-		var dirtyFrag sql.NullBool
-		var fragnesia sql.NullBool
 		err = database.QueryRowContext(c.Request.Context(), `
-      SELECT needs_restarting, restarting_reason, copy_fail, dirty_frag, fragnesia
+      SELECT needs_restarting, restarting_reason
       FROM assets
       WHERE machine_id = $1
       LIMIT 1
-      `, machineID).Scan(&needsRestarting, &restartingReason, &copyFail, &dirtyFrag, &fragnesia)
+      `, machineID).Scan(&needsRestarting, &restartingReason)
 		if err != nil && err != sql.ErrNoRows {
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
@@ -622,13 +592,6 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			displayNeedsRestarting = false
 		}
 
-		var displayCopyFail bool
-		if copyFail.Valid {
-			displayCopyFail = copyFail.Bool
-		} else {
-			displayCopyFail = false
-		}
-
 		c.HTML(http.StatusOK, "machine_id.html", gin.H{
 			"Context":           c,
 			"title":             "Assets",
@@ -639,9 +602,6 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 			"other_assets":      otherAssets,
 			"needs_restarting":  displayNeedsRestarting,
 			"restarting_reason": restartingReason.String,
-			"copy_fail":         displayCopyFail,
-			"dirty_frag":        dirtyFrag.Bool && dirtyFrag.Valid,
-			"fragnesia":         fragnesia.Bool && fragnesia.Valid,
 		})
 	}
 }

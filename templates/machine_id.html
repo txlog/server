@@ -8,28 +8,6 @@
       </div>
       <div class="flex items-center gap-3">
 
-        {{ if or .copy_fail .dirty_frag .fragnesia }}
-        <div
-          class="bg-kumo-danger/10 border border-kumo-danger/20 text-kumo-danger px-4 py-2 rounded-lg flex items-center gap-3 text-sm">
-          <div class="flex items-center gap-2 font-medium">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M208,40H48a8,8,0,0,0-8,8v64c0,52.72,35.32,95.77,84,111a8,8,0,0,0,5.32,0c48.71-15.24,84-58.3,84-111V48A8,8,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="104" x2="128" y2="144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="180" r="12" fill="currentColor"/></svg>
-            Vulnerabilities Found
-          </div>
-          <div class="flex items-center gap-1.5 ml-2 border-l border-kumo-danger/20 pl-3">
-            {{ if .copy_fail }}
-            <span class="bg-kumo-danger text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm" title="Copy Fail (CVE-2026-31431)">CF</span>
-            {{ end }}
-            {{ if .dirty_frag }}
-            <span class="bg-kumo-accent text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm" title="Dirty Frag">DF</span>
-            {{ end }}
-            {{ if .fragnesia }}
-            <span class="bg-kumo-brand text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-sm" title="Fragnesia">FN</span>
-            {{ end }}
-          </div>
-          <a href="https://txlog.rda.run/docs/server/explanation/copy-fail-detection" target="_blank" class="underline text-kumo-danger hover:text-kumo-danger transition-colors text-xs ml-auto">Learn more</a>
-        </div>
-        {{ end }}
-
         {{ if .needs_restarting }}
         <div
           class="bg-kumo-warning/10 border border-kumo-warning/20 text-kumo-warning px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium">

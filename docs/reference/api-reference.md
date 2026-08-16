@@ -18,7 +18,7 @@ the Swagger UI at `/swagger/index.html`.
 
 | Method   | Path                        | Description                                     | Query Params                                                     |
 | :------- | :-------------------------- | :---------------------------------------------- | :--------------------------------------------------------------- |
-| `GET`    | `/machines`                 | List active machines.                           | `os`, `agent_version`, `search` (supports `copyfail:true/false`) |
+| `GET`    | `/machines`                 | List active machines.                           | `os`, `agent_version`, `search`                                  |
 | `GET`    | `/machines/ids`             | Get machine IDs for a hostname.                 | `hostname` (Required)                                            |
 | `GET`    | `/assets/requiring-restart` | List assets flagged for restart.                | -                                                                |
 | `DELETE` | `/admin/assets/:machine_id` | Delete a machine and its data (**Admin Only**). | -                                                                |

@@ -1,5 +1,6 @@
 /bin/
 .env
+.claude/
 tmp/main
 tmp/build-errors.log
 server
@@ -11,3 +12,4 @@ server.log
 .gopath/
 RELEASE.md
 node_modules/
+CLAUDE.md

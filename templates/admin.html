@@ -751,8 +751,7 @@
                   <div data-modal-panel
                     class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
                     <form action="/admin/apikeys/revoke" method="post">
-                      <div class="p-6 text-center"><i data-lucide="circle-x"
-                          class="w-12 h-12 text-kumo-warning mx-auto mb-3"></i>
+                      <div class="p-6 text-center"><svg class="w-12 h-12 text-kumo-warning mx-auto mb-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M165.66,101.66,139.31,128l26.35,26.34a8,8,0,0,1-11.32,11.32L128,139.31l-26.34,26.35a8,8,0,0,1-11.32-11.32L116.69,128,90.34,101.66a8,8,0,0,1,11.32-11.32L128,116.69l26.34-26.35a8,8,0,0,1,11.32,11.32ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"></path></svg>
                         <h3 class="font-semibold text-lg mb-2">Revoke API Key</h3><input type="hidden"
                           name="key_id" value="{{ .ID }}">
                         <p class="text-sm text-kumo-muted mb-1">Are you sure you want to revoke <strong>{{ .Name
@@ -856,7 +855,7 @@
                       title="Priority: Lower numbers are evaluated first. Use low numbers for specific rules and high numbers for generic rules.">
                       <div class="flex items-center gap-1">
                         Order
-                        <i data-lucide="help-circle" class="w-4 h-4 opacity-40"></i>
+                        <svg class="w-4 h-4 opacity-40" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M140,180a12,12,0,1,1-12-12A12,12,0,0,1,140,180ZM128,72c-22.06,0-40,16.15-40,36v4a8,8,0,0,0,16,0v-4c0-11,10.77-20,24-20s24,9,24,20-10.77,20-24,20a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-.72c18.24-3.35,32-17.9,32-35.28C168,88.15,150.06,72,128,72Zm104,56A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"></path></svg>
                       </div>
                     </th>
                     <th class="px-6 py-2 w-1">&nbsp;</th>
@@ -877,11 +876,11 @@
                       <div class="flex gap-2 justify-end">
                         <button type="button" onclick="previewPattern('{{ .Template }}')"
                           class="text-kumo-brand text-xs font-medium px-2 py-1 rounded-lg border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors flex items-center gap-1">
-                          <i data-lucide="eye" class="w-3 h-3"></i> Preview
+                          <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path></svg> Preview
                         </button>
                         <button type="button" onclick="editPattern({{ .ID }}, '{{ .Template }}', {{ .DisplayOrder }})"
                           class="text-kumo-muted text-xs font-medium px-2 py-1 rounded-lg border border-kumo-line hover:bg-kumo-tint transition-colors flex items-center gap-1">
-                          <i data-lucide="edit-3" class="w-3 h-3"></i> Edit
+                          <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"></path></svg> Edit
                         </button>
                         <form action="/admin/topology/patterns/delete" method="post" class="inline">
                           <input type="hidden" name="id" value="{{ .ID }}">
@@ -943,7 +942,7 @@
                     <td class="flex items-center gap-2">
                       <button type="button" onclick="previewEnv('{{ .MatchValue }}')"
                         class="text-kumo-brand text-xs font-medium px-2 py-1 rounded-lg border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors flex items-center gap-1">
-                        <i data-lucide="eye" class="w-3 h-3"></i> Preview
+                        <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path></svg> Preview
                       </button>
                       <form action="/admin/topology/environments/delete" method="post" class="inline">
                         <input type="hidden" name="id" value="{{ .ID }}">
@@ -1008,11 +1007,11 @@
                     <td class="flex items-center gap-2">
                       <button type="button" onclick="previewSvc('{{ .MatchValue }}')"
                         class="text-kumo-brand text-xs font-medium px-2 py-1 rounded-lg border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors flex items-center gap-1">
-                        <i data-lucide="eye" class="w-3 h-3"></i> Preview
+                        <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path></svg> Preview
                       </button>
                       <button type="button" onclick="editService({{ .ID }}, '{{ .MatchValue }}', '{{ .Name }}', {{ .HasPods }})"
                         class="text-kumo-brand text-xs font-medium px-2 py-1 rounded-lg border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors flex items-center gap-1">
-                        <i data-lucide="edit-3" class="w-3 h-3"></i>
+                        <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"></path></svg>
                       </button>
                       <form action="/admin/topology/services/delete" method="post" class="inline">
                         <input type="hidden" name="id" value="{{ .ID }}">
@@ -1085,7 +1084,7 @@
 
                 <input type="hidden" name="template" id="new-pattern-input" required>
                 <p class="text-[10px] text-kumo-muted mt-2 flex items-center gap-1">
-                  <i data-lucide="mouse-pointer-2" class="w-3 h-3"></i>
+                  <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M168,132.69,214.08,115l.33-.13A16,16,0,0,0,213,85.07L52.92,32.8A15.95,15.95,0,0,0,32.8,52.92L85.07,213a15.82,15.82,0,0,0,14.41,11l.78,0a15.84,15.84,0,0,0,14.61-9.59l.13-.33L132.69,168,184,219.31a16,16,0,0,0,22.63,0l12.68-12.68a16,16,0,0,0,0-22.63ZM195.31,208,144,156.69a16,16,0,0,0-26,4.93c0,.11-.09.22-.13.32l-17.65,46L48,48l159.85,52.2-45.95,17.64-.32.13a16,16,0,0,0-4.93,26h0L208,195.31Z"></path></svg>
                   Drag items to reorder. The :any tag acts as a wildcard (.*) for positional matching.
                 </p>
               </div>
@@ -1315,13 +1314,13 @@
           <div class="p-6">
             {{ if .migrations }}
             <div class="grid md:grid-cols-4 gap-4 mb-4">
-              <div class="flex items-center gap-3"><i data-lucide="lock" class="w-5 h-5 text-kumo-brand"></i>
+              <div class="flex items-center gap-3"><svg class="w-5 h-5 text-kumo-brand" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
                 <div><strong>Current Version:</strong> {{ .migrations.CurrentVersion }}</div>
               </div>
               <div class="flex items-center gap-3"><svg class="w-5 h-5 text-kumo-success" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                 <div><strong>Applied:</strong> {{ len .migrations.Applied }}</div>
               </div>
-              <div class="flex items-center gap-3"><i data-lucide="circle-check" class="w-5 h-5 text-kumo-warning"></i>
+              <div class="flex items-center gap-3"><svg class="w-5 h-5 text-kumo-warning" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"></path></svg>
                 <div><strong>Pending:</strong> {{ len .migrations.Pending }}</div>
               </div>
               <div class="flex items-center gap-3">{{ if .migrations.IsDirty }}<svg class="w-5 h-5 text-kumo-danger" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M236.8,188.09L149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,104v40a8,8,0,0,0,16,0V104a8,8,0,0,0-16,0Zm20,80a12,12,0,1,1-12-12A12,12,0,0,1,140,184Z"></path></svg>
@@ -1339,8 +1338,7 @@
                   <div class="flex gap-2">
                     <form action="/admin/migrations/force-clean" method="post" class="inline"><button type="submit"
                         onclick="return confirm('This will force the database to clean state. Are you sure?')"
-                        class="bg-kumo-danger text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><i
-                          data-lucide="refresh-cw" class="w-3 h-3"></i> Force Clean State</button></form>
+                        class="bg-kumo-danger text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43h-.45A79.52,79.52,0,0,0,69.59,72.71,8,8,0,0,1,58.41,61.27a96,96,0,0,1,135,.79L208,76.69V48a8,8,0,0,1,16,0ZM186.41,183.29a80,80,0,0,1-112.47-.66L59.31,168H88a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l14.63,14.63A95.43,95.43,0,0,0,130,222.06h.53a95.36,95.36,0,0,0,67.07-27.33,8,8,0,0,0-11.18-11.44Z"></path></svg> Force Clean State</button></form>
                     <form action="/admin/migrations/run" method="post" class="inline"><button type="submit"
                         onclick="return confirm('Force clean and run all pending migrations?')"
                         class="bg-kumo-brand text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Force Clean &amp; Run</button></form>
@@ -1528,7 +1526,6 @@
       else btn.className += ' bg-kumo-brand text-kumo-default';
     });
     location.hash = sectionId;
-    lucide.createIcons();
   }
   document.addEventListener('DOMContentLoaded', function () {
     var hash = location.hash.replace('#', '');
@@ -1558,13 +1555,13 @@
       var formData = new FormData(); formData.append('name', name);
       fetch('/admin/apikeys/create', { method: 'POST', body: formData }).then(function (r) { return r.json(); }).then(function (data) {
         if (data.success) { createForm.classList.add('hidden'); resultDiv.classList.remove('hidden'); generateBtn.classList.add('hidden'); document.getElementById('apiKeyValue').value = data.key; document.getElementById('apiKeyExample').textContent = data.key; closeBtn.textContent = 'Done'; closeBtn.classList.remove('border-kumo-line', 'text-kumo-default', 'hover:bg-kumo-line/20'); closeBtn.classList.add('bg-kumo-success', 'text-kumo-default', 'hover:-translate-y-0.5'); }
-        else { alert('Error: ' + (data.error || 'Failed')); generateBtn.disabled = false; generateBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M172,16a84,84,0,0,0-64,138.45L20.69,241.86a16.14,16.14,0,0,0,6.58,26.7A16.08,16.08,0,0,0,32,272H64a16,16,0,0,0,16-16v-8H96a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,11.31-4.69L155.65,203A84,84,0,1,0,172,16Zm0,152a68,68,0,1,1,68-68A68.07,68.07,0,0,1,172,168Z"></path></svg> Generate Key'; lucide.createIcons(); }
-      }).catch(function (e) { alert('Error: ' + e.message); generateBtn.disabled = false; generateBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M172,16a84,84,0,0,0-64,138.45L20.69,241.86a16.14,16.14,0,0,0,6.58,26.7A16.08,16.08,0,0,0,32,272H64a16,16,0,0,0,16-16v-8H96a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,11.31-4.69L155.65,203A84,84,0,1,0,172,16Zm0,152a68,68,0,1,1,68-68A68.07,68.07,0,0,1,172,168Z"></path></svg> Generate Key'; lucide.createIcons(); });
+        else { alert('Error: ' + (data.error || 'Failed')); generateBtn.disabled = false; generateBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M172,16a84,84,0,0,0-64,138.45L20.69,241.86a16.14,16.14,0,0,0,6.58,26.7A16.08,16.08,0,0,0,32,272H64a16,16,0,0,0,16-16v-8H96a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,11.31-4.69L155.65,203A84,84,0,1,0,172,16Zm0,152a68,68,0,1,1,68-68A68.07,68.07,0,0,1,172,168Z"></path></svg> Generate Key'; }
+      }).catch(function (e) { alert('Error: ' + e.message); generateBtn.disabled = false; generateBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M172,16a84,84,0,0,0-64,138.45L20.69,241.86a16.14,16.14,0,0,0,6.58,26.7A16.08,16.08,0,0,0,32,272H64a16,16,0,0,0,16-16v-8H96a16,16,0,0,0,16-16v-8h16a16,16,0,0,0,11.31-4.69L155.65,203A84,84,0,1,0,172,16Zm0,152a68,68,0,1,1,68-68A68.07,68.07,0,0,1,172,168Z"></path></svg> Generate Key'; });
     });
     if (copyBtn) copyBtn.addEventListener('click', function () {
       var input = document.getElementById('apiKeyValue'); input.select(); document.execCommand('copy');
-      copyBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Copied!'; lucide.createIcons();
-      setTimeout(function () { copyBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M216,40V168a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H200A16,16,0,0,1,216,40ZM184,80V216a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V80A16,16,0,0,1,40,64H168A16,16,0,0,1,184,80Zm-16,0H40V216H168Z"></path></svg> Copy'; lucide.createIcons(); }, 2000);
+      copyBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Copied!';
+      setTimeout(function () { copyBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M216,40V168a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H200A16,16,0,0,1,216,40ZM184,80V216a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V80A16,16,0,0,1,40,64H168A16,16,0,0,1,184,80Zm-16,0H40V216H168Z"></path></svg> Copy'; }, 2000);
     });
     // --- Template Builder Logic ---
     var tagBank = document.getElementById('tag-bank');
@@ -1622,7 +1619,6 @@
         syncTemplate();
       };
       el.appendChild(btn);
-      lucide.createIcons();
     }
 
     function syncTemplate() {
@@ -1736,7 +1732,7 @@
     var d = document.createElement('div');
     d.className = 'bg-kumo-success/10 border border-kumo-success/20 text-kumo-success px-4 py-3 rounded-xl mb-4 flex items-center gap-2';
     d.innerHTML = '<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="96" cy="96" r="72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M167.6,88.4a72,72,0,1,1-79.2,79.2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="164.91" y1="116.91" x2="228.91" y2="180.91" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="146.91" y1="146.91" x2="210.91" y2="210.91" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="116.91" y1="164.91" x2="180.91" y2="228.91" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg><span>' + msg + '</span>';
-    var c = document.getElementById('alert-container'); if (c) c.appendChild(d); lucide.createIcons();
+    var c = document.getElementById('alert-container'); if (c) c.appendChild(d);
   }
   function previewPattern(template) {
     document.getElementById('preview-modal-template').textContent = template;

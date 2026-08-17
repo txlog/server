@@ -18,6 +18,24 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.34.1] - 2026-08-17
+
+### Fixed
+
+- **Templates**: Replaced the leftover Lucide icons in the admin and license
+  pages with inline Phosphor SVGs. The Kumo migration dropped the Lucide script
+  tag but left `data-lucide` icons and `lucide.createIcons()` calls behind,
+  which threw `lucide is not defined` on `/admin`.
+- **Analytics**: The chart and report-prompt script on
+  `/analytics/progression` now only runs when there is graph data. It targets
+  elements that exist solely in the populated branch of the template, so with no
+  data the page raised an ApexCharts "Element not found" error and a null
+  `appendChild`.
+- **Startup**: On-disk templates and static assets are now used only when the
+  `templates/` directory actually exists, instead of whenever `GIN_MODE` was
+  set. Container images ship no `templates/` directory, so the documented
+  `GIN_MODE=release` made `LoadHTMLGlob` panic at startup.
+
 ## [1.34.0] - 2026-08-16
 
 ### Removed

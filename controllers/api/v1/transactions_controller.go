@@ -22,22 +22,35 @@ import (
 //	@Tags			transactions
 //	@Accept			json
 //	@Produce		json
+//	@Param			machine_id	query		string	false	"Machine ID"
+//	@Param			hostname	query		string	false	"Hostname"
 //	@Success		200	{object}	interface{}
 //	@Security		ApiKeyAuth
 //	@Router			/v1/transactions/ids [get]
 func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		body := models.Transaction{}
-		data, err := c.GetRawData()
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid transaction data")
-			return
-		}
-		err = json.Unmarshal(data, &body)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid JSON input")
-			logger.Error("Invalid JSON input: " + err.Error())
-			return
+		machineID := c.Query("machine_id")
+		hostname := c.Query("hostname")
+
+		// agents up to v1.x send the parameters as a JSON body on GET, which
+		// proxies may reject; keep reading it when no query params are given
+		if machineID == "" && hostname == "" {
+			body := models.Transaction{}
+			data, err := c.GetRawData()
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid transaction data")
+				return
+			}
+			if len(data) > 0 {
+				err = json.Unmarshal(data, &body)
+				if err != nil {
+					c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid JSON input")
+					logger.Error("Invalid JSON input: " + err.Error())
+					return
+				}
+				machineID = body.MachineID
+				hostname = body.Hostname
+			}
 		}
 
 		rows, err := database.QueryContext(c.Request.Context(), `
@@ -46,8 +59,8 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
       WHERE machine_id = $1
       AND hostname = $2
       ORDER BY transaction_id ASC`,
-			body.MachineID,
-			body.Hostname,
+			machineID,
+			hostname,
 		)
 		if err != nil {
 			logger.Error("Couldn't get saved transaction_ids for this host: " + err.Error())

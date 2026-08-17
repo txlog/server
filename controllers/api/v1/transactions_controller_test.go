@@ -168,6 +168,45 @@ func TestGetTransactionIDs_ReturnsIDs(t *testing.T) {
 	}
 }
 
+func TestGetTransactionIDs_QueryParams(t *testing.T) {
+	db := setupTransactionsTestDB(t)
+	defer db.Close()
+	defer cleanupTransactionsTestData(t, db)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.GET("/v1/transactions/ids", GetTransactionIDs(db))
+
+	machineID := "tx-test-machine-query"
+	hostname := "tx-test-hostname-query"
+
+	_, err := db.Exec(`
+		INSERT INTO transactions (transaction_id, machine_id, hostname, actions, altered, "user", return_code, release_version, command_line, comment, scriptlet_output)
+		VALUES (42, $1, $2, 'Install', '1', 'root', '0', '8.5', 'dnf install test', '', '')`,
+		machineID, hostname)
+	if err != nil {
+		t.Fatalf("Failed to insert test transaction: %v", err)
+	}
+
+	// No body at all: parameters come from the query string
+	req, _ := http.NewRequest("GET", "/v1/transactions/ids?machine_id="+machineID+"&hostname="+hostname, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status %d, got %d. Body: %s", http.StatusOK, w.Code, w.Body.String())
+	}
+
+	var response []int
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+
+	if len(response) != 1 || response[0] != 42 {
+		t.Errorf("Expected [42], got %v", response)
+	}
+}
+
 func TestGetTransactionIDs_FiltersCorrectly(t *testing.T) {
 	db := setupTransactionsTestDB(t)
 	defer db.Close()

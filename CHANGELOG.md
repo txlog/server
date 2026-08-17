@@ -18,6 +18,21 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.34.2] - 2026-08-17
+
+### Added
+
+- **API**: `GET /v1/transactions/ids` now accepts `machine_id` and `hostname` as
+  query parameters, documented in the Swagger spec. Agents up to v1.x send these
+  fields as a JSON body on a GET request, which some proxies and load balancers
+  reject or strip.
+
+### Changed
+
+- **API**: `GET /v1/transactions/ids` only reads the request body when neither
+  query parameter is given, and an empty body is no longer treated as invalid
+  JSON. Existing agents keep working unchanged.
+
 ## [1.34.1] - 2026-08-17
 
 ### Fixed

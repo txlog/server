@@ -13,3 +13,4 @@ server.log
 RELEASE.md
 node_modules/
 CLAUDE.md
+.serena/

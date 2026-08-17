@@ -132,7 +132,10 @@ func main() {
 		"versionsEqual":    util.VersionsEqual,
 	}
 
-	if os.Getenv("GIN_MODE") == "" {
+	// Use on-disk assets only when they actually exist (dev tree with Air);
+	// otherwise fall back to the embedded copies. Keying this off GIN_MODE
+	// broke containers, which have no templates/ directory.
+	if _, err := os.Stat("templates"); err != nil {
 		tmpl := template.Must(template.New("any").Funcs(funcMap).ParseFS(templateFS, "templates/*.html"))
 		r.SetHTMLTemplate(tmpl)
 

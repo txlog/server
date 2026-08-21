@@ -3,6 +3,7 @@ package controllers
 import (
 	"database/sql"
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	logger "github.com/txlog/server/logger"
@@ -76,6 +77,21 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 				selectedEnv = &envs[i]
 				break
 			}
+		}
+
+		// Only services associated with the selected environment are offered.
+		// Resolving selectedSvc from the filtered slice also drops a stale ?svc=
+		// carried over from another environment.
+		if selectedEnv != nil {
+			filtered := make([]models.ServiceName, 0, len(svcs))
+			for _, s := range svcs {
+				if slices.Contains(s.EnvironmentIDs, int64(selectedEnv.ID)) {
+					filtered = append(filtered, s)
+				}
+			}
+			svcs = filtered
+		} else {
+			svcs = nil
 		}
 
 		var selectedSvc *models.ServiceName

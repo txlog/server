@@ -985,6 +985,7 @@
                       Value</th>
                     <th class="px-6 py-2 font-semibold text-kumo-default text-xs uppercase tracking-wider">Display
                       Name</th>
+                    <th class="px-6 py-2 font-semibold text-kumo-default text-xs uppercase tracking-wider">Environments</th>
                     <th class="px-6 py-2 font-semibold text-kumo-default text-xs uppercase tracking-wider text-center">Group by Pods</th>
                     <th class="px-6 py-2 w-1">&nbsp;</th>
                   </tr>
@@ -997,6 +998,17 @@
                         class="bg-kumo-tint text-kumo-default text-xs font-mono px-2 py-1 rounded-md">{{ .MatchValue }}</code>
                     </td>
                     <td class="font-medium">{{ .Name }}</td>
+                    <td>
+                      {{ if .EnvironmentNames }}
+                      <span class="flex flex-wrap gap-1">
+                        {{ range .EnvironmentNames }}
+                        <span class="text-kumo-brand bg-kumo-brand/10 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">{{ . }}</span>
+                        {{ end }}
+                      </span>
+                      {{ else }}
+                      <span class="text-kumo-danger bg-kumo-danger/10 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">None</span>
+                      {{ end }}
+                    </td>
                     <td class="text-center">
                       {{ if .HasPods }}
                       <span class="text-kumo-success bg-kumo-success/10 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">Yes</span>
@@ -1009,7 +1021,7 @@
                         class="text-kumo-brand text-xs font-medium px-2 py-1 rounded-lg border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors flex items-center gap-1">
                         <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M247.31,124.76c-.35-.79-8.82-19.58-27.65-38.41C194.57,61.26,162.88,48,128,48S61.43,61.26,36.34,86.35C17.51,105.18,9,124,8.69,124.76a8,8,0,0,0,0,6.5c.35.79,8.82,19.57,27.65,38.4C61.43,194.74,93.12,208,128,208s66.57-13.26,91.66-38.34c18.83-18.83,27.3-37.61,27.65-38.4A8,8,0,0,0,247.31,124.76ZM128,192c-30.78,0-57.67-11.19-79.93-33.25A133.47,133.47,0,0,1,25,128,133.33,133.33,0,0,1,48.07,97.25C70.33,75.19,97.22,64,128,64s57.67,11.19,79.93,33.25A133.46,133.46,0,0,1,231.05,128C223.84,141.46,192.43,192,128,192Zm0-112a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Z"></path></svg> Preview
                       </button>
-                      <button type="button" onclick="editService({{ .ID }}, '{{ .MatchValue }}', '{{ .Name }}', {{ .HasPods }})"
+                      <button type="button" onclick="editService({{ .ID }}, '{{ .MatchValue }}', '{{ .Name }}', {{ .HasPods }}, {{ .EnvironmentIDs }})"
                         class="text-kumo-brand text-xs font-medium px-2 py-1 rounded-lg border border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors flex items-center gap-1">
                         <svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"></path></svg>
                       </button>
@@ -1191,6 +1203,33 @@
                     class="text-kumo-danger">*</span></label>
                 <input type="text" name="name" id="svc-name" required placeholder="ACME System"
                   class="w-full border-2 border-kumo-line px-3 py-2 rounded-xl text-sm focus:border-kumo-brand focus:outline-none transition-all">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Environments <span
+                    class="text-kumo-danger">*</span></label>
+                {{ if .environmentNames }}
+                <div
+                  class="border-2 border-kumo-line rounded-xl p-3 max-h-40 overflow-y-auto flex flex-col gap-2">
+                  <label class="flex items-center gap-2 cursor-pointer border-b border-kumo-line/50 pb-2">
+                    <input type="checkbox" id="svc-env-all" onchange="toggleAllEnvironments(this.checked)"
+                      class="w-4 h-4 text-kumo-brand border-kumo-line rounded focus:ring-kumo-brand/20 transition-all">
+                    <span class="text-sm font-medium text-kumo-muted">Select all</span>
+                  </label>
+                  {{ range .environmentNames }}
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="environment_ids" value="{{ .ID }}" data-env-checkbox
+                      onchange="syncEnvironmentToggle()"
+                      class="w-4 h-4 text-kumo-brand border-kumo-line rounded focus:ring-kumo-brand/20 transition-all">
+                    <span class="text-sm text-kumo-default">{{ .Name }}</span>
+                  </label>
+                  {{ end }}
+                </div>
+                <p class="text-xs text-kumo-subtle mt-1">The service is only listed on <a href="/topology"
+                    class="text-kumo-brand hover:underline">Topology</a> for the environments selected here.</p>
+                {{ else }}
+                <p class="text-xs text-kumo-danger">Add an environment name first — a service must belong to at least
+                  one environment.</p>
+                {{ end }}
               </div>
               <div>
                 <label class="flex items-center gap-2 cursor-pointer">
@@ -1706,6 +1745,31 @@
       openModal('modal-pattern');
     };
 
+    function setServiceEnvironments(envIds) {
+      var selected = (envIds || []).map(String);
+      document.querySelectorAll('[data-env-checkbox]').forEach(function (cb) {
+        cb.checked = selected.indexOf(cb.value) !== -1;
+      });
+      window.syncEnvironmentToggle();
+    }
+
+    window.toggleAllEnvironments = function (checked) {
+      document.querySelectorAll('[data-env-checkbox]').forEach(function (cb) {
+        cb.checked = checked;
+      });
+    };
+
+    // Keeps the "Select all" box in sync: checked when every environment is
+    // selected, indeterminate when only some are.
+    window.syncEnvironmentToggle = function () {
+      var all = document.getElementById('svc-env-all');
+      if (!all) return;
+      var boxes = document.querySelectorAll('[data-env-checkbox]');
+      var checked = document.querySelectorAll('[data-env-checkbox]:checked').length;
+      all.checked = boxes.length > 0 && checked === boxes.length;
+      all.indeterminate = checked > 0 && checked < boxes.length;
+    };
+
     window.addService = function () {
       document.getElementById('svc-form').action = '/admin/topology/services';
       document.getElementById('svc-modal-title').textContent = 'Add Service Name';
@@ -1713,16 +1777,18 @@
       document.getElementById('svc-match-value').value = '';
       document.getElementById('svc-name').value = '';
       document.getElementById('svc-has-pods').checked = false;
+      setServiceEnvironments([]);
       openModal('modal-add-svc');
     };
 
-    window.editService = function (id, matchValue, name, hasPods) {
+    window.editService = function (id, matchValue, name, hasPods, envIds) {
       document.getElementById('svc-form').action = '/admin/topology/services/update';
       document.getElementById('svc-modal-title').textContent = 'Edit Service Name';
       document.getElementById('svc-id').value = id;
       document.getElementById('svc-match-value').value = matchValue;
       document.getElementById('svc-name').value = name;
       document.getElementById('svc-has-pods').checked = hasPods;
+      setServiceEnvironments(envIds);
       openModal('modal-add-svc');
     };
 

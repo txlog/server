@@ -1,8 +1,65 @@
 package models
 
 import (
+	"slices"
 	"testing"
 )
+
+// TestTopologyServiceEnvironments verifies that a service's environment
+// associations round-trip through Create/List and that Update replaces them
+// instead of appending.
+func TestTopologyServiceEnvironments(t *testing.T) {
+	db := setupTestDB(t)
+	defer db.Close()
+
+	tm := NewTopologyManager(db)
+
+	envA, err := tm.CreateEnvironmentName("tstenva", "Test Env A")
+	if err != nil {
+		t.Fatalf("CreateEnvironmentName(A): %v", err)
+	}
+	defer func() { _ = tm.DeleteEnvironmentName(envA.ID) }()
+
+	envB, err := tm.CreateEnvironmentName("tstenvb", "Test Env B")
+	if err != nil {
+		t.Fatalf("CreateEnvironmentName(B): %v", err)
+	}
+	defer func() { _ = tm.DeleteEnvironmentName(envB.ID) }()
+
+	svc, err := tm.CreateServiceName("tstsvc", "Test Service", false, []int{envA.ID})
+	if err != nil {
+		t.Fatalf("CreateServiceName: %v", err)
+	}
+	defer func() { _ = tm.DeleteServiceName(svc.ID) }()
+
+	assertEnvIDs := func(step string, want ...int) {
+		t.Helper()
+		svcs, err := tm.ListServiceNames()
+		if err != nil {
+			t.Fatalf("%s: ListServiceNames: %v", step, err)
+		}
+		idx := slices.IndexFunc(svcs, func(s ServiceName) bool { return s.ID == svc.ID })
+		if idx < 0 {
+			t.Fatalf("%s: service %d not returned by ListServiceNames", step, svc.ID)
+		}
+		got := svcs[idx].EnvironmentIDs
+		if len(got) != len(want) {
+			t.Fatalf("%s: got environment ids %v, want %v", step, got, want)
+		}
+		for _, id := range want {
+			if !slices.Contains(got, int64(id)) {
+				t.Errorf("%s: environment id %d missing from %v", step, id, got)
+			}
+		}
+	}
+
+	assertEnvIDs("after create", envA.ID)
+
+	if err := tm.UpdateServiceName(svc.ID, "tstsvc", "Test Service", false, []int{envB.ID}); err != nil {
+		t.Fatalf("UpdateServiceName: %v", err)
+	}
+	assertEnvIDs("after update", envB.ID)
+}
 
 // TestCompileTemplate validates the template→regex compilation logic.
 func TestCompileTemplate(t *testing.T) {

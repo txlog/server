@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -265,8 +266,14 @@ func PostAdminTopologyCreateService(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		envIDs, err := parseEnvironmentIDs(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 		tm := models.NewTopologyManager(db)
-		s, err := tm.CreateServiceName(matchValue, name, hasPods)
+		s, err := tm.CreateServiceName(matchValue, name, hasPods, envIDs)
 		if err != nil {
 			logger.Error("Failed to create service name: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -276,6 +283,25 @@ func PostAdminTopologyCreateService(db *sql.DB) gin.HandlerFunc {
 		logger.Info("Service name created: " + s.MatchValue + " -> " + s.Name)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_saved=1")
 	}
+}
+
+// parseEnvironmentIDs reads the environment_ids checkbox group. A service must
+// belong to at least one environment, otherwise it can never be selected on
+// /topology.
+func parseEnvironmentIDs(c *gin.Context) ([]int, error) {
+	raw := c.PostFormArray("environment_ids")
+	if len(raw) == 0 {
+		return nil, errors.New("at least one environment is required")
+	}
+	envIDs := make([]int, 0, len(raw))
+	for _, s := range raw {
+		id, err := strconv.Atoi(s)
+		if err != nil {
+			return nil, errors.New("invalid environment id: " + s)
+		}
+		envIDs = append(envIDs, id)
+	}
+	return envIDs, nil
 }
 
 // PostAdminTopologyUpdateService updates an existing service name mapping.
@@ -293,8 +319,14 @@ func PostAdminTopologyUpdateService(db *sql.DB) gin.HandlerFunc {
 		name := c.PostForm("name")
 		hasPods := c.PostForm("has_pods") == "on"
 
+		envIDs, err := parseEnvironmentIDs(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 		tm := models.NewTopologyManager(db)
-		if err := tm.UpdateServiceName(id, matchValue, name, hasPods); err != nil {
+		if err := tm.UpdateServiceName(id, matchValue, name, hasPods, envIDs); err != nil {
 			logger.Error("Failed to update service name: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return

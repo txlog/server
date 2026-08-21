@@ -11,4 +11,8 @@ type ServiceName struct {
 	Name       string
 	HasPods    bool
 	CreatedAt  time.Time
+	// EnvironmentIDs and EnvironmentNames list the environments this service
+	// belongs to. A service is only offered on /topology for these environments.
+	EnvironmentIDs   []int64
+	EnvironmentNames []string
 }

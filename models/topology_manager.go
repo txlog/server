@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/lib/pq"
 )
 
 // TopologyManager provides CRUD operations for topology configuration:
@@ -410,9 +412,14 @@ func (tm *TopologyManager) DeleteEnvironmentName(id int) error {
 // ListServiceNames returns all service name mappings ordered by display_order.
 func (tm *TopologyManager) ListServiceNames() ([]ServiceName, error) {
 	rows, err := tm.db.Query(`
-		SELECT id, match_value, name, has_pods, created_at
-		FROM service_names
-		ORDER BY name, id
+		SELECT s.id, s.match_value, s.name, s.has_pods, s.created_at,
+		       COALESCE(ARRAY_AGG(e.id   ORDER BY e.name) FILTER (WHERE e.id IS NOT NULL), '{}'),
+		       COALESCE(ARRAY_AGG(e.name ORDER BY e.name) FILTER (WHERE e.id IS NOT NULL), '{}')
+		FROM service_names s
+		LEFT JOIN service_environments se ON se.service_name_id = s.id
+		LEFT JOIN environment_names   e  ON e.id = se.environment_name_id
+		GROUP BY s.id
+		ORDER BY s.name, s.id
 	`)
 	if err != nil {
 		return nil, err
@@ -422,7 +429,8 @@ func (tm *TopologyManager) ListServiceNames() ([]ServiceName, error) {
 	var svcs []ServiceName
 	for rows.Next() {
 		var s ServiceName
-		if err := rows.Scan(&s.ID, &s.MatchValue, &s.Name, &s.HasPods, &s.CreatedAt); err != nil {
+		if err := rows.Scan(&s.ID, &s.MatchValue, &s.Name, &s.HasPods, &s.CreatedAt,
+			pq.Array(&s.EnvironmentIDs), pq.Array(&s.EnvironmentNames)); err != nil {
 			return nil, err
 		}
 		svcs = append(svcs, s)
@@ -430,10 +438,32 @@ func (tm *TopologyManager) ListServiceNames() ([]ServiceName, error) {
 	return svcs, rows.Err()
 }
 
+// setServiceEnvironments replaces the environment associations of a service.
+func setServiceEnvironments(tx *sql.Tx, serviceID int, envIDs []int) error {
+	if _, err := tx.Exec(`DELETE FROM service_environments WHERE service_name_id = $1`, serviceID); err != nil {
+		return err
+	}
+	for _, envID := range envIDs {
+		if _, err := tx.Exec(`
+			INSERT INTO service_environments (service_name_id, environment_name_id)
+			VALUES ($1, $2) ON CONFLICT DO NOTHING
+		`, serviceID, envID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // CreateServiceName inserts a new service name mapping.
-func (tm *TopologyManager) CreateServiceName(matchValue, name string, hasPods bool) (*ServiceName, error) {
+func (tm *TopologyManager) CreateServiceName(matchValue, name string, hasPods bool, envIDs []int) (*ServiceName, error) {
+	tx, err := tm.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = tx.Rollback() }()
+
 	var s ServiceName
-	err := tm.db.QueryRow(`
+	err = tx.QueryRow(`
 		INSERT INTO service_names (match_value, name, has_pods)
 		VALUES ($1, $2, $3)
 		RETURNING id, match_value, name, has_pods, created_at
@@ -441,21 +471,39 @@ func (tm *TopologyManager) CreateServiceName(matchValue, name string, hasPods bo
 	if err != nil {
 		return nil, err
 	}
+	if err := setServiceEnvironments(tx, s.ID, envIDs); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	_, _ = tm.SyncCompiledPatterns()
 	return &s, nil
 }
 
 // UpdateServiceName updates an existing service name mapping.
-func (tm *TopologyManager) UpdateServiceName(id int, matchValue, name string, hasPods bool) error {
-	_, err := tm.db.Exec(`
+func (tm *TopologyManager) UpdateServiceName(id int, matchValue, name string, hasPods bool, envIDs []int) error {
+	tx, err := tm.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	if _, err := tx.Exec(`
 		UPDATE service_names
 		SET match_value = $1, name = $2, has_pods = $3
 		WHERE id = $4
-	`, matchValue, name, hasPods, id)
-	if err == nil {
-		_, _ = tm.SyncCompiledPatterns()
+	`, matchValue, name, hasPods, id); err != nil {
+		return err
 	}
-	return err
+	if err := setServiceEnvironments(tx, id, envIDs); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	_, _ = tm.SyncCompiledPatterns()
+	return nil
 }
 
 // DeleteServiceName removes a service name mapping by ID.

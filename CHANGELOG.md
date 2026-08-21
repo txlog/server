@@ -18,6 +18,22 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.35.0] - 2026-08-20
+
+### Added
+
+- **Topology**: services now belong to one or more environments. The service
+  form in `/admin#topology` has an Environments checkbox group (at least one is
+  required), and the services table shows each service's environments.
+
+### Changed
+
+- **Topology**: the Service dropdown in `/topology` only lists services
+  associated with the selected environment. Selecting an environment a service
+  does not belong to clears the selection instead of rendering an empty pod
+  list. Existing services are associated with every existing environment by the
+  migration, preserving current behavior.
+
 ## [1.34.2] - 2026-08-17
 
 ### Added

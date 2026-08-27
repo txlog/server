@@ -39,8 +39,8 @@ WITH LatestPackageVersion AS (
     ROW_NUMBER() OVER (
       PARTITION BY machine_id
       ORDER BY
-        version DESC,
-        release DESC,
+        version_sort_key(version) DESC,
+        version_sort_key(release) DESC,
         transaction_id DESC
     ) AS rn
   FROM

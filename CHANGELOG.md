@@ -18,6 +18,18 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.35.1] - 2026-08-26
+
+### Fixed
+
+- **Packages**: version ordering is now numeric instead of textual. The version
+  timeline in `/packages/{name}` was sorting `1.9.4` above `1.18.0`, and the
+  same textual `ORDER BY` made `/packages` and the `/v1/packages/.../assets`
+  endpoint pick the wrong "latest" version. A new `version_sort_key()`
+  PostgreSQL function zero-pads numeric runs in version and release strings and
+  is now used by every version ordering, including the `mv_package_listing`
+  materialized view.
+
 ## [1.35.0] - 2026-08-21
 
 ### Added

@@ -150,7 +150,7 @@ func getPackagesFromDirectQuery(ctx context.Context, database *sql.DB, search st
         WITH RankedItems AS (
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
-                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
+                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version_sort_key(version) DESC, version_sort_key(release) DESC) as rn
             FROM
                 public.transaction_items
         ),
@@ -196,7 +196,7 @@ func getPackagesFromDirectQuery(ctx context.Context, database *sql.DB, search st
         WITH RankedItems AS (
             SELECT
                 REPLACE(package, 'Change ', '') AS package,
-                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
+                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version_sort_key(version) DESC, version_sort_key(release) DESC) as rn
             FROM
                 public.transaction_items
         ),
@@ -253,7 +253,7 @@ func getPackagesFromDirectQuery(ctx context.Context, database *sql.DB, search st
                 release,
                 arch,
                 repo,
-                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
+                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version_sort_key(version) DESC, version_sort_key(release) DESC) as rn
             FROM
                 public.transaction_items
         ),
@@ -312,7 +312,7 @@ func getPackagesFromDirectQuery(ctx context.Context, database *sql.DB, search st
                 release,
                 arch,
                 repo,
-                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version DESC, release DESC) as rn
+                ROW_NUMBER() OVER(PARTITION BY REPLACE(package, 'Change ', '') ORDER BY version_sort_key(version) DESC, version_sort_key(release) DESC) as rn
             FROM
                 public.transaction_items
         ),
@@ -430,8 +430,8 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
         ti.arch,
         ti.repo
       ORDER BY
-        version DESC,
-        release DESC;
+        version_sort_key(ti.version) DESC,
+        version_sort_key(ti.release) DESC;
     `
 		rows, err := database.QueryContext(c.Request.Context(), query, pkg.Name)
 

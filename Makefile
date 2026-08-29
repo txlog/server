@@ -1,4 +1,4 @@
-.PHONY: all help clean fmt vet build run doc css css-watch komparo
+.PHONY: all help clean fmt vet lint test build run doc css css-watch komparo
 
 all: help
 
@@ -23,6 +23,14 @@ fmt:
 ## vet: Recursively check all packages
 vet:
 	@go vet ./...
+
+## lint: Run golangci-lint using .golangci.yml
+lint:
+	@golangci-lint run ./...
+
+## test: Run the test suite (tests skip when PostgreSQL is unreachable)
+test:
+	@go test ./...
 
 ## css: Build the Tailwind CSS (minified)
 css:

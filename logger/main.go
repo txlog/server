@@ -6,7 +6,11 @@ import (
 	"strings"
 )
 
-var logger *slog.Logger
+// logger starts with a usable default so that code paths reached before
+// InitLogger runs — every test binary, since only main calls it — log instead
+// of dereferencing a nil pointer. InitLogger replaces it with the configured
+// level.
+var logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 
 // InitLogger initializes a structured logger (slog) with a configurable log
 // level. The log level can be set through the LOG_LEVEL environment variable

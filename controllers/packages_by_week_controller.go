@@ -201,7 +201,7 @@ func getMonthlyPackageData(ctx context.Context, database *sql.DB, month, year in
 		escapedOS := escapeCSVField(osVersion)
 		escapedPackage := escapeCSVField(fullPackageName)
 
-		csvBuilder.WriteString(fmt.Sprintf("%s,%s,%d,%d\n", escapedOS, escapedPackage, machineCount, totalUpdates))
+		fmt.Fprintf(&csvBuilder, "%s,%s,%d,%d\n", escapedOS, escapedPackage, machineCount, totalUpdates)
 	}
 
 	if err := rows.Err(); err != nil {

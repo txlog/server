@@ -102,7 +102,9 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.SetTrustedProxies(nil)
+	if err := r.SetTrustedProxies(nil); err != nil {
+		logger.Error("Failed to configure trusted proxies: " + err.Error())
+	}
 	r.Use(func(c *gin.Context) {
 		c.SetSameSite(http.SameSiteLaxMode)
 		c.Next()

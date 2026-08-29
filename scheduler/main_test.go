@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"database/sql"
-	"os"
 	"testing"
 	"time"
 
@@ -166,7 +165,9 @@ func TestLockAcquireReleaseFlow(t *testing.T) {
 		}
 
 		// Cleanup
-		releaseLock(db, lockName)
+		if err := releaseLock(db, lockName); err != nil {
+			t.Errorf("Failed to release lock: %v", err)
+		}
 	})
 }
 
@@ -180,15 +181,7 @@ func TestHousekeepingJob(t *testing.T) {
 
 	t.Run("Delete old executions", func(t *testing.T) {
 		// Set retention to 7 days for this test
-		originalRetention := os.Getenv("CRON_RETENTION_DAYS")
-		os.Setenv("CRON_RETENTION_DAYS", "7")
-		defer func() {
-			if originalRetention == "" {
-				os.Unsetenv("CRON_RETENTION_DAYS")
-			} else {
-				os.Setenv("CRON_RETENTION_DAYS", originalRetention)
-			}
-		}()
+		t.Setenv("CRON_RETENTION_DAYS", "7")
 
 		// Insert old executions (older than 7 days)
 		oldExecutedAt := time.Now().AddDate(0, 0, -10)
@@ -257,13 +250,9 @@ func TestHousekeepingJobWithDefaultRetention(t *testing.T) {
 
 	t.Run("Use default retention when env not set", func(t *testing.T) {
 		// Unset the retention env variable
-		originalRetention := os.Getenv("CRON_RETENTION_DAYS")
-		os.Unsetenv("CRON_RETENTION_DAYS")
-		defer func() {
-			if originalRetention != "" {
-				os.Setenv("CRON_RETENTION_DAYS", originalRetention)
-			}
-		}()
+		// t.Setenv cannot unset; an empty value is equivalent here, since
+		// DeleteOldExecutions falls back to the default when os.Getenv is "".
+		t.Setenv("CRON_RETENTION_DAYS", "")
 
 		machineID := "scheduler-test-machine-002"
 
@@ -301,15 +290,7 @@ func TestHousekeepingJobWithInvalidRetention(t *testing.T) {
 
 	t.Run("Ignore invalid retention value", func(t *testing.T) {
 		// Set invalid retention value
-		originalRetention := os.Getenv("CRON_RETENTION_DAYS")
-		os.Setenv("CRON_RETENTION_DAYS", "invalid")
-		defer func() {
-			if originalRetention == "" {
-				os.Unsetenv("CRON_RETENTION_DAYS")
-			} else {
-				os.Setenv("CRON_RETENTION_DAYS", originalRetention)
-			}
-		}()
+		t.Setenv("CRON_RETENTION_DAYS", "invalid")
 
 		machineID := "scheduler-test-machine-003"
 
@@ -380,6 +361,8 @@ func TestConcurrentLockAcquisition(t *testing.T) {
 		}
 
 		// Cleanup
-		releaseLock(db, lockName)
+		if err := releaseLock(db, lockName); err != nil {
+			t.Errorf("Failed to release lock: %v", err)
+		}
 	})
 }

@@ -58,7 +58,10 @@ func latestVersionJob() {
 	}
 
 	version := strings.TrimSpace(string(body))
-	os.Setenv("LATEST_VERSION", version)
+	if err := os.Setenv("LATEST_VERSION", version); err != nil {
+		logger.Error("Failed to store latest version: " + err.Error())
+		return
+	}
 	logger.Info("Latest version updated: " + version)
 }
 

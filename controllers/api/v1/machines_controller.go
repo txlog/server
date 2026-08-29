@@ -49,7 +49,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
     FROM assets a
     WHERE a.is_active = TRUE`
 
-		var params []interface{}
+		var params []any
 		var paramCount int
 
 		if os != "" {

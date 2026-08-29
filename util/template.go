@@ -63,7 +63,7 @@ func FormatPercentage(percentage float64) string {
 
 	var result strings.Builder
 	result.Grow(n + n/3)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if (n-i)%3 == 0 && i != 0 {
 			result.WriteByte('.')
 		}
@@ -111,7 +111,7 @@ func FormatInteger(num int) string {
 
 	var result strings.Builder
 	result.Grow(n + n/3)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		if (n-i)%3 == 0 && i != 0 {
 			result.WriteByte('.')
 		}
@@ -151,11 +151,7 @@ func Add(a, b int) int {
 // Min returns the minimum value between two integers.
 // It compares two integers a and b and returns the smaller one.
 func Min(a, b int) int {
-	if a < b {
-		return a
-	} else {
-		return b
-	}
+	return min(a, b)
 }
 
 // Version returns the semantic version of the application.
@@ -189,11 +185,9 @@ func DnfUser(user string) string {
 	if user == "" {
 		return "Unknown"
 	}
-	if strings.Contains(user, "<") && strings.Contains(user, ">") {
-		start := strings.Index(user, "<")
-		end := strings.Index(user, ">")
-		if start != -1 && end != -1 {
-			return user[start+1 : end]
+	if _, rest, found := strings.Cut(user, "<"); found {
+		if inner, _, found := strings.Cut(rest, ">"); found {
+			return inner
 		}
 	}
 	// If user is not in the format "rodrigo avila <rodrigo.avila>", return the user
@@ -273,8 +267,7 @@ func HasAction(actions, action string) bool {
 	// is a word, we need to compare it with the action. if actions is a list,
 	// we need to check if the action is in the list.
 	// From https://dnf.readthedocs.io/en/latest/command_ref.html#history-command
-	actionsList := strings.Split(actions, ",")
-	for _, a := range actionsList {
+	for a := range strings.SplitSeq(actions, ",") {
 		a = strings.TrimSpace(a)
 		switch a {
 		case "I":

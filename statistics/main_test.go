@@ -61,7 +61,7 @@ func TestCountExecutions(t *testing.T) {
 	// Insert test executions
 	t.Run("Insert test data", func(t *testing.T) {
 		// Last 30 days: 10 executions
-		for i := 0; i < 10; i++ {
+		for i := range 10 {
 			executedAt := time.Now().AddDate(0, 0, -i-1)
 			_, err := db.Exec(`
 				INSERT INTO executions (machine_id, status, message, executed_at)
@@ -73,7 +73,7 @@ func TestCountExecutions(t *testing.T) {
 		}
 
 		// 30-60 days ago: 5 executions
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			executedAt := time.Now().AddDate(0, 0, -31-i)
 			_, err := db.Exec(`
 				INSERT INTO executions (machine_id, status, message, executed_at)
@@ -126,7 +126,7 @@ func TestCountInstalledPackages(t *testing.T) {
 
 	t.Run("Insert test transactions and items", func(t *testing.T) {
 		// Last 30 days: 8 installs
-		for i := 0; i < 8; i++ {
+		for i := range 8 {
 			transactionID := fmt.Sprintf("stats-test-tx-%d", i)
 			beginTime := time.Now().AddDate(0, 0, -i-1)
 
@@ -148,7 +148,7 @@ func TestCountInstalledPackages(t *testing.T) {
 		}
 
 		// 30-60 days ago: 4 installs
-		for i := 0; i < 4; i++ {
+		for i := range 4 {
 			transactionID := fmt.Sprintf("stats-test-tx-old-%d", i)
 			beginTime := time.Now().AddDate(0, 0, -31-i)
 
@@ -211,7 +211,7 @@ func TestCountUpgradedPackages(t *testing.T) {
 
 	t.Run("Insert test upgrades", func(t *testing.T) {
 		// Last 30 days: 6 upgrades
-		for i := 0; i < 6; i++ {
+		for i := range 6 {
 			transactionID := fmt.Sprintf("stats-test-upgrade-tx-%d", i)
 			beginTime := time.Now().AddDate(0, 0, -i-1)
 
@@ -233,7 +233,7 @@ func TestCountUpgradedPackages(t *testing.T) {
 		}
 
 		// 30-60 days ago: 3 upgrades
-		for i := 0; i < 3; i++ {
+		for i := range 3 {
 			transactionID := fmt.Sprintf("stats-test-upgrade-tx-old-%d", i)
 			beginTime := time.Now().AddDate(0, 0, -31-i)
 
@@ -295,7 +295,7 @@ func TestStatisticsWithZeroPreviousMonth(t *testing.T) {
 	machineID := "stats-test-machine-004"
 
 	t.Run("Insert data only in last 30 days", func(t *testing.T) {
-		for i := 0; i < 5; i++ {
+		for i := range 5 {
 			executedAt := time.Now().AddDate(0, 0, -i-1)
 			_, err := db.Exec(`
 				INSERT INTO executions (machine_id, status, message, executed_at)

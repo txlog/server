@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"database/sql"
 	"testing"
 )
@@ -25,7 +24,7 @@ func TestGetTotalActiveAssets(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	count, err := getTotalActiveAssets(context.Background(), db)
+	count, err := getTotalActiveAssets(t.Context(), db)
 	if err != nil {
 		t.Errorf("getTotalActiveAssets() error = %v", err)
 	}
@@ -42,7 +41,7 @@ func TestGetAssetsByOS(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	stats, err := getAssetsByOS(context.Background(), db)
+	stats, err := getAssetsByOS(t.Context(), db)
 	if err != nil {
 		t.Errorf("getAssetsByOS() error = %v", err)
 	}
@@ -65,7 +64,7 @@ func TestGetAssetsByAgentVersion(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	stats, err := getAssetsByAgentVersion(context.Background(), db)
+	stats, err := getAssetsByAgentVersion(t.Context(), db)
 	if err != nil {
 		t.Errorf("getAssetsByAgentVersion() error = %v", err)
 	}
@@ -88,7 +87,7 @@ func TestGetDuplicatedAssets(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	assets, err := getDuplicatedAssets(context.Background(), db)
+	assets, err := getDuplicatedAssets(t.Context(), db)
 	if err != nil {
 		t.Errorf("getDuplicatedAssets() error = %v", err)
 	}
@@ -112,7 +111,7 @@ func TestGetMostUpdatedPackages(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	packages, err := getMostUpdatedPackages(context.Background(), db)
+	packages, err := getMostUpdatedPackages(t.Context(), db)
 	if err != nil {
 		t.Errorf("getMostUpdatedPackages() error = %v", err)
 	}
@@ -146,7 +145,7 @@ func TestGetStatistics(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
 
-	stats, err := getStatistics(context.Background(), db)
+	stats, err := getStatistics(t.Context(), db)
 	if err != nil {
 		t.Errorf("getStatistics() error = %v", err)
 	}

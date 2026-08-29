@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 
 	logger "github.com/txlog/server/logger"
@@ -25,7 +26,7 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 		WHERE hostname = $1 AND machine_id = $2
 	`, hostname, machineID).Scan(&existingAssetID, &existingIsActive)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		err = am.deactivateAssetsByMachineID(tx, machineID)
 		if err != nil {
 			return err

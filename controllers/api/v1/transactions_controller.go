@@ -278,7 +278,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		// Batch insert rpm transaction items
 		if len(body.Items) > 0 {
 			valueStrings := make([]string, 0, len(body.Items))
-			valueArgs := make([]interface{}, 0, len(body.Items)*10)
+			valueArgs := make([]any, 0, len(body.Items)*10)
 			for i, item := range body.Items {
 				base := i * 10
 				valueStrings = append(valueStrings, fmt.Sprintf(

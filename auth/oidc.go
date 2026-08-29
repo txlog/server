@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -134,7 +135,7 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 
 	// Check if user already exists by email
 	existingUser, err := s.getUserByEmail(claims.Email)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("failed to check existing user for email '%s': %w", claims.Email, err)
 	}
 
@@ -164,7 +165,7 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 
 	// Check if user already exists by sub
 	existingUser, err = s.getUserBySub(claims.Sub)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("failed to check existing user for sub '%s': %w", claims.Sub, err)
 	}
 
@@ -267,7 +268,7 @@ func (s *OIDCService) getUserBySub(sub string) (*models.User, error) {
 		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 	)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, sql.ErrNoRows
 	}
 
@@ -286,7 +287,7 @@ func (s *OIDCService) getUserByEmail(email string) (*models.User, error) {
 		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 	)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, sql.ErrNoRows
 	}
 

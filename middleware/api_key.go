@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -72,7 +73,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 		`
 		err := db.QueryRow(query, keyHash).Scan(&keyID, &isActive)
 
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			logger.Warn("API request with non-existent key from " + c.ClientIP())
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid API key.",

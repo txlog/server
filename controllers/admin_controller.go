@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -319,7 +320,7 @@ func getMigrationStatus(db *sql.DB) (*models.MigrationStatus, error) {
 	if exists {
 		// Get current migration version and dirty state
 		err = db.QueryRow("SELECT version, dirty FROM schema_migrations LIMIT 1").Scan(&status.CurrentVersion, &status.IsDirty)
-		if err != nil && err != sql.ErrNoRows {
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("failed to get current migration version: %w", err)
 		}
 	}

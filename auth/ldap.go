@@ -1,8 +1,10 @@
 package auth
 
 import (
+	"cmp"
 	"crypto/tls"
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -176,18 +178,13 @@ func (s *LDAPService) Authenticate(username, password string) (*models.User, err
 	}
 
 	// Extract user information
-	email := s.getAttributeValue(userAttrs, "mail")
-	if email == "" {
-		email = username + "@local" // Fallback if email is not set
-	}
-
-	name := s.getAttributeValue(userAttrs, "cn")
-	if name == "" {
-		name = s.getAttributeValue(userAttrs, "displayName")
-	}
-	if name == "" {
-		name = username
-	}
+	// Fallback to a synthetic address if email is not set
+	email := cmp.Or(s.getAttributeValue(userAttrs, "mail"), username+"@local")
+	name := cmp.Or(
+		s.getAttributeValue(userAttrs, "cn"),
+		s.getAttributeValue(userAttrs, "displayName"),
+		username,
+	)
 
 	// Create or update user in database
 	user, err := s.createOrUpdateUser(username, email, name, isAdmin)
@@ -398,7 +395,7 @@ func (s *LDAPService) createOrUpdateUser(username, email, name string, isAdmin b
 
 	// Check if user already exists by email
 	existingUser, err := s.getUserByEmail(email)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 
@@ -428,7 +425,7 @@ func (s *LDAPService) createOrUpdateUser(username, email, name string, isAdmin b
 
 	// Check if user already exists by sub
 	existingUser, err = s.getUserBySub(ldapSub)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
 
@@ -488,7 +485,7 @@ func (s *LDAPService) getUserBySub(sub string) (*models.User, error) {
 		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 	)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, sql.ErrNoRows
 	}
 
@@ -507,7 +504,7 @@ func (s *LDAPService) getUserByEmail(email string) (*models.User, error) {
 		&user.IsActive, &user.IsAdmin, &user.CreatedAt, &user.UpdatedAt, &user.LastLoginAt,
 	)
 
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		return nil, sql.ErrNoRows
 	}
 

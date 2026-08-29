@@ -2,6 +2,7 @@ package v1
 
 import (
 	"database/sql"
+	"errors"
 	"net/http"
 
 	"github.com/txlog/server/models"
@@ -161,7 +162,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			&transaction.ScriptletOutput,
 		)
 
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			c.JSON(http.StatusOK, gin.H{})
 			return
 		}

@@ -2,7 +2,8 @@ package database
 
 import (
 	"fmt"
-	"sort"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -60,13 +61,7 @@ func GetAllAvailableMigrations() ([]models.Migration, error) {
 	}
 
 	// Convert map to sorted slice
-	var versions []int
-	for version := range migrationMap {
-		versions = append(versions, version)
-	}
-	sort.Ints(versions)
-
-	for _, version := range versions {
+	for _, version := range slices.Sorted(maps.Keys(migrationMap)) {
 		migrations = append(migrations, migrationMap[version])
 	}
 

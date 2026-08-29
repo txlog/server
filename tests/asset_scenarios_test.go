@@ -2,6 +2,7 @@ package tests
 
 import (
 	"database/sql"
+	"errors"
 	"testing"
 	"time"
 
@@ -50,7 +51,7 @@ func TestMultipleAssetReplacements(t *testing.T) {
 	}
 
 	// Verify all previous ones are inactive
-	for i := 0; i < 2; i++ {
+	for i := range 2 {
 		asset, err := am.GetAssetByMachineID(machines[i])
 		if err != nil {
 			t.Fatalf("Failed to get asset %s: %v", machines[i], err)
@@ -76,7 +77,7 @@ func TestConcurrentAssetUpdates(t *testing.T) {
 	machineID := "integration-test-machine-c01"
 
 	// Simulate concurrent updates (in sequence but testing the logic)
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		tx, _ := db.Begin()
 
 		timestamp := time.Now().Add(time.Duration(i) * time.Minute)
@@ -217,7 +218,9 @@ func TestAssetHistoryPreservation(t *testing.T) {
 			tx.Rollback()
 			t.Fatalf("Failed to create asset %s: %v", m.id, err)
 		}
-		tx.Commit()
+		if err := tx.Commit(); err != nil {
+			t.Fatalf("Failed to commit transaction: %v", err)
+		}
 	}
 
 	// Verify we have complete history
@@ -282,7 +285,9 @@ func TestAssetDatabaseConstraints(t *testing.T) {
 			tx.Rollback()
 			t.Fatalf("Failed to create first asset: %v", err)
 		}
-		tx.Commit()
+		if err := tx.Commit(); err != nil {
+			t.Fatalf("Failed to commit transaction: %v", err)
+		}
 
 		// Create second asset (should deactivate first)
 		tx, _ = db.Begin()
@@ -291,7 +296,9 @@ func TestAssetDatabaseConstraints(t *testing.T) {
 			tx.Rollback()
 			t.Fatalf("Failed to create second asset: %v", err)
 		}
-		tx.Commit()
+		if err := tx.Commit(); err != nil {
+			t.Fatalf("Failed to commit transaction: %v", err)
+		}
 
 		// Verify only one is active
 		var activeCount int
@@ -321,7 +328,7 @@ func TestGetActiveAsset_NoAsset(t *testing.T) {
 		t.Error("Expected error when getting non-existent asset")
 	}
 
-	if err != sql.ErrNoRows {
+	if !errors.Is(err, sql.ErrNoRows) {
 		t.Errorf("Expected sql.ErrNoRows, got %v", err)
 	}
 }
@@ -337,7 +344,7 @@ func TestGetAssetByMachineID_NoAsset(t *testing.T) {
 		t.Error("Expected error when getting non-existent asset")
 	}
 
-	if err != sql.ErrNoRows {
+	if !errors.Is(err, sql.ErrNoRows) {
 		t.Errorf("Expected sql.ErrNoRows, got %v", err)
 	}
 }
@@ -361,7 +368,9 @@ func TestAssetTimestampEdgeCases(t *testing.T) {
 			tx.Rollback()
 			t.Fatalf("Failed to create asset: %v", err)
 		}
-		tx.Commit()
+		if err := tx.Commit(); err != nil {
+			t.Fatalf("Failed to commit transaction: %v", err)
+		}
 
 		// Update with older timestamp (should still update last_seen)
 		tx, _ = db.Begin()
@@ -371,7 +380,9 @@ func TestAssetTimestampEdgeCases(t *testing.T) {
 			tx.Rollback()
 			t.Fatalf("Failed to update asset: %v", err)
 		}
-		tx.Commit()
+		if err := tx.Commit(); err != nil {
+			t.Fatalf("Failed to commit transaction: %v", err)
+		}
 
 		// Verify last_seen was updated (to the older time)
 		asset, err := am.GetActiveAsset(hostname)

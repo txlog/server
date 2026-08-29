@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -50,12 +49,12 @@ func TestGetGraphData(t *testing.T) {
 
 	t.Run("Insert test data for graph", func(t *testing.T) {
 		// Insert transactions and items for multiple weeks
-		for week := 0; week < 3; week++ {
+		for week := range 3 {
 			beginTime := time.Now().AddDate(0, 0, -7*week)
 			weekStart := beginTime.Truncate(7 * 24 * time.Hour)
 
 			// Installs
-			for i := 0; i < 3; i++ {
+			for i := range 3 {
 				transactionID := fmt.Sprintf("packages-test-install-w%d-%d", week, i)
 				_, err := db.Exec(`
 					INSERT INTO transactions (transaction_id, machine_id, begin_time, end_time, return_code)
@@ -75,7 +74,7 @@ func TestGetGraphData(t *testing.T) {
 			}
 
 			// Upgrades
-			for i := 0; i < 2; i++ {
+			for i := range 2 {
 				transactionID := fmt.Sprintf("packages-test-upgrade-w%d-%d", week, i)
 				_, err := db.Exec(`
 					INSERT INTO transactions (transaction_id, machine_id, begin_time, end_time, return_code)
@@ -97,7 +96,7 @@ func TestGetGraphData(t *testing.T) {
 	})
 
 	t.Run("Verify getGraphData returns correct data", func(t *testing.T) {
-		graphData, err := getGraphData(context.Background(), db)
+		graphData, err := getGraphData(t.Context(), db)
 		if err != nil {
 			t.Fatalf("Failed to get graph data: %v", err)
 		}
@@ -131,7 +130,7 @@ func TestGetGraphData(t *testing.T) {
 	})
 
 	t.Run("Verify data is ordered ascending by week", func(t *testing.T) {
-		graphData, err := getGraphData(context.Background(), db)
+		graphData, err := getGraphData(t.Context(), db)
 		if err != nil {
 			t.Fatalf("Failed to get graph data: %v", err)
 		}
@@ -150,7 +149,7 @@ func TestGetGraphData(t *testing.T) {
 	})
 
 	t.Run("Verify limit of 15 records", func(t *testing.T) {
-		graphData, err := getGraphData(context.Background(), db)
+		graphData, err := getGraphData(t.Context(), db)
 		if err != nil {
 			t.Fatalf("Failed to get graph data: %v", err)
 		}
@@ -205,7 +204,7 @@ func TestGetGraphDataWithEmptyDatabase(t *testing.T) {
 	cleanupPackagesTestData(t, db)
 
 	t.Run("Empty database returns empty slice", func(t *testing.T) {
-		graphData, err := getGraphData(context.Background(), db)
+		graphData, err := getGraphData(t.Context(), db)
 		if err != nil {
 			t.Fatalf("Failed to get graph data: %v", err)
 		}
@@ -249,7 +248,7 @@ func TestGetGraphDataWithOnlyInstalls(t *testing.T) {
 	})
 
 	t.Run("Verify Install count is correct and Upgraded is 0", func(t *testing.T) {
-		graphData, err := getGraphData(context.Background(), db)
+		graphData, err := getGraphData(t.Context(), db)
 		if err != nil {
 			t.Fatalf("Failed to get graph data: %v", err)
 		}
@@ -299,7 +298,7 @@ func TestGetGraphDataWithOnlyUpgrades(t *testing.T) {
 	})
 
 	t.Run("Verify Upgraded count is correct and Install is 0", func(t *testing.T) {
-		graphData, err := getGraphData(context.Background(), db)
+		graphData, err := getGraphData(t.Context(), db)
 		if err != nil {
 			t.Fatalf("Failed to get graph data: %v", err)
 		}

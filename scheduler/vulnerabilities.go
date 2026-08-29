@@ -3,6 +3,8 @@ package scheduler
 import (
 	"database/sql"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -57,7 +59,11 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 		logger.Info("Another instance is running this vulnerabilities job.")
 		return
 	}
-	defer releaseLock(db, lockName)
+	defer func() {
+		if err := releaseLock(db, lockName); err != nil {
+			logger.Error("Failed to release lock for " + lockName + ": " + err.Error())
+		}
+	}()
 
 	// Extract all distinct packages from transaction items, joined with asset OS.
 	query := `
@@ -101,10 +107,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 		}
 	}
 
-	packages := make([]pkg, 0, len(pkgMap))
-	for _, v := range pkgMap {
-		packages = append(packages, v)
-	}
+	packages := slices.Collect(maps.Values(pkgMap))
 
 	logger.Info(fmt.Sprintf("Vulnerabilities: found %d discrete package/ecosystem pairs to check.", len(packages)))
 
@@ -117,10 +120,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 
 	chunkSize := 500
 	for i := 0; i < len(packages); i += chunkSize {
-		end := i + chunkSize
-		if end > len(packages) {
-			end = len(packages)
-		}
+		end := min(i+chunkSize, len(packages))
 
 		logger.Info(fmt.Sprintf("Vulnerabilities: fetching %d to %d of %d...", i+1, end, len(packages)))
 
@@ -179,10 +179,8 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 			}
 			close(idChan)
 
-			for w := 0; w < workers && w < len(uniqueIDs); w++ {
-				wg.Add(1)
-				go func() {
-					defer wg.Done()
+			for range min(workers, len(uniqueIDs)) {
+				wg.Go(func() {
 					for id := range idChan {
 						fetched, err := util.FetchOSVVulnerabilityDetails(id)
 						fetchedMu.Lock()
@@ -191,7 +189,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 						}
 						fetchedMu.Unlock()
 					}
-				}()
+				})
 			}
 			wg.Wait()
 		}
@@ -276,14 +274,11 @@ func batchUpsertVulnerabilities(db *sql.DB, records map[string]vulnRecord) {
 
 	batchSize := 200
 	for i := 0; i < len(all); i += batchSize {
-		end := i + batchSize
-		if end > len(all) {
-			end = len(all)
-		}
+		end := min(i+batchSize, len(all))
 		batch := all[i:end]
 
 		var valueParts []string
-		var args []interface{}
+		var args []any
 		idx := 1
 
 		for _, r := range batch {
@@ -315,14 +310,11 @@ func batchUpsertVulnerabilities(db *sql.DB, records map[string]vulnRecord) {
 func batchUpsertPackageVulnerabilities(db *sql.DB, records []pvRecord) {
 	batchSize := 200
 	for i := 0; i < len(records); i += batchSize {
-		end := i + batchSize
-		if end > len(records) {
-			end = len(records)
-		}
+		end := min(i+batchSize, len(records))
 		batch := records[i:end]
 
 		var valueParts []string
-		var args []interface{}
+		var args []any
 		idx := 1
 
 		for _, r := range batch {
@@ -425,10 +417,7 @@ func processScoreboardBatch(db *sql.DB, keys []vulnTxKey) {
 	total := len(keys)
 	chunkSize := 500
 	for i := 0; i < total; i += chunkSize {
-		end := i + chunkSize
-		if end > total {
-			end = total
-		}
+		end := min(i+chunkSize, total)
 
 		pct := float64(i) / float64(total) * 100
 		logger.Info(fmt.Sprintf("Vulnerabilities: Processing batch %d to %d of %d (%.1f%%)...", i+1, end, total, pct))

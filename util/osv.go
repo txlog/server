@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"math"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -59,33 +58,27 @@ type OSVVuln struct {
 	DatabaseSpecific OSVDatabaseSpecific `json:"database_specific,omitempty"`
 }
 
-// cvssBaseScoreRe extracts the base score from a CVSS 3.x vector string.
-var cvssBaseScoreRe = regexp.MustCompile(`CVSS:3\.\d+/`)
-
 // ExtractSeverityAndScore determines the severity label and numeric CVSS score
 // from structured OSV data, falling back to text matching as a last resort.
 func (v *OSVVuln) ExtractSeverityAndScore() (severity string, cvssScore float64) {
 	// 1. Try to extract CVSS numeric score from severity[] vector
 	for _, s := range v.Severity {
 		if strings.HasPrefix(s.Score, "CVSS:3") {
-			score := parseCVSSScore(s.Score)
-			if score > cvssScore {
-				cvssScore = score
-			}
+			cvssScore = max(cvssScore, parseCVSSScore(s.Score))
 		}
 	}
 
 	// 2. Try database_specific.severity (used by AlmaLinux, Rocky, etc.)
 	if v.DatabaseSpecific.Severity != "" {
 		dbSev := strings.ToUpper(v.DatabaseSpecific.Severity)
-		switch {
-		case dbSev == "CRITICAL":
+		switch dbSev {
+		case "CRITICAL":
 			severity = "CRITICAL"
-		case dbSev == "IMPORTANT" || dbSev == "HIGH":
+		case "IMPORTANT", "HIGH":
 			severity = "HIGH"
-		case dbSev == "MODERATE" || dbSev == "MEDIUM":
+		case "MODERATE", "MEDIUM":
 			severity = "MEDIUM"
-		case dbSev == "LOW":
+		case "LOW":
 			severity = "LOW"
 		}
 	}

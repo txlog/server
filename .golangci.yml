@@ -1,0 +1,24 @@
+version: "2"
+
+issues:
+  # Defaults are max-issues-per-linter: 50 and max-same-issues: 3, which silently
+  # truncate the report: repeated findings of the same kind vanish after the third.
+  # Report everything so nothing hides behind a cap.
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  # Default set: errcheck, govet, ineffassign, staticcheck, unused.
+  default: standard
+  settings:
+    errcheck:
+      # Cleanup calls whose error is not actionable. Wrapping these in
+      # `func() { _ = x.Close() }()` adds noise without adding safety.
+      exclude-functions:
+        - (*database/sql.Rows).Close
+        - (*database/sql.Tx).Rollback
+        - (*database/sql.DB).Close
+        - (io.Closer).Close
+        - (io.ReadCloser).Close
+        - (*github.com/go-ldap/ldap/v3.Conn).Close
+        - (*github.com/golang-migrate/migrate/v4.Migrate).Close

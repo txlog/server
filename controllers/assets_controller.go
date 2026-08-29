@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -63,7 +64,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		offset := (page - 1) * limit
 
 		var total int
-		var queryArgs []interface{}
+		var queryArgs []any
 
 		activeFilter := "is_active = TRUE"
 
@@ -573,7 +574,7 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
       WHERE machine_id = $1
       LIMIT 1
       `, machineID).Scan(&needsRestarting, &restartingReason)
-		if err != nil && err != sql.ErrNoRows {
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})

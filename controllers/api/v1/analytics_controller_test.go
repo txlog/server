@@ -144,7 +144,7 @@ func TestGetAnomalies_ResponseStructure(t *testing.T) {
 		t.Fatalf("Expected status 200, got %d", w.Code)
 	}
 
-	var rawResponse map[string]interface{}
+	var rawResponse map[string]any
 	if err := json.Unmarshal(w.Body.Bytes(), &rawResponse); err != nil {
 		t.Fatalf("Failed to unmarshal response: %v", err)
 	}
@@ -158,7 +158,7 @@ func TestGetAnomalies_ResponseStructure(t *testing.T) {
 	}
 
 	// Verify summary structure
-	summary, ok := rawResponse["summary"].(map[string]interface{})
+	summary, ok := rawResponse["summary"].(map[string]any)
 	if !ok {
 		t.Fatal("Expected summary to be an object")
 	}

@@ -165,7 +165,7 @@ func TestGetMonthlyReport_ResponseStructure(t *testing.T) {
 	}
 
 	// Test JSON structure
-	var rawResponse map[string]interface{}
+	var rawResponse map[string]any
 	if err := json.Unmarshal(w.Body.Bytes(), &rawResponse); err != nil {
 		t.Fatalf("Failed to unmarshal response: %v", err)
 	}

@@ -151,7 +151,9 @@ func main() {
 		r.Static("/css", "./static/css")
 	}
 
-	healthcheck.New(r, util.CheckConfig(), util.Check(database.Db))
+	if err := healthcheck.New(r, util.CheckConfig(), util.Check(database.Db)); err != nil {
+		logger.Error("Failed to register health check endpoint: " + err.Error())
+	}
 
 	r.NoRoute(controllers.Get404)
 
@@ -271,7 +273,10 @@ func main() {
 		v1Group.GET("/vulnerabilities", v1API.GetTransactionVulnerabilities(database.Db))
 	}
 
-	r.Run()
+	if err := r.Run(); err != nil {
+		logger.Error("Server terminated: " + err.Error())
+		os.Exit(1)
+	}
 }
 
 func EnvironmentVariablesMiddleware() gin.HandlerFunc {

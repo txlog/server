@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"database/sql"
+
 	"github.com/mileusna/crontab"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/statistics"
@@ -85,7 +86,11 @@ func refreshMaterializedViewsJob(db *sql.DB) {
 		return
 	}
 
-	defer releaseLock(db, lockName)
+	defer func() {
+		if err := releaseLock(db, lockName); err != nil {
+			logger.Error("Failed to release lock for " + lockName + ": " + err.Error())
+		}
+	}()
 
 	// Refresh the package listing materialized view
 	// Using CONCURRENTLY to allow reads during refresh (requires UNIQUE index)
@@ -143,7 +148,11 @@ func statsJob(db *sql.DB) {
 		return
 	}
 
-	defer releaseLock(db, lockName)
+	defer func() {
+		if err := releaseLock(db, lockName); err != nil {
+			logger.Error("Failed to release lock for " + lockName + ": " + err.Error())
+		}
+	}()
 
 	statistics.CountExecutions()
 	statistics.CountInstalledPackages()
@@ -174,7 +183,11 @@ func housekeepingJob(db *sql.DB) {
 		return
 	}
 
-	defer releaseLock(db, lockName)
+	defer func() {
+		if err := releaseLock(db, lockName); err != nil {
+			logger.Error("Failed to release lock for " + lockName + ": " + err.Error())
+		}
+	}()
 
 	retentionDays := os.Getenv("CRON_RETENTION_DAYS")
 	if retentionDays == "" {

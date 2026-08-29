@@ -36,18 +36,6 @@ type CompilationResult struct {
 	SeqGroupIndex   *int
 }
 
-// knownTags are the supported template tags and their regex capture groups.
-var knownTags = map[string]string{
-	":env": `(.+?)`,
-	":svc": `(.+?)`,
-	":seq": `(\d+)`,
-	":any": `.*`,
-}
-
-// tagOrder defines the order in which tags are replaced so that longer tags
-// are matched before shorter ones (avoids partial replacements).
-var tagOrder = []string{":env", ":svc", ":seq", ":any"}
-
 // CompileTemplate converts a user-friendly hostname template into a
 // PostgreSQL-compatible anchored regex string. It also calculates the
 // positions and capture group indices for each tag.
@@ -88,7 +76,7 @@ func (tm *TopologyManager) CompileTemplate(template string) (*CompilationResult,
 			for rows.Next() {
 				var v string
 				if rows.Scan(&v) == nil {
-					for _, part := range strings.Split(v, "|") {
+					for part := range strings.SplitSeq(v, "|") {
 						if part != "" {
 							envVals = append(envVals, regexp.QuoteMeta(part))
 						}
@@ -102,7 +90,7 @@ func (tm *TopologyManager) CompileTemplate(template string) (*CompilationResult,
 			for rows.Next() {
 				var v string
 				if rows.Scan(&v) == nil {
-					for _, part := range strings.Split(v, "|") {
+					for part := range strings.SplitSeq(v, "|") {
 						if part != "" {
 							svcVals = append(svcVals, regexp.QuoteMeta(part))
 						}

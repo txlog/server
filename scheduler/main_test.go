@@ -359,7 +359,7 @@ func TestConcurrentLockAcquisition(t *testing.T) {
 		results := make(chan bool, 5)
 
 		// Launch 5 goroutines trying to acquire the same lock
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			go func() {
 				locked, _ := acquireLock(db, lockName)
 				results <- locked
@@ -368,7 +368,7 @@ func TestConcurrentLockAcquisition(t *testing.T) {
 
 		// Collect results
 		successCount := 0
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			if <-results {
 				successCount++
 			}

@@ -18,6 +18,37 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.35.2] - 2026-08-29
+
+### Fixed
+
+- **Server**: a failure to bind the listening port no longer exits silently
+  with status 0. `r.Run()` now logs the error and exits non-zero, and a
+  failure to register the `/health` endpoint is logged instead of discarded.
+- **Scheduler**: a failed lock release is now logged. `releaseLock` deletes
+  the `cron_lock` row, and when the delete failed silently the row stayed
+  behind, making the next runs of the statistics, retention, materialized
+  view and OSV jobs log "Another instance is running this job" and skip,
+  until `acquireLock` reaped the stale lock twelve hours later.
+- **Assets**: `DnfUser` no longer panics on a `dnf` user string where `>`
+  precedes `<`, such as `a>b<c`. The two indexes were taken independently,
+  producing an inverted slice range.
+
+### Changed
+
+- **Codebase**: adopted the modern Go idioms available in the go 1.26
+  toolchain: `errors.Is` for `sql.ErrNoRows`, `any`, builtin `min`/`max`,
+  `for i := range n`, `slices`/`maps` iterator helpers, `strings.Cut`,
+  `strings.SplitSeq`, `cmp.Or`, `wg.Go` and `t.Context()` in tests. No
+  behavior change beyond the `DnfUser` fix above.
+- **Auth**: LDAP connections use `ldap.DialURL` instead of the deprecated
+  `ldap.Dial` and `ldap.DialTLS`. `LDAP_HOST`, `LDAP_PORT` and
+  `LDAP_USE_TLS` keep their current meaning and default ports.
+- **Codebase**: added a `.golangci.yml` and cleared every finding it
+  reports. The config disables `max-issues-per-linter` and
+  `max-same-issues`, whose defaults truncate the report, and excludes
+  non-actionable cleanup calls from `errcheck`.
+
 ## [1.35.1] - 2026-08-26
 
 ### Fixed

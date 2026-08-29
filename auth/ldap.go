@@ -209,20 +209,14 @@ func (s *LDAPService) connect() (*ldap.Conn, error) {
 		}
 	}
 
-	address := fmt.Sprintf("%s:%s", host, port)
-
-	var conn *ldap.Conn
-	var err error
-
+	scheme := "ldap"
+	var opts []ldap.DialOpt
 	if useTLS {
-		tlsConfig := &tls.Config{
-			ServerName: host,
-		}
-		conn, err = ldap.DialTLS("tcp", address, tlsConfig)
-	} else {
-		conn, err = ldap.Dial("tcp", address)
+		scheme = "ldaps"
+		opts = append(opts, ldap.DialWithTLSConfig(&tls.Config{ServerName: host}))
 	}
 
+	conn, err := ldap.DialURL(fmt.Sprintf("%s://%s:%s", scheme, host, port), opts...)
 	if err != nil {
 		return nil, err
 	}

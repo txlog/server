@@ -1,6 +1,8 @@
 package database
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"maps"
 	"slices"
@@ -70,8 +72,14 @@ func GetAllAvailableMigrations() ([]models.Migration, error) {
 
 // RunAllMigrations applies all pending migrations using the same mechanism as ConnectDatabase
 func RunAllMigrations() error {
+	return Migrate(Db)
+}
+
+// Migrate applies all pending migrations to the given database. RunAllMigrations
+// is the package-level Db variant; tests call this one with their own handle.
+func Migrate(db *sql.DB) error {
 	// Create postgres driver instance
-	driver, err := postgres.WithInstance(Db, &postgres.Config{})
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to create database driver: %w", err)
 	}
@@ -91,7 +99,7 @@ func RunAllMigrations() error {
 
 	// Apply all pending migrations
 	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return fmt.Errorf("failed to apply migrations: %w", err)
 	}
 

@@ -18,7 +18,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
-## [1.35.2] - 2026-08-29
+## [1.36.0] - 2026-08-30
 
 ### Fixed
 
@@ -92,6 +92,18 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   their ranges do not overlap, so the current order is correct. `CLAUDE.md`
   and the "Run Database Migrations" how-to now state the rule and the reason.
 - Bump `github.com/tavsec/gin-healthcheck` from 1.7.16 to 1.7.18.
+
+> **Note:** review `CRON_RETENTION_DAYS` **before** upgrading. The retention
+> job has never actually deleted anything, so whatever value is configured has
+> been inert. This release fixes it, and on the first run after the upgrade —
+> at the time set in `CRON_RETENTION_EXPRESSION`, `0 2 * * *` in the
+> documented examples — every execution older than the retention period is
+> deleted for good. Installations that have accumulated months of history
+> while the job was broken will lose all of it at once. The default is 7 days,
+> and the sample `.env` in the README uses 1. Raise `CRON_RETENTION_DAYS` if
+> that history matters. Note that `CRON_RETENTION_EXPRESSION` cannot be
+> cleared to disable the job: an empty value fails to parse and the server
+> panics on startup. To postpone the cleanup, schedule it far out instead.
 
 ## [1.35.1] - 2026-08-26
 

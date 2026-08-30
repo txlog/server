@@ -52,10 +52,15 @@ Integration tests for the complete asset lifecycle:
 ```bash
 # Create test database
 createdb -U postgres txlog_test
-
-# Run migrations on test database
-# (migrations will be run automatically when server starts)
 ```
+
+There is no migration step: each package with database-backed tests applies the
+migrations from its `TestMain`, via `internal/testdb.EnsureSchema`. An empty
+`txlog_test` is all the suite needs.
+
+The simplest option is to run `make test`, which starts a throwaway PostgreSQL
+container with Podman, runs the suite against it and removes it afterwards. Use
+`make test-nodb` to run against a database you manage yourself.
 
 ### Run All Tests
 
@@ -171,8 +176,9 @@ These tests can be integrated into CI/CD pipelines:
 
 ### Tests Fail: "table does not exist"
 
-- Run migrations first on test database
-- Start server once with test database connection string
+The suite migrates the database itself, so this means the migrations did not
+apply. Check the failure reported by `TestMain`, and confirm the `postgres` user
+owns `txlog_test` and may create tables in it.
 
 ## Best Practices
 

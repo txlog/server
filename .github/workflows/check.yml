@@ -9,6 +9,22 @@ jobs:
 
   check:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: txlog_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d txlog_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
     - uses: actions/checkout@v5
 
@@ -34,10 +50,8 @@ jobs:
         go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2
         golangci-lint run ./...
 
-    # No PostgreSQL service here: the suite needs a migrated txlog_test
-    # database, and nothing in the test packages applies the migrations, so
-    # every database-backed test skips itself. This step still catches
-    # compilation errors in test files and runs the tests that need no
-    # database. See tests/README.md.
+    # The suite applies the migrations itself, from TestMain in each package
+    # with database-backed tests. Without the service above the tests would
+    # still pass, by skipping themselves. See tests/README.md.
     - name: Test
       run: go test ./...

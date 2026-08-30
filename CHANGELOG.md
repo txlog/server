@@ -22,6 +22,21 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- **Scheduler**: the retention cleanup never deleted anything. `INTERVAL $1
+  day` is a syntax error in PostgreSQL — an interval literal cannot take a
+  placeholder — and the statement discarded its error, so every run failed
+  silently and executions accumulated no matter what `CRON_RETENTION_DAYS`
+  was set to.
+- **Assets**: `/assets/{machine_id}` returned 500 whenever one of the asset's
+  executions had a NULL `details`. That column is nullable and the handler
+  read it into a plain string. The four queries reading `details`,
+  `transactions_processed` and `transactions_sent` now coalesce them.
+- **API**: `POST /v1/executions` returned 500 and dropped the execution when
+  the agent omitted `executed_at`. The column is NOT NULL; an omitted
+  timestamp now means "now".
+- **API**: `GET /v1/transactions/ids` answered 400 for a request carrying
+  neither query parameters nor a body. No parameters is an empty result.
+
 - **Server**: a failure to bind the listening port no longer exits silently
   with status 0. `r.Run()` now logs the error and exits non-zero, and a
   failure to register the `/health` endpoint is logged instead of discarded.
@@ -48,6 +63,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   reports. The config disables `max-issues-per-linter` and
   `max-same-issues`, whose defaults truncate the report, and excludes
   non-actionable cleanup calls from `errcheck`.
+- **Codebase**: the test suite runs against PostgreSQL again. It applies the
+  migrations itself from a `TestMain` in each package with database-backed
+  tests, and its fixtures were realigned with the current schema; they had
+  drifted unnoticed because the tests skip themselves when no database is
+  reachable. A new Check workflow runs gofmt, vet, golangci-lint and the
+  tests, with a PostgreSQL service, on every push and pull request.
 
 ## [1.35.1] - 2026-08-26
 

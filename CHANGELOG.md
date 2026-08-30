@@ -36,7 +36,6 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   timestamp now means "now".
 - **API**: `GET /v1/transactions/ids` answered 400 for a request carrying
   neither query parameters nor a body. No parameters is an empty result.
-
 - **Server**: a failure to bind the listening port no longer exits silently
   with status 0. `r.Run()` now logs the error and exits non-zero, and a
   failure to register the `/health` endpoint is logged instead of discarded.
@@ -48,6 +47,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - **Assets**: `DnfUser` no longer panics on a `dnf` user string where `>`
   precedes `<`, such as `a>b<c`. The two indexes were taken independently,
   producing an inverted slice range.
+- **Migrations**: added the missing `202603020002_add_ecosystem.down.sql`, the
+  only migration without a down counterpart. It drops the `ecosystem` column
+  and restores the primary key from `202603020001`, truncating the table as
+  the up migration does — without `ecosystem` the remaining columns are no
+  longer unique, which is why the column was added to the key. The data is
+  repopulated by the OSV job.
+- **Documentation**: the "Run Database Migrations" how-to said the server does
+  **not** apply migrations on startup and that they had to be triggered by
+  hand. `ConnectDatabase()` has always run them before serving traffic, so
+  deploying a new image is enough. `tests/README.md` likewise still told the
+  reader to migrate the test database manually.
 
 ### Changed
 
@@ -73,6 +83,15 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   pull request. Both set `TXLOG_TEST_REQUIRE_DB`, which turns an unreachable
   database into a failure instead of a skip, so a database that fails to
   start cannot leave the run green with nothing exercised.
+- **Migrations**: new migration filenames must now use the full 14-digit
+  `YYYYMMDDHHMMSS` prefix. golang-migrate reads the prefix as an integer
+  version rather than as text, so `20260901` is 20,260,901 while
+  `20260309201502` is 20,260,309,201,502: a migration added today with a
+  shorter prefix would sort *before* every 14-digit one already applied and be
+  skipped in silence. Existing files mix 8-, 12- and 14-digit prefixes, and
+  their ranges do not overlap, so the current order is correct. `CLAUDE.md`
+  and the "Run Database Migrations" how-to now state the rule and the reason.
+- Bump `github.com/tavsec/gin-healthcheck` from 1.7.16 to 1.7.18.
 
 ## [1.35.1] - 2026-08-26
 

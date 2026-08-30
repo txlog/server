@@ -67,8 +67,12 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   migrations itself from a `TestMain` in each package with database-backed
   tests, and its fixtures were realigned with the current schema; they had
   drifted unnoticed because the tests skip themselves when no database is
-  reachable. A new Check workflow runs gofmt, vet, golangci-lint and the
-  tests, with a PostgreSQL service, on every push and pull request.
+  reachable. `make test` runs the suite against a throwaway PostgreSQL
+  container managed with Podman, and a new Check workflow runs gofmt, vet,
+  golangci-lint and the tests, with a PostgreSQL service, on every push and
+  pull request. Both set `TXLOG_TEST_REQUIRE_DB`, which turns an unreachable
+  database into a failure instead of a skip, so a database that fails to
+  start cannot leave the run green with nothing exercised.
 
 ## [1.35.1] - 2026-08-26
 

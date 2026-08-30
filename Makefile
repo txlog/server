@@ -1,4 +1,4 @@
-.PHONY: all help clean fmt vet lint test build run doc css css-watch komparo
+.PHONY: all help clean fmt vet lint test test-nodb build run doc css css-watch komparo
 
 all: help
 
@@ -28,8 +28,12 @@ vet:
 lint:
 	@golangci-lint run ./...
 
-## test: Run the test suite (tests skip when PostgreSQL is unreachable)
+## test: Run the test suite against a throwaway PostgreSQL container (Podman)
 test:
+	@bash scripts/test-with-postgres.sh
+
+## test-nodb: Run the test suite against whatever PostgreSQL is already reachable
+test-nodb:
 	@go test ./...
 
 ## css: Build the Tailwind CSS (minified)

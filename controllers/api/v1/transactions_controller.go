@@ -34,7 +34,10 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 
 		// agents up to v1.x send the parameters as a JSON body on GET, which
 		// proxies may reject; keep reading it when no query params are given
-		if machineID == "" && hostname == "" {
+		// A request with no body at all carries no parameters, which is an
+		// empty result rather than a bad request; gin refuses to read a nil
+		// body, so ask before reading.
+		if machineID == "" && hostname == "" && c.Request.Body != nil {
 			body := models.Transaction{}
 			data, err := c.GetRawData()
 			if err != nil {

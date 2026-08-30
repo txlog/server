@@ -19,7 +19,11 @@ func GetExecutionID(database *sql.DB) gin.HandlerFunc {
 
 		row := database.QueryRow(`
       SELECT id, machine_id, hostname, executed_at, success,
-        details, transactions_processed, transactions_sent,
+        COALESCE(details, '') AS details,
+
+        COALESCE(transactions_processed, 0) AS transactions_processed,
+
+        COALESCE(transactions_sent, 0) AS transactions_sent,
         agent_version, os
       FROM executions
       WHERE id = $1`,

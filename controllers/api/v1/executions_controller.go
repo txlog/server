@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
@@ -42,11 +43,12 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Convert *time.Time to sql.NullTime
-		var executedAt sql.NullTime
+		// executions.executed_at is NOT NULL, so an agent that omits the field
+		// means "now"; leaving it invalid made the insert fail and the
+		// execution be dropped with a 500.
+		executedAt := sql.NullTime{Time: time.Now(), Valid: true}
 		if body.ExecutedAt != nil {
 			executedAt.Time = *body.ExecutedAt
-			executedAt.Valid = true
 		}
 
 		// Convert *bool to sql.NullBool
@@ -171,7 +173,11 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 			rows, err = database.QueryContext(c.Request.Context(),
 				`SELECT
           id, machine_id, hostname, executed_at, success,
-          details, transactions_processed, transactions_sent,
+          COALESCE(details, '') AS details,
+
+          COALESCE(transactions_processed, 0) AS transactions_processed,
+
+          COALESCE(transactions_sent, 0) AS transactions_sent,
           agent_version, os
         FROM executions WHERE machine_id = $1 AND success = $2
         ORDER BY executed_at DESC LIMIT $3 OFFSET $4;`,
@@ -181,7 +187,11 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 			rows, err = database.QueryContext(c.Request.Context(),
 				`SELECT
           id, machine_id, hostname, executed_at, success,
-          details, transactions_processed, transactions_sent,
+          COALESCE(details, '') AS details,
+
+          COALESCE(transactions_processed, 0) AS transactions_processed,
+
+          COALESCE(transactions_sent, 0) AS transactions_sent,
           agent_version, os
         FROM executions WHERE machine_id = $1
         ORDER BY executed_at DESC LIMIT $2 OFFSET $3;`,

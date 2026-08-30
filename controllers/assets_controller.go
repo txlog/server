@@ -409,7 +409,11 @@ func GetMachineID(database *sql.DB) gin.HandlerFunc {
 
 		rows, err := database.QueryContext(c.Request.Context(), `
       SELECT id, machine_id, hostname, executed_at, success,
-        details, transactions_processed, transactions_sent,
+        COALESCE(details, '') AS details,
+
+        COALESCE(transactions_processed, 0) AS transactions_processed,
+
+        COALESCE(transactions_sent, 0) AS transactions_sent,
         agent_version, os
       FROM executions
       WHERE machine_id = $1

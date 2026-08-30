@@ -197,7 +197,11 @@ func housekeepingJob(db *sql.DB) {
 		retentionDays = "7" // default to 7 days if not set
 	}
 	if numericRegex.MatchString(retentionDays) {
-		_, _ = db.Exec("DELETE FROM executions WHERE executed_at < NOW() - INTERVAL $1 day", retentionDays)
+		// An interval literal cannot take a placeholder: "INTERVAL $1 day" is a
+		// syntax error, so build the interval from the validated numeric string.
+		if _, err := db.Exec("DELETE FROM executions WHERE executed_at < NOW() - ($1 || ' days')::interval", retentionDays); err != nil {
+			logger.Error("Error deleting executions past the retention period: " + err.Error())
+		}
 	}
 
 	// D11: Cleanup orphan transaction_items and transactions from inactive assets

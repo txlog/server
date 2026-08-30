@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"github.com/txlog/server/models"
+	"github.com/txlog/server/util"
 )
 
 func setupAssetsTestDB(t *testing.T) *sql.DB {
@@ -92,6 +93,7 @@ func TestGetAssetsIndex_NoFilters(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets", GetAssetsIndex(db))
 
@@ -120,6 +122,7 @@ func TestGetAssetsIndex_SearchByHostname(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets", GetAssetsIndex(db))
 
@@ -143,6 +146,7 @@ func TestGetAssetsIndex_SearchByMachineID(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets", GetAssetsIndex(db))
 
@@ -166,6 +170,7 @@ func TestGetAssetsIndex_RestartFilter(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets", GetAssetsIndex(db))
 
@@ -191,6 +196,7 @@ func TestGetAssetsIndex_InactiveFilter(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets", GetAssetsIndex(db))
 
@@ -213,6 +219,7 @@ func TestGetAssetsIndex_Pagination(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets", GetAssetsIndex(db))
 
@@ -264,6 +271,7 @@ func TestDeleteMachineID_EmptyMachineID(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.DELETE("/assets/:machine_id", DeleteMachineID(db))
 
@@ -288,6 +296,7 @@ func TestGetMachineID_Success(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets/:machine_id", GetMachineID(db))
 
@@ -306,6 +315,7 @@ func TestGetMachineID_NotFound(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets/:machine_id", GetMachineID(db))
 
@@ -333,6 +343,7 @@ func TestGetMachineID_WithMultipleAssetsSameHostname(t *testing.T) {
 
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
+	router.SetFuncMap(util.TemplateFuncMap())
 	router.LoadHTMLGlob("../templates/*.html")
 	router.GET("/assets/:machine_id", GetMachineID(db))
 

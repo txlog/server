@@ -59,9 +59,10 @@ func createTestAssetWithExecution(t *testing.T, db *sql.DB, hostname, machineID,
 		t.Fatalf("Failed to insert execution: %v", err)
 	}
 
-	// Insert asset
+	// Insert asset. GetMachines filters on assets.os and assets.agent_version,
+	// so the values have to reach the asset row, not just the execution.
 	am := models.NewAssetManager(db)
-	err = am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{}, "", "")
+	err = am.UpsertAsset(tx, hostname, machineID, timestamp, sql.NullBool{}, sql.NullString{}, os, agentVersion)
 	if err != nil {
 		t.Fatalf("Failed to insert asset: %v", err)
 	}

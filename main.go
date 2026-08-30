@@ -112,27 +112,7 @@ func main() {
 	r.Use(EnvironmentVariablesMiddleware())
 	r.Use(middleware.AuthMiddleware(database.Db))
 
-	funcMap := template.FuncMap{
-		"add":              util.Add,
-		"brand":            util.Brand,
-		"derefBool":        util.DerefBool,
-		"dnfUser":          util.DnfUser,
-		"formatInteger":    util.FormatInteger,
-		"formatPercentage": util.FormatPercentage,
-		"formatDateTime":   util.FormatDateTime,
-		"formatDate":       util.FormatDate,
-		"hasAction":        util.HasAction,
-		"hasPrefix":        util.HasPrefix,
-		"initial":          util.Initial,
-		"iterate":          util.Iterate,
-		"maskString":       util.MaskString,
-		"min":              util.Min,
-		"text2html":        util.Text2HTML,
-		"timeStatusClass":  util.TimeStatusClass,
-		"trimPrefix":       util.TrimPrefix,
-		"version":          util.Version,
-		"versionsEqual":    util.VersionsEqual,
-	}
+	funcMap := util.TemplateFuncMap()
 
 	// Use on-disk assets only when they actually exist (dev tree with Air);
 	// otherwise fall back to the embedded copies. Keying this off GIN_MODE

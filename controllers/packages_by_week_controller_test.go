@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/txlog/server/util"
 )
 
 // setupTestDB creates a test database connection
@@ -55,7 +56,7 @@ func TestGetGraphData(t *testing.T) {
 
 			// Installs
 			for i := range 3 {
-				transactionID := fmt.Sprintf("packages-test-install-w%d-%d", week, i)
+				transactionID := week*10 + i
 				_, err := db.Exec(`
 					INSERT INTO transactions (transaction_id, machine_id, begin_time, end_time, return_code)
 					VALUES ($1, $2, $3, $4, 0)`,
@@ -65,9 +66,9 @@ func TestGetGraphData(t *testing.T) {
 				}
 
 				_, err = db.Exec(`
-					INSERT INTO transaction_items (transaction_id, machine_id, item_id, name, action, version, arch, repo)
-					VALUES ($1, $2, $3, $4, 'Install', '1.0.0', 'x86_64', 'test-repo')`,
-					transactionID, machineID, fmt.Sprintf("install-package-w%d-%d", week, i), fmt.Sprintf("package-%d", i))
+					INSERT INTO transaction_items (transaction_id, machine_id, package, action, version, arch, repo)
+					VALUES ($1, $2, $3, 'Install', '1.0.0', 'x86_64', 'test-repo')`,
+					transactionID, machineID, fmt.Sprintf("install-package-w%d-%d", week, i))
 				if err != nil {
 					t.Fatalf("Failed to insert transaction_item: %v", err)
 				}
@@ -75,7 +76,7 @@ func TestGetGraphData(t *testing.T) {
 
 			// Upgrades
 			for i := range 2 {
-				transactionID := fmt.Sprintf("packages-test-upgrade-w%d-%d", week, i)
+				transactionID := 100 + week*10 + i
 				_, err := db.Exec(`
 					INSERT INTO transactions (transaction_id, machine_id, begin_time, end_time, return_code)
 					VALUES ($1, $2, $3, $4, 0)`,
@@ -85,9 +86,9 @@ func TestGetGraphData(t *testing.T) {
 				}
 
 				_, err = db.Exec(`
-					INSERT INTO transaction_items (transaction_id, machine_id, item_id, name, action, version, arch, repo)
-					VALUES ($1, $2, $3, $4, 'Upgraded', '2.0.0', 'x86_64', 'test-repo')`,
-					transactionID, machineID, fmt.Sprintf("upgrade-package-w%d-%d", week, i), fmt.Sprintf("package-%d", i))
+					INSERT INTO transaction_items (transaction_id, machine_id, package, action, version, arch, repo)
+					VALUES ($1, $2, $3, 'Upgraded', '2.0.0', 'x86_64', 'test-repo')`,
+					transactionID, machineID, fmt.Sprintf("upgrade-package-w%d-%d", week, i))
 				if err != nil {
 					t.Fatalf("Failed to insert transaction_item: %v", err)
 				}
@@ -170,11 +171,12 @@ func TestGetPackagesByWeekIndex(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("Handler returns 200 and renders template", func(t *testing.T) {
-		// Create a test router
+		// Create a test router. The templates must be loaded: gin's c.HTML
+		// panics on a nil template renderer rather than returning 500.
 		router := gin.New()
+		router.SetFuncMap(util.TemplateFuncMap())
+		router.LoadHTMLGlob("../templates/*.html")
 
-		// Note: In a real scenario, you'd need to load templates
-		// For this test, we'll just verify the handler doesn't panic
 		router.GET("/packages-by-week", GetPackagesByWeekIndex(db))
 
 		// Create a test request
@@ -184,10 +186,8 @@ func TestGetPackagesByWeekIndex(t *testing.T) {
 		// Serve the request
 		router.ServeHTTP(w, req)
 
-		// The response might be 500 if templates aren't loaded,
-		// but it shouldn't panic
-		if w.Code != http.StatusOK && w.Code != http.StatusInternalServerError {
-			t.Errorf("Expected status 200 or 500, got %d", w.Code)
+		if w.Code != http.StatusOK {
+			t.Errorf("Expected status 200, got %d", w.Code)
 		}
 
 		t.Logf("Handler responded with status: %d", w.Code)
@@ -228,7 +228,7 @@ func TestGetGraphDataWithOnlyInstalls(t *testing.T) {
 
 	t.Run("Insert only Install actions", func(t *testing.T) {
 		beginTime := time.Now().AddDate(0, 0, -1)
-		transactionID := "packages-test-install-only"
+		transactionID := 1
 
 		_, err := db.Exec(`
 			INSERT INTO transactions (transaction_id, machine_id, begin_time, end_time, return_code)
@@ -239,9 +239,9 @@ func TestGetGraphDataWithOnlyInstalls(t *testing.T) {
 		}
 
 		_, err = db.Exec(`
-			INSERT INTO transaction_items (transaction_id, machine_id, item_id, name, action, version, arch, repo)
-			VALUES ($1, $2, $3, $4, 'Install', '1.0.0', 'x86_64', 'test-repo')`,
-			transactionID, machineID, "install-only-package", "test-package")
+			INSERT INTO transaction_items (transaction_id, machine_id, package, action, version, arch, repo)
+			VALUES ($1, $2, $3, 'Install', '1.0.0', 'x86_64', 'test-repo')`,
+			transactionID, machineID, "install-only-package")
 		if err != nil {
 			t.Fatalf("Failed to insert transaction_item: %v", err)
 		}
@@ -278,7 +278,7 @@ func TestGetGraphDataWithOnlyUpgrades(t *testing.T) {
 
 	t.Run("Insert only Upgraded actions", func(t *testing.T) {
 		beginTime := time.Now().AddDate(0, 0, -1)
-		transactionID := "packages-test-upgrade-only"
+		transactionID := 1
 
 		_, err := db.Exec(`
 			INSERT INTO transactions (transaction_id, machine_id, begin_time, end_time, return_code)
@@ -289,9 +289,9 @@ func TestGetGraphDataWithOnlyUpgrades(t *testing.T) {
 		}
 
 		_, err = db.Exec(`
-			INSERT INTO transaction_items (transaction_id, machine_id, item_id, name, action, version, arch, repo)
-			VALUES ($1, $2, $3, $4, 'Upgraded', '2.0.0', 'x86_64', 'test-repo')`,
-			transactionID, machineID, "upgrade-only-package", "test-package")
+			INSERT INTO transaction_items (transaction_id, machine_id, package, action, version, arch, repo)
+			VALUES ($1, $2, $3, 'Upgraded', '2.0.0', 'x86_64', 'test-repo')`,
+			transactionID, machineID, "upgrade-only-package")
 		if err != nil {
 			t.Fatalf("Failed to insert transaction_item: %v", err)
 		}

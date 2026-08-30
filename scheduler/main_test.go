@@ -186,8 +186,8 @@ func TestHousekeepingJob(t *testing.T) {
 		// Insert old executions (older than 7 days)
 		oldExecutedAt := time.Now().AddDate(0, 0, -10)
 		_, err := db.Exec(`
-			INSERT INTO executions (machine_id, status, message, executed_at)
-			VALUES ($1, 'success', 'old execution', $2)`,
+			INSERT INTO executions (machine_id, hostname, executed_at, success, details)
+			VALUES ($1, $1, $2, TRUE, 'old execution')`,
 			machineID, oldExecutedAt)
 		if err != nil {
 			t.Fatalf("Failed to insert old execution: %v", err)
@@ -196,8 +196,8 @@ func TestHousekeepingJob(t *testing.T) {
 		// Insert recent executions (within 7 days)
 		recentExecutedAt := time.Now().AddDate(0, 0, -2)
 		_, err = db.Exec(`
-			INSERT INTO executions (machine_id, status, message, executed_at)
-			VALUES ($1, 'success', 'recent execution', $2)`,
+			INSERT INTO executions (machine_id, hostname, executed_at, success, details)
+			VALUES ($1, $1, $2, TRUE, 'recent execution')`,
 			machineID, recentExecutedAt)
 		if err != nil {
 			t.Fatalf("Failed to insert recent execution: %v", err)
@@ -259,8 +259,8 @@ func TestHousekeepingJobWithDefaultRetention(t *testing.T) {
 		// Insert old execution (older than default 7 days)
 		oldExecutedAt := time.Now().AddDate(0, 0, -10)
 		_, err := db.Exec(`
-			INSERT INTO executions (machine_id, status, message, executed_at)
-			VALUES ($1, 'success', 'old execution', $2)`,
+			INSERT INTO executions (machine_id, hostname, executed_at, success, details)
+			VALUES ($1, $1, $2, TRUE, 'old execution')`,
 			machineID, oldExecutedAt)
 		if err != nil {
 			t.Fatalf("Failed to insert old execution: %v", err)
@@ -297,8 +297,8 @@ func TestHousekeepingJobWithInvalidRetention(t *testing.T) {
 		// Insert execution
 		executedAt := time.Now().AddDate(0, 0, -10)
 		_, err := db.Exec(`
-			INSERT INTO executions (machine_id, status, message, executed_at)
-			VALUES ($1, 'success', 'test execution', $2)`,
+			INSERT INTO executions (machine_id, hostname, executed_at, success, details)
+			VALUES ($1, $1, $2, TRUE, 'test execution')`,
 			machineID, executedAt)
 		if err != nil {
 			t.Fatalf("Failed to insert execution: %v", err)

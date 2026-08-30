@@ -143,6 +143,34 @@ func Iterate(start, count int) []int {
 	return items
 }
 
+// TemplateFuncMap returns the helpers every template in templates/ may call.
+// It lives here rather than in main so that tests rendering those templates
+// register the same set; a template calling a helper the map omits panics at
+// parse time.
+func TemplateFuncMap() template.FuncMap {
+	return template.FuncMap{
+		"add":              Add,
+		"brand":            Brand,
+		"derefBool":        DerefBool,
+		"dnfUser":          DnfUser,
+		"formatInteger":    FormatInteger,
+		"formatPercentage": FormatPercentage,
+		"formatDateTime":   FormatDateTime,
+		"formatDate":       FormatDate,
+		"hasAction":        HasAction,
+		"hasPrefix":        HasPrefix,
+		"initial":          Initial,
+		"iterate":          Iterate,
+		"maskString":       MaskString,
+		"min":              Min,
+		"text2html":        Text2HTML,
+		"timeStatusClass":  TimeStatusClass,
+		"trimPrefix":       TrimPrefix,
+		"version":          Version,
+		"versionsEqual":    VersionsEqual,
+	}
+}
+
 // Add returns the sum of two integers a and b.
 func Add(a, b int) int {
 	return a + b

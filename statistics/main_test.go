@@ -64,8 +64,8 @@ func TestCountExecutions(t *testing.T) {
 		for i := range 10 {
 			executedAt := time.Now().AddDate(0, 0, -i-1)
 			_, err := db.Exec(`
-				INSERT INTO executions (machine_id, status, message, executed_at)
-				VALUES ($1, 'success', 'test execution', $2)`,
+				INSERT INTO executions (machine_id, hostname, executed_at, success, details)
+				VALUES ($1, $1, $2, TRUE, 'test execution')`,
 				machineID, executedAt)
 			if err != nil {
 				t.Fatalf("Failed to insert execution: %v", err)
@@ -76,8 +76,8 @@ func TestCountExecutions(t *testing.T) {
 		for i := range 5 {
 			executedAt := time.Now().AddDate(0, 0, -31-i)
 			_, err := db.Exec(`
-				INSERT INTO executions (machine_id, status, message, executed_at)
-				VALUES ($1, 'success', 'test execution', $2)`,
+				INSERT INTO executions (machine_id, hostname, executed_at, success, details)
+				VALUES ($1, $1, $2, TRUE, 'test execution')`,
 				machineID, executedAt)
 			if err != nil {
 				t.Fatalf("Failed to insert execution: %v", err)
@@ -127,7 +127,7 @@ func TestCountInstalledPackages(t *testing.T) {
 	t.Run("Insert test transactions and items", func(t *testing.T) {
 		// Last 30 days: 8 installs
 		for i := range 8 {
-			transactionID := fmt.Sprintf("stats-test-tx-%d", i)
+			transactionID := i
 			beginTime := time.Now().AddDate(0, 0, -i-1)
 
 			_, err := db.Exec(`
@@ -139,9 +139,9 @@ func TestCountInstalledPackages(t *testing.T) {
 			}
 
 			_, err = db.Exec(`
-				INSERT INTO transaction_items (transaction_id, machine_id, item_id, name, action, version, arch, repo)
-				VALUES ($1, $2, $3, $4, 'Install', '1.0.0', 'x86_64', 'test-repo')`,
-				transactionID, machineID, fmt.Sprintf("test-package-%d", i), fmt.Sprintf("test-package-%d", i))
+				INSERT INTO transaction_items (transaction_id, machine_id, package, action, version, arch, repo)
+				VALUES ($1, $2, $3, 'Install', '1.0.0', 'x86_64', 'test-repo')`,
+				transactionID, machineID, fmt.Sprintf("test-package-%d", i))
 			if err != nil {
 				t.Fatalf("Failed to insert transaction_item: %v", err)
 			}
@@ -149,7 +149,7 @@ func TestCountInstalledPackages(t *testing.T) {
 
 		// 30-60 days ago: 4 installs
 		for i := range 4 {
-			transactionID := fmt.Sprintf("stats-test-tx-old-%d", i)
+			transactionID := 100 + i // distinct from the recent transactions above
 			beginTime := time.Now().AddDate(0, 0, -31-i)
 
 			_, err := db.Exec(`
@@ -161,9 +161,9 @@ func TestCountInstalledPackages(t *testing.T) {
 			}
 
 			_, err = db.Exec(`
-				INSERT INTO transaction_items (transaction_id, machine_id, item_id, name, action, version, arch, repo)
-				VALUES ($1, $2, $3, $4, 'Install', '1.0.0', 'x86_64', 'test-repo')`,
-				transactionID, machineID, fmt.Sprintf("test-package-old-%d", i), fmt.Sprintf("test-package-old-%d", i))
+				INSERT INTO transaction_items (transaction_id, machine_id, package, action, version, arch, repo)
+				VALUES ($1, $2, $3, 'Install', '1.0.0', 'x86_64', 'test-repo')`,
+				transactionID, machineID, fmt.Sprintf("test-package-old-%d", i))
 			if err != nil {
 				t.Fatalf("Failed to insert transaction_item: %v", err)
 			}
@@ -212,7 +212,7 @@ func TestCountUpgradedPackages(t *testing.T) {
 	t.Run("Insert test upgrades", func(t *testing.T) {
 		// Last 30 days: 6 upgrades
 		for i := range 6 {
-			transactionID := fmt.Sprintf("stats-test-upgrade-tx-%d", i)
+			transactionID := i
 			beginTime := time.Now().AddDate(0, 0, -i-1)
 
 			_, err := db.Exec(`
@@ -224,9 +224,9 @@ func TestCountUpgradedPackages(t *testing.T) {
 			}
 
 			_, err = db.Exec(`
-				INSERT INTO transaction_items (transaction_id, machine_id, item_id, name, action, version, arch, repo)
-				VALUES ($1, $2, $3, $4, 'Upgrade', '2.0.0', 'x86_64', 'test-repo')`,
-				transactionID, machineID, fmt.Sprintf("test-upgrade-%d", i), fmt.Sprintf("test-upgrade-%d", i))
+				INSERT INTO transaction_items (transaction_id, machine_id, package, action, version, arch, repo)
+				VALUES ($1, $2, $3, 'Upgrade', '2.0.0', 'x86_64', 'test-repo')`,
+				transactionID, machineID, fmt.Sprintf("test-upgrade-%d", i))
 			if err != nil {
 				t.Fatalf("Failed to insert transaction_item: %v", err)
 			}
@@ -234,7 +234,7 @@ func TestCountUpgradedPackages(t *testing.T) {
 
 		// 30-60 days ago: 3 upgrades
 		for i := range 3 {
-			transactionID := fmt.Sprintf("stats-test-upgrade-tx-old-%d", i)
+			transactionID := 100 + i // distinct from the recent transactions above
 			beginTime := time.Now().AddDate(0, 0, -31-i)
 
 			_, err := db.Exec(`
@@ -246,9 +246,9 @@ func TestCountUpgradedPackages(t *testing.T) {
 			}
 
 			_, err = db.Exec(`
-				INSERT INTO transaction_items (transaction_id, machine_id, item_id, name, action, version, arch, repo)
-				VALUES ($1, $2, $3, $4, 'Upgrade', '2.0.0', 'x86_64', 'test-repo')`,
-				transactionID, machineID, fmt.Sprintf("test-upgrade-old-%d", i), fmt.Sprintf("test-upgrade-old-%d", i))
+				INSERT INTO transaction_items (transaction_id, machine_id, package, action, version, arch, repo)
+				VALUES ($1, $2, $3, 'Upgrade', '2.0.0', 'x86_64', 'test-repo')`,
+				transactionID, machineID, fmt.Sprintf("test-upgrade-old-%d", i))
 			if err != nil {
 				t.Fatalf("Failed to insert transaction_item: %v", err)
 			}
@@ -298,8 +298,8 @@ func TestStatisticsWithZeroPreviousMonth(t *testing.T) {
 		for i := range 5 {
 			executedAt := time.Now().AddDate(0, 0, -i-1)
 			_, err := db.Exec(`
-				INSERT INTO executions (machine_id, status, message, executed_at)
-				VALUES ($1, 'success', 'test execution', $2)`,
+				INSERT INTO executions (machine_id, hostname, executed_at, success, details)
+				VALUES ($1, $1, $2, TRUE, 'test execution')`,
 				machineID, executedAt)
 			if err != nil {
 				t.Fatalf("Failed to insert execution: %v", err)

@@ -11,7 +11,7 @@
         {{ if .needs_restarting }}
         <div
           class="bg-kumo-warning/10 border border-kumo-warning/20 text-kumo-warning px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M236.8,188.09L149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,104v40a8,8,0,0,0,16,0V104a8,8,0,0,0-16,0Zm20,80a12,12,0,1,1-12-12A12,12,0,0,1,140,184Z"></path></svg>
+          {{ template "icon-warning" "w-4 h-4" }}
           Asset must be restarted
           <a href="#" onclick="openModal('modal-reason')" class="underline text-kumo-warning ml-1">Why?</a>
         </div>
@@ -69,7 +69,7 @@
       <table class="kumo-table">
         <thead>
           <tr>
-            <th>ID <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256" class="inline-block"><rect width="256" height="256" fill="none"/><polyline points="168 152 128 192 88 152" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 104 128 64 168 104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></th>
+            <th>ID {{ template "icon-caret-down-small" "w-3 h-3 inline-block" }}</th>
             <th>Execution Time
             </th>
             <th>User</th>
@@ -91,7 +91,7 @@
                   {{ if gt .VulnsFixed 0 }}
                   <div class="relative group/fixed">
                     <span class="bg-kumo-success text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M208,40H48a8,8,0,0,0-8,8v64c0,52.72,35.32,95.77,84,111a8,8,0,0,0,5.32,0c48.71-15.24,84-58.3,84-111V48A8,8,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="172 104 113.33 160 84 132" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> {{ .VulnsFixed }}
+                      {{ template "icon-shield-check" "w-3 h-3" }} {{ .VulnsFixed }}
                     </span>
                     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/fixed:block bg-kumo-control border border-kumo-line text-kumo-default shadow-lg text-xs px-2 py-1 rounded-lg whitespace-nowrap z-20">CVEs Fixed</div>
                   </div>
@@ -99,7 +99,7 @@
                   {{ if gt .VulnsIntroduced 0 }}
                   <div class="relative group/intro">
                     <span class="bg-kumo-danger text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M208,40H48a8,8,0,0,0-8,8v64c0,52.72,35.32,95.77,84,111a8,8,0,0,0,5.32,0c48.71-15.24,84-58.3,84-111V48A8,8,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="104" x2="128" y2="144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="180" r="12" fill="currentColor"/></svg> {{ .VulnsIntroduced }}
+                      {{ template "icon-shield-warning" "w-3 h-3" }} {{ .VulnsIntroduced }}
                     </span>
                     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/intro:block bg-kumo-control border border-kumo-line text-kumo-default shadow-lg text-xs px-2 py-1 rounded-lg whitespace-nowrap z-20">New CVEs</div>
                   </div>
@@ -112,7 +112,7 @@
             <td>
               <div class="flex items-center gap-1">
                 <div class="relative group">
-                  <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions "Install" }}bg-kumo-success text-white{{ else }}bg-kumo-tint text-kumo-subtle{{ end }}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><line x1="200" y1="136" x2="248" y2="136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="224" y1="112" x2="224" y2="160" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="108" cy="100" r="60" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M24,200c20.55-24.45,49.56-40,84-40s63.45,15.55,84,40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></span>
+                  <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions "Install" }}bg-kumo-success text-white{{ else }}bg-kumo-tint text-kumo-subtle{{ end }}">{{ template "icon-plus" "w-3 h-3" }}</span>
                   <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-kumo-control shadow-lg border border-kumo-line text-kumo-default text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">Install</div>
                 </div>
                 <div class="relative group">
@@ -120,7 +120,7 @@
                   <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-kumo-control shadow-lg border border-kumo-line text-kumo-default text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">Upgrade</div>
                 </div>
                 <div class="relative group">
-                  <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions "Reinstall" }}bg-kumo-warning text-white{{ else }}bg-kumo-tint text-kumo-subtle{{ end }}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M108.11,28.11A96.09,96.09,0,0,0,227.89,147.89,96,96,0,1,1,108.11,28.11Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></span>
+                  <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions "Reinstall" }}bg-kumo-warning text-white{{ else }}bg-kumo-tint text-kumo-subtle{{ end }}">{{ template "icon-moon" "w-3 h-3" }}</span>
                   <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-kumo-control shadow-lg border border-kumo-line text-kumo-default text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">Reinstall</div>
                 </div>
                 <div class="relative group">
@@ -132,7 +132,7 @@
                   <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-kumo-control shadow-lg border border-kumo-line text-kumo-default text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">Removed</div>
                 </div>
                 <div class="relative group">
-                  <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions "Obsolete" }}bg-kumo-accent text-white{{ else }}bg-kumo-tint text-kumo-subtle{{ end }}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="88 136 112 160 168 104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="128" r="96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></span>
+                  <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs {{ if hasAction .Actions "Obsolete" }}bg-kumo-accent text-white{{ else }}bg-kumo-tint text-kumo-subtle{{ end }}">{{ template "icon-check-circle" "w-3 h-3" }}</span>
                   <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-kumo-control shadow-lg border border-kumo-line text-kumo-default text-xs px-2 py-1 rounded-lg whitespace-nowrap z-10">Obsolete</div>
                 </div>
                 <div class="relative group">
@@ -153,7 +153,7 @@
                   onclick="event.preventDefault(); showModal('{{ .TransactionID }}')">Details</a>
                 <div class="relative flex">
                   <button type="button" class="dropdown-toggle text-kumo-brand px-1.5 border-l border-kumo-brand/20 hover:bg-kumo-brand/10 transition-colors flex items-center" data-txid="{{ .TransactionID }}" data-has-vulns="{{ or (gt .VulnsFixed 0) (gt .VulnsIntroduced 0) }}">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="208 96 128 176 48 96" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+                    {{ template "icon-caret-down" "w-3 h-3" }}
                   </button>
                   <div class="dropdown-menu hidden absolute right-0 top-full mt-1 bg-kumo-control rounded-lg shadow-lg border border-kumo-line z-30 min-w-[160px]">
                     {{ if or (gt .VulnsFixed 0) (gt .VulnsIntroduced 0) }}
@@ -161,13 +161,13 @@
                       {{ if gt .VulnsIntroduced 0 }}
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" class="text-kumo-danger"><rect width="256" height="256" fill="none"/><path d="M208,40H48a8,8,0,0,0-8,8v64c0,52.72,35.32,95.77,84,111a8,8,0,0,0,5.32,0c48.71-15.24,84-58.3,84-111V48A8,8,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="104" x2="128" y2="144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="180" x2="128" y2="180" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                       {{ else }}
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" class="text-kumo-success"><rect width="256" height="256" fill="none"/><path d="M208,40H48a8,8,0,0,0-8,8v64c0,52.72,35.32,95.77,84,111a8,8,0,0,0,5.32,0c48.71-15.24,84-58.3,84-111V48A8,8,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="172 104 113.33 160 84 132" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+                      {{ template "icon-shield-check" "w-3.5 h-3.5 text-kumo-success" }}
                       {{ end }}
                       Vulnerabilities
                     </button>
                     {{ else }}
                     <span class="w-full text-left px-3 py-2 text-sm text-kumo-muted flex items-center gap-2 cursor-not-allowed rounded-lg">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><path d="M208,40H48a8,8,0,0,0-8,8v64c0,52.72,35.32,95.77,84,111a8,8,0,0,0,5.32,0c48.71-15.24,84-58.3,84-111V48A8,8,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="172 104 113.33 160 84 132" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Vulnerabilities
+                      {{ template "icon-shield-check" "w-3.5 h-3.5" }} Vulnerabilities
                     </span>
                     {{ end }}
                   </div>
@@ -200,7 +200,7 @@
       <table class="kumo-table">
         <thead>
           <tr>
-            <th>Execution ID <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256" class="inline-block"><rect width="256" height="256" fill="none"/><polyline points="168 152 128 192 88 152" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 104 128 64 168 104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></th>
+            <th>Execution ID {{ template "icon-caret-down-small" "w-3 h-3 inline-block" }}</th>
             <th>Hostname</th>
             <th>Execution Time
             </th>
@@ -259,7 +259,7 @@
           <tr>
             <th>Asset ID</th>
             <th>Hostname</th>
-            <th>Last seen <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 256 256" class="inline-block"><rect width="256" height="256" fill="none"/><polyline points="168 152 128 192 88 152" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="88 104 128 64 168 104" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg></th>
+            <th>Last seen {{ template "icon-caret-down-small" "w-3 h-3 inline-block" }}</th>
             <th>Agent version</th>
             <th>OS version</th>
           </tr>
@@ -310,7 +310,7 @@
     <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between flex-shrink-0">
       <h5 class="font-semibold text-lg text-kumo-default" id="modal-title">Loading...</h5>
       <button onclick="closeModal('modal-scrollable')"
-        class="text-kumo-muted hover:text-kumo-default transition-colors cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></button>
+        class="text-kumo-muted hover:text-kumo-default transition-colors cursor-pointer">{{ template "icon-x" "w-5 h-5" }}</button>
     </div>
     <div class="overflow-y-auto flex-1 p-6 text-kumo-default">
       <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm mb-6">
@@ -358,11 +358,11 @@
     class="bg-kumo-control rounded-xl shadow-lg border border-kumo-line max-w-3xl w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">
     <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between flex-shrink-0">
       <h5 class="font-semibold text-lg flex items-center gap-2 text-kumo-default" id="modal-vulns-title">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256" class="text-kumo-danger"><rect width="256" height="256" fill="none"/><path d="M208,40H48a8,8,0,0,0-8,8v64c0,52.72,35.32,95.77,84,111a8,8,0,0,0,5.32,0c48.71-15.24,84-58.3,84-111V48A8,8,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="104" x2="128" y2="144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="180" r="12" fill="currentColor"/></svg>
+        {{ template "icon-shield-warning" "w-5 h-5 text-kumo-danger" }}
         Loading...
       </h5>
       <button onclick="closeModal('modal-vulns')"
-        class="text-kumo-muted hover:text-kumo-default transition-colors cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></button>
+        class="text-kumo-muted hover:text-kumo-default transition-colors cursor-pointer">{{ template "icon-x" "w-5 h-5" }}</button>
     </div>
     <div class="overflow-y-auto flex-1 p-6">
       <div id="modal-vulns-summary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4"></div>
@@ -406,7 +406,7 @@
     <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between flex-shrink-0">
       <h5 class="font-semibold text-lg text-kumo-default">Reason to restart the asset</h5>
       <button onclick="closeModal('modal-reason')"
-        class="text-kumo-muted hover:text-kumo-default transition-colors cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg></button>
+        class="text-kumo-muted hover:text-kumo-default transition-colors cursor-pointer">{{ template "icon-x" "w-5 h-5" }}</button>
     </div>
     <div class="overflow-y-auto flex-1 p-6 text-sm leading-relaxed text-kumo-default">
       {{ .restarting_reason | text2html }}
@@ -424,7 +424,7 @@
     class="bg-kumo-control rounded-xl shadow-lg border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0 overflow-hidden">
     <div class="h-1 bg-kumo-danger rounded-t-xl"></div>
     <div class="p-6 text-center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-kumo-danger mx-auto mb-3"><path d="M236.8,188.09L149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,104v40a8,8,0,0,0,16,0V104a8,8,0,0,0-16,0Zm20,80a12,12,0,1,1-12-12A12,12,0,0,1,140,184Z"></path></svg>
+      {{ template "icon-warning" "w-12 h-12 text-kumo-danger mx-auto mb-3" }}
       <h3 class="font-semibold text-lg mb-2 text-kumo-default">Are you sure?</h3>
       <p class="text-sm text-kumo-subtle mb-2">Do you really want to remove all data for this asset ID? <strong class="text-kumo-danger">What
           you do cannot be undone.</strong></p>

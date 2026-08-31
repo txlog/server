@@ -61,6 +61,18 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Templates**: the 46 icon glyphs that appeared more than once are defined
+  once each in `templates/icons.html` and called as
+  `{{ template "icon-trash" "w-4 h-4 text-kumo-danger" }}`. The close icon
+  alone was pasted 16 times, the warning triangle 8. 151 of the 199 inline
+  `<svg>` blocks are now calls; the 48 glyphs used exactly once stay where
+  they are, and the 17 inside `<script>` blocks are untouched. The templates
+  shrink from 383 KB to 332 KB, `admin.html` from 169 KB to 124 KB.
+
+  The glyphs carry no `width`/`height` of their own — the size comes from the
+  Tailwind class passed in, which is what already governed it wherever a class
+  was present. The rendered HTML of `/`, `/assets`, `/admin`, `/license` and
+  `/topology` is unchanged.
 - **Statistics**: `CountExecutions`, `CountInstalledPackages` and
   `CountUpgradedPackages` were three copies of the same forty lines differing
   only in the query and the metric name. They now share a `countStat` helper

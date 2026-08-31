@@ -134,7 +134,7 @@
       <h5 class="font-semibold text-lg text-kumo-default">Generated AI Report Prompt</h5>
       <button onclick="closeModal('prompt-modal')"
         class="text-kumo-muted hover:text-kumo-default transition-colors cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg>
+        {{ template "icon-x" "w-5 h-5" }}
       </button>
     </div>
     <div class="overflow-y-auto flex-1 p-6">
@@ -148,7 +148,7 @@
         class="flex-1 group flex shrink-0 font-medium select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-kumo-brand cursor-pointer rounded-lg items-center justify-center px-4 py-2.5 text-kumo-default bg-kumo-control border border-kumo-line hover:bg-kumo-tint shadow-sm transition-colors">Close</button>
       <button id="copy-prompt-btn" data-kumo-component="Button"
         class="flex-1 group flex shrink-0 font-medium select-none border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-kumo-brand cursor-pointer rounded-lg items-center justify-center px-4 py-2.5 text-white bg-kumo-brand hover:bg-kumo-brand/90 shadow-sm transition-colors gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M216,40V168a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H200A16,16,0,0,1,216,40ZM184,80V216a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V80A16,16,0,0,1,40,64H168A16,16,0,0,1,184,80Zm-16,0H40V216H168Z"></path></svg> Copy to Clipboard
+        {{ template "icon-copy" "w-4 h-4" }} Copy to Clipboard
       </button>
     </div>
   </div>
@@ -160,7 +160,7 @@
     class="bg-kumo-control rounded-xl shadow-lg border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0 overflow-hidden">
     <div class="h-1 bg-kumo-danger rounded-t-xl"></div>
     <div class="p-6 text-center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 256 256" class="text-kumo-danger mx-auto mb-3"><path d="M236.8,188.09L149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM222.93,203.8a8.5,8.5,0,0,1-7.48,4.2H40.55a8.5,8.5,0,0,1-7.48-4.2,7.59,7.59,0,0,1,0-7.72L120.52,44.21a8.75,8.75,0,0,1,15,0l87.45,151.87A7.59,7.59,0,0,1,222.93,203.8ZM120,104v40a8,8,0,0,0,16,0V104a8,8,0,0,0-16,0Zm20,80a12,12,0,1,1-12-12A12,12,0,0,1,140,184Z"></path></svg>
+      {{ template "icon-warning" "w-12 h-12 text-kumo-danger mx-auto mb-3" }}
       <h3 class="font-semibold text-lg mb-2 text-kumo-default">No Data Available</h3>
       <p class="text-sm text-kumo-subtle" id="error-modal-message"></p>
     </div>

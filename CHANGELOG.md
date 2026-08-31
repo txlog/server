@@ -18,6 +18,41 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.37.0] - 2026-08-31
+
+### Removed
+
+- **Dashboard**: the `/insights` route. It rendered `insights.html`, a template
+  that does not exist in `templates/`, so every request to it returned 500.
+  The route and its controller are gone; the path now answers 404 like any
+  other unknown one.
+- **Admin**: `PostAdminForceCleanMigration`, a handler that was never wired to
+  a route. `PostAdminRunMigrations` already forces a dirty database clean
+  before applying migrations, which is the path the admin panel actually uses.
+- **Controllers**: `Get500`, referenced from nowhere. Handlers render
+  `500.html` directly.
+- **Database**: the blank import of `golang-migrate`'s `source/file` driver.
+  Migrations are read from the embedded filesystem through `source/iofs`.
+- **Documentation**: `docs/generate_schema.sh`, which concatenated the
+  migrations into a `schema.sql` that nothing consumed and that was not even
+  covered by `.gitignore`.
+- **Build**: `vscode-langservers-extracted` from the npm dependencies. It is a
+  bundle of editor language servers and takes no part in the CSS build. The
+  `main` field, pointing at a `tailwind.config.js` that Tailwind v4 no longer
+  uses, is gone as well.
+
+### Changed
+
+- **Admin**: the OSV update trigger is called directly. The handlers went
+  through a package-level `schedulerOSVTrigger` variable, injected from
+  `main` by `SetSchedulerOSVTrigger`, to work around an import cycle between
+  `controllers` and `scheduler` — a cycle that does not exist, since
+  `scheduler` never imports `controllers`. The handlers now call
+  `scheduler.UpdateVulnerabilitiesJob` themselves.
+- **Analytics**: `GetAnalyticsAnomalies` and `GetAnalyticsSecurity` are plain
+  handlers again. Both took a `*sql.DB` they never used and wrapped it in a
+  closure; the pages fetch their data from `/v1/reports/*` in the browser.
+
 ## [1.36.0] - 2026-08-30
 
 ### Fixed

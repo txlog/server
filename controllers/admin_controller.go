@@ -12,6 +12,7 @@ import (
 	"github.com/txlog/server/database"
 	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
+	"github.com/txlog/server/scheduler"
 	"github.com/txlog/server/util"
 )
 
@@ -218,24 +219,6 @@ func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// PostAdminForceCleanMigration forces the database migration state to clean
-func PostAdminForceCleanMigration(db *sql.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		err := database.ForceCleanIfDirty()
-		if err != nil {
-			logger.Error("Failed to force clean migration state: " + err.Error())
-			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
-				"title": "Migration Error",
-				"error": "Failed to force clean migration state: " + err.Error(),
-			})
-			return
-		}
-
-		logger.Info("Database migration forced to clean state via admin panel")
-		c.Redirect(http.StatusSeeOther, "/admin?migration_success=1")
-	}
-}
-
 // GetCronLockStatus retrieves the boolean status of a lock record.
 func GetCronLockStatus(db *sql.DB, lockName string) bool {
 	var count int
@@ -250,8 +233,7 @@ func GetCronLockStatus(db *sql.DB, lockName string) bool {
 // PostAdminRunOSVUpdate manually triggers the OSV sync task.
 func PostAdminRunOSVUpdate(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Import scheduler locally just to run the background job asynchronously
-		importSchedulerFunc()
+		go scheduler.UpdateVulnerabilitiesJob(db)
 
 		c.Redirect(http.StatusSeeOther, "/admin?osv_update_started=1")
 	}
@@ -284,25 +266,9 @@ func PostAdminResetOSV(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		importSchedulerFunc()
+		go scheduler.UpdateVulnerabilitiesJob(db)
 
 		c.Redirect(http.StatusSeeOther, "/admin?osv_reset_started=1")
-	}
-}
-
-// Wrapper local para instanciar função sem ciclio cruzado (em go é melhor expor uma funçao wrapper global se dependencias cruzarem ou canal de channel porem aqui podemos simular a task chamando async via goroutine na camada de route, o melhor design).
-var schedulerOSVTrigger func()
-
-// SetSchedulerOSVTrigger injeta do pacote pai a funçao de trigger (evitando cycle).
-func SetSchedulerOSVTrigger(f func()) {
-	schedulerOSVTrigger = f
-}
-
-func importSchedulerFunc() {
-	if schedulerOSVTrigger != nil {
-		go schedulerOSVTrigger()
-	} else {
-		logger.Error("OSV Update wrapper not statically assigned.")
 	}
 }
 

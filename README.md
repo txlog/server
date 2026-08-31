@@ -218,7 +218,6 @@ OIDC_SKIP_TLS_VERIFY=false
 LDAP_HOST=ldap.example.com
 LDAP_PORT=389
 LDAP_USE_TLS=false
-LDAP_SKIP_TLS_VERIFY=false
 LDAP_BIND_DN=cn=admin,dc=example,dc=com
 LDAP_BIND_PASSWORD=your_bind_password
 LDAP_BASE_DN=ou=users,dc=example,dc=com

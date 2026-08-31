@@ -22,6 +22,25 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Removed
 
+- **Documentation**: `docs/schema-compare.md` and `docs/txlog_expected.json`.
+  The document was a 1,013-line design proposal for embedding a schema snapshot
+  in the binary and validating the live database against it at runtime — a
+  feature that was never built. No Go code reads the JSON, and `docs/README.md`
+  never linked to either. The `komparo` Makefile target, whose only job was
+  regenerating that JSON, is gone too; its help text was a copy of the `doc`
+  target's and described swagger generation. The
+  `komparo-snapshot.yml` workflow still runs and still uploads its snapshot as
+  a CI artifact.
+- **Documentation**: nine LDAP documents become five, and `ldap-discovery.sh`
+  moves from `docs/` — where it belonged to no Diátaxis category — to
+  `scripts/`. There were three documents per category for one subject, several
+  filed under the wrong one, and links to four files that do not exist. See
+  Changed below for what replaced them; 3,071 lines become 614.
+- **Build**: `scripts/embed_uikit_css.py`, which pasted the whole 88 KB of
+  `static/css/style.css` into `docs/UI-KIT.html` on every `make css` and
+  committed the result. The page now links the stylesheet, as a page in the
+  same repository can; it drops from 105 KB to 16 KB and stops changing
+  wholesale on every build.
 - **Dependencies**: `github.com/tavsec/gin-healthcheck`. It served a single
   route — `GET /health`, a database ping plus six "is this environment
   variable set" checks — and dragged the MongoDB, Redis, InfluxDB and RabbitMQ
@@ -61,6 +80,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Documentation**: the LDAP documentation is one document per Diátaxis
+  category. `explanation/ldap-authentication.md` explains the login flow and
+  the service-account trade-off, replacing the deep dive, the implementation
+  summary — which was a stale pull-request changelog, not documentation — and
+  the service-account FAQ. `reference/ldap-configuration.md` merges the
+  cheatsheet and the filter reference, which answered the same question.
+  `reference/ldap-error-codes.md` keeps its code table and one diagnosis
+  procedure instead of repeating the same ❌/✅ pair for every kind of DN.
+  `how-to/configure-ldap.md` absorbs the anonymous-bind variant, and
+  `how-to/discover-ldap-filters.md` is the procedure rather than an
+  `ldapsearch` tutorial.
 - **Templates**: the 46 icon glyphs that appeared more than once are defined
   once each in `templates/icons.html` and called as
   `{{ template "icon-trash" "w-4 h-4 text-kumo-danger" }}`. The close icon
@@ -96,6 +126,19 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - **Analytics**: `GetAnalyticsAnomalies` and `GetAnalyticsSecurity` are plain
   handlers again. Both took a `*sql.DB` they never used and wrapped it in a
   closure; the pages fetch their data from `/v1/reports/*` in the browser.
+
+### Fixed
+
+- **Documentation**: `LDAP_SKIP_TLS_VERIFY` was documented in `README.md` and
+  in the LDAP cheatsheet, and does not exist. `auth/ldap.go` never reads it;
+  TLS certificates are always verified. Anyone who set it to `true` expecting a
+  self-signed certificate to be accepted got a connection failure and no
+  explanation.
+- **Documentation**: `LDAP_GROUP_FILTER` was missing from the environment
+  variable reference, despite being the setting most often responsible for
+  "not a member of any authorized group".
+- **Documentation**: `docs/how-to/run-tests.md` linked to `../TESTING.md`,
+  which does not exist; it now points at the testing strategy document.
 
 ## [1.36.0] - 2026-08-30
 

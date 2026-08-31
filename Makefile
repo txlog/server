@@ -1,4 +1,4 @@
-.PHONY: all help clean fmt vet lint test test-nodb build run doc css css-watch komparo
+.PHONY: all help clean fmt vet lint test test-nodb build run doc css css-watch
 
 all: help
 
@@ -39,7 +39,6 @@ test-nodb:
 ## css: Build the Tailwind CSS (minified)
 css:
 	@npx @tailwindcss/cli -i static/css/input.css -o static/css/style.css --minify
-	@python3 scripts/embed_uikit_css.py
 
 ## css-watch: Watch and rebuild Tailwind CSS on changes
 css-watch:
@@ -57,7 +56,3 @@ run:
 doc:
 	@swag init --outputTypes go
 	@swag fmt
-
-## komparo: Write the swagger documentation based on method comments
-komparo:
-	@komparo snapshot -o docs/txlog_expected.json

@@ -18,8 +18,8 @@ _Step-by-step guides to achieve specific goals._
 #### Authentication & Security
 
 - **[Configure OIDC Authentication](how-to/configure-oidc.md)**: Connect with Google, Keycloak, etc.
-- **[Configure LDAP Authentication](how-to/configure-ldap.md)**: Connect with Active Directory or OpenLDAP.
-- **[Configure Anonymous LDAP](how-to/configure-ldap-anonymous.md)**: For servers without service accounts.
+- **[Configure LDAP Authentication](how-to/configure-ldap.md)**: Connect with Active Directory or OpenLDAP, with or
+  without a service account.
 - **[Discover LDAP Filters](how-to/discover-ldap-filters.md)**: How to find the right query filters for your directory.
 - **[Manage API Keys](how-to/manage-api-keys.md)**: Create and revoke keys for agents.
 
@@ -53,9 +53,9 @@ _Technical descriptions and specifications._
 
 #### LDAP Specifics
 
-- **[LDAP Cheatsheet](reference/ldap-cheatsheet.md)**: Quick reference for variables and common setups.
+- **[LDAP Configuration](reference/ldap-configuration.md)**: Every LDAP variable, plus the filters each directory
+  server expects.
 - **[LDAP Error Codes](reference/ldap-error-codes.md)**: Troubleshooting common error codes (32, 49, 50).
-- **[LDAP Filters Reference](reference/ldap-filters.md)**: Common filter patterns for AD, OpenLDAP, etc.
 
 ### 4. Explanation (Understanding-oriented)
 
@@ -70,20 +70,18 @@ _Background knowledge and design decisions._
 
 #### Deep Dives
 
-- **[LDAP Authentication Deep Dive](explanation/ldap-deep-dive.md)**: Comprehensive guide to how LDAP auth works.
-- **[LDAP Implementation Details](explanation/ldap-implementation-details.md)**: Internal code structure of the LDAP
-  module.
-- **[LDAP Service Accounts FAQ](explanation/ldap-service-account-faq.md)**: Best practices for bind accounts.
+- **[LDAP Authentication](explanation/ldap-authentication.md)**: How the login flow works, and when a service account
+  is actually required.
 - **[Testing Strategy](explanation/testing-strategy.md)**: Overview of the test suite and coverage goals.
 
 ---
 
 ## �️ Tools & Scripts
 
-The `docs/` directory also contains useful scripts for administrators:
+The `scripts/` directory contains useful scripts for administrators:
 
-- **[ldap-discovery.sh](ldap-discovery.sh)**: An interactive script to help you discover your LDAP server's structure
-  and test filters.
+- **[ldap-discovery.sh](../scripts/ldap-discovery.sh)**: An interactive script to help you discover your LDAP server's
+  structure and test filters.
 
 ## 🔌 API Documentation (Swagger)
 

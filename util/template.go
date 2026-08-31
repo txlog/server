@@ -42,37 +42,34 @@ func Text2HTML(s string) template.HTML {
 //	A string containing the formatted percentage value using Brazilian number format
 func FormatPercentage(percentage float64) string {
 	s := strconv.FormatFloat(percentage, 'f', 2, 64)
-	s = strings.ReplaceAll(s, ".", ",")
+	integerPart, decimalPart, _ := strings.Cut(s, ".")
+	return groupThousands(integerPart) + "," + decimalPart
+}
 
-	parts := strings.Split(s, ",")
-	integerPart := parts[0]
-	decimalPart := parts[1]
-
-	isNegative := strings.HasPrefix(integerPart, "-")
-	if isNegative {
-		integerPart = integerPart[1:]
+// groupThousands inserts a dot every three digits of a decimal integer string,
+// preserving a leading minus sign. It is the shared half of FormatInteger and
+// FormatPercentage, which differ only in what they do around it.
+func groupThousands(s string) string {
+	sign := ""
+	if rest, found := strings.CutPrefix(s, "-"); found {
+		sign, s = "-", rest
 	}
 
-	n := len(integerPart)
+	n := len(s)
 	if n <= 3 {
-		if isNegative {
-			return "-" + integerPart + "," + decimalPart
-		}
-		return integerPart + "," + decimalPart
+		return sign + s
 	}
 
 	var result strings.Builder
-	result.Grow(n + n/3)
+	result.Grow(len(sign) + n + n/3)
+	result.WriteString(sign)
 	for i := range n {
 		if (n-i)%3 == 0 && i != 0 {
 			result.WriteByte('.')
 		}
-		result.WriteByte(integerPart[i])
+		result.WriteByte(s[i])
 	}
-	if isNegative {
-		return "-" + result.String() + "," + decimalPart
-	}
-	return result.String() + "," + decimalPart
+	return result.String()
 }
 
 // FormatInteger formats an integer with thousand separators using dots.
@@ -95,32 +92,7 @@ func FormatPercentage(percentage float64) string {
 //
 //	A string representation of the number with thousand separators
 func FormatInteger(num int) string {
-	s := strconv.Itoa(num)
-	isNegative := strings.HasPrefix(s, "-")
-	if isNegative {
-		s = s[1:]
-	}
-
-	n := len(s)
-	if n <= 3 {
-		if isNegative {
-			return "-" + s
-		}
-		return s
-	}
-
-	var result strings.Builder
-	result.Grow(n + n/3)
-	for i := range n {
-		if (n-i)%3 == 0 && i != 0 {
-			result.WriteByte('.')
-		}
-		result.WriteByte(s[i])
-	}
-	if isNegative {
-		return "-" + result.String()
-	}
-	return result.String()
+	return groupThousands(strconv.Itoa(num))
 }
 
 // Iterate generates a slice of integers from start to count (inclusive).
@@ -158,14 +130,14 @@ func TemplateFuncMap() template.FuncMap {
 		"formatDateTime":   FormatDateTime,
 		"formatDate":       FormatDate,
 		"hasAction":        HasAction,
-		"hasPrefix":        HasPrefix,
+		"hasPrefix":        strings.HasPrefix,
 		"initial":          Initial,
 		"iterate":          Iterate,
 		"maskString":       MaskString,
 		"min":              Min,
 		"text2html":        Text2HTML,
 		"timeStatusClass":  TimeStatusClass,
-		"trimPrefix":       TrimPrefix,
+		"trimPrefix":       strings.TrimPrefix,
 		"version":          Version,
 		"versionsEqual":    VersionsEqual,
 	}
@@ -242,31 +214,26 @@ func DnfUser(user string) string {
 //
 // Returns:
 //   - string: the filename of the corresponding brand SVG logo
+//
+// brands maps a distribution name, as it appears in the OS string, to its logo.
+// The order matters only in that the first match wins, as in the original chain
+// of comparisons.
+var brands = []struct{ needle, file string }{
+	{"almalinux", "brand-almalinux.svg"},
+	{"centos", "brand-centos.svg"},
+	{"fedora", "brand-fedora.svg"},
+	{"oracle", "brand-oracle.svg"},
+	{"red hat", "brand-redhat.svg"},
+	{"rocky", "brand-rocky.svg"},
+}
+
 func Brand(brand string) string {
-	if strings.Contains(strings.ToLower(brand), "almalinux") {
-		return "brand-almalinux.svg"
+	lower := strings.ToLower(brand)
+	for _, b := range brands {
+		if strings.Contains(lower, b.needle) {
+			return b.file
+		}
 	}
-
-	if strings.Contains(strings.ToLower(brand), "centos") {
-		return "brand-centos.svg"
-	}
-
-	if strings.Contains(strings.ToLower(brand), "fedora") {
-		return "brand-fedora.svg"
-	}
-
-	if strings.Contains(strings.ToLower(brand), "oracle") {
-		return "brand-oracle.svg"
-	}
-
-	if strings.Contains(strings.ToLower(brand), "red hat") {
-		return "brand-redhat.svg"
-	}
-
-	if strings.Contains(strings.ToLower(brand), "rocky") {
-		return "brand-rocky.svg"
-	}
-
 	return "brand-linux.svg"
 }
 
@@ -349,32 +316,6 @@ func DerefBool(p *bool) bool {
 		return false
 	}
 	return *p
-}
-
-// HasPrefix checks if a string starts with a given prefix.
-// This function is designed to be used in Go templates.
-//
-// Parameters:
-//   - s: The string to check
-//   - prefix: The prefix to look for
-//
-// Returns:
-//   - bool: True if s starts with prefix, false otherwise
-func HasPrefix(s, prefix string) bool {
-	return strings.HasPrefix(s, prefix)
-}
-
-// TrimPrefix removes a prefix from a string if it exists.
-// This function is designed to be used in Go templates.
-//
-// Parameters:
-//   - s: The string to trim
-//   - prefix: The prefix to remove
-//
-// Returns:
-//   - string: The string with the prefix removed, or the original string if it doesn't start with the prefix
-func TrimPrefix(s, prefix string) string {
-	return strings.TrimPrefix(s, prefix)
 }
 
 // VersionsEqual compares two version strings, normalizing them by removing "v" prefix if present.

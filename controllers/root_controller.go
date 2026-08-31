@@ -3,10 +3,10 @@ package controllers
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 	"golang.org/x/sync/errgroup"
 )
@@ -97,7 +97,7 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 		})
 
 		if err := g.Wait(); err != nil {
-			logger.Error("Error loading dashboard data: " + err.Error())
+			slog.Error("Error loading dashboard data: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})

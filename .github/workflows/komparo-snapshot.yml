@@ -46,11 +46,9 @@ jobs:
           package main
           import (
             "github.com/txlog/server/database"
-            "github.com/txlog/server/logger"
             "os"
           )
           func main() {
-            logger.InitLogger()
             database.ConnectDatabase()
             os.Exit(0)
           }

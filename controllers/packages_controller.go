@@ -3,12 +3,12 @@ package controllers
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 	"github.com/txlog/server/util"
 )
@@ -31,10 +31,10 @@ func GetPackagesIndex(database *sql.DB) gin.HandlerFunc {
 		packageNames, total, err := getPackagesFromMaterializedView(c.Request.Context(), database, search, limit, offset)
 		if err != nil {
 			// Fallback to direct query if materialized view doesn't exist
-			logger.Debug("Using fallback query for packages: " + err.Error())
+			slog.Debug("Using fallback query for packages: " + err.Error())
 			packageNames, total, err = getPackagesFromDirectQuery(c.Request.Context(), database, search, limit, offset)
 			if err != nil {
-				logger.Error("Error listing packages:" + err.Error())
+				slog.Error("Error listing packages:" + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 					"error": err.Error(),
 				})
@@ -436,7 +436,7 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
 		rows, err := database.QueryContext(c.Request.Context(), query, pkg.Name)
 
 		if err != nil {
-			logger.Error("Error listing packages:" + err.Error())
+			slog.Error("Error listing packages:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -458,7 +458,7 @@ func GetPackageByName(database *sql.DB) gin.HandlerFunc {
 				&vulns,
 			)
 			if err != nil {
-				logger.Error("Error iterating packages:" + err.Error())
+				slog.Error("Error iterating packages:" + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 					"error": err.Error(),
 				})

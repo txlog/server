@@ -1,8 +1,9 @@
 package statistics
 
 import (
+	"log/slog"
+
 	"github.com/txlog/server/database"
-	"github.com/txlog/server/logger"
 )
 
 // countStat runs a query that returns two counts — the last 30 days and the 30
@@ -13,7 +14,7 @@ import (
 func countStat(name, query string) {
 	var thisMonth, previousMonth int
 	if err := database.Db.QueryRow(query).Scan(&thisMonth, &previousMonth); err != nil {
-		logger.Error("Error querying statistics: " + err.Error())
+		slog.Error("Error querying statistics: " + err.Error())
 		return
 	}
 
@@ -29,7 +30,7 @@ func countStat(name, query string) {
 	        SET value = $2, percentage = $3, updated_at = NOW()`,
 		name, thisMonth, percentage)
 	if err != nil {
-		logger.Error("Error inserting statistics: " + err.Error())
+		slog.Error("Error inserting statistics: " + err.Error())
 	}
 }
 

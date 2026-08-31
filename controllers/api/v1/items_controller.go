@@ -3,13 +3,12 @@ package v1
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"net/http"
-
-	"github.com/txlog/server/models"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	logger "github.com/txlog/server/logger"
+	"github.com/txlog/server/models"
 )
 
 // GetItemIDs Get the saved item IDs for a transaction
@@ -60,7 +59,7 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 			transactionID,
 		)
 		if err != nil {
-			logger.Error("Couldn't get saved item_ids for this transaction: " + err.Error())
+			slog.Error("Couldn't get saved item_ids for this transaction: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusBadRequest, "Couldn't get saved item_ids for this transaction.")
 			return
 		}
@@ -70,7 +69,7 @@ func GetItemIDs(database *sql.DB) gin.HandlerFunc {
 		for rows.Next() {
 			var id int
 			if err := rows.Scan(&id); err != nil {
-				logger.Error("Error scanning transaction_ids: " + err.Error())
+				slog.Error("Error scanning transaction_ids: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, "Error scanning transaction_ids")
 				return
 			}
@@ -167,7 +166,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 		if err != nil {
-			logger.Error("Error querying transaction: " + err.Error())
+			slog.Error("Error querying transaction: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -200,7 +199,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			logger.Error("Error querying items: " + err.Error())
+			slog.Error("Error querying items: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -220,7 +219,7 @@ func GetItems(database *sql.DB) gin.HandlerFunc {
 			)
 
 			if err != nil {
-				logger.Error("Error reading transaction item: " + err.Error())
+				slog.Error("Error reading transaction item: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}

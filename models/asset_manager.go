@@ -3,9 +3,8 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"time"
-
-	logger "github.com/txlog/server/logger"
 )
 
 type AssetManager struct {
@@ -53,17 +52,17 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 				VALUES ($1, $2, $3, $3, TRUE, CURRENT_TIMESTAMP, $4, $5, $6)
 			`, hostname, machineID, timestamp, needsRestarting, restartingReason, os)
 			if err != nil {
-				logger.Error("Error inserting asset: " + err.Error())
+				slog.Error("Error inserting asset: " + err.Error())
 				return err
 			}
 		} else {
 			_, _ = tx.Exec("RELEASE SAVEPOINT upsert_agent_version")
 		}
 
-		logger.Debug("Created new asset: hostname=" + hostname + " machine_id=" + machineID)
+		slog.Debug("Created new asset: hostname=" + hostname + " machine_id=" + machineID)
 		return nil
 	} else if err != nil {
-		logger.Error("Error checking existing asset: " + err.Error())
+		slog.Error("Error checking existing asset: " + err.Error())
 		return err
 	}
 
@@ -85,7 +84,7 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 			WHERE asset_id = $5
 		`, timestamp, needsRestarting, restartingReason, os, existingAssetID)
 		if err != nil {
-			logger.Error("Error updating asset last_seen: " + err.Error())
+			slog.Error("Error updating asset last_seen: " + err.Error())
 			return err
 		}
 	} else {
@@ -110,11 +109,11 @@ func (am *AssetManager) UpsertAsset(tx *sql.Tx, hostname string, machineID strin
 		`, existingAssetID)
 
 		if err != nil {
-			logger.Error("Error reactivating asset: " + err.Error())
+			slog.Error("Error reactivating asset: " + err.Error())
 			return err
 		}
 
-		logger.Info("Reactivated asset: hostname=" + hostname + " machine_id=" + machineID)
+		slog.Info("Reactivated asset: hostname=" + hostname + " machine_id=" + machineID)
 	}
 
 	return nil
@@ -129,7 +128,7 @@ func (am *AssetManager) deactivateAssetsByMachineID(tx *sql.Tx, machineID string
 	`, machineID)
 
 	if err != nil {
-		logger.Error("Error deactivating old assets by machine_id: " + err.Error())
+		slog.Error("Error deactivating old assets by machine_id: " + err.Error())
 		return err
 	}
 
@@ -145,7 +144,7 @@ func (am *AssetManager) deactivateAssetsByHostname(tx *sql.Tx, hostname string) 
 	`, hostname)
 
 	if err != nil {
-		logger.Error("Error deactivating old assets by hostname: " + err.Error())
+		slog.Error("Error deactivating old assets by hostname: " + err.Error())
 		return err
 	}
 

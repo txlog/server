@@ -3,13 +3,13 @@ package v1
 import (
 	"database/sql"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 )
 
@@ -39,7 +39,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		err = json.Unmarshal(data, &body)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid JSON input")
-			logger.Error("Invalid JSON input:" + err.Error())
+			slog.Error("Invalid JSON input:" + err.Error())
 			return
 		}
 
@@ -68,7 +68,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		// Start database transaction
 		tx, err := database.BeginTx(c.Request.Context(), nil)
 		if err != nil {
-			logger.Error("Error beginning transaction:" + err.Error())
+			slog.Error("Error beginning transaction:" + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
@@ -96,7 +96,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Error inserting execution:" + err.Error())
+			slog.Error("Error inserting execution:" + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
@@ -110,7 +110,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, needsRestarting, restartingReason, body.OS, body.AgentVersion)
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Error upserting asset:" + err.Error())
+			slog.Error("Error upserting asset:" + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to update asset registry"})
 			return
 		}
@@ -118,7 +118,7 @@ func PostExecutions(database *sql.DB) gin.HandlerFunc {
 		// Commit the database transaction
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()
-			logger.Error("Error committing execution:" + err.Error())
+			slog.Error("Error committing execution:" + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
@@ -200,7 +200,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if err != nil {
-			logger.Error("Error querying executions:" + err.Error())
+			slog.Error("Error querying executions:" + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -227,7 +227,7 @@ func GetExecutions(database *sql.DB) gin.HandlerFunc {
 			execution.AgentVersion = agentVersion.String
 			execution.OS = os.String
 			if err != nil {
-				logger.Error("Error iterating executions:" + err.Error())
+				slog.Error("Error iterating executions:" + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}

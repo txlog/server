@@ -4,15 +4,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/txlog/server/models"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	logger "github.com/txlog/server/logger"
+	"github.com/txlog/server/models"
 )
 
 // GetTransactionIDs Get the saved transactions IDs for a host
@@ -48,7 +47,7 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 				err = json.Unmarshal(data, &body)
 				if err != nil {
 					c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid JSON input")
-					logger.Error("Invalid JSON input: " + err.Error())
+					slog.Error("Invalid JSON input: " + err.Error())
 					return
 				}
 				machineID = body.MachineID
@@ -66,7 +65,7 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 			hostname,
 		)
 		if err != nil {
-			logger.Error("Couldn't get saved transaction_ids for this host: " + err.Error())
+			slog.Error("Couldn't get saved transaction_ids for this host: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusBadRequest, "Couldn't get saved transaction_ids for this host.")
 			return
 		}
@@ -76,7 +75,7 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
 		for rows.Next() {
 			var id int
 			if err := rows.Scan(&id); err != nil {
-				logger.Error("Error scanning transaction_ids: " + err.Error())
+				slog.Error("Error scanning transaction_ids: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, "Error scanning transaction_ids")
 				return
 			}
@@ -140,7 +139,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			logger.Error("Error querying transactions: " + err.Error())
+			slog.Error("Error querying transactions: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -167,7 +166,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 			)
 
 			if err != nil {
-				logger.Error("Error iterating transactions: " + err.Error())
+				slog.Error("Error iterating transactions: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
@@ -209,7 +208,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		err = json.Unmarshal(data, &body)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, "Invalid JSON input")
-			logger.Error("Invalid JSON input: " + err.Error())
+			slog.Error("Invalid JSON input: " + err.Error())
 			return
 		}
 
@@ -229,7 +228,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		// Start database transaction
 		tx, err := database.BeginTx(c.Request.Context(), nil)
 		if err != nil {
-			logger.Error("Error beginning transaction: " + err.Error())
+			slog.Error("Error beginning transaction: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
@@ -259,7 +258,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Error inserting transaction: " + err.Error())
+			slog.Error("Error inserting transaction: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
@@ -267,7 +266,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		rowsAffected, err := result.RowsAffected()
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Error checking rows affected: " + err.Error())
+			slog.Error("Error checking rows affected: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}
@@ -300,7 +299,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			_, err = tx.Exec(query, valueArgs...)
 			if err != nil {
 				tx.Rollback()
-				logger.Error("Error inserting transaction items: " + err.Error())
+				slog.Error("Error inserting transaction items: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 				return
 			}
@@ -315,7 +314,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		err = assetManager.UpsertAsset(tx, body.Hostname, body.MachineID, *timestamp, sql.NullBool{}, sql.NullString{}, "", "")
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Error upserting asset:" + err.Error())
+			slog.Error("Error upserting asset:" + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Failed to update asset registry"})
 			return
 		}
@@ -323,7 +322,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 		// Commit the database transaction
 		if err = tx.Commit(); err != nil {
 			tx.Rollback()
-			logger.Error("Error committing transaction: " + err.Error())
+			slog.Error("Error committing transaction: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 			return
 		}

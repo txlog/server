@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 )
 
@@ -17,7 +17,7 @@ func GetPackagesByWeekIndex(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		graphData, err := getGraphData(c.Request.Context(), database)
 		if err != nil {
-			logger.Error("Error getting statistics:" + err.Error())
+			slog.Error("Error getting statistics:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -113,14 +113,14 @@ func GetPackagesByMonth(database *sql.DB) gin.HandlerFunc {
 
 		csvData, err := getMonthlyPackageData(c.Request.Context(), database, month, year)
 		if err != nil {
-			logger.Error("Error getting monthly package data: " + err.Error())
+			slog.Error("Error getting monthly package data: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching package data: " + err.Error()})
 			return
 		}
 
 		assetCount, err := getTotalActiveAssets(c.Request.Context(), database)
 		if err != nil {
-			logger.Error("Error getting total active assets: " + err.Error())
+			slog.Error("Error getting total active assets: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching asset count: " + err.Error()})
 			return
 		}

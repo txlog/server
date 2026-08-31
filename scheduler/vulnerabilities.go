@@ -3,6 +3,7 @@ package scheduler
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"maps"
 	"slices"
 	"strings"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/util"
 )
 
@@ -46,22 +46,22 @@ type vulnTxKey struct {
 }
 
 func UpdateVulnerabilitiesJob(db *sql.DB) {
-	logger.Info("Vulnerabilities: executing update task...")
+	slog.Info("Vulnerabilities: executing update task...")
 
 	lockName := "vulnerabilities"
 
 	locked, err := acquireLock(db, lockName)
 	if err != nil {
-		logger.Error("Error acquiring lock for vulnerabilities: " + err.Error())
+		slog.Error("Error acquiring lock for vulnerabilities: " + err.Error())
 		return
 	}
 	if !locked {
-		logger.Info("Another instance is running this vulnerabilities job.")
+		slog.Info("Another instance is running this vulnerabilities job.")
 		return
 	}
 	defer func() {
 		if err := releaseLock(db, lockName); err != nil {
-			logger.Error("Failed to release lock for " + lockName + ": " + err.Error())
+			slog.Error("Failed to release lock for " + lockName + ": " + err.Error())
 		}
 	}()
 
@@ -76,7 +76,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
     `
 	rows, err := db.Query(query)
 	if err != nil {
-		logger.Error("Vulnerabilities: " + err.Error())
+		slog.Error("Vulnerabilities: " + err.Error())
 		return
 	}
 	defer rows.Close()
@@ -92,7 +92,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 	for rows.Next() {
 		var pName, pVersion, pRelease, pOs, pRepo sql.NullString
 		if err := rows.Scan(&pName, &pVersion, &pRelease, &pOs, &pRepo); err != nil {
-			logger.Error("Vulnerabilities scan error: " + err.Error())
+			slog.Error("Vulnerabilities scan error: " + err.Error())
 			continue
 		}
 
@@ -109,7 +109,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 
 	packages := slices.Collect(maps.Values(pkgMap))
 
-	logger.Info(fmt.Sprintf("Vulnerabilities: found %d discrete package/ecosystem pairs to check.", len(packages)))
+	slog.Info(fmt.Sprintf("Vulnerabilities: found %d discrete package/ecosystem pairs to check.", len(packages)))
 
 	// Cache for detailed vulnerability data
 	fetchedVulns := make(map[string]*util.OSVVuln)
@@ -122,7 +122,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 	for i := 0; i < len(packages); i += chunkSize {
 		end := min(i+chunkSize, len(packages))
 
-		logger.Info(fmt.Sprintf("Vulnerabilities: fetching %d to %d of %d...", i+1, end, len(packages)))
+		slog.Info(fmt.Sprintf("Vulnerabilities: fetching %d to %d of %d...", i+1, end, len(packages)))
 
 		chunk := packages[i:end]
 		osvQueries := make([]util.OSVQuery, 0, len(chunk))
@@ -140,7 +140,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 
 		resp, err := util.FetchOSVVulnerabilitiesBatch(osvQueries)
 		if err != nil {
-			logger.Error("Vulnerabilities fetch error: " + err.Error())
+			slog.Error("Vulnerabilities fetch error: " + err.Error())
 			continue
 		}
 
@@ -169,7 +169,7 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 
 		// Fetch vulnerability details concurrently with a worker pool
 		if len(uniqueIDs) > 0 {
-			logger.Info(fmt.Sprintf("Vulnerabilities: fetching details for %d unique CVEs...", len(uniqueIDs)))
+			slog.Info(fmt.Sprintf("Vulnerabilities: fetching details for %d unique CVEs...", len(uniqueIDs)))
 			const workers = 10
 			idChan := make(chan string, len(uniqueIDs))
 			var wg sync.WaitGroup
@@ -260,9 +260,9 @@ func UpdateVulnerabilitiesJob(db *sql.DB) {
 		}
 	}
 
-	logger.Info("Vulnerabilities downloaded. Proceeding to calculate transaction scoreboards...")
+	slog.Info("Vulnerabilities downloaded. Proceeding to calculate transaction scoreboards...")
 	updateTransactionScoreboards(db, updatedPackages)
-	logger.Info("Vulnerabilities and transaction scoreboards updated successfully.")
+	slog.Info("Vulnerabilities and transaction scoreboards updated successfully.")
 }
 
 // batchUpsertVulnerabilities inserts/updates vulnerabilities in batches of 200 rows.
@@ -301,7 +301,7 @@ func batchUpsertVulnerabilities(db *sql.DB, records map[string]vulnRecord) {
 
 		_, err := db.Exec(stmt, args...)
 		if err != nil {
-			logger.Error("Batch upsert vulnerabilities error: " + err.Error())
+			slog.Error("Batch upsert vulnerabilities error: " + err.Error())
 		}
 	}
 }
@@ -332,18 +332,18 @@ func batchUpsertPackageVulnerabilities(db *sql.DB, records []pvRecord) {
 
 		_, err := db.Exec(stmt, args...)
 		if err != nil {
-			logger.Error("Batch upsert package_vulnerabilities error: " + err.Error())
+			slog.Error("Batch upsert package_vulnerabilities error: " + err.Error())
 		}
 	}
 }
 
 func updateTransactionScoreboards(db *sql.DB, updatedPackages map[vulnPkgKey]bool) {
 	if len(updatedPackages) == 0 {
-		logger.Info("Vulnerabilities: No packages were updated, skipping scoreboard recalculation.")
+		slog.Info("Vulnerabilities: No packages were updated, skipping scoreboard recalculation.")
 		return
 	}
 
-	logger.Info(fmt.Sprintf("Vulnerabilities: %d packages had vulnerability updates. Fetching affected transactions...", len(updatedPackages)))
+	slog.Info(fmt.Sprintf("Vulnerabilities: %d packages had vulnerability updates. Fetching affected transactions...", len(updatedPackages)))
 
 	// Build arrays of package names/versions/releases that were updated
 	var pkgNames, pkgVersions, pkgReleases []string
@@ -363,7 +363,7 @@ func updateTransactionScoreboards(db *sql.DB, updatedPackages map[vulnPkgKey]boo
 		)
 	`, pq.Array(pkgNames), pq.Array(pkgVersions), pq.Array(pkgReleases))
 	if err != nil {
-		logger.Error("Failed to fetch affected transactions: " + err.Error())
+		slog.Error("Failed to fetch affected transactions: " + err.Error())
 		// Fallback to processing all transactions
 		updateAllTransactionScoreboards(db)
 		return
@@ -379,7 +379,7 @@ func updateTransactionScoreboards(db *sql.DB, updatedPackages map[vulnPkgKey]boo
 	rows.Close()
 
 	total := len(keys)
-	logger.Info(fmt.Sprintf("Vulnerabilities: %d affected transactions to process (incremental).", total))
+	slog.Info(fmt.Sprintf("Vulnerabilities: %d affected transactions to process (incremental).", total))
 
 	if total == 0 {
 		return
@@ -390,13 +390,13 @@ func updateTransactionScoreboards(db *sql.DB, updatedPackages map[vulnPkgKey]boo
 
 // updateAllTransactionScoreboards is the fallback that processes all transactions.
 func updateAllTransactionScoreboards(db *sql.DB) {
-	logger.Info("Vulnerabilities: Fallback - fetching ALL transactions for scoreboard calculation...")
+	slog.Info("Vulnerabilities: Fallback - fetching ALL transactions for scoreboard calculation...")
 
 	var keys []vulnTxKey
 
 	rows, err := db.Query("SELECT DISTINCT transaction_id, machine_id FROM transactions")
 	if err != nil {
-		logger.Error("Failed to fetch transactions list: " + err.Error())
+		slog.Error("Failed to fetch transactions list: " + err.Error())
 		return
 	}
 	for rows.Next() {
@@ -408,7 +408,7 @@ func updateAllTransactionScoreboards(db *sql.DB) {
 	rows.Close()
 
 	total := len(keys)
-	logger.Info(fmt.Sprintf("Vulnerabilities: Total of %d transactions to process.", total))
+	slog.Info(fmt.Sprintf("Vulnerabilities: Total of %d transactions to process.", total))
 
 	processScoreboardBatch(db, keys)
 }
@@ -420,7 +420,7 @@ func processScoreboardBatch(db *sql.DB, keys []vulnTxKey) {
 		end := min(i+chunkSize, total)
 
 		pct := float64(i) / float64(total) * 100
-		logger.Info(fmt.Sprintf("Vulnerabilities: Processing batch %d to %d of %d (%.1f%%)...", i+1, end, total, pct))
+		slog.Info(fmt.Sprintf("Vulnerabilities: Processing batch %d to %d of %d (%.1f%%)...", i+1, end, total, pct))
 
 		chunk := keys[i:end]
 		txnIDs := make([]string, 0, len(chunk))
@@ -525,7 +525,7 @@ WHERE t.transaction_id = s.transaction_id
 
 		_, err := db.Exec(stmt, pq.Array(txnIDs), pq.Array(mchnIDs))
 		if err != nil {
-			logger.Error("Failed to update transaction scoreboards for batch: " + err.Error())
+			slog.Error("Failed to update transaction scoreboards for batch: " + err.Error())
 		}
 	}
 }

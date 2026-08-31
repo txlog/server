@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 	"github.com/txlog/server/util"
 )
@@ -150,7 +150,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 
 		err = database.QueryRowContext(c.Request.Context(), countQuery, queryArgs...).Scan(&total)
 		if err != nil {
-			logger.Error("Error counting assets:" + err.Error())
+			slog.Error("Error counting assets:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -178,7 +178,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 		rows, err = database.QueryContext(c.Request.Context(), selectQuery, queryArgs...)
 
 		if err != nil {
-			logger.Error("Error listing assets:" + err.Error())
+			slog.Error("Error listing assets:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -200,7 +200,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				&asset.NeedsRestarting,
 			)
 			if err != nil {
-				logger.Error("Error iterating assets:" + err.Error())
+				slog.Error("Error iterating assets:" + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 					"error": err.Error(),
 				})
@@ -224,7 +224,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
       FROM statistics;`)
 
 		if err != nil {
-			logger.Error("Error listing executions:" + err.Error())
+			slog.Error("Error listing executions:" + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"error": err.Error(),
 			})
@@ -244,7 +244,7 @@ func GetAssetsIndex(database *sql.DB) gin.HandlerFunc {
 				&statistic.UpdatedAt,
 			)
 			if err != nil {
-				logger.Error("Error iterating machine_id:" + err.Error())
+				slog.Error("Error iterating machine_id:" + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 					"error": err.Error(),
 				})
@@ -303,7 +303,7 @@ func DeleteMachineID(database *sql.DB) gin.HandlerFunc {
 		defer func() {
 			if p := recover(); p != nil {
 				tx.Rollback()
-				logger.Error(fmt.Sprintf("Critical panic caught deleting machine %s: %v", machineID, p))
+				slog.Error(fmt.Sprintf("Critical panic caught deleting machine %s: %v", machineID, p))
 				panic(p)
 			}
 		}()

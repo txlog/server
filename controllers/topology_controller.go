@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"database/sql"
+	"log/slog"
 	"net/http"
 	"slices"
 
 	"github.com/gin-gonic/gin"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 )
 
@@ -59,7 +59,7 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 		// Check if any patterns are configured.
 		patterns, err := tm.ListPatterns()
 		if err != nil {
-			logger.Error("Failed to list topology patterns: " + err.Error())
+			slog.Error("Failed to list topology patterns: " + err.Error())
 		}
 		hasPatterns := len(patterns) > 0
 
@@ -143,7 +143,7 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 		assetsQuery := buildTopologyAssetsQuery(envCondition, svcCondition)
 		rows, err := db.QueryContext(c.Request.Context(), assetsQuery)
 		if err != nil {
-			logger.Error("Failed to query topology assets: " + err.Error())
+			slog.Error("Failed to query topology assets: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{"error": err.Error()})
 			return
 		}
@@ -167,7 +167,7 @@ func GetTopologyIndex(db *sql.DB) gin.HandlerFunc {
 				&agentVersion, &os,
 				&needsRestarting,
 			); err != nil {
-				logger.Error("Failed to scan topology row: " + err.Error())
+				slog.Error("Failed to scan topology row: " + err.Error())
 				continue
 			}
 

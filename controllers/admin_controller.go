@@ -4,13 +4,13 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/txlog/server/database"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 	"github.com/txlog/server/scheduler"
 	"github.com/txlog/server/util"
@@ -21,7 +21,7 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		users, err := getAllUsers(db)
 		if err != nil {
-			logger.Error("Failed to get users: " + err.Error())
+			slog.Error("Failed to get users: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Internal Server Error",
 				"error": "Failed to load users",
@@ -32,7 +32,7 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 		// Get migration status
 		migrationStatus, err := getMigrationStatus(db)
 		if err != nil {
-			logger.Error("Failed to get migration status: " + err.Error())
+			slog.Error("Failed to get migration status: " + err.Error())
 			// Don't fail the page, just show empty migration status
 			migrationStatus = &models.MigrationStatus{}
 		}
@@ -40,7 +40,7 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 		// Get API keys
 		apiKeys, err := getAllAPIKeys(db)
 		if err != nil {
-			logger.Error("Failed to get API keys: " + err.Error())
+			slog.Error("Failed to get API keys: " + err.Error())
 			// Don't fail the page, just show empty API keys list
 			apiKeys = []models.ApiKey{}
 		}
@@ -50,7 +50,7 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 		// Get inactive assets count for housekeeping section
 		inactiveAssetsCount, err := getInactiveAssetsCount(db)
 		if err != nil {
-			logger.Error("Failed to get inactive assets count: " + err.Error())
+			slog.Error("Failed to get inactive assets count: " + err.Error())
 			inactiveAssetsCount = 0
 		}
 
@@ -58,17 +58,17 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 		tm := models.NewTopologyManager(db)
 		topologyPatterns, err := tm.ListPatterns()
 		if err != nil {
-			logger.Error("Failed to get topology patterns: " + err.Error())
+			slog.Error("Failed to get topology patterns: " + err.Error())
 			topologyPatterns = []models.TopologyPattern{}
 		}
 		environmentNames, err := tm.ListEnvironmentNames()
 		if err != nil {
-			logger.Error("Failed to get environment names: " + err.Error())
+			slog.Error("Failed to get environment names: " + err.Error())
 			environmentNames = []models.EnvironmentName{}
 		}
 		serviceNames, err := tm.ListServiceNames()
 		if err != nil {
-			logger.Error("Failed to get service names: " + err.Error())
+			slog.Error("Failed to get service names: " + err.Error())
 			serviceNames = []models.ServiceName{}
 		}
 
@@ -102,12 +102,12 @@ func PostAdminUpdateUser(db *sql.DB) gin.HandlerFunc {
 
 		err = updateUser(db, userID, isActive, isAdmin)
 		if err != nil {
-			logger.Error("Failed to update user: " + err.Error())
+			slog.Error("Failed to update user: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user"})
 			return
 		}
 
-		logger.Info("User " + userIDStr + " updated successfully")
+		slog.Info("User " + userIDStr + " updated successfully")
 		c.Redirect(http.StatusSeeOther, "/admin")
 	}
 }
@@ -124,12 +124,12 @@ func PostAdminDeleteUser(db *sql.DB) gin.HandlerFunc {
 
 		err = deactivateUser(db, userID)
 		if err != nil {
-			logger.Error("Failed to deactivate user: " + err.Error())
+			slog.Error("Failed to deactivate user: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to deactivate user"})
 			return
 		}
 
-		logger.Info("User " + userIDStr + " deactivated successfully")
+		slog.Info("User " + userIDStr + " deactivated successfully")
 		c.Redirect(http.StatusSeeOther, "/admin")
 	}
 }
@@ -195,7 +195,7 @@ func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// First check if database is dirty and force clean if needed
 		if err := database.ForceCleanIfDirty(); err != nil {
-			logger.Error("Failed to clean dirty state: " + err.Error())
+			slog.Error("Failed to clean dirty state: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Migration Error",
 				"error": "Failed to clean dirty state: " + err.Error(),
@@ -206,7 +206,7 @@ func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 		// Apply all pending migrations using database package function
 		err := database.RunAllMigrations()
 		if err != nil {
-			logger.Error("Failed to run migrations: " + err.Error())
+			slog.Error("Failed to run migrations: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Migration Error",
 				"error": "Failed to apply migrations: " + err.Error(),
@@ -214,7 +214,7 @@ func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		logger.Info("All pending migrations applied successfully via admin panel")
+		slog.Info("All pending migrations applied successfully via admin panel")
 		c.Redirect(http.StatusSeeOther, "/admin?migration_success=1")
 	}
 }
@@ -224,7 +224,7 @@ func GetCronLockStatus(db *sql.DB, lockName string) bool {
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM cron_lock WHERE job_name = $1", lockName).Scan(&count)
 	if err != nil {
-		logger.Error("Failed to check cron lock status for " + lockName + ": " + err.Error())
+		slog.Error("Failed to check cron lock status for " + lockName + ": " + err.Error())
 		return false
 	}
 	return count > 0
@@ -258,7 +258,7 @@ func PostAdminResetOSV(db *sql.DB) gin.HandlerFunc {
 		`
 		_, err := db.Exec(query)
 		if err != nil {
-			logger.Error("Failed to reset vulnerabilities database: " + err.Error())
+			slog.Error("Failed to reset vulnerabilities database: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Database Error",
 				"error": "Failed to reset vulnerabilities database: " + err.Error(),
@@ -368,7 +368,7 @@ func PostAdminCreateAPIKey(db *sql.DB) gin.HandlerFunc {
 		// Generate API key
 		fullKey, keyHash, keyPrefix, err := util.GenerateAPIKey()
 		if err != nil {
-			logger.Error("Failed to generate API key: " + err.Error())
+			slog.Error("Failed to generate API key: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate API key"})
 			return
 		}
@@ -390,12 +390,12 @@ func PostAdminCreateAPIKey(db *sql.DB) gin.HandlerFunc {
 		`
 		err = db.QueryRow(query, name, keyHash, keyPrefix, createdBy, time.Now()).Scan(&keyID)
 		if err != nil {
-			logger.Error("Failed to insert API key: " + err.Error())
+			slog.Error("Failed to insert API key: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create API key"})
 			return
 		}
 
-		logger.Info(fmt.Sprintf("API key created: ID=%d, Name=%s", keyID, name))
+		slog.Info(fmt.Sprintf("API key created: ID=%d, Name=%s", keyID, name))
 
 		// Return the full key (this is the only time it will be shown)
 		c.JSON(http.StatusOK, gin.H{
@@ -421,12 +421,12 @@ func PostAdminRevokeAPIKey(db *sql.DB) gin.HandlerFunc {
 		query := `UPDATE api_keys SET is_active = false WHERE id = $1`
 		_, err = db.Exec(query, keyID)
 		if err != nil {
-			logger.Error("Failed to revoke API key: " + err.Error())
+			slog.Error("Failed to revoke API key: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to revoke API key"})
 			return
 		}
 
-		logger.Info(fmt.Sprintf("API key revoked: ID=%d", keyID))
+		slog.Info(fmt.Sprintf("API key revoked: ID=%d", keyID))
 		c.Redirect(http.StatusSeeOther, "/admin?apikey_revoked=1")
 	}
 }
@@ -444,12 +444,12 @@ func DeleteAdminAPIKey(db *sql.DB) gin.HandlerFunc {
 		query := `DELETE FROM api_keys WHERE id = $1`
 		_, err = db.Exec(query, keyID)
 		if err != nil {
-			logger.Error("Failed to delete API key: " + err.Error())
+			slog.Error("Failed to delete API key: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete API key"})
 			return
 		}
 
-		logger.Info(fmt.Sprintf("API key deleted: ID=%d", keyID))
+		slog.Info(fmt.Sprintf("API key deleted: ID=%d", keyID))
 		c.Redirect(http.StatusSeeOther, "/admin?apikey_deleted=1")
 	}
 }
@@ -477,7 +477,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 			  AND last_seen < NOW() - INTERVAL '15 days'
 		`)
 		if err != nil {
-			logger.Error("Failed to query inactive assets: " + err.Error())
+			slog.Error("Failed to query inactive assets: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Cleanup Error",
 				"error": "Failed to query inactive assets: " + err.Error(),
@@ -490,7 +490,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 		for rows.Next() {
 			var id string
 			if err := rows.Scan(&id); err != nil {
-				logger.Error("Failed to scan inactive asset: " + err.Error())
+				slog.Error("Failed to scan inactive asset: " + err.Error())
 				c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 					"title": "Cleanup Error",
 					"error": "Failed to scan inactive asset: " + err.Error(),
@@ -500,7 +500,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 			machineIDs = append(machineIDs, id)
 		}
 		if err := rows.Err(); err != nil {
-			logger.Error("Error iterating inactive assets: " + err.Error())
+			slog.Error("Error iterating inactive assets: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Cleanup Error",
 				"error": "Error iterating inactive assets: " + err.Error(),
@@ -516,7 +516,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 		// Delete all data in a single transaction
 		tx, err := db.Begin()
 		if err != nil {
-			logger.Error("Failed to start cleanup transaction: " + err.Error())
+			slog.Error("Failed to start cleanup transaction: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Cleanup Error",
 				"error": "Failed to start transaction: " + err.Error(),
@@ -540,7 +540,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 		_, err = tx.Exec(`DELETE FROM transaction_items WHERE ` + inactiveSubquery)
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Failed to delete transaction_items for inactive assets: " + err.Error())
+			slog.Error("Failed to delete transaction_items for inactive assets: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Cleanup Error",
 				"error": "Failed to delete transaction items: " + err.Error(),
@@ -551,7 +551,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 		_, err = tx.Exec(`DELETE FROM transactions WHERE ` + inactiveSubquery)
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Failed to delete transactions for inactive assets: " + err.Error())
+			slog.Error("Failed to delete transactions for inactive assets: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Cleanup Error",
 				"error": "Failed to delete transactions: " + err.Error(),
@@ -562,7 +562,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 		_, err = tx.Exec(`DELETE FROM executions WHERE ` + inactiveSubquery)
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Failed to delete executions for inactive assets: " + err.Error())
+			slog.Error("Failed to delete executions for inactive assets: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Cleanup Error",
 				"error": "Failed to delete executions: " + err.Error(),
@@ -573,7 +573,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 		_, err = tx.Exec(`DELETE FROM assets WHERE is_active = true AND last_seen < NOW() - INTERVAL '15 days'`)
 		if err != nil {
 			tx.Rollback()
-			logger.Error("Failed to delete inactive assets: " + err.Error())
+			slog.Error("Failed to delete inactive assets: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Cleanup Error",
 				"error": "Failed to delete assets: " + err.Error(),
@@ -582,7 +582,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 		}
 
 		if err := tx.Commit(); err != nil {
-			logger.Error("Failed to commit cleanup transaction: " + err.Error())
+			slog.Error("Failed to commit cleanup transaction: " + err.Error())
 			c.HTML(http.StatusInternalServerError, "500.html", gin.H{
 				"title": "Cleanup Error",
 				"error": "Failed to commit transaction: " + err.Error(),
@@ -590,7 +590,7 @@ func PostAdminCleanupInactiveAssets(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 
-		logger.Info(fmt.Sprintf("Inactive assets cleanup completed: %d assets removed", len(machineIDs)))
+		slog.Info(fmt.Sprintf("Inactive assets cleanup completed: %d assets removed", len(machineIDs)))
 		c.Redirect(http.StatusSeeOther, "/admin?cleanup_success=1")
 	}
 }

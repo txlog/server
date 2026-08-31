@@ -7,12 +7,12 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/coreos/go-oidc/v3/oidc"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 	"golang.org/x/oauth2"
 )
@@ -221,7 +221,7 @@ func (s *OIDCService) CreateOrUpdateUser(ctx context.Context, idToken *oidc.IDTo
 
 	// Log if this is the first admin user
 	if isAdmin {
-		logger.Info(fmt.Sprintf("First user created as administrator: %s (%s)", user.Name, user.Email))
+		slog.Info(fmt.Sprintf("First user created as administrator: %s (%s)", user.Name, user.Email))
 	}
 
 	return user, nil

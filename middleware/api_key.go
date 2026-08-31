@@ -7,12 +7,12 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	logger "github.com/txlog/server/logger"
 )
 
 // APIKeyMiddleware validates API keys for /v1 endpoints
@@ -41,7 +41,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 			}
 
 			// No API key and no valid session
-			logger.Warn("API request without API key from " + c.ClientIP())
+			slog.Warn("API request without API key from " + c.ClientIP())
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "API key required. Please provide X-API-Key header.",
 			})
@@ -51,7 +51,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 
 		// Validate API key format (should start with txlog_)
 		if !strings.HasPrefix(apiKey, "txlog_") {
-			logger.Warn("API request with invalid key format from " + c.ClientIP())
+			slog.Warn("API request with invalid key format from " + c.ClientIP())
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid API key format.",
 			})
@@ -74,7 +74,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 		err := db.QueryRow(query, keyHash).Scan(&keyID, &isActive)
 
 		if errors.Is(err, sql.ErrNoRows) {
-			logger.Warn("API request with non-existent key from " + c.ClientIP())
+			slog.Warn("API request with non-existent key from " + c.ClientIP())
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid API key.",
 			})
@@ -83,7 +83,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 		}
 
 		if err != nil {
-			logger.Error("Database error validating API key: " + err.Error())
+			slog.Error("Database error validating API key: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "Internal server error.",
 			})
@@ -92,7 +92,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 		}
 
 		if !isActive {
-			logger.Warn(fmt.Sprintf("API request with inactive key (ID: %d) from %s", keyID, c.ClientIP()))
+			slog.Warn(fmt.Sprintf("API request with inactive key (ID: %d) from %s", keyID, c.ClientIP()))
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid API key.",
 			})
@@ -108,7 +108,7 @@ func APIKeyMiddleware(db *sql.DB) gin.HandlerFunc {
 			updateQuery := `UPDATE api_keys SET last_used_at = $1 WHERE id = $2`
 			_, err := db.ExecContext(ctx, updateQuery, time.Now(), id)
 			if err != nil {
-				logger.Error("Failed to update last_used_at for API key: " + err.Error())
+				slog.Error("Failed to update last_used_at for API key: " + err.Error())
 			}
 		}(keyID)
 

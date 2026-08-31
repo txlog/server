@@ -69,9 +69,6 @@ func main() {
 
 	scheduler.StartScheduler(database.Db)
 
-	// Inject the background task trigger into controllers safely without direct package cycle
-	controllers.SetSchedulerOSVTrigger(func() { scheduler.UpdateVulnerabilitiesJob(database.Db) })
-
 	// Initialize OIDC service (optional)
 	var oidcService *auth.OIDCService
 	oidcService, err := auth.NewOIDCService(database.Db)
@@ -202,15 +199,14 @@ func main() {
 	}
 	r.GET("/assets/:machine_id", controllers.GetMachineID(database.Db))
 	r.GET("/executions/:execution_id", controllers.GetExecutionID(database.Db))
-	r.GET("/insights", controllers.GetInsightsIndex)
 	r.GET("/license", controllers.GetLicensesIndex)
 	r.GET("/analytics/progression", controllers.GetPackagesByWeekIndex(database.Db))
 	r.GET("/api/packages-by-month", controllers.GetPackagesByMonth(database.Db))
 	r.GET("/packages/:name", controllers.GetPackageByName(database.Db))
 
 	// Analytics pages
-	r.GET("/analytics/anomalies", controllers.GetAnalyticsAnomalies(database.Db))
-	r.GET("/analytics/security", controllers.GetAnalyticsSecurity(database.Db))
+	r.GET("/analytics/anomalies", controllers.GetAnalyticsAnomalies)
+	r.GET("/analytics/security", controllers.GetAnalyticsSecurity)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(
 		swaggerfiles.Handler,

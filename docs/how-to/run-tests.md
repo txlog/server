@@ -50,4 +50,5 @@ end-to-end.
 go test ./tests -v
 ```
 
-For more details on the testing strategy, see [TESTING.md](../TESTING.md).
+For more details on the testing strategy, see
+[Testing Strategy](../explanation/testing-strategy.md).

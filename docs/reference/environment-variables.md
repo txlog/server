@@ -44,6 +44,7 @@ Configuration reference for Txlog Server.
 | `LDAP_USER_FILTER`   | No       | Filter for users (e.g., `(uid=%s)`). |
 | `LDAP_ADMIN_GROUP`   | No       | DN of admin group.                   |
 | `LDAP_VIEWER_GROUP`  | No       | DN of viewer group.                  |
+| `LDAP_GROUP_FILTER`  | No       | Membership filter (`(member=%s)`).   |
 
 ## Scheduler & Retention
 

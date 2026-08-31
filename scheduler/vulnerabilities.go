@@ -45,25 +45,15 @@ type vulnTxKey struct {
 	MachineID     string
 }
 
+// UpdateVulnerabilitiesJob refreshes the OSV vulnerability data. It runs on the
+// CRON_OSV_EXPRESSION schedule and can also be triggered from the admin panel;
+// either way only one instance runs it at a time.
 func UpdateVulnerabilitiesJob(db *sql.DB) {
+	withLock(db, "vulnerabilities", func() { updateVulnerabilities(db) })
+}
+
+func updateVulnerabilities(db *sql.DB) {
 	slog.Info("Vulnerabilities: executing update task...")
-
-	lockName := "vulnerabilities"
-
-	locked, err := acquireLock(db, lockName)
-	if err != nil {
-		slog.Error("Error acquiring lock for vulnerabilities: " + err.Error())
-		return
-	}
-	if !locked {
-		slog.Info("Another instance is running this vulnerabilities job.")
-		return
-	}
-	defer func() {
-		if err := releaseLock(db, lockName); err != nil {
-			slog.Error("Failed to release lock for " + lockName + ": " + err.Error())
-		}
-	}()
 
 	// Extract all distinct packages from transaction items, joined with asset OS.
 	query := `

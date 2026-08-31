@@ -18,6 +18,7 @@ linters:
         - (*database/sql.Rows).Close
         - (*database/sql.Tx).Rollback
         - (*database/sql.DB).Close
+        - (*database/sql.Conn).Close
         - (io.Closer).Close
         - (io.ReadCloser).Close
         - (*github.com/go-ldap/ldap/v3.Conn).Close

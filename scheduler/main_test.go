@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"database/sql"
+	"sync"
 	"testing"
 	"time"
 
@@ -25,150 +26,104 @@ func setupTestDB(t *testing.T) *sql.DB {
 
 // cleanupTestData removes all test data
 func cleanupTestData(t *testing.T, db *sql.DB) {
-	_, err := db.Exec("DELETE FROM cron_lock WHERE job_name LIKE 'test-%'")
-	if err != nil {
-		t.Logf("Warning: Failed to cleanup cron_lock: %v", err)
-	}
-	_, err = db.Exec("DELETE FROM executions WHERE machine_id LIKE 'scheduler-test-%'")
+	_, err := db.Exec("DELETE FROM executions WHERE machine_id LIKE 'scheduler-test-%'")
 	if err != nil {
 		t.Logf("Warning: Failed to cleanup executions: %v", err)
 	}
 }
 
-// TestAcquireLock tests the acquireLock function
-func TestAcquireLock(t *testing.T) {
+// TestWithLock covers the advisory lock that keeps two instances from running
+// the same job at once: it runs the work when the lock is free, skips it when
+// another holder has it, and gives the lock back when the work returns.
+func TestWithLock(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
-	defer cleanupTestData(t, db)
 
-	lockName := "test-lock-1"
+	const lockName = "test-with-lock"
 
-	t.Run("Acquire lock successfully", func(t *testing.T) {
-		locked, err := acquireLock(db, lockName)
-		if err != nil {
-			t.Fatalf("Failed to acquire lock: %v", err)
-		}
-
-		if !locked {
-			t.Error("Expected lock to be acquired, but it was not")
-		}
-
-		// Verify lock exists in database
-		var count int
-		err = db.QueryRow("SELECT COUNT(*) FROM cron_lock WHERE job_name = $1", lockName).Scan(&count)
-		if err != nil {
-			t.Fatalf("Failed to query lock: %v", err)
-		}
-
-		if count != 1 {
-			t.Errorf("Expected 1 lock entry, got %d", count)
+	t.Run("Runs the function when the lock is free", func(t *testing.T) {
+		ran := false
+		withLock(db, lockName, func() { ran = true })
+		if !ran {
+			t.Error("Expected withLock to run the function")
 		}
 	})
 
-	t.Run("Cannot acquire already locked job", func(t *testing.T) {
-		locked, err := acquireLock(db, lockName)
-		if err != nil {
-			t.Fatalf("Failed to attempt lock acquisition: %v", err)
-		}
+	t.Run("Releases the lock when the function returns", func(t *testing.T) {
+		withLock(db, lockName, func() {})
 
-		if locked {
-			t.Error("Expected lock acquisition to fail, but it succeeded")
+		ran := false
+		withLock(db, lockName, func() { ran = true })
+		if !ran {
+			t.Error("Expected the lock to be free for a second call")
+		}
+	})
+
+	t.Run("Skips the function while another holder has the lock", func(t *testing.T) {
+		inner := false
+		withLock(db, lockName, func() {
+			// A nested call stands in for a second instance: the lock lives on
+			// its own connection, so this competes for it exactly as another
+			// process would.
+			withLock(db, lockName, func() { inner = true })
+
+			if !IsJobRunning(db, lockName) {
+				t.Error("Expected IsJobRunning to report the job as running")
+			}
+		})
+
+		if inner {
+			t.Error("Expected the nested call to be skipped while the lock was held")
+		}
+	})
+
+	t.Run("Reports the job as not running once the lock is released", func(t *testing.T) {
+		withLock(db, lockName, func() {})
+
+		if IsJobRunning(db, lockName) {
+			t.Error("Expected IsJobRunning to report the job as not running")
 		}
 	})
 }
 
-// TestReleaseLock tests the releaseLock function
-func TestReleaseLock(t *testing.T) {
+// TestConcurrentWithLock verifies that exactly one of several simultaneous
+// callers gets to run.
+func TestConcurrentWithLock(t *testing.T) {
 	db := setupTestDB(t)
 	defer db.Close()
-	defer cleanupTestData(t, db)
 
-	lockName := "test-lock-2"
+	const lockName = "test-concurrent-lock"
 
-	t.Run("Release existing lock", func(t *testing.T) {
-		// First acquire the lock
-		locked, err := acquireLock(db, lockName)
-		if err != nil {
-			t.Fatalf("Failed to acquire lock: %v", err)
-		}
+	var mu sync.Mutex
+	ran := 0
+	release := make(chan struct{})
+	var wg sync.WaitGroup
 
-		if !locked {
-			t.Fatal("Lock should have been acquired")
-		}
+	for range 5 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			withLock(db, lockName, func() {
+				mu.Lock()
+				ran++
+				mu.Unlock()
+				// Hold the lock until every goroutine has had its attempt, so
+				// the losers cannot simply be running one after the other.
+				<-release
+			})
+		}()
+	}
 
-		// Now release it
-		err = releaseLock(db, lockName)
-		if err != nil {
-			t.Fatalf("Failed to release lock: %v", err)
-		}
+	// Give the losers time to fail their attempt, then let the winner finish.
+	time.Sleep(500 * time.Millisecond)
+	close(release)
+	wg.Wait()
 
-		// Verify lock is removed
-		var count int
-		err = db.QueryRow("SELECT COUNT(*) FROM cron_lock WHERE job_name = $1", lockName).Scan(&count)
-		if err != nil {
-			t.Fatalf("Failed to query lock: %v", err)
-		}
-
-		if count != 0 {
-			t.Errorf("Expected 0 lock entries after release, got %d", count)
-		}
-	})
-
-	t.Run("Release non-existent lock does not error", func(t *testing.T) {
-		err := releaseLock(db, "test-lock-nonexistent")
-		if err != nil {
-			t.Errorf("Expected no error when releasing non-existent lock, got: %v", err)
-		}
-	})
-}
-
-// TestLockAcquireReleaseFlow tests the complete lock lifecycle
-func TestLockAcquireReleaseFlow(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-	defer cleanupTestData(t, db)
-
-	lockName := "test-lock-flow"
-
-	t.Run("Complete lock lifecycle", func(t *testing.T) {
-		// Acquire lock
-		locked, err := acquireLock(db, lockName)
-		if err != nil {
-			t.Fatalf("Failed to acquire lock: %v", err)
-		}
-		if !locked {
-			t.Fatal("Lock should have been acquired")
-		}
-
-		// Try to acquire again (should fail)
-		locked, err = acquireLock(db, lockName)
-		if err != nil {
-			t.Fatalf("Failed to attempt second acquisition: %v", err)
-		}
-		if locked {
-			t.Error("Second acquisition should have failed")
-		}
-
-		// Release lock
-		err = releaseLock(db, lockName)
-		if err != nil {
-			t.Fatalf("Failed to release lock: %v", err)
-		}
-
-		// Acquire again (should succeed now)
-		locked, err = acquireLock(db, lockName)
-		if err != nil {
-			t.Fatalf("Failed to re-acquire lock: %v", err)
-		}
-		if !locked {
-			t.Error("Lock should have been re-acquired after release")
-		}
-
-		// Cleanup
-		if err := releaseLock(db, lockName); err != nil {
-			t.Errorf("Failed to release lock: %v", err)
-		}
-	})
+	mu.Lock()
+	defer mu.Unlock()
+	if ran != 1 {
+		t.Errorf("Expected exactly 1 goroutine to run the job, got %d", ran)
+	}
 }
 
 // TestHousekeepingJob tests the housekeepingJob function
@@ -324,45 +279,6 @@ func TestHousekeepingJobWithInvalidRetention(t *testing.T) {
 		// Should still have the execution (invalid retention is ignored)
 		if countBefore != countAfter {
 			t.Logf("Note: Executions count changed from %d to %d with invalid retention", countBefore, countAfter)
-		}
-	})
-}
-
-// TestConcurrentLockAcquisition tests that locks prevent concurrent execution
-func TestConcurrentLockAcquisition(t *testing.T) {
-	db := setupTestDB(t)
-	defer db.Close()
-	defer cleanupTestData(t, db)
-
-	lockName := "test-concurrent-lock"
-
-	t.Run("Multiple goroutines try to acquire same lock", func(t *testing.T) {
-		results := make(chan bool, 5)
-
-		// Launch 5 goroutines trying to acquire the same lock
-		for range 5 {
-			go func() {
-				locked, _ := acquireLock(db, lockName)
-				results <- locked
-			}()
-		}
-
-		// Collect results
-		successCount := 0
-		for range 5 {
-			if <-results {
-				successCount++
-			}
-		}
-
-		// Only one should have succeeded
-		if successCount != 1 {
-			t.Errorf("Expected exactly 1 successful lock acquisition, got %d", successCount)
-		}
-
-		// Cleanup
-		if err := releaseLock(db, lockName); err != nil {
-			t.Errorf("Failed to release lock: %v", err)
 		}
 	})
 }

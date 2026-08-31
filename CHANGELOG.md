@@ -22,6 +22,30 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Removed
 
+- **Scheduler**: the `cron_lock` table, dropped by migration
+  `20260831210000_drop_cron_lock`. Scheduled jobs now coordinate through
+  PostgreSQL advisory locks (`pg_try_advisory_lock`), taken on a connection
+  pinned for the duration of the job.
+
+  This removes a whole failure mode rather than a few lines. A row-based lock
+  outlives the process that took it, so an instance killed mid-job left the row
+  behind and every later run of that job logged "another instance is running"
+  and skipped — until a reaper deleted locks older than twelve hours. That
+  reaper was itself a hazard: a job legitimately running past twelve hours
+  would have its own lock deleted and a second instance would start. An
+  advisory lock belongs to a session, so PostgreSQL releases it when the
+  backend goes away, and there is nothing to reap.
+
+  The four jobs each carried their own copy of the acquire/defer/release
+  dance; they now pass a closure to `withLock`. "Another instance is running
+  this job" moves from INFO to DEBUG, because the materialized-view refresh
+  runs every five minutes and would otherwise fill the log on any multi-replica
+  deployment.
+
+  The admin panel's "OSV update running" indicator reads `pg_locks` through
+  `scheduler.IsJobRunning`, which has no side effect on the lock it reports on.
+  `PostAdminResetOSV` no longer deletes a lock row: there is no stuck lock to
+  clear.
 - **Logging**: the `logger` package. Its `Error`, `Info`, `Debug` and `Warn`
   were four wrappers forwarding to `log/slog`, which has had package-level
   functions of the same names since Go 1.21. The 240 call sites use `slog`

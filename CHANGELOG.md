@@ -22,6 +22,24 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Removed
 
+- **Dependencies**: `github.com/tavsec/gin-healthcheck`. It served a single
+  route — `GET /health`, a database ping plus six "is this environment
+  variable set" checks — and dragged the MongoDB, Redis, InfluxDB and RabbitMQ
+  clients into the build for the checks the server never used. `/health` is
+  now nine lines in `main.go`. The compiled package count drops from 536 to
+  433, the module graph loses nine modules, and the binary loses 2.1 MB.
+
+  **Breaking for anyone parsing the response body.** It was a JSON array of
+  `{"name","pass"}` objects, one per check; it is now `{"status":"ok"}` or
+  `{"status":"unhealthy"}`. The status codes are unchanged — 200 healthy, 503
+  unhealthy — so Kubernetes liveness and readiness probes are unaffected. The
+  reason for a failure is logged rather than returned, since the endpoint is
+  unauthenticated and the error names the database host and port.
+
+  The six environment-variable checks are gone with it: `PGSQL_HOST` and its
+  siblings cannot be wrong while the ping succeeds.
+- **Utilities**: `util.Db`, a package-level `*sql.DB` that nothing ever read
+  or assigned, alongside `util.Check` and `util.CheckConfig`.
 - **Dashboard**: the `/insights` route. It rendered `insights.html`, a template
   that does not exist in `templates/`, so every request to it returned 500.
   The route and its controller are gone; the path now answers 404 like any

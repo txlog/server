@@ -12,7 +12,6 @@ import (
 	_ "github.com/joho/godotenv/autoload"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	healthcheck "github.com/tavsec/gin-healthcheck"
 	"github.com/txlog/server/auth"
 	"github.com/txlog/server/controllers"
 	v1API "github.com/txlog/server/controllers/api/v1"
@@ -130,9 +129,19 @@ func main() {
 		r.Static("/css", "./static/css")
 	}
 
-	if err := healthcheck.New(r, util.CheckConfig(), util.Check(database.Db)); err != nil {
-		logger.Error("Failed to register health check endpoint: " + err.Error())
-	}
+	// Liveness and readiness probe. Kubernetes reads the status code; the body
+	// is informational. A reachable database is the only thing worth checking —
+	// the PGSQL_* variables cannot be wrong while the ping succeeds.
+	r.GET("/health", func(c *gin.Context) {
+		if err := database.Db.PingContext(c.Request.Context()); err != nil {
+			// The endpoint is unauthenticated, so the reason stays in the log
+			// rather than in the body: it names the database host and port.
+			logger.Error("Health check failed: " + err.Error())
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unhealthy"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	r.NoRoute(controllers.Get404)
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -17,7 +18,6 @@ import (
 	v1API "github.com/txlog/server/controllers/api/v1"
 	"github.com/txlog/server/database"
 	_ "github.com/txlog/server/docs"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/middleware"
 	"github.com/txlog/server/models"
 	"github.com/txlog/server/scheduler"
@@ -47,8 +47,18 @@ var templateFS embed.FS
 // @in							header
 // @name						X-API-Key
 // @description				API key authentication for /v1 endpoints. Generate your API key in the admin panel at /admin
+// initLogger installs the process-wide slog handler, writing text to stdout at
+// the level named by LOG_LEVEL. An unset or unrecognised value means INFO.
+func initLogger() {
+	level := slog.LevelInfo
+	if err := level.UnmarshalText([]byte(os.Getenv("LOG_LEVEL"))); err != nil {
+		level = slog.LevelInfo
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level})))
+}
+
 func main() {
-	logger.InitLogger()
+	initLogger()
 
 	if os.Getenv("GIN_MODE") == "" {
 		gin.SetMode(gin.ReleaseMode)
@@ -59,11 +69,11 @@ func main() {
 	// Sync topology pattern regular expressions
 	tm := models.NewTopologyManager(database.Db)
 	if count, err := tm.SyncCompiledPatterns(); err != nil {
-		logger.Error("Failed to sync compiled topology patterns at startup: " + err.Error())
+		slog.Error("Failed to sync compiled topology patterns at startup: " + err.Error())
 	} else if count > 0 {
-		logger.Info(fmt.Sprintf("Topology: %d patterns synchronized with the current template engine.", count))
+		slog.Info(fmt.Sprintf("Topology: %d patterns synchronized with the current template engine.", count))
 	} else {
-		logger.Info("Topology: all patterns are up to date.")
+		slog.Info("Topology: all patterns are up to date.")
 	}
 
 	scheduler.StartScheduler(database.Db)
@@ -72,7 +82,7 @@ func main() {
 	var oidcService *auth.OIDCService
 	oidcService, err := auth.NewOIDCService(database.Db)
 	if err != nil {
-		logger.Error("Failed to initialize OIDC service: " + err.Error())
+		slog.Error("Failed to initialize OIDC service: " + err.Error())
 		os.Exit(1)
 	}
 
@@ -80,26 +90,26 @@ func main() {
 	var ldapService *auth.LDAPService
 	ldapService, err = auth.NewLDAPService(database.Db)
 	if err != nil {
-		logger.Error("Failed to initialize LDAP service: " + err.Error())
+		slog.Error("Failed to initialize LDAP service: " + err.Error())
 		os.Exit(1)
 	}
 
 	// Log authentication status
 	if oidcService != nil {
-		logger.Info("OIDC authentication enabled")
+		slog.Info("OIDC authentication enabled")
 	}
 	if ldapService != nil {
-		logger.Info("LDAP authentication enabled")
+		slog.Info("LDAP authentication enabled")
 	}
 	if oidcService == nil && ldapService == nil {
-		logger.Info("No authentication configured - API endpoints accessible without API key")
+		slog.Info("No authentication configured - API endpoints accessible without API key")
 	} else {
-		logger.Info("API key authentication required for /v1 endpoints")
+		slog.Info("API key authentication required for /v1 endpoints")
 	}
 
 	r := gin.Default()
 	if err := r.SetTrustedProxies(nil); err != nil {
-		logger.Error("Failed to configure trusted proxies: " + err.Error())
+		slog.Error("Failed to configure trusted proxies: " + err.Error())
 	}
 	r.Use(func(c *gin.Context) {
 		c.SetSameSite(http.SameSiteLaxMode)
@@ -136,7 +146,7 @@ func main() {
 		if err := database.Db.PingContext(c.Request.Context()); err != nil {
 			// The endpoint is unauthenticated, so the reason stays in the log
 			// rather than in the body: it names the database host and port.
-			logger.Error("Health check failed: " + err.Error())
+			slog.Error("Health check failed: " + err.Error())
 			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "unhealthy"})
 			return
 		}
@@ -261,7 +271,7 @@ func main() {
 	}
 
 	if err := r.Run(); err != nil {
-		logger.Error("Server terminated: " + err.Error())
+		slog.Error("Server terminated: " + err.Error())
 		os.Exit(1)
 	}
 }

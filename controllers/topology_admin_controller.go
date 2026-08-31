@@ -3,11 +3,11 @@ package controllers
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 )
 
@@ -31,12 +31,12 @@ func PostAdminTopologyCreatePattern(db *sql.DB) gin.HandlerFunc {
 		tm := models.NewTopologyManager(db)
 		p, err := tm.CreatePattern(template, order)
 		if err != nil {
-			logger.Error("Failed to create topology pattern: " + err.Error())
+			slog.Error("Failed to create topology pattern: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Topology pattern created: " + p.Template)
+		slog.Info("Topology pattern created: " + p.Template)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_saved=1")
 	}
 }
@@ -58,12 +58,12 @@ func PostAdminTopologyUpdatePattern(db *sql.DB) gin.HandlerFunc {
 
 		tm := models.NewTopologyManager(db)
 		if err := tm.UpdatePattern(id, template, order); err != nil {
-			logger.Error("Failed to update topology pattern: " + err.Error())
+			slog.Error("Failed to update topology pattern: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Topology pattern updated: id=" + idStr)
+		slog.Info("Topology pattern updated: id=" + idStr)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_saved=1")
 	}
 }
@@ -81,12 +81,12 @@ func PostAdminTopologyDeletePattern(db *sql.DB) gin.HandlerFunc {
 
 		tm := models.NewTopologyManager(db)
 		if err := tm.DeletePattern(id); err != nil {
-			logger.Error("Failed to delete topology pattern: " + err.Error())
+			slog.Error("Failed to delete topology pattern: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Topology pattern deleted: id=" + idStr)
+		slog.Info("Topology pattern deleted: id=" + idStr)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_deleted=1")
 	}
 }
@@ -110,7 +110,7 @@ func GetAdminTopologyPreview(db *sql.DB) gin.HandlerFunc {
 		}
 		hostnames, err := tm.PreviewPattern(res.CompiledPattern)
 		if err != nil {
-			logger.Error("Failed to preview topology pattern: " + err.Error())
+			slog.Error("Failed to preview topology pattern: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -135,7 +135,7 @@ func GetAdminTopologyPreviewEnv(db *sql.DB) gin.HandlerFunc {
 		tm := models.NewTopologyManager(db)
 		hostnames, err := tm.PreviewEnvironment(matchValue)
 		if err != nil {
-			logger.Error("Failed to preview environment match: " + err.Error())
+			slog.Error("Failed to preview environment match: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -159,7 +159,7 @@ func GetAdminTopologyPreviewSvc(db *sql.DB) gin.HandlerFunc {
 		tm := models.NewTopologyManager(db)
 		hostnames, err := tm.PreviewService(matchValue)
 		if err != nil {
-			logger.Error("Failed to preview service match: " + err.Error())
+			slog.Error("Failed to preview service match: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -190,12 +190,12 @@ func PostAdminTopologyCreateEnvironment(db *sql.DB) gin.HandlerFunc {
 		tm := models.NewTopologyManager(db)
 		e, err := tm.CreateEnvironmentName(matchValue, name)
 		if err != nil {
-			logger.Error("Failed to create environment name: " + err.Error())
+			slog.Error("Failed to create environment name: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Environment name created: " + e.MatchValue + " -> " + e.Name)
+		slog.Info("Environment name created: " + e.MatchValue + " -> " + e.Name)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_saved=1")
 	}
 }
@@ -216,12 +216,12 @@ func PostAdminTopologyUpdateEnvironment(db *sql.DB) gin.HandlerFunc {
 
 		tm := models.NewTopologyManager(db)
 		if err := tm.UpdateEnvironmentName(id, matchValue, name); err != nil {
-			logger.Error("Failed to update environment name: " + err.Error())
+			slog.Error("Failed to update environment name: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Environment name updated: id=" + idStr)
+		slog.Info("Environment name updated: id=" + idStr)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_saved=1")
 	}
 }
@@ -239,12 +239,12 @@ func PostAdminTopologyDeleteEnvironment(db *sql.DB) gin.HandlerFunc {
 
 		tm := models.NewTopologyManager(db)
 		if err := tm.DeleteEnvironmentName(id); err != nil {
-			logger.Error("Failed to delete environment name: " + err.Error())
+			slog.Error("Failed to delete environment name: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Environment name deleted: id=" + idStr)
+		slog.Info("Environment name deleted: id=" + idStr)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_deleted=1")
 	}
 }
@@ -275,12 +275,12 @@ func PostAdminTopologyCreateService(db *sql.DB) gin.HandlerFunc {
 		tm := models.NewTopologyManager(db)
 		s, err := tm.CreateServiceName(matchValue, name, hasPods, envIDs)
 		if err != nil {
-			logger.Error("Failed to create service name: " + err.Error())
+			slog.Error("Failed to create service name: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Service name created: " + s.MatchValue + " -> " + s.Name)
+		slog.Info("Service name created: " + s.MatchValue + " -> " + s.Name)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_saved=1")
 	}
 }
@@ -327,12 +327,12 @@ func PostAdminTopologyUpdateService(db *sql.DB) gin.HandlerFunc {
 
 		tm := models.NewTopologyManager(db)
 		if err := tm.UpdateServiceName(id, matchValue, name, hasPods, envIDs); err != nil {
-			logger.Error("Failed to update service name: " + err.Error())
+			slog.Error("Failed to update service name: " + err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Service name updated: id=" + idStr)
+		slog.Info("Service name updated: id=" + idStr)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_saved=1")
 	}
 }
@@ -350,12 +350,12 @@ func PostAdminTopologyDeleteService(db *sql.DB) gin.HandlerFunc {
 
 		tm := models.NewTopologyManager(db)
 		if err := tm.DeleteServiceName(id); err != nil {
-			logger.Error("Failed to delete service name: " + err.Error())
+			slog.Error("Failed to delete service name: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		logger.Info("Service name deleted: id=" + idStr)
+		slog.Info("Service name deleted: id=" + idStr)
 		c.Redirect(http.StatusSeeOther, "/admin?topology_deleted=1")
 	}
 }

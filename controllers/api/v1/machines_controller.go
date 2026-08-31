@@ -2,6 +2,7 @@ package v1
 
 import (
 	"database/sql"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
-	logger "github.com/txlog/server/logger"
 )
 
 type MachineID struct {
@@ -53,7 +53,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 		var paramCount int
 
 		if os != "" {
-			logger.Debug("os: " + os)
+			slog.Debug("os: " + os)
 			if os == "Undefined OS" {
 				os = ""
 			}
@@ -67,7 +67,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if agentVersion != "" {
-			logger.Debug("agent_version: " + agentVersion)
+			slog.Debug("agent_version: " + agentVersion)
 			if agentVersion == "with undefined version" {
 				agentVersion = ""
 			}
@@ -91,7 +91,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 		if err != nil && agentVersion != "" {
 			pqErr, ok := err.(*pq.Error)
 			if ok && pqErr.Code == "42703" { // undefined_column
-				logger.Info("Falling back to executions table for agent_version filter")
+				slog.Info("Falling back to executions table for agent_version filter")
 				query = `
     SELECT
       a.hostname,
@@ -141,7 +141,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 		}
 
 		if err != nil {
-			logger.Error("Error querying assets: " + err.Error())
+			slog.Error("Error querying assets: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -155,7 +155,7 @@ func GetMachines(database *sql.DB) gin.HandlerFunc {
 				&machine.MachineID,
 			)
 			if err != nil {
-				logger.Error("Error iterating assets: " + err.Error())
+				slog.Error("Error iterating assets: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
@@ -196,7 +196,7 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 		rows, err = database.QueryContext(c.Request.Context(), query)
 
 		if err != nil {
-			logger.Error("Error querying assets that require a restart: " + err.Error())
+			slog.Error("Error querying assets that require a restart: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -210,7 +210,7 @@ func GetAssetsRequiringRestart(database *sql.DB) gin.HandlerFunc {
 				&machine.MachineID,
 			)
 			if err != nil {
-				logger.Error("Error iterating assets: " + err.Error())
+				slog.Error("Error iterating assets: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}
@@ -242,7 +242,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			logger.Error("Error querying machine_id: " + err.Error())
+			slog.Error("Error querying machine_id: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -258,7 +258,7 @@ func GetMachineIDs(database *sql.DB) gin.HandlerFunc {
 				&firstSeen,
 			)
 			if err != nil {
-				logger.Error("Error iterating machine_id: " + err.Error())
+				slog.Error("Error iterating machine_id: " + err.Error())
 				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 				return
 			}

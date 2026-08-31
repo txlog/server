@@ -22,6 +22,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Removed
 
+- **Logging**: the `logger` package. Its `Error`, `Info`, `Debug` and `Warn`
+  were four wrappers forwarding to `log/slog`, which has had package-level
+  functions of the same names since Go 1.21. The 240 call sites use `slog`
+  directly, and `InitLogger` — the only part with any logic, reading
+  `LOG_LEVEL` — becomes a nine-line `initLogger` in `main.go`, its only caller,
+  which now installs the handler with `slog.SetDefault`.
+
+  Output is unchanged for the server: text format, stdout, level from
+  `LOG_LEVEL`. A test binary, which never called `InitLogger`, previously got a
+  stdout handler from the package's own default and now gets `slog`'s, which
+  writes to stderr.
 - **Documentation**: `docs/schema-compare.md` and `docs/txlog_expected.json`.
   The document was a 1,013-line design proposal for embedding a schema snapshot
   in the binary and validating the live database against it at runtime — a

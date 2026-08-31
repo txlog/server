@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 )
 
@@ -44,7 +44,7 @@ func GetAnomalies(database *sql.DB) gin.HandlerFunc {
 
 		report, err := detectAnomalies(c.Request.Context(), database, days, severityFilter)
 		if err != nil {
-			logger.Error("Error detecting anomalies: " + err.Error())
+			slog.Error("Error detecting anomalies: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error detecting anomalies: " + err.Error()})
 			return
 		}

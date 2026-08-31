@@ -3,12 +3,12 @@ package v1
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	logger "github.com/txlog/server/logger"
 )
 
 // MonthlyReportPackage represents a package update entry in the monthly report
@@ -63,14 +63,14 @@ func GetMonthlyReport(database *sql.DB) gin.HandlerFunc {
 
 		packages, err := getMonthlyPackageReport(c.Request.Context(), database, month, year)
 		if err != nil {
-			logger.Error("Error getting monthly package report: " + err.Error())
+			slog.Error("Error getting monthly package report: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
 
 		assetCount, err := getTotalActiveAssetsForReport(c.Request.Context(), database)
 		if err != nil {
-			logger.Error("Error getting total active assets: " + err.Error())
+			slog.Error("Error getting total active assets: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -200,7 +200,7 @@ func GetFixedVulnerabilities(database *sql.DB) gin.HandlerFunc {
 		`
 		rows, err := database.QueryContext(c.Request.Context(), query, days)
 		if err != nil {
-			logger.Error("Error getting vulnerability series: " + err.Error())
+			slog.Error("Error getting vulnerability series: " + err.Error())
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query vulnerabilities series"})
 			return
 		}

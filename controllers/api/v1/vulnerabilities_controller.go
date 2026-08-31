@@ -2,11 +2,11 @@ package v1
 
 import (
 	"database/sql"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	logger "github.com/txlog/server/logger"
 )
 
 type TransactionVulnerability struct {
@@ -53,7 +53,7 @@ func GetTransactionVulnerabilities(database *sql.DB) gin.HandlerFunc {
 		)
 
 		if err != nil {
-			logger.Error("Error querying transaction vulnerabilities: " + err.Error())
+			slog.Error("Error querying transaction vulnerabilities: " + err.Error())
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 			return
 		}
@@ -63,7 +63,7 @@ func GetTransactionVulnerabilities(database *sql.DB) gin.HandlerFunc {
 		for rows.Next() {
 			var v TransactionVulnerability
 			if err := rows.Scan(&v.ID, &v.Summary, &v.Severity, &v.CvssScore, &v.Package, &v.Version, &v.Type); err != nil {
-				logger.Error("Error scanning vulnerability: " + err.Error())
+				slog.Error("Error scanning vulnerability: " + err.Error())
 				continue
 			}
 			vulns = append(vulns, v)

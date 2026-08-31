@@ -6,12 +6,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/go-ldap/ldap/v3"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/models"
 )
 
@@ -115,7 +115,7 @@ func (s *LDAPService) Authenticate(username, password string) (*models.User, err
 		return nil, fmt.Errorf("username and password are required")
 	}
 
-	logger.Info(fmt.Sprintf("LDAP authentication attempt for user: %s", username))
+	slog.Info(fmt.Sprintf("LDAP authentication attempt for user: %s", username))
 
 	// Connect to LDAP
 	conn, err := s.connect()
@@ -124,21 +124,21 @@ func (s *LDAPService) Authenticate(username, password string) (*models.User, err
 	}
 	defer conn.Close()
 
-	logger.Debug("LDAP connection established")
+	slog.Debug("LDAP connection established")
 
 	// Bind with service account if configured
 	bindDN := os.Getenv("LDAP_BIND_DN")
 	bindPassword := os.Getenv("LDAP_BIND_PASSWORD")
 
 	if bindDN != "" && bindPassword != "" {
-		logger.Debug(fmt.Sprintf("Binding with service account: %s", bindDN))
+		slog.Debug(fmt.Sprintf("Binding with service account: %s", bindDN))
 		err = conn.Bind(bindDN, bindPassword)
 		if err != nil {
 			return nil, fmt.Errorf("failed to bind with service account: %w", err)
 		}
-		logger.Debug("Service account bind successful")
+		slog.Debug("Service account bind successful")
 	} else {
-		logger.Debug("No service account configured, using anonymous bind")
+		slog.Debug("No service account configured, using anonymous bind")
 	}
 
 	// Search for user
@@ -147,17 +147,17 @@ func (s *LDAPService) Authenticate(username, password string) (*models.User, err
 		return nil, fmt.Errorf("user not found: %w", err)
 	}
 
-	logger.Info(fmt.Sprintf("User found in LDAP: %s", userDN))
+	slog.Info(fmt.Sprintf("User found in LDAP: %s", userDN))
 
 	// Authenticate user
-	logger.Debug("Attempting user bind with provided credentials")
+	slog.Debug("Attempting user bind with provided credentials")
 	err = conn.Bind(userDN, password)
 	if err != nil {
-		logger.Warn(fmt.Sprintf("User bind failed for %s: %v", userDN, err))
+		slog.Warn(fmt.Sprintf("User bind failed for %s: %v", userDN, err))
 		return nil, fmt.Errorf("invalid credentials: %w", err)
 	}
 
-	logger.Debug("User credentials validated successfully")
+	slog.Debug("User credentials validated successfully")
 
 	// Re-bind with service account to check group membership
 	if bindDN != "" && bindPassword != "" {
@@ -234,7 +234,7 @@ func (s *LDAPService) searchUser(conn *ldap.Conn, username string) (string, map[
 	filter := fmt.Sprintf(userFilter, ldap.EscapeFilter(username))
 
 	// Log search parameters for debugging
-	logger.Debug(fmt.Sprintf("LDAP user search: baseDN=%s, filter=%s", baseDN, filter))
+	slog.Debug(fmt.Sprintf("LDAP user search: baseDN=%s, filter=%s", baseDN, filter))
 
 	searchRequest := ldap.NewSearchRequest(
 		baseDN,
@@ -250,24 +250,24 @@ func (s *LDAPService) searchUser(conn *ldap.Conn, username string) (string, map[
 
 	result, err := conn.Search(searchRequest)
 	if err != nil {
-		logger.Error(fmt.Sprintf("LDAP search failed: %v", err))
+		slog.Error(fmt.Sprintf("LDAP search failed: %v", err))
 		return "", nil, err
 	}
 
 	if len(result.Entries) == 0 {
-		logger.Warn(fmt.Sprintf("LDAP user not found with filter '%s' in base '%s'", filter, baseDN))
+		slog.Warn(fmt.Sprintf("LDAP user not found with filter '%s' in base '%s'", filter, baseDN))
 		return "", nil, fmt.Errorf("user not found")
 	}
 
 	if len(result.Entries) > 1 {
-		logger.Warn(fmt.Sprintf("Multiple LDAP users found with filter '%s': %d entries", filter, len(result.Entries)))
+		slog.Warn(fmt.Sprintf("Multiple LDAP users found with filter '%s': %d entries", filter, len(result.Entries)))
 		return "", nil, fmt.Errorf("multiple users found")
 	}
 
 	entry := result.Entries[0]
 	userDN := entry.DN
 
-	logger.Debug(fmt.Sprintf("LDAP user found: %s", userDN))
+	slog.Debug(fmt.Sprintf("LDAP user found: %s", userDN))
 
 	attrs := make(map[string]string)
 	for _, attr := range entry.Attributes {
@@ -294,7 +294,7 @@ func (s *LDAPService) checkGroupMembership(conn *ldap.Conn, userDN string) (bool
 	if adminGroup != "" {
 		isMember, err := s.isGroupMember(conn, userDN, adminGroup, groupFilter)
 		if err != nil {
-			logger.Error(fmt.Sprintf("Failed to check admin group membership: %v", err))
+			slog.Error(fmt.Sprintf("Failed to check admin group membership: %v", err))
 		} else {
 			isAdmin = isMember
 		}
@@ -304,7 +304,7 @@ func (s *LDAPService) checkGroupMembership(conn *ldap.Conn, userDN string) (bool
 	if viewerGroup != "" {
 		isMember, err := s.isGroupMember(conn, userDN, viewerGroup, groupFilter)
 		if err != nil {
-			logger.Error(fmt.Sprintf("Failed to check viewer group membership: %v", err))
+			slog.Error(fmt.Sprintf("Failed to check viewer group membership: %v", err))
 		} else {
 			isViewer = isMember
 		}
@@ -320,7 +320,7 @@ func (s *LDAPService) isGroupMember(conn *ldap.Conn, userDN, groupDN, groupFilte
 	if strings.Contains(groupFilter, "memberUid") {
 		// Extract uid from DN (e.g., "uid=john,ou=users,dc=example,dc=com" -> "john")
 		filterValue = extractUIDFromDN(userDN)
-		logger.Debug(fmt.Sprintf("Using memberUid filter, extracted uid: %s from DN: %s", filterValue, userDN))
+		slog.Debug(fmt.Sprintf("Using memberUid filter, extracted uid: %s from DN: %s", filterValue, userDN))
 	}
 
 	filter := fmt.Sprintf(groupFilter, ldap.EscapeFilter(filterValue))
@@ -462,7 +462,7 @@ func (s *LDAPService) createOrUpdateUser(username, email, name string, isAdmin b
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	logger.Info(fmt.Sprintf("LDAP user created: %s (%s) - Admin: %v", user.Name, user.Email, isAdmin))
+	slog.Info(fmt.Sprintf("LDAP user created: %s (%s) - Admin: %v", user.Name, user.Email, isAdmin))
 
 	return user, nil
 }

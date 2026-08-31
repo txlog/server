@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"embed"
 	"fmt"
+	"log/slog"
 	"os"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	_ "github.com/lib/pq"
-	logger "github.com/txlog/server/logger"
 )
 
 var Db *sql.DB
@@ -53,11 +53,11 @@ func ConnectDatabase() {
 
 	db, errSql := sql.Open("postgres", psqlSetup)
 	if errSql != nil {
-		logger.Error("There is an error while connecting to the database: " + errSql.Error())
+		slog.Error("There is an error while connecting to the database: " + errSql.Error())
 		panic(errSql)
 	} else {
 		Db = db
-		logger.Info("Database: connection established.")
+		slog.Info("Database: connection established.")
 	}
 
 	// Configure connection pool to prevent unbounded connection growth
@@ -65,49 +65,49 @@ func ConnectDatabase() {
 	db.SetMaxIdleConns(10)
 	db.SetConnMaxLifetime(5 * time.Minute)
 	db.SetConnMaxIdleTime(1 * time.Minute)
-	logger.Info("Database: connection pool configured (max_open=25, max_idle=10).")
+	slog.Info("Database: connection pool configured (max_open=25, max_idle=10).")
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		logger.Error("Failed to create database driver: " + err.Error())
+		slog.Error("Failed to create database driver: " + err.Error())
 		return
 	}
 
 	source, err := iofs.New(migrationsFS, "migrations")
 	if err != nil {
-		logger.Error("Failed to create migration source: " + err.Error())
+		slog.Error("Failed to create migration source: " + err.Error())
 		return
 	}
 
 	m, err := migrate.NewWithInstance("iofs", source, "postgres", driver)
 	if err != nil {
-		logger.Error("Failed to create migration instance: " + err.Error())
+		slog.Error("Failed to create migration instance: " + err.Error())
 		return
 	}
 
 	// Check if database is in a dirty state
 	version, dirty, err := m.Version()
 	if err != nil && err != migrate.ErrNilVersion {
-		logger.Error("Failed to get migration version: " + err.Error())
+		slog.Error("Failed to get migration version: " + err.Error())
 	}
 
 	// If database is dirty, try to force to the current version and retry
 	if dirty {
-		logger.Warn(fmt.Sprintf("Database is in dirty state at version %d. Attempting to fix...", version))
+		slog.Warn(fmt.Sprintf("Database is in dirty state at version %d. Attempting to fix...", version))
 		if err := m.Force(int(version)); err != nil {
-			logger.Error("Failed to force migration version: " + err.Error())
-			logger.Error("Manual intervention required. Run: migrate force <version>")
+			slog.Error("Failed to force migration version: " + err.Error())
+			slog.Error("Manual intervention required. Run: migrate force <version>")
 			return
 		}
-		logger.Info(fmt.Sprintf("Forced database to clean state at version %d", version))
+		slog.Info(fmt.Sprintf("Forced database to clean state at version %d", version))
 	}
 
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		logger.Error("Failed to apply migrations: " + err.Error())
-		logger.Error("Migration may be incomplete. Check database state and consider manual migration.")
+		slog.Error("Failed to apply migrations: " + err.Error())
+		slog.Error("Migration may be incomplete. Check database state and consider manual migration.")
 	} else if err == migrate.ErrNoChange {
-		logger.Info("Migrations: no new migrations to apply.")
+		slog.Info("Migrations: no new migrations to apply.")
 	} else {
-		logger.Info("Migrations: successfully applied.")
+		slog.Info("Migrations: successfully applied.")
 	}
 }

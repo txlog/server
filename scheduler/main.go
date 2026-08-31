@@ -1,16 +1,15 @@
 package scheduler
 
 import (
+	"database/sql"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"regexp"
 	"strings"
 
-	"database/sql"
-
 	"github.com/mileusna/crontab"
-	logger "github.com/txlog/server/logger"
 	"github.com/txlog/server/statistics"
 )
 
@@ -40,29 +39,29 @@ func StartScheduler(db *sql.DB) {
 
 	latestVersionJob()              // Run for the first time
 	refreshMaterializedViewsJob(db) // Run for the first time
-	logger.Info("Scheduler: started.")
+	slog.Info("Scheduler: started.")
 }
 
 func latestVersionJob() {
 	resp, err := http.Get("https://txlog.rda.run/server/version")
 	if err != nil {
-		logger.Error("Error fetching latest version: " + err.Error())
+		slog.Error("Error fetching latest version: " + err.Error())
 		return
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		logger.Error("Error reading response body: " + err.Error())
+		slog.Error("Error reading response body: " + err.Error())
 		return
 	}
 
 	version := strings.TrimSpace(string(body))
 	if err := os.Setenv("LATEST_VERSION", version); err != nil {
-		logger.Error("Failed to store latest version: " + err.Error())
+		slog.Error("Failed to store latest version: " + err.Error())
 		return
 	}
-	logger.Info("Latest version updated: " + version)
+	slog.Info("Latest version updated: " + version)
 }
 
 // refreshMaterializedViewsJob refreshes the materialized views used for performance optimization.
@@ -80,7 +79,7 @@ func refreshMaterializedViewsJob(db *sql.DB) {
 
 	locked, err := acquireLock(db, lockName)
 	if err != nil {
-		logger.Error("Error acquiring lock for materialized view refresh: " + err.Error())
+		slog.Error("Error acquiring lock for materialized view refresh: " + err.Error())
 		return
 	}
 
@@ -91,7 +90,7 @@ func refreshMaterializedViewsJob(db *sql.DB) {
 
 	defer func() {
 		if err := releaseLock(db, lockName); err != nil {
-			logger.Error("Failed to release lock for " + lockName + ": " + err.Error())
+			slog.Error("Failed to release lock for " + lockName + ": " + err.Error())
 		}
 	}()
 
@@ -104,7 +103,7 @@ func refreshMaterializedViewsJob(db *sql.DB) {
 		if err != nil {
 			// View might not exist yet (migration not applied)
 			// This is expected on first deployment, so we only log at debug level
-			logger.Debug("Could not refresh mv_package_listing: " + err.Error())
+			slog.Debug("Could not refresh mv_package_listing: " + err.Error())
 		}
 	}
 
@@ -119,12 +118,12 @@ func refreshMaterializedViewsJob(db *sql.DB) {
 		if err != nil {
 			_, err = db.Exec(`REFRESH MATERIALIZED VIEW ` + view)
 			if err != nil {
-				logger.Debug("Could not refresh " + view + ": " + err.Error())
+				slog.Debug("Could not refresh " + view + ": " + err.Error())
 			}
 		}
 	}
 
-	logger.Debug("Materialized views refreshed successfully.")
+	slog.Debug("Materialized views refreshed successfully.")
 }
 
 // statsJob executes statistical tasks for the system while ensuring only one instance
@@ -136,24 +135,24 @@ func refreshMaterializedViewsJob(db *sql.DB) {
 // 3. Counts executions, installed packages, and upgraded packages for the last 30 days
 // 4. Automatically releases the lock when the function completes
 func statsJob(db *sql.DB) {
-	logger.Info("Statistics: executing task...")
+	slog.Info("Statistics: executing task...")
 
 	lockName := "stats"
 
 	locked, err := acquireLock(db, lockName)
 	if err != nil {
-		logger.Error("Error acquiring lock: " + err.Error())
+		slog.Error("Error acquiring lock: " + err.Error())
 		return
 	}
 
 	if !locked {
-		logger.Info("Another instance is running this job.")
+		slog.Info("Another instance is running this job.")
 		return
 	}
 
 	defer func() {
 		if err := releaseLock(db, lockName); err != nil {
-			logger.Error("Failed to release lock for " + lockName + ": " + err.Error())
+			slog.Error("Failed to release lock for " + lockName + ": " + err.Error())
 		}
 	}()
 
@@ -161,7 +160,7 @@ func statsJob(db *sql.DB) {
 	statistics.CountInstalledPackages()
 	statistics.CountUpgradedPackages()
 
-	logger.Info("Statistics updated.")
+	slog.Info("Statistics updated.")
 }
 
 // housekeepingJob performs database cleanup by deleting old execution records.
@@ -171,24 +170,24 @@ func statsJob(db *sql.DB) {
 // deleted from the executions table. The function logs its progress and any errors
 // encountered during the process.
 func housekeepingJob(db *sql.DB) {
-	logger.Info("Housekeeping: executing task...")
+	slog.Info("Housekeeping: executing task...")
 
 	lockName := "retention-days"
 
 	locked, err := acquireLock(db, lockName)
 	if err != nil {
-		logger.Error("Error acquiring lock: " + err.Error())
+		slog.Error("Error acquiring lock: " + err.Error())
 		return
 	}
 
 	if !locked {
-		logger.Info("Another instance is running this job.")
+		slog.Info("Another instance is running this job.")
 		return
 	}
 
 	defer func() {
 		if err := releaseLock(db, lockName); err != nil {
-			logger.Error("Failed to release lock for " + lockName + ": " + err.Error())
+			slog.Error("Failed to release lock for " + lockName + ": " + err.Error())
 		}
 	}()
 
@@ -200,7 +199,7 @@ func housekeepingJob(db *sql.DB) {
 		// An interval literal cannot take a placeholder: "INTERVAL $1 day" is a
 		// syntax error, so build the interval from the validated numeric string.
 		if _, err := db.Exec("DELETE FROM executions WHERE executed_at < NOW() - ($1 || ' days')::interval", retentionDays); err != nil {
-			logger.Error("Error deleting executions past the retention period: " + err.Error())
+			slog.Error("Error deleting executions past the retention period: " + err.Error())
 		}
 	}
 
@@ -216,7 +215,7 @@ func housekeepingJob(db *sql.DB) {
 		)
 	`)
 	if err != nil {
-		logger.Error("Housekeeping: error cleaning orphan transaction_items: " + err.Error())
+		slog.Error("Housekeeping: error cleaning orphan transaction_items: " + err.Error())
 	}
 
 	_, err = db.Exec(`
@@ -230,10 +229,10 @@ func housekeepingJob(db *sql.DB) {
 		)
 	`)
 	if err != nil {
-		logger.Error("Housekeeping: error cleaning orphan transactions: " + err.Error())
+		slog.Error("Housekeeping: error cleaning orphan transactions: " + err.Error())
 	}
 
-	logger.Info("Housekeeping: executions older than " + retentionDays + " days are deleted.")
+	slog.Info("Housekeeping: executions older than " + retentionDays + " days are deleted.")
 }
 
 // acquireLock attempts to obtain a lock for a given job name in the cron_lock table.
@@ -250,7 +249,7 @@ func acquireLock(db *sql.DB, lockName string) (bool, error) {
 	// locks older than 12 hours. We assume jobs don't take this long.
 	_, err := db.Exec(`DELETE FROM cron_lock WHERE job_name = $1 AND locked_at < NOW() - INTERVAL '12 hours'`, lockName)
 	if err != nil {
-		logger.Error("Failed to clean up stale lock for " + lockName + ": " + err.Error())
+		slog.Error("Failed to clean up stale lock for " + lockName + ": " + err.Error())
 	}
 
 	res, err := db.Exec(`INSERT INTO cron_lock (job_name, locked_at) VALUES ($1, NOW()) ON CONFLICT (job_name) DO NOTHING`, lockName)

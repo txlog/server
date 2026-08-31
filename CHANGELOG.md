@@ -61,6 +61,20 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
+- **Statistics**: `CountExecutions`, `CountInstalledPackages` and
+  `CountUpgradedPackages` were three copies of the same forty lines differing
+  only in the query and the metric name. They now share a `countStat` helper
+  and are three calls. As a side effect the percentage calculation and the
+  upsert exist once, so they can no longer drift apart.
+- **Templates**: `FormatInteger` and `FormatPercentage` shared a duplicated
+  thousand-separator loop, now extracted as `groupThousands`. On a value with
+  no decimal point — `NaN`, `+Inf` — `FormatPercentage` used to panic on an
+  out-of-range index; it now returns the value unformatted.
+- **Templates**: `Brand` lowercased its argument once per candidate
+  distribution across six identical branches; it lowercases once and walks a
+  table. The `hasPrefix` and `trimPrefix` template helpers now point at
+  `strings.HasPrefix` and `strings.TrimPrefix` directly, so the two wrapper
+  functions that only forwarded to them are gone.
 - **Admin**: the OSV update trigger is called directly. The handlers went
   through a package-level `schedulerOSVTrigger` variable, injected from
   `main` by `SetSchedulerOSVTrigger`, to work around an import cycle between

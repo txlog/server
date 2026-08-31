@@ -51,11 +51,14 @@ statistics calculation.
 
 - **Challenge**: In a high-availability deployment (e.g., Kubernetes with 3 replicas), we cannot have all 3 instances
   running the cleanup job simultaneously.
-- **Solution**: **Distributed Locking via Database**.
-  - Before running a job, the instance attempts to acquire a named lock in the `cron_lock` table
-    (`INSERT ... ON CONFLICT DO NOTHING`).
-  - Only the instance that successfully inserts the row executes the job.
-  - This allows the scheduler to be simple (no external dependencies like Redis) yet robust for clustered deployments.
+- **Solution**: **PostgreSQL advisory locks**.
+  - `scheduler.withLock` wraps every job in `pg_try_advisory_lock`, keyed by a hash of the job name. The instance that
+    takes the lock runs the job; the others return immediately.
+  - The lock is held on a connection pinned for the duration of the job, because an advisory lock belongs to the
+    session that took it.
+  - That session is also what makes the lock self-cleaning: if an instance dies mid-job, PostgreSQL releases the lock
+    when the backend goes away. There is no stale lock for the next run to trip over, and nothing to reap.
+  - The scheduler therefore needs no external dependency such as Redis, and no table of its own.
 
 ### 3. Context-Aware Database Operations
 

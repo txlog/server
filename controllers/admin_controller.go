@@ -45,7 +45,7 @@ func GetAdminIndex(db *sql.DB) gin.HandlerFunc {
 			apiKeys = []models.ApiKey{}
 		}
 
-		osvIsRunning := GetCronLockStatus(db, "vulnerabilities")
+		osvIsRunning := scheduler.IsJobRunning(db, "vulnerabilities")
 
 		// Get inactive assets count for housekeeping section
 		inactiveAssetsCount, err := getInactiveAssetsCount(db)
@@ -219,17 +219,6 @@ func PostAdminRunMigrations(db *sql.DB) gin.HandlerFunc {
 	}
 }
 
-// GetCronLockStatus retrieves the boolean status of a lock record.
-func GetCronLockStatus(db *sql.DB, lockName string) bool {
-	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM cron_lock WHERE job_name = $1", lockName).Scan(&count)
-	if err != nil {
-		slog.Error("Failed to check cron lock status for " + lockName + ": " + err.Error())
-		return false
-	}
-	return count > 0
-}
-
 // PostAdminRunOSVUpdate manually triggers the OSV sync task.
 func PostAdminRunOSVUpdate(db *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -253,7 +242,6 @@ func PostAdminResetOSV(db *sql.DB) gin.HandlerFunc {
 				medium_vulns_fixed = 0, medium_vulns_introduced = 0,
 				low_vulns_fixed = 0, low_vulns_introduced = 0,
 				risk_score_mitigated = 0, is_security_patch = false;
-			DELETE FROM cron_lock WHERE job_name = 'vulnerabilities';
 			SET lock_timeout = DEFAULT;
 		`
 		_, err := db.Exec(query)

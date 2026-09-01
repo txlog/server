@@ -56,7 +56,8 @@
               Topology
             </a>
             <div class="relative" id="reports-dropdown">
-              <button onclick="toggleDropdown('reports-menu')" {{ navAttrs $path "/analytics" "cursor-pointer" }}>
+              <button type="button" onclick="toggleDropdown('reports-menu')" aria-haspopup="true"
+                aria-expanded="false" aria-controls="reports-menu" {{ navAttrs $path "/analytics" "cursor-pointer" }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="48 208 48 136 96 136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="224" y1="208" x2="32" y2="208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="96 208 96 88 152 88" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="152 208 152 40 208 40 208 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                 Analytics
                 {{ template "icon-caret-down" "w-3 h-3" }}
@@ -108,7 +109,8 @@
           </a>
           {{ end }}
           <div class="relative" id="user-dropdown">
-            <button onclick="toggleDropdown('user-menu')"
+            <button type="button" onclick="toggleDropdown('user-menu')" aria-haspopup="true" aria-expanded="false"
+              aria-controls="user-menu" aria-label="Account menu"
               class="flex items-center gap-2 text-kumo-default p-0 hover:opacity-80 transition-opacity cursor-pointer">
               {{ if and .Context.Keys.user.Picture .Context.Keys.oidc_enabled }}
               <span class="w-8 h-8 rounded-lg overflow-hidden bg-kumo-tint">
@@ -147,7 +149,8 @@
             </div>
           </div>
           {{ end }}
-          <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
+          <button type="button" onclick="toggleDropdown('mobile-menu')" aria-haspopup="true" aria-expanded="false"
+            aria-controls="mobile-menu"
             class="md:hidden text-kumo-default p-1.5 rounded-lg hover:bg-kumo-tint transition-colors cursor-pointer"
             aria-label="Toggle navigation">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="80" cy="104" r="40" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="160" y1="80" x2="248" y2="80" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="160" y1="128" x2="248" y2="128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="184" y1="176" x2="248" y2="176" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M16,192c7.1-27.6,34.18-48,64-48s56.9,20.4,64,48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>

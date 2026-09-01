@@ -85,7 +85,7 @@
                   <kbd class="bg-kumo-tint border border-kumo-line text-kumo-default text-xs font-mono px-2 py-1 rounded-md">{{ .TransactionID }}</kbd>
                   {{ if gt .VulnsFixed 0 }}
                   <div class="relative group/fixed">
-                    <span class="bg-kumo-success text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-1">
+                    <span class="bg-kumo-success text-white text-xs font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-1">
                       {{ template "icon-shield-check" "w-3 h-3" }} {{ .VulnsFixed }}
                     </span>
                     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/fixed:block bg-kumo-control border border-kumo-line text-kumo-default shadow-lg text-xs px-2 py-1 rounded-lg whitespace-nowrap z-20">CVEs Fixed</div>
@@ -93,7 +93,7 @@
                   {{ end }}
                   {{ if gt .VulnsIntroduced 0 }}
                   <div class="relative group/intro">
-                    <span class="bg-kumo-danger text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-1">
+                    <span class="bg-kumo-danger text-white text-xs font-bold px-1.5 py-0.5 rounded-sm flex items-center gap-1">
                       {{ template "icon-shield-warning" "w-3 h-3" }} {{ .VulnsIntroduced }}
                     </span>
                     <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/intro:block bg-kumo-control border border-kumo-line text-kumo-default shadow-lg text-xs px-2 py-1 rounded-lg whitespace-nowrap z-20">New CVEs</div>
@@ -446,7 +446,7 @@
       'UNKNOWN': 'bg-kumo-tint text-kumo-muted border border-kumo-line'
     };
     var cls = colors[severity] || colors['UNKNOWN'];
-    return '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-sm ' + cls + '">' + severity + '</span>';
+    return '<span class="text-xs font-bold px-1.5 py-0.5 rounded-sm ' + cls + '">' + severity + '</span>';
   }
 
   function closeAllDropdowns() {
@@ -531,11 +531,11 @@
         document.getElementById('modal-vulns-title').innerHTML = shieldCheck + ' Vulnerabilities — Transaction #' + transactionId;
 
         var summaryHtml = '';
-        if (uniqueCVEs > 0) summaryHtml += '<div class="bg-kumo-tint border border-kumo-line rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-default">' + uniqueCVEs + '</div><div class="text-[10px] uppercase tracking-wider text-kumo-subtle font-semibold">Total<br/>CVEs</div></div>';
-        if (fixedCount > 0) summaryHtml += '<div class="bg-kumo-success/10 border border-kumo-success/20 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-success">' + fixedCount + '</div><div class="text-[10px] uppercase tracking-wider text-kumo-success font-semibold">CVEs<br/>Fixed</div></div>';
-        if (introducedCount > 0) summaryHtml += '<div class="bg-kumo-danger/10 border border-kumo-danger/20 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-danger">' + introducedCount + '</div><div class="text-[10px] uppercase tracking-wider text-kumo-danger font-semibold">New<br/>CVEs</div></div>';
-        if (criticalCount > 0) summaryHtml += '<div class="bg-kumo-danger/10 border border-kumo-danger/20 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-danger">' + criticalCount + '</div><div class="text-[10px] uppercase tracking-wider text-kumo-danger font-semibold">Critical<br/>CVEs</div></div>';
-        if (highCount > 0) summaryHtml += '<div class="bg-kumo-warning/10 border border-kumo-warning/20 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-warning">' + highCount + '</div><div class="text-[10px] uppercase tracking-wider text-kumo-warning font-semibold">High<br/>CVEs</div></div>';
+        if (uniqueCVEs > 0) summaryHtml += '<div class="bg-kumo-tint border border-kumo-line rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-default">' + uniqueCVEs + '</div><div class="text-xs uppercase tracking-wider text-kumo-subtle font-semibold">Total<br/>CVEs</div></div>';
+        if (fixedCount > 0) summaryHtml += '<div class="bg-kumo-success/10 border border-kumo-success/20 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-success">' + fixedCount + '</div><div class="text-xs uppercase tracking-wider text-kumo-success font-semibold">CVEs<br/>Fixed</div></div>';
+        if (introducedCount > 0) summaryHtml += '<div class="bg-kumo-danger/10 border border-kumo-danger/20 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-danger">' + introducedCount + '</div><div class="text-xs uppercase tracking-wider text-kumo-danger font-semibold">New<br/>CVEs</div></div>';
+        if (criticalCount > 0) summaryHtml += '<div class="bg-kumo-danger/10 border border-kumo-danger/20 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-danger">' + criticalCount + '</div><div class="text-xs uppercase tracking-wider text-kumo-danger font-semibold">Critical<br/>CVEs</div></div>';
+        if (highCount > 0) summaryHtml += '<div class="bg-kumo-warning/10 border border-kumo-warning/20 rounded-xl px-4 py-2.5 text-center"><div class="text-lg font-bold text-kumo-warning">' + highCount + '</div><div class="text-xs uppercase tracking-wider text-kumo-warning font-semibold">High<br/>CVEs</div></div>';
         document.getElementById('modal-vulns-summary').innerHTML = summaryHtml;
         document.getElementById('modal-vulns-explanation').classList.remove('hidden');
 
@@ -548,8 +548,8 @@
             var row = document.createElement('tr');
             row.className = '';
             var statusBadge = v.type === 'fixed'
-              ? '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-kumo-success/15 text-kumo-success">FIXED</span>'
-              : '<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-kumo-danger/15 text-kumo-danger">INTRODUCED</span>';
+              ? '<span class="text-xs font-bold px-1.5 py-0.5 rounded-sm bg-kumo-success/15 text-kumo-success">FIXED</span>'
+              : '<span class="text-xs font-bold px-1.5 py-0.5 rounded-sm bg-kumo-danger/15 text-kumo-danger">INTRODUCED</span>';
             row.innerHTML = '<td class="py-2">' + severityBadge(v.severity) + '</td>' +
               '<td class="py-2"><a href="https://osv.dev/vulnerability/' + v.id + '" target="_blank" class="text-kumo-brand hover:underline font-mono text-xs">' + v.id + '</a></td>' +
               '<td class="py-2 text-xs text-kumo-default">' + v.package + '-' + v.version + '</td>' +

@@ -41,7 +41,7 @@
       <!-- Filters (Left) -->
       <form method="GET" action="/topology" class="flex flex-wrap items-center gap-3">
         <div class="flex items-center gap-2">
-          <label class="text-kumo-subtle text-[10px] font-bold uppercase tracking-widest">Environment</label>
+          <label class="text-kumo-subtle text-xs font-bold uppercase tracking-widest">Environment</label>
           <select name="env" id="env-select" data-kumo-component="Select"
             class="min-w-[140px]"
             onchange="this.form.submit()">
@@ -55,7 +55,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <label class="text-kumo-subtle text-[10px] font-bold uppercase tracking-widest">Service</label>
+          <label class="text-kumo-subtle text-xs font-bold uppercase tracking-widest">Service</label>
           <select name="svc" id="svc-select" data-kumo-component="Select"
             class="min-w-[140px]"
             onchange="this.form.submit()">
@@ -85,7 +85,7 @@
           </div>
           <div>
             <div class="text-base font-bold text-kumo-default leading-tight">{{ len .view.Pods }}</div>
-            <div class="text-[10px] text-kumo-subtle uppercase font-bold tracking-wider">Pods</div>
+            <div class="text-xs text-kumo-subtle uppercase font-bold tracking-wider">Pods</div>
           </div>
         </div>
         {{ end }}
@@ -96,7 +96,7 @@
           </div>
           <div>
             <div class="text-base font-bold text-kumo-default leading-tight">{{ .view.TotalAssets }}</div>
-            <div class="text-[10px] text-kumo-subtle uppercase font-bold tracking-wider">Assets</div>
+            <div class="text-xs text-kumo-subtle uppercase font-bold tracking-wider">Assets</div>
           </div>
         </div>
         {{ end }}
@@ -107,7 +107,7 @@
           </div>
           <div>
             <div class="text-base font-bold text-kumo-warning leading-tight">{{ .view.TotalNeedsRestart }}</div>
-            <div class="text-[10px] text-kumo-warning uppercase font-bold tracking-wider">Need Restart</div>
+            <div class="text-xs text-kumo-warning uppercase font-bold tracking-wider">Need Restart</div>
           </div>
         </div>
         {{ end }}
@@ -161,7 +161,7 @@
         <div class="flex items-center gap-2">
           {{ if gt $pod.NeedsRestart 0 }}
           <span
-            class="bg-kumo-warning/10 text-kumo-warning text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider flex items-center gap-1 border border-kumo-warning/20">
+            class="bg-kumo-warning/10 text-kumo-warning text-xs font-bold px-2 py-0.5 rounded-sm uppercase tracking-wider flex items-center gap-1 border border-kumo-warning/20">
             <span class="w-1.5 h-1.5 rounded-full bg-kumo-warning animate-pulse"></span>{{ $pod.NeedsRestart }} need restart
           </span>
           {{ end }}
@@ -196,7 +196,7 @@
               <td class="text-right min-w-[100px]">
                 {{ if .NeedsRestarting }}
                 <span
-                  class="bg-kumo-warning/10 text-kumo-warning text-[10px] font-bold px-1.5 py-0.5 rounded-sm border border-kumo-warning/20 uppercase tracking-wider whitespace-nowrap">Need Restart</span>
+                  class="bg-kumo-warning/10 text-kumo-warning text-xs font-bold px-1.5 py-0.5 rounded-sm border border-kumo-warning/20 uppercase tracking-wider whitespace-nowrap">Need Restart</span>
                 {{ end }}
               </td>
               <td class="text-right">

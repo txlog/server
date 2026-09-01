@@ -20,6 +20,14 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [1.37.0] - 2026-08-31
 
+### Added
+
+- **Dark mode**: a theme toggle in the header. The choice is kept in
+  `localStorage` and falls back to `prefers-color-scheme`, and an inline script
+  in `<head>` applies it before the first paint so a dark session never flashes
+  light. `icon-moon` had been defined in `templates/icons.html` all along
+  without a single caller; `icon-sun` joins it.
+
 ### Removed
 
 - **Scheduler**: the `cron_lock` table, dropped by migration
@@ -161,6 +169,53 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - **Analytics**: `GetAnalyticsAnomalies` and `GetAnalyticsSecurity` are plain
   handlers again. Both took a `*sql.DB` they never used and wrapped it in a
   closure; the pages fetch their data from `/v1/reports/*` in the browser.
+- **Templates**: a `page-header` partial replaces the wrapper, container,
+  heading and subtitle that opened ten pages identically. The copies had
+  already drifted — four spaced the subtitle with `mt-0.5` and three with
+  `mt-1` — and they settle on `mt-1`. Seven pages use it; `machine_id`,
+  `package_name` and `topology` keep their own markup, since their headers
+  carry action buttons alongside the title. A `dict` helper carries the two or
+  three values, because a `{{ template }}` action takes a single argument.
+- **Templates**: an `empty-state` partial replaces the eight copies of the
+  "Start by running Txlog Agent" block — three on the dashboard, two on the
+  asset page, one each on assets, packages and package progression. Those had
+  split into two spacings (`py-12` with `mb-1`, `py-16` with `mb-2`) and two
+  title sizes. The partial takes the headline and, where the list is
+  searchable, the term to echo back, and adds an icon so a screen with nothing
+  on it reads as empty rather than broken.
+- **Dashboard**: `getStatistics` returns a `map[string]models.Statistic`
+  instead of a slice. Each of the three cards used to scan that slice four
+  times — value, colour class, percentage, arrow — sixteen passes over the same
+  list to show three numbers. A card is now one lookup, and the
+  percentage-and-arrow block is a `stat-trend` partial. `TestGetStatistics`
+  ranges over the result and reads `stat.Name`, which works unchanged on a map.
+- **Templates**: the remaining repeated glyphs join `templates/icons.html`,
+  which gains `icon-shield`, `icon-star` and the three glyphs that were still
+  inline in `header.html` itself. Ten inline blocks were byte-for-byte copies
+  of an icon already defined, and two spinner styles ran side by side — the
+  library's, and a 24-viewBox Tailwind one in four places. `package_name`'s
+  stroke-drawn external-link arrow gives way to the library's, so one style
+  holds across the app. Inline glyphs drop from 47 to 27; each of those 27 is
+  used exactly once on one page, where a shared definition buys indirection
+  rather than reuse.
+- **Admin**: `templates/admin.html` was 1,940 lines and 120 KB, 38% of the
+  project's HTML in one file. The seven sections of the content area move into
+  `admin_server`, `admin_auth`, `admin_housekeeping`, `admin_users`,
+  `admin_apikeys`, `admin_topology` and `admin_migrations`, included by
+  filename the way `header.html` and `footer.html` already are. The markup is
+  unchanged; the shell — navigation, the two page-level modals and the
+  section-switching script — stays at 634 lines.
+- **Templates**: `text-[10px]` appeared 34 times, with two strays at 11px, on
+  badges, uppercase labels and the admin panel's mono blocks. It is an
+  arbitrary value outside the type scale and below a comfortable reading size,
+  and the same labels were already `text-xs` on the dashboard. All of them are
+  now `text-xs`, so the smallest type in the interface is 12px.
+- **Assets**: every page blocked on three third-party resources — Inter
+  requested as the whole `wght@100..900` variable axis, plus the ApexCharts
+  stylesheet and script on all eighteen templates although only two draw a
+  chart. Inter now asks for the four weights the markup uses (400, 500, 600,
+  700), and ApexCharts moves into a partial included only by package
+  progression and security analytics.
 
 ### Fixed
 
@@ -174,6 +229,47 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   "not a member of any authorized group".
 - **Documentation**: `docs/how-to/run-tests.md` linked to `../TESTING.md`,
   which does not exist; it now points at the testing strategy document.
+- **Dark mode**: the token override block listed `[data-mode="dark"]`
+  alongside `:root` and `[data-mode="light"]`, so switching to dark reapplied
+  the light values with `!important` and nothing changed. Splitting dark out
+  was not enough on its own: the selector still led with `:root`, which matches
+  `<html>` in both modes, and its `!important` values kept winning — only the
+  few controls using `bg-kumo-base`, a token the block never overrode,
+  actually changed colour. The light values now key off `[data-mode="light"]`
+  alone, which is safe because the attribute is always present. Kumo ships a
+  complete dark palette; only the brand hue is overridden, lifted to `#8ba4fc`
+  so it stays legible against a dark canvas, along with
+  `--text-color-kumo-muted`, the one surface token Kumo's dark block leaves
+  unset.
+- **Navigation**: all eight links carried the same classes on every page, so
+  nothing told the reader — or a screen reader — where they were. A `navAttrs`
+  helper derives the class list and `aria-current` from the request path, which
+  `header.html` already reaches through `.Context.Request.URL.Path`. It matches
+  the subtree as well as the exact path, so `/analytics/security` highlights
+  Analytics and `/assets/<machine-id>` highlights Assets.
+- **Accessibility**: the whole project carried 19 `aria-*` attributes across
+  5,103 lines of template. The three header menus were plain buttons toggling a
+  hidden `div`, with nothing conveying that they open anything or whether they
+  were open; they now carry `aria-haspopup`, `aria-controls` and an
+  `aria-expanded` kept in sync, and Escape closes them. The twenty modals are
+  marked `role="dialog" aria-modal="true"`, `openModal` labels each from its
+  own heading, moves focus into the panel and restores it on close, and Tab
+  cycles inside the open dialog instead of walking into the page behind the
+  overlay.
+- **Header**: the mobile menu had drifted from the desktop bar, listing Assets,
+  Topology, Packages where the desktop lists Assets, Packages, Topology. The
+  "New version" badge was written out twice, once inside each arm of the
+  signed-in check, though it does not depend on the user at all; it moves above
+  the check and the two mutually exclusive arms collapse into one `if`/`else`.
+- **Charts**: the two ApexCharts pages carried their own hex — `#D9556A` and
+  `#6AA2FB` on package progression, `#0ea5e9`, `#ef4444` and `#10b981` plus
+  `#64748b` axes and an `#e2e8f0` grid on security analytics. None of it came
+  from the design system, and none of it would have followed the dark palette.
+  A `chartTheme` helper reads the tokens off the document, so both charts and
+  the two legend swatches resolve to the same palette as the rest of the page;
+  the hues are unchanged in light mode. The ApexCharts stylesheet also had no
+  `integrity` attribute though the script beside it did, and security analytics
+  pulled a second, unpinned copy of ApexCharts of its own.
 
 ## [1.36.0] - 2026-08-30
 

@@ -87,7 +87,6 @@
             {{ template "icon-moon" "w-5 h-5 mode-light-only" }}
             {{ template "icon-sun" "w-5 h-5 mode-dark-only" }}
           </button>
-          {{ if not .Context.Keys.user }}
           {{ $latestVersion := .Context.Keys.env.latestVersion }}
           {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
           <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
@@ -96,18 +95,10 @@
             {{ template "icon-arrow-square-out" "w-3 h-3" }}
           </a>
           {{ end }}
+          {{ if not .Context.Keys.user }}
           <span class="hidden xl:inline-block bg-kumo-tint text-kumo-subtle border border-kumo-line text-xs font-medium px-2.5 py-1 rounded-md">{{
             .Context.Keys.env.instance }}</span>
-          {{ end }}
-          {{ if .Context.Keys.user }}
-          {{ $latestVersion := .Context.Keys.env.latestVersion }}
-          {{ if and $latestVersion (ne $latestVersion "") (not (versionsEqual $latestVersion (version))) }}
-          <a href="https://github.com/txlog/server/releases/tag/{{ $latestVersion }}"
-            class="hidden xl:inline-flex items-center gap-1.5 bg-kumo-brand/10 text-kumo-brand text-xs font-bold px-2.5 py-1 rounded-md hover:bg-kumo-brand/20 transition-colors">
-            New version: {{ $latestVersion }}
-            {{ template "icon-arrow-square-out" "w-3 h-3" }}
-          </a>
-          {{ end }}
+          {{ else }}
           <div class="relative" id="user-dropdown">
             <button type="button" onclick="toggleDropdown('user-menu')" aria-haspopup="true" aria-expanded="false"
               aria-controls="user-menu" aria-label="Account menu"
@@ -164,11 +155,11 @@
         <a href="/assets" {{ navAttrs $path "/assets" "" }}>
           {{ template "icon-rows" "w-4 h-4" }} Assets
         </a>
-        <a href="/topology" {{ navAttrs $path "/topology" "" }}>
-          {{ template "icon-topology" "w-4 h-4" }} Topology
-        </a>
         <a href="/packages" {{ navAttrs $path "/packages" "" }}>
           {{ template "icon-package" "w-4 h-4" }} Packages
+        </a>
+        <a href="/topology" {{ navAttrs $path "/topology" "" }}>
+          {{ template "icon-topology" "w-4 h-4" }} Topology
         </a>
         <a href="/analytics/progression" {{ navAttrs $path "/analytics/progression" "pl-6" }}>
           Package Progression

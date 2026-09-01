@@ -23,28 +23,50 @@
     document.documentElement.dataset.mode = next;
     try { localStorage.setItem('mode', next); } catch (e) { /* private mode: this tab only */ }
   }
+  // Each trigger points at its menu with aria-controls, so the expanded state
+  // can be kept in sync from here rather than at every call site.
+  function setMenuState(menu, open) {
+    menu.classList.toggle('hidden', !open);
+    var trigger = document.querySelector('[aria-controls="' + menu.id + '"]');
+    if (trigger) trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function closeAllMenus() {
+    document.querySelectorAll('[id$="-menu"]').forEach(function (m) { setMenuState(m, false); });
+  }
   function toggleDropdown(menuId) {
     var menu = document.getElementById(menuId);
+    if (!menu) return;
     var isHidden = menu.classList.contains('hidden');
-    document.querySelectorAll('[id$="-menu"]').forEach(function (m) { m.classList.add('hidden'); });
-    if (isHidden) menu.classList.remove('hidden');
+    closeAllMenus();
+    if (isHidden) setMenuState(menu, true);
   }
   document.addEventListener('click', function (e) {
     document.querySelectorAll('[id$="-menu"]').forEach(function (menu) {
       var parent = menu.parentElement;
-      if (parent && !parent.contains(e.target)) menu.classList.add('hidden');
+      if (parent && !parent.contains(e.target)) setMenuState(menu, false);
     });
   });
+  var focusBeforeModal = null;
   function openModal(id) {
     var modal = document.getElementById(id);
     if (!modal) return;
+    focusBeforeModal = document.activeElement;
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    // Announce the dialog by its own heading instead of maintaining an
+    // aria-labelledby target by hand in each of the twenty modals.
+    var heading = modal.querySelector('h1, h2, h3, h4');
+    if (heading) {
+      if (!heading.id) heading.id = id + '-title';
+      modal.setAttribute('aria-labelledby', heading.id);
+    }
     var panel = modal.querySelector('[data-modal-panel]');
     if (panel) {
+      panel.tabIndex = -1;
       setTimeout(function () {
         panel.classList.remove('scale-95', 'opacity-0');
         panel.classList.add('scale-100', 'opacity-100');
+        panel.focus();
       }, 10);
     }
   }
@@ -59,14 +81,36 @@
     setTimeout(function () {
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+      if (focusBeforeModal && focusBeforeModal.focus) focusBeforeModal.focus();
+      focusBeforeModal = null;
       if (callback) callback();
     }, 200);
   }
+  function openDialog() {
+    return document.querySelector('[role="dialog"]:not(.hidden)');
+  }
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-      document.querySelectorAll('.fixed.inset-0.z-50:not(.hidden)').forEach(function (modal) {
-        closeModal(modal.id);
-      });
+      var dialog = openDialog();
+      if (dialog) { closeModal(dialog.id); return; }
+      closeAllMenus();
+      return;
+    }
+    // Keep Tab inside the open dialog; without this the focus ring walks off
+    // into the page behind the overlay, which is unreachable by pointer.
+    if (e.key !== 'Tab') return;
+    var modal = openDialog();
+    if (!modal) return;
+    var focusable = modal.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+    if (!focusable.length) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
     }
   });
 </script>

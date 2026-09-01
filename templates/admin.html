@@ -598,7 +598,7 @@
                   </td>
                 </tr>
                 <!-- Edit Modal -->
-                <div id="editModal{{ .ID }}" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+                <div id="editModal{{ .ID }}" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
                   onclick="if(event.target===this)closeModal('editModal{{ .ID }}')">
                   <div data-modal-panel
                     class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -647,7 +647,7 @@
                 </div>
                 <!-- Deactivate Modal -->
                 <div id="deactivateModal{{ .ID }}"
-                  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+                  role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
                   onclick="if(event.target===this)closeModal('deactivateModal{{ .ID }}')">
                   <div data-modal-panel
                     class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -746,7 +746,7 @@
                 </tr>
                 <!-- Revoke Modal -->
                 <div id="revokeAPIKeyModal{{ .ID }}"
-                  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+                  role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
                   onclick="if(event.target===this)closeModal('revokeAPIKeyModal{{ .ID }}')">
                   <div data-modal-panel
                     class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -770,7 +770,7 @@
                 </div>
                 <!-- Delete Modal -->
                 <div id="deleteAPIKeyModal{{ .ID }}"
-                  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+                  role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
                   onclick="if(event.target===this)closeModal('deleteAPIKeyModal{{ .ID }}')">
                   <div data-modal-panel
                     class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -1047,7 +1047,7 @@
 
       <!-- Topology Modals -->
       <!-- Pattern Modal (Add/Edit) -->
-      <div id="modal-pattern" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+      <div id="modal-pattern" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
         onclick="if(event.target===this)closeModal('modal-pattern')">
         <div data-modal-panel
           class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-lg w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -1126,7 +1126,7 @@
       </div>
 
       <!-- Add Environment Modal -->
-      <div id="modal-add-env" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+      <div id="modal-add-env" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
         onclick="if(event.target===this)closeModal('modal-add-env')">
         <div data-modal-panel
           class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -1171,7 +1171,7 @@
       </div>
 
       <!-- Add Service Modal -->
-      <div id="modal-add-svc" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+      <div id="modal-add-svc" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
         onclick="if(event.target===this)closeModal('modal-add-svc')">
         <div data-modal-panel
           class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-sm w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -1252,7 +1252,7 @@
       </div>
 
       <!-- Preview Environment Modal -->
-      <div id="modal-preview-env" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+      <div id="modal-preview-env" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
         onclick="if(event.target===this)closeModal('modal-preview-env')">
         <div data-modal-panel
           class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-md w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -1278,7 +1278,7 @@
       </div>
 
       <!-- Preview Service Modal -->
-      <div id="modal-preview-svc" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+      <div id="modal-preview-svc" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
         onclick="if(event.target===this)closeModal('modal-preview-svc')">
         <div data-modal-panel
           class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-md w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -1304,7 +1304,7 @@
       </div>
 
       <!-- Preview Modal -->
-      <div id="modal-preview-pattern" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+      <div id="modal-preview-pattern" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
         onclick="if(event.target===this)closeModal('modal-preview-pattern')">
         <div data-modal-panel
           class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-lg w-full mx-4 transform transition-all scale-95 opacity-0">
@@ -1458,7 +1458,7 @@
 </div>
 
 <!-- Create API Key Modal -->
-<div id="createAPIKeyModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+<div id="createAPIKeyModal" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
   onclick="if(event.target===this)closeModal('createAPIKeyModal', function() { window.location.reload(); })">
   <div data-modal-panel
     class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-2xl w-full mx-4 transform transition-all scale-95 opacity-0 overflow-hidden">
@@ -1508,7 +1508,7 @@
 </div>
 
 <!-- Run Migrations Modal -->
-<div id="migrationsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
+<div id="migrationsModal" role="dialog" aria-modal="true" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50"
   onclick="if(event.target===this)closeModal('migrationsModal')">
   <div data-modal-panel
     class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line max-w-lg w-full mx-4 max-h-[80vh] flex flex-col transform transition-all scale-95 opacity-0">

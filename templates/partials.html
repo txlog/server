@@ -3,6 +3,14 @@
 
       {{ template "stat-trend" (index .statistics "executions-30-days") }}
 -->
+{{ define "page-header" }}<div class="py-6 mb-6 print:hidden">
+  <div class="max-w-7xl mx-auto px-6">
+    {{ with .eyebrow }}<p class="text-kumo-subtle text-sm mb-1">{{ . }}</p>{{ end }}
+    <h2 class="font-bold text-2xl text-kumo-default">{{ .title }}</h2>
+    {{ with .subtitle }}<p class="text-kumo-subtle text-sm mt-1">{{ . }}</p>{{ end }}
+  </div>
+</div>{{ end }}
+
 {{ define "stat-trend" }}<span
   class="{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }} text-sm font-medium flex items-center gap-1">
   {{ formatPercentage .Percentage }}%

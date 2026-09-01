@@ -11,6 +11,18 @@
   </div>
 </div>{{ end }}
 
+{{ define "empty-state" }}<div class="py-16 px-6 flex flex-col items-center text-center gap-3">
+  <span class="w-12 h-12 rounded-xl bg-kumo-tint border border-kumo-line flex items-center justify-center">
+    {{ template "icon-stack" "w-6 h-6 text-kumo-muted" }}
+  </span>
+  <div class="flex flex-col gap-1">
+    <p class="font-semibold text-lg text-kumo-default">{{ .title }}{{ with .search }} containing <kbd
+        class="bg-kumo-tint border border-kumo-line text-kumo-default text-xs font-mono px-2 py-1 rounded-md">{{ . }}</kbd>{{ end }}</p>
+    <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent" target="_blank"
+        rel="noopener" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
+  </div>
+</div>{{ end }}
+
 {{ define "stat-trend" }}<span
   class="{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }} text-sm font-medium flex items-center gap-1">
   {{ formatPercentage .Percentage }}%

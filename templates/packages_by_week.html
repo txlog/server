@@ -4,12 +4,7 @@
 <div class="max-w-7xl mx-auto px-6 pb-8 space-y-6">
   {{ if not .graphData }}
   <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
-    <div class="py-16 text-center">
-      
-      <p class="font-semibold text-lg text-kumo-default mb-2">No package progression data</p>
-      <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
-          target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
-    </div>
+    {{ template "empty-state" (dict "title" "No package progression data") }}
   </div>
   {{ else }}
   <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">

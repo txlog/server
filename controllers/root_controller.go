@@ -50,7 +50,7 @@ type UpdatedPackage struct {
 func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
-			statistics           []models.Statistic
+			statistics           map[string]models.Statistic
 			totalActiveAssets    int
 			assetsByOS           []OSStats
 			assetsByAgentVersion []AgentStats
@@ -124,10 +124,13 @@ func GetRootIndex(database *sql.DB) gin.HandlerFunc {
 // The function queries the statistics table for name, value, percentage and updated_at fields.
 // It handles NULL timestamps by using sql.NullTime and converts them to *time.Time in the returned models.
 //
+// The result is keyed by name because the dashboard looks statistics up one at
+// a time: as a slice, each of the three cards had to scan it once per field.
+//
 // Returns:
-//   - []models.Statistic: Slice containing all statistics records
+//   - map[string]models.Statistic: Statistics records keyed by name
 //   - error: Any error that occurred during database operations, nil if successful
-func getStatistics(ctx context.Context, database *sql.DB) ([]models.Statistic, error) {
+func getStatistics(ctx context.Context, database *sql.DB) (map[string]models.Statistic, error) {
 	rows, err := database.QueryContext(ctx, `SELECT name, value, percentage, updated_at FROM statistics;`)
 
 	if err != nil {
@@ -135,7 +138,7 @@ func getStatistics(ctx context.Context, database *sql.DB) ([]models.Statistic, e
 	}
 	defer rows.Close()
 
-	statistics := []models.Statistic{}
+	statistics := map[string]models.Statistic{}
 
 	for rows.Next() {
 		var statistic = models.Statistic{}
@@ -152,7 +155,7 @@ func getStatistics(ctx context.Context, database *sql.DB) ([]models.Statistic, e
 		if updatedAt.Valid {
 			statistic.UpdatedAt = &updatedAt.Time
 		}
-		statistics = append(statistics, statistic)
+		statistics[statistic.Name] = statistic
 	}
 
 	if err = rows.Err(); err != nil {

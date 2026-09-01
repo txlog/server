@@ -20,45 +20,36 @@
         <span class="text-xs font-bold text-kumo-subtle uppercase tracking-wider">Executions</span>
         <span class="text-xs text-kumo-muted">Last 30 days</span>
       </div>
+      {{ with index .statistics "executions-30-days" }}
       <div class="flex items-baseline gap-2">
-        <div class="font-bold text-3xl text-kumo-default">{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
-          {{ range .statistics }}{{ if eq .Name "executions-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-          {{ range .statistics }}{{ if eq .Name "executions-30-days" }}
-          {{ if gt .Percentage 0.0 }}{{ template "icon-arrow-up-right" "w-4 h-4" }}{{ else if lt .Percentage 0.0 }}{{ template "icon-arrow-down-right" "w-4 h-4" }}{{ else }}{{ template "icon-minus" "w-4 h-4" }}{{ end }}
-          {{ end }}{{ end }}
-        </span>
+        <div class="font-bold text-3xl text-kumo-default">{{ formatInteger .Value }}</div>
+        {{ template "stat-trend" . }}
       </div>
+      {{ end }}
     </div>
     <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-5">
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-bold text-kumo-subtle uppercase tracking-wider">Installed packages</span>
         <span class="text-xs text-kumo-muted">Last 30 days</span>
       </div>
+      {{ with index .statistics "installed-packages-30-days" }}
       <div class="flex items-baseline gap-2">
-        <div class="font-bold text-3xl text-kumo-default">{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
-          {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-          {{ range .statistics }}{{ if eq .Name "installed-packages-30-days" }}
-          {{ if gt .Percentage 0.0 }}{{ template "icon-arrow-up-right" "w-4 h-4" }}{{ else if lt .Percentage 0.0 }}{{ template "icon-arrow-down-right" "w-4 h-4" }}{{ else }}{{ template "icon-minus" "w-4 h-4" }}{{ end }}
-          {{ end }}{{ end }}
-        </span>
+        <div class="font-bold text-3xl text-kumo-default">{{ formatInteger .Value }}</div>
+        {{ template "stat-trend" . }}
       </div>
+      {{ end }}
     </div>
     <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line p-5">
       <div class="flex items-center justify-between mb-2">
         <span class="text-xs font-bold text-kumo-subtle uppercase tracking-wider">Upgraded Packages</span>
         <span class="text-xs text-kumo-muted">Last 30 days</span>
       </div>
+      {{ with index .statistics "upgraded-packages-30-days" }}
       <div class="flex items-baseline gap-2">
-        <div class="font-bold text-3xl text-kumo-default">{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatInteger .Value) }}{{ end }}{{ end }}</div>
-        <span class="{{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }}{{ end }}{{ end }} text-sm font-medium flex items-center gap-1">
-          {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}{{ printf "%s" (formatPercentage .Percentage) }}{{ end }}{{ end }}%
-          {{ range .statistics }}{{ if eq .Name "upgraded-packages-30-days" }}
-          {{ if gt .Percentage 0.0 }}{{ template "icon-arrow-up-right" "w-4 h-4" }}{{ else if lt .Percentage 0.0 }}{{ template "icon-arrow-down-right" "w-4 h-4" }}{{ else }}{{ template "icon-minus" "w-4 h-4" }}{{ end }}
-          {{ end }}{{ end }}
-        </span>
+        <div class="font-bold text-3xl text-kumo-default">{{ formatInteger .Value }}</div>
+        {{ template "stat-trend" . }}
       </div>
+      {{ end }}
     </div>
   </div>
 

@@ -1,0 +1,11 @@
+<!--
+  Shared page fragments. Each takes the data it renders as its argument:
+
+      {{ template "stat-trend" (index .statistics "executions-30-days") }}
+-->
+{{ define "stat-trend" }}<span
+  class="{{ if gt .Percentage 0.0 }}text-kumo-success{{ else if lt .Percentage 0.0 }}text-kumo-danger{{ else }}text-kumo-warning{{ end }} text-sm font-medium flex items-center gap-1">
+  {{ formatPercentage .Percentage }}%
+  {{ if gt .Percentage 0.0 }}{{ template "icon-arrow-up-right" "w-4 h-4" }}{{ else if lt .Percentage 0.0 }}{{ template
+  "icon-arrow-down-right" "w-4 h-4" }}{{ else }}{{ template "icon-minus" "w-4 h-4" }}{{ end }}
+</span>{{ end }}

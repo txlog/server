@@ -18,6 +18,11 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.js"
   integrity="sha384-mrR3K8Jvv+o9bZ6Yu9HWI0M8tuzo5VWNi4fWcmmbFq3NbB+WvjW/tF/wnELivEnc" crossorigin="anonymous"></script>
 <script>
+  function toggleMode() {
+    var next = document.documentElement.dataset.mode === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.mode = next;
+    try { localStorage.setItem('mode', next); } catch (e) { /* private mode: this tab only */ }
+  }
   function toggleDropdown(menuId) {
     var menu = document.getElementById(menuId);
     var isHidden = menu.classList.contains('hidden');

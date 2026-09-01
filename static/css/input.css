@@ -9,7 +9,7 @@
     scroll-behavior: smooth;
   }
 
-  :root, [data-mode="light"], [data-mode="dark"] {
+  :root, [data-mode="light"] {
     --color-kumo-canvas: #f1f5f9 !important;
     --color-kumo-control: #ffffff !important;
     --color-kumo-tint: #f8f9fa !important;
@@ -22,6 +22,20 @@
     --text-color-kumo-inactive: #94a3b8 !important;
     --text-color-kumo-muted: #94a3b8 !important;
   }
+
+  /* Kumo already ships a complete [data-mode="dark"] palette; listing dark
+     alongside light above was overwriting it with the light values. Only the
+     brand hue is ours, and #3b5bdb is too dark to read against a dark canvas,
+     so it lifts to the same hue at a higher lightness. */
+  [data-mode="dark"] {
+    --color-kumo-brand: #8ba4fc !important;
+    --text-color-kumo-brand: #8ba4fc !important;
+    --text-color-kumo-link: #8ba4fc !important;
+  }
+
+  /* The theme toggle carries both glyphs and shows the one it switches to. */
+  [data-mode="dark"] .mode-light-only { display: none; }
+  [data-mode="light"] .mode-dark-only { display: none; }
 
   /* ─── Kumo UI Table Component ─── */
   /* Matches https://kumo-ui.com/components/table/ */

@@ -135,12 +135,37 @@ func TemplateFuncMap() template.FuncMap {
 		"iterate":          Iterate,
 		"maskString":       MaskString,
 		"min":              Min,
+		"navAttrs":         NavAttrs,
 		"text2html":        Text2HTML,
 		"timeStatusClass":  TimeStatusClass,
 		"trimPrefix":       strings.TrimPrefix,
 		"version":          Version,
 		"versionsEqual":    VersionsEqual,
 	}
+}
+
+// NavAttrs renders the class and aria-current attributes for one navigation
+// link, highlighting it when it points at the page being served. "/" matches
+// exactly; every other entry also matches its own subtree, so /analytics/security
+// lights up the Analytics item. extra carries per-menu classes (the mobile
+// submenu indents with pl-6) and may be empty.
+//
+// The attributes are built here rather than repeated as a conditional in each
+// of the sixteen links across the desktop and mobile menus.
+func NavAttrs(currentPath, linkPath, extra string) template.HTMLAttr {
+	classes := "flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-sm"
+	if extra != "" {
+		classes += " " + extra
+	}
+
+	active := currentPath == linkPath
+	if !active && linkPath != "/" {
+		active = strings.HasPrefix(currentPath, linkPath+"/")
+	}
+	if active {
+		return template.HTMLAttr(`class="` + classes + ` font-semibold bg-kumo-brand/10 text-kumo-brand" aria-current="page"`)
+	}
+	return template.HTMLAttr(`class="` + classes + ` font-medium text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint"`)
 }
 
 // Add returns the sum of two integers a and b.

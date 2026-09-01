@@ -63,6 +63,7 @@
     var securityChart;
 
     function loadSecurity() {
+        var theme = chartTheme();
         var days = document.getElementById('days-filter').value;
         var url = '/v1/reports/fixed-vulnerabilities?days=' + days;
 
@@ -116,7 +117,7 @@
                         toolbar: { show: false },
                         zoom: { enabled: false }
                     },
-                    colors: ['#0ea5e9', '#ef4444', '#10b981'],
+                    colors: [theme.info, theme.danger, theme.success],
                     stroke: {
                         curve: 'smooth',
                         width: [0, 4, 0]
@@ -136,25 +137,25 @@
                     xaxis: {
                         type: 'datetime',
                         labels: {
-                            style: { colors: '#64748b' }
+                            style: { colors: theme.text }
                         }
                     },
                     yaxis: [
                         {
-                            title: { text: 'Vulnerabilities', style: { color: '#64748b' } },
-                            labels: { style: { colors: '#64748b' } }
+                            title: { text: 'Vulnerabilities', style: { color: theme.text } },
+                            labels: { style: { colors: theme.text } }
                         },
                         {
                             show: false,
                         },
                         {
                             opposite: true,
-                            title: { text: 'CVSS Score Mitigated', style: { color: '#64748b' } },
-                            labels: { style: { colors: '#64748b' } }
+                            title: { text: 'CVSS Score Mitigated', style: { color: theme.text } },
+                            labels: { style: { colors: theme.text } }
                         }
                     ],
                     grid: {
-                        borderColor: '#e2e8f0',
+                        borderColor: theme.line,
                         strokeDashArray: 4
                     },
                     tooltip: {

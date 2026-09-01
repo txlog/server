@@ -11,6 +11,11 @@
   </div>
 </div>{{ end }}
 
+{{ define "apexcharts" }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.css"
+  integrity="sha384-WNiy+NducmnYcKgUF5VPJHiJS34RxH0miG2SKAnbvkw+SxF9bqX1AIMFC6ocsO+d" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.js"
+  integrity="sha384-mrR3K8Jvv+o9bZ6Yu9HWI0M8tuzo5VWNi4fWcmmbFq3NbB+WvjW/tF/wnELivEnc" crossorigin="anonymous"></script>{{ end }}
+
 {{ define "empty-state" }}<div class="py-16 px-6 flex flex-col items-center text-center gap-3">
   <span class="w-12 h-12 rounded-xl bg-kumo-tint border border-kumo-line flex items-center justify-center">
     {{ template "icon-stack" "w-6 h-6 text-kumo-muted" }}

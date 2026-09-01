@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"html/template"
 	"strconv"
 	"strings"
@@ -124,6 +125,7 @@ func TemplateFuncMap() template.FuncMap {
 		"add":              Add,
 		"brand":            Brand,
 		"derefBool":        DerefBool,
+		"dict":             Dict,
 		"dnfUser":          DnfUser,
 		"formatInteger":    FormatInteger,
 		"formatPercentage": FormatPercentage,
@@ -142,6 +144,29 @@ func TemplateFuncMap() template.FuncMap {
 		"version":          Version,
 		"versionsEqual":    VersionsEqual,
 	}
+}
+
+// Dict builds a map from alternating key/value arguments, so a template can
+// pass more than one value to a partial:
+//
+//	{{ template "page-header" (dict "title" .title "subtitle" "…") }}
+//
+// It returns an error for an odd number of arguments or a non-string key,
+// which surfaces as a template execution error rather than silently rendering
+// the wrong page.
+func Dict(values ...any) (map[string]any, error) {
+	if len(values)%2 != 0 {
+		return nil, errors.New("dict expects an even number of arguments")
+	}
+	d := make(map[string]any, len(values)/2)
+	for i := 0; i < len(values); i += 2 {
+		key, ok := values[i].(string)
+		if !ok {
+			return nil, errors.New("dict keys must be strings")
+		}
+		d[key] = values[i+1]
+	}
+	return d, nil
 }
 
 // NavAttrs renders the class and aria-current attributes for one navigation

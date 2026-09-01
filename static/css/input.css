@@ -9,7 +9,11 @@
     scroll-behavior: smooth;
   }
 
-  :root, [data-mode="light"] {
+  /* Scoped to [data-mode="light"] only: :root matches <html> in BOTH modes, so
+     these !important values were also winning in dark and flattening the whole
+     palette back to light. The attribute is always present — the template ships
+     data-mode="light" and the head script rewrites it before the first paint. */
+  [data-mode="light"] {
     --color-kumo-canvas: #f1f5f9 !important;
     --color-kumo-control: #ffffff !important;
     --color-kumo-tint: #f8f9fa !important;
@@ -31,6 +35,8 @@
     --color-kumo-brand: #8ba4fc !important;
     --text-color-kumo-brand: #8ba4fc !important;
     --text-color-kumo-link: #8ba4fc !important;
+    /* The one surface token Kumo's dark block leaves unset. */
+    --text-color-kumo-muted: #94a3b8 !important;
   }
 
   /* The theme toggle carries both glyphs and shows the one it switches to. */

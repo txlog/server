@@ -54,11 +54,7 @@
         <h3 class="font-semibold text-lg text-kumo-default">OS distribution</h3>
       </div>
       {{ if eq (len .assetsByOS) 0 }}
-      <div class="py-12 text-center">
-        <p class="font-semibold text-kumo-default mb-1">No assets found</p>
-        <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
-            target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
-      </div>
+      {{ template "empty-state" (dict "title" "No assets found") }}
       {{ else }}
       <div class="overflow-x-auto">
         <table class="kumo-table">
@@ -92,11 +88,7 @@
         <h3 class="font-semibold text-lg text-kumo-default">Agent distribution</h3>
       </div>
       {{ if eq (len .assetsByAgentVersion) 0 }}
-      <div class="py-12 text-center">
-        <p class="font-semibold text-kumo-default mb-1">No assets found</p>
-        <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
-            target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
-      </div>
+      {{ template "empty-state" (dict "title" "No assets found") }}
       {{ else }}
       <div class="overflow-x-auto">
         <table class="kumo-table">
@@ -174,11 +166,7 @@
             class="text-sm text-kumo-subtle font-normal ml-1">last 30 days</span></h3>
       </div>
       {{ if eq (len .mostUpdatedPackages) 0 }}
-      <div class="py-12 text-center">
-        <p class="font-semibold text-kumo-default mb-1">No packages to list</p>
-        <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
-            target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
-      </div>
+      {{ template "empty-state" (dict "title" "No packages to list") }}
       {{ else }}
       <div class="overflow-x-auto">
         <table class="kumo-table">

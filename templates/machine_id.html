@@ -58,12 +58,7 @@
       <h3 class="font-semibold text-lg text-kumo-default">Transactions</h3>
     </div>
     {{ if eq (len .transactions) 0 }}
-    <div class="py-12 text-center">
-      
-      <p class="font-semibold text-kumo-default mb-1">No transactions found for this asset</p>
-      <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
-          target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
-    </div>
+    {{ template "empty-state" (dict "title" "No transactions found for this asset") }}
     {{ else }}
     <div class="overflow-x-auto">
       <table class="kumo-table">
@@ -189,12 +184,7 @@
           class="text-sm text-kumo-subtle font-normal ml-1">with transactions</span></h3>
     </div>
     {{ if eq (len .executions) 0 }}
-    <div class="py-12 text-center">
-      
-      <p class="font-semibold text-kumo-default mb-1">No executions found for this asset</p>
-      <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
-          target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
-    </div>
+    {{ template "empty-state" (dict "title" "No executions found for this asset") }}
     {{ else }}
     <div class="overflow-x-auto">
       <table class="kumo-table">

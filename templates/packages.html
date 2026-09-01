@@ -29,13 +29,7 @@
     </div>
 
     {{ if eq (len .packageNames) 0 }}
-    <div class="py-16 text-center">
-      
-      <p class="font-semibold text-lg text-kumo-default mb-2">No packages found{{ if .search }} containing <kbd
-          class="bg-kumo-tint border border-kumo-line text-xs font-mono px-2 py-1 rounded-md">{{ .search }}</kbd>{{ end }}</p>
-      <p class="text-sm text-kumo-subtle">Start by running <a href="https://txlog.rda.run/docs/agent"
-          target="_blank" class="text-kumo-brand hover:underline">Txlog Agent</a> in one of your servers.</p>
-    </div>
+    {{ template "empty-state" (dict "title" "No packages found" "search" .search) }}
     {{ else }}
     <div class="overflow-x-auto">
       <table class="kumo-table">

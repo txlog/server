@@ -426,11 +426,7 @@
       <button id="delete-asset-btn" onclick="deleteAsset('{{ .machine_id }}')" data-kumo-component="Button"
         class="group flex shrink-0 font-medium select-none border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-kumo-danger cursor-pointer rounded-lg items-center justify-center px-4 py-2.5 text-white bg-kumo-danger hover:bg-kumo-danger/90 shadow-sm transition-colors gap-2">
         <span id="delete-btn-text">Delete all</span>
-        <svg id="delete-btn-spinner" class="animate-spin w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" fill="none"
-          viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
+        {{ template "icon-spinner" "animate-spin w-4 h-4 hidden" }}
       </button>
     </div>
   </div>
@@ -504,7 +500,7 @@
   }
 
   function showVulnsModal(transactionId) {
-    var shieldCheck = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256" class="text-kumo-danger"><rect width="256" height="256" fill="none"/><path d="M208,40H48a8,8,0,0,0-8,8v64c0,52.72,35.32,95.77,84,111a8,8,0,0,0,5.32,0c48.71-15.24,84-58.3,84-111V48A8,8,0,0,0,208,40Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="128" y1="104" x2="128" y2="144" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><circle cx="128" cy="180" r="12" fill="currentColor"/></svg>';
+    var shieldCheck = '{{ template "icon-shield-warning" "w-5 h-5 text-kumo-danger" }}';
     document.getElementById('modal-vulns-title').innerHTML = shieldCheck + ' Loading...';
     document.getElementById('modal-vulns-summary').innerHTML = '';
     document.getElementById('modal-vulns-explanation').classList.add('hidden');

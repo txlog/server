@@ -1,0 +1,121 @@
+      <!-- Database Migrations -->
+      <div id="section-migrations" class="admin-section hidden">
+
+        <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+          <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between">
+            <h3 class="font-semibold text-lg">Database Migrations</h3>
+            <div class="flex gap-2">
+              {{ if .migrations }}{{ if gt (len .migrations.Pending) 0 }}<span
+                class="bg-kumo-warning/10 text-kumo-warning text-xs font-bold px-3 py-1 rounded-lg">{{ len
+                .migrations.Pending
+                }} pending</span>{{ else }}<span
+                class="bg-kumo-success/10 text-kumo-success text-xs font-bold px-3 py-1 rounded-lg">Up to date</span>{{ end
+              }}{{
+              if .migrations.IsDirty }}<span
+                class="bg-kumo-danger/10 text-kumo-danger text-xs font-bold px-3 py-1 rounded-lg">Dirty state</span>{{
+              end
+              }}{{ end }}
+            </div>
+          </div>
+          <div class="p-6">
+            {{ if .migrations }}
+            <div class="grid md:grid-cols-4 gap-4 mb-4">
+              <div class="flex items-center gap-3"><svg class="w-5 h-5 text-kumo-brand" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M208,80H176V56a48,48,0,0,0-96,0V80H48A16,16,0,0,0,32,96V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V96A16,16,0,0,0,208,80ZM96,56a32,32,0,0,1,64,0V80H96ZM208,208H48V96H208V208Z"></path></svg>
+                <div><strong>Current Version:</strong> {{ .migrations.CurrentVersion }}</div>
+              </div>
+              <div class="flex items-center gap-3">{{ template "icon-arrow-bend-right" "w-5 h-5 text-kumo-success" }}
+                <div><strong>Applied:</strong> {{ len .migrations.Applied }}</div>
+              </div>
+              <div class="flex items-center gap-3"><svg class="w-5 h-5 text-kumo-warning" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M173.66,98.34a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35A8,8,0,0,1,173.66,98.34ZM232,128A104,104,0,1,1,128,24,104.11,104.11,0,0,1,232,128Zm-16,0a88,88,0,1,0-88,88A88.1,88.1,0,0,0,216,128Z"></path></svg>
+                <div><strong>Pending:</strong> {{ len .migrations.Pending }}</div>
+              </div>
+              <div class="flex items-center gap-3">{{ if .migrations.IsDirty }}{{ template "icon-warning" "w-5 h-5 text-kumo-danger" }}
+                <div><strong>State:</strong> <span class="text-kumo-danger font-semibold">Dirty</span></div>{{ else }}<svg class="w-5 h-5 text-kumo-success" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="40 144 96 200 224 72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
+                <div><strong>State:</strong> <span class="text-kumo-success font-semibold">Clean</span></div>{{ end }}
+              </div>
+            </div>
+            {{ if .migrations.IsDirty }}
+            <div class="bg-kumo-danger/5 border border-kumo-danger/20 rounded-2xl p-4 mb-4">
+              <div class="flex gap-3">{{ template "icon-warning" "w-5 h-5 text-kumo-danger flex-shrink-0 mt-0.5" }}
+                <div>
+                  <h4 class="font-semibold text-sm mb-1">Database Migration in Dirty State</h4>
+                  <p class="text-sm text-kumo-muted mb-3">The database is stuck at version <strong>{{
+                      .migrations.CurrentVersion }}</strong> in a dirty state.</p>
+                  <div class="flex gap-2">
+                    <form action="/admin/migrations/force-clean" method="post" class="inline"><button type="submit"
+                        onclick="return confirm('This will force the database to clean state. Are you sure?')"
+                        class="bg-kumo-danger text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1"><svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M224,48V96a8,8,0,0,1-8,8H168a8,8,0,0,1,0-16h28.69L182.06,73.37a79.56,79.56,0,0,0-56.13-23.43h-.45A79.52,79.52,0,0,0,69.59,72.71,8,8,0,0,1,58.41,61.27a96,96,0,0,1,135,.79L208,76.69V48a8,8,0,0,1,16,0ZM186.41,183.29a80,80,0,0,1-112.47-.66L59.31,168H88a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V179.31l14.63,14.63A95.43,95.43,0,0,0,130,222.06h.53a95.36,95.36,0,0,0,67.07-27.33,8,8,0,0,0-11.18-11.44Z"></path></svg> Force Clean State</button></form>
+                    <form action="/admin/migrations/run" method="post" class="inline"><button type="submit"
+                        onclick="return confirm('Force clean and run all pending migrations?')"
+                        class="bg-kumo-brand text-white text-xs font-medium px-3 py-1.5 rounded-lg hover:-translate-y-0.5 transition-all flex items-center gap-1">{{ template "icon-arrow-bend-right" "w-3 h-3" }} Force Clean &amp; Run</button></form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {{ end }}
+            {{ if gt (len .migrations.Pending) 0 }}
+            <div class="bg-kumo-warning/5 border border-kumo-warning/20 rounded-2xl p-4 mb-4">
+              <div class="flex gap-3">{{ template "icon-warning" "w-5 h-5 text-kumo-warning flex-shrink-0 mt-0.5" }}
+                <div>
+                  <h4 class="font-semibold text-sm mb-1">Pending Migrations</h4>
+                  <p class="text-sm text-kumo-muted">There are {{ len .migrations.Pending }} pending migrations.
+                  </p>
+                </div>
+              </div>
+            </div>
+            {{ if not .migrations.IsDirty }}
+            <button type="button" onclick="openModal('migrationsModal')"
+              class="bg-kumo-brand text-white text-sm font-medium px-4 py-2 rounded-xl hover:-translate-y-0.5 hover:shadow-lg hover:shadow-kumo-brand/30 transition-all flex items-center gap-2 mb-4">{{ template "icon-arrow-bend-right" "w-4 h-4" }} Run All Migrations ({{ len .migrations.Pending }})</button>
+            {{ end }}
+            {{ else }}{{ if not .migrations.IsDirty }}
+            <div class="bg-kumo-success/5 border border-kumo-success/20 rounded-2xl p-4 mb-4 flex gap-3">{{ template "icon-arrows-clockwise" "w-5 h-5 text-kumo-success flex-shrink-0 mt-0.5" }}
+              <div>
+                <h4 class="font-semibold text-sm mb-1">Database Up to Date</h4>
+                <p class="text-sm text-kumo-muted">All migrations have been applied successfully.</p>
+              </div>
+            </div>
+            {{ end }}{{ end }}
+            {{ else }}
+            <div class="bg-kumo-brand/5 border border-kumo-brand/20 rounded-2xl p-4">
+              <p class="text-sm text-kumo-muted">Unable to load migration status.</p>
+            </div>
+            {{ end }}
+          </div>
+          {{ if .migrations }}
+          <div class="overflow-x-auto">
+            <table class="kumo-table">
+              <thead>
+                <tr class="border-b border-kumo-line/50 text-left">
+                  <th class="font-semibold text-kumo-default text-xs uppercase tracking-wider">Version</th>
+                  <th class="font-semibold text-kumo-default text-xs uppercase tracking-wider">Description
+                  </th>
+                  <th class="font-semibold text-kumo-default text-xs uppercase tracking-wider">Status</th>
+                  <th class="font-semibold text-kumo-default text-xs uppercase tracking-wider">Filename
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {{ range .migrations.Applied }}<tr class="hover:bg-kumo-tint transition-colors">
+                  <td><code
+                      class="bg-kumo-tint text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code></td>
+                  <td>{{ .Description }}</td>
+                  <td><span
+                      class="bg-kumo-success/10 text-kumo-success text-xs font-bold px-2 py-0.5 rounded-md">Applied</span>
+                  </td>
+                  <td class="text-kumo-muted">{{ .Filename }}</td>
+                </tr>{{ end }}
+                {{ range .migrations.Pending }}<tr class="hover:bg-kumo-tint transition-colors">
+                  <td><code
+                      class="bg-kumo-tint text-xs font-mono px-2 py-0.5 rounded">{{ .Version }}</code></td>
+                  <td>{{ .Description }}</td>
+                  <td><span
+                      class="bg-kumo-warning/10 text-kumo-warning text-xs font-bold px-2 py-0.5 rounded-md">Pending</span>
+                  </td>
+                  <td class="text-kumo-muted">{{ .Filename }}</td>
+                </tr>{{ end }}
+              </tbody>
+            </table>
+          </div>
+          {{ end }}
+        </div>
+      </div>

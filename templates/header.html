@@ -29,6 +29,7 @@
 </head>
 
 <body class="font-sans antialiased bg-kumo-canvas text-kumo-default">
+  {{ $path := .Context.Request.URL.Path }}
   <nav class="fixed top-0 left-0 right-0 bg-kumo-control border-b border-kumo-line z-50 print:hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
       <div class="flex items-center justify-between h-16">
@@ -38,29 +39,24 @@
             <span class="text-kumo-default font-semibold text-lg hidden sm:inline">Txlog Server</span>
           </a>
           <div class="hidden md:flex items-center gap-1">
-            <a href="/"
-              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+            <a href="/" {{ navAttrs $path "/" "" }}>
               {{ template "icon-house" "w-4 h-4" }}
               Home
             </a>
-            <a href="/assets"
-              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+            <a href="/assets" {{ navAttrs $path "/assets" "" }}>
               {{ template "icon-rows" "w-4 h-4" }}
               Assets
             </a>
-            <a href="/packages"
-              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+            <a href="/packages" {{ navAttrs $path "/packages" "" }}>
               {{ template "icon-package" "w-4 h-4" }}
               Packages
             </a>
-            <a href="/topology"
-              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+            <a href="/topology" {{ navAttrs $path "/topology" "" }}>
               {{ template "icon-topology" "w-4 h-4" }}
               Topology
             </a>
             <div class="relative" id="reports-dropdown">
-              <button onclick="toggleDropdown('reports-menu')"
-                class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium cursor-pointer">
+              <button onclick="toggleDropdown('reports-menu')" {{ navAttrs $path "/analytics" "cursor-pointer" }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="48 208 48 136 96 136" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="224" y1="208" x2="32" y2="208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="96 208 96 88 152 88" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="152 208 152 40 208 40 208 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg>
                 Analytics
                 {{ template "icon-caret-down" "w-3 h-3" }}
@@ -77,8 +73,7 @@
               </div>
             </div>
             {{ if not (or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled) }}
-            <a href="/admin"
-              class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+            <a href="/admin" {{ navAttrs $path "/admin" "" }}>
               {{ template "icon-wrench" "w-4 h-4" }}
               Admin
             </a>
@@ -160,38 +155,30 @@
         </div>
       </div>
       <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-kumo-line mt-2 pt-3 space-y-1">
-        <a href="/"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+        <a href="/" {{ navAttrs $path "/" "" }}>
           {{ template "icon-house" "w-4 h-4" }} Home
         </a>
-        <a href="/assets"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+        <a href="/assets" {{ navAttrs $path "/assets" "" }}>
           {{ template "icon-rows" "w-4 h-4" }} Assets
         </a>
-        <a href="/topology"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+        <a href="/topology" {{ navAttrs $path "/topology" "" }}>
           {{ template "icon-topology" "w-4 h-4" }} Topology
         </a>
-        <a href="/packages"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+        <a href="/packages" {{ navAttrs $path "/packages" "" }}>
           {{ template "icon-package" "w-4 h-4" }} Packages
         </a>
-        <a href="/analytics/progression"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium pl-6">
+        <a href="/analytics/progression" {{ navAttrs $path "/analytics/progression" "pl-6" }}>
           Package Progression
         </a>
 
-        <a href="/analytics/anomalies"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium pl-6">
+        <a href="/analytics/anomalies" {{ navAttrs $path "/analytics/anomalies" "pl-6" }}>
           Anomaly Detection
         </a>
-        <a href="/analytics/security"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium pl-6">
+        <a href="/analytics/security" {{ navAttrs $path "/analytics/security" "pl-6" }}>
           Security & Mitigations
         </a>
         {{ if not (or .Context.Keys.oidc_enabled .Context.Keys.ldap_enabled) }}
-        <a href="/admin"
-          class="flex items-center gap-2 px-3 py-2 rounded-lg text-kumo-subtle hover:text-kumo-default hover:bg-kumo-tint transition-all text-sm font-medium">
+        <a href="/admin" {{ navAttrs $path "/admin" "" }}>
           {{ template "icon-wrench" "w-4 h-4" }} Admin
         </a>
         {{ end }}

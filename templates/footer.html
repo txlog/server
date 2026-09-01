@@ -18,6 +18,24 @@
 <script src="https://cdn.jsdelivr.net/npm/apexcharts@5.3.6/dist/apexcharts.min.js"
   integrity="sha384-mrR3K8Jvv+o9bZ6Yu9HWI0M8tuzo5VWNi4fWcmmbFq3NbB+WvjW/tF/wnELivEnc" crossorigin="anonymous"></script>
 <script>
+  // ApexCharts only takes literal colours, so the Kumo tokens are read off the
+  // document instead of being pasted as hex into each page that draws a chart.
+  // ponytail: charts keep the palette they were built with, so a theme switch
+  // recolours them on the next load; re-render on toggle if that starts to jar.
+  function chartTheme() {
+    var style = getComputedStyle(document.documentElement);
+    var token = function (name, fallback) {
+      return (style.getPropertyValue(name) || '').trim() || fallback;
+    };
+    return {
+      text: token('--text-color-kumo-subtle', '#64748b'),
+      line: token('--color-kumo-line', '#e2e8f0'),
+      brand: token('--color-kumo-brand', '#3b5bdb'),
+      danger: token('--color-kumo-danger', '#ef4444'),
+      success: token('--color-kumo-success', '#10b981'),
+      info: token('--color-kumo-info', '#0ea5e9')
+    };
+  }
   function toggleMode() {
     var next = document.documentElement.dataset.mode === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.mode = next;

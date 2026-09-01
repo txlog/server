@@ -17,8 +17,7 @@
         </div>
         <div class="md:w-48 flex md:flex-col gap-6 md:gap-4 md:justify-center">
           <div class="px-4 py-3 bg-kumo-tint border border-kumo-line rounded-lg">
-            <div class="text-sm text-kumo-subtle flex items-center gap-2"><span class="w-2 h-2 rounded-full"
-                style="background-color: #D9556A;"></span> Installed</div>
+            <div class="text-sm text-kumo-subtle flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-kumo-danger"></span> Installed</div>
             <div class="font-bold text-2xl text-kumo-default mt-1">
               {{ $total := 0 }}
               {{ range .graphData }}
@@ -28,8 +27,7 @@
             </div>
           </div>
           <div class="px-4 py-3 bg-kumo-tint border border-kumo-line rounded-lg">
-            <div class="text-sm text-kumo-subtle flex items-center gap-2"><span class="w-2 h-2 rounded-full"
-                style="background-color: #6AA2FB;"></span> Upgraded</div>
+            <div class="text-sm text-kumo-subtle flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-kumo-brand"></span> Upgraded</div>
             <div class="font-bold text-2xl text-kumo-default mt-1">
               {{ $total := 0 }}
               {{ range .graphData }}
@@ -163,6 +161,7 @@
 <script>
   {{ if .graphData }}
   document.addEventListener("DOMContentLoaded", function () {
+    var theme = chartTheme();
     window.ApexCharts &&
       new ApexCharts(document.getElementById("chart-active-users-2"), {
         chart: {
@@ -179,7 +178,7 @@
     xaxis: { labels: { padding: 0, rotate: -45, rotateAlways: false, hideOverlappingLabels: true, style: { fontSize: '11px' } }, tooltip: { enabled: false }, type: "category" },
     yaxis: { labels: { padding: 4 } },
     labels: [{{ range .graphData }}"{{ formatDate .Week }}", {{ end }}],
-    colors: ['#D9556A', '#6AA2FB'],
+    colors: [theme.danger, theme.brand],
     legend: { show: false },
       }).render();
 

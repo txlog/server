@@ -1581,7 +1581,7 @@
     if (!hash || validSections.indexOf(hash) === -1 || !document.getElementById('section-' + hash)) hash = 'server';
     showSection(hash);
     var runBtn = document.getElementById('runMigrationsBtn');
-    if (runBtn) runBtn.addEventListener('click', function () { this.disabled = true; this.innerHTML = '<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Running...'; });
+    if (runBtn) runBtn.addEventListener('click', function () { this.disabled = true; this.innerHTML = '{{ template "icon-spinner" "animate-spin w-4 h-4" }} Running...'; });
     var generateBtn = document.getElementById('generateAPIKeyBtn');
     var copyBtn = document.getElementById('copyAPIKeyBtn');
     var createForm = document.getElementById('createAPIKeyForm');
@@ -1590,17 +1590,17 @@
     if (generateBtn) generateBtn.addEventListener('click', function () {
       var name = document.getElementById('apiKeyName').value.trim();
       if (name.length < 3) { alert('Please enter a name with at least 3 characters'); return; }
-      generateBtn.disabled = true; generateBtn.innerHTML = '<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Generating...';
+      generateBtn.disabled = true; generateBtn.innerHTML = '{{ template "icon-spinner" "animate-spin w-4 h-4" }} Generating...';
       var formData = new FormData(); formData.append('name', name);
       fetch('/admin/apikeys/create', { method: 'POST', body: formData }).then(function (r) { return r.json(); }).then(function (data) {
         if (data.success) { createForm.classList.add('hidden'); resultDiv.classList.remove('hidden'); generateBtn.classList.add('hidden'); document.getElementById('apiKeyValue').value = data.key; document.getElementById('apiKeyExample').textContent = data.key; closeBtn.textContent = 'Done'; closeBtn.classList.remove('border-kumo-line', 'text-kumo-default', 'hover:bg-kumo-line/20'); closeBtn.classList.add('bg-kumo-success', 'text-kumo-default', 'hover:-translate-y-0.5'); }
-        else { alert('Error: ' + (data.error || 'Failed')); generateBtn.disabled = false; generateBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A79.73,79.73,0,0,0,160,176h.1A80,80,0,0,0,216.57,39.43ZM224,98.1c-1.09,34.09-29.75,61.86-63.89,61.9H160a63.7,63.7,0,0,1-23.65-4.51,8,8,0,0,0-8.84,1.68L116.69,168H96a8,8,0,0,0-8,8v16H72a8,8,0,0,0-8,8v16H40V187.31l58.83-58.82a8,8,0,0,0,1.68-8.84A63.72,63.72,0,0,1,96,95.92c0-34.14,27.81-62.8,61.9-63.89A64,64,0,0,1,224,98.1ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"></path></svg> Generate Key'; }
-      }).catch(function (e) { alert('Error: ' + e.message); generateBtn.disabled = false; generateBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A79.73,79.73,0,0,0,160,176h.1A80,80,0,0,0,216.57,39.43ZM224,98.1c-1.09,34.09-29.75,61.86-63.89,61.9H160a63.7,63.7,0,0,1-23.65-4.51,8,8,0,0,0-8.84,1.68L116.69,168H96a8,8,0,0,0-8,8v16H72a8,8,0,0,0-8,8v16H40V187.31l58.83-58.82a8,8,0,0,0,1.68-8.84A63.72,63.72,0,0,1,96,95.92c0-34.14,27.81-62.8,61.9-63.89A64,64,0,0,1,224,98.1ZM192,76a12,12,0,1,1-12-12A12,12,0,0,1,192,76Z"></path></svg> Generate Key'; });
+        else { alert('Error: ' + (data.error || 'Failed')); generateBtn.disabled = false; generateBtn.innerHTML = '{{ template "icon-key" "w-4 h-4" }} Generate Key'; }
+      }).catch(function (e) { alert('Error: ' + e.message); generateBtn.disabled = false; generateBtn.innerHTML = '{{ template "icon-key" "w-4 h-4" }} Generate Key'; });
     });
     if (copyBtn) copyBtn.addEventListener('click', function () {
       var input = document.getElementById('apiKeyValue'); input.select(); document.execCommand('copy');
-      copyBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="176 152 224 104 176 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><polyline points="128 152 176 104 128 56" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M32,200a96,96,0,0,1,96-96h48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Copied!';
-      setTimeout(function () { copyBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M216,40V168a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H200A16,16,0,0,1,216,40ZM184,80V216a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V80A16,16,0,0,1,40,64H168A16,16,0,0,1,184,80Zm-16,0H40V216H168Z"></path></svg> Copy'; }, 2000);
+      copyBtn.innerHTML = '{{ template "icon-arrow-bend-right" "w-4 h-4" }} Copied!';
+      setTimeout(function () { copyBtn.innerHTML = '{{ template "icon-copy" "w-4 h-4" }} Copy'; }, 2000);
     });
     // --- Template Builder Logic ---
     var tagBank = document.getElementById('tag-bank');
@@ -1649,7 +1649,7 @@
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'remove-tag ml-1 text-kumo-muted hover:text-kumo-danger transition-colors';
-      btn.innerHTML = '<svg class="w-3 h-3" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path></svg>';
+      btn.innerHTML = '{{ template "icon-x" "w-3 h-3" }}';
       btn.onclick = function () {
         el.remove();
         if (dropzone.querySelectorAll('.tag-chip').length === 0) {
@@ -1797,7 +1797,7 @@
   function showAdminAlert(msg) {
     var d = document.createElement('div');
     d.className = 'bg-kumo-success/10 border border-kumo-success/20 text-kumo-success px-4 py-3 rounded-xl mb-4 flex items-center gap-2';
-    d.innerHTML = '<svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><circle cx="96" cy="96" r="72" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><path d="M167.6,88.4a72,72,0,1,1-79.2,79.2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="164.91" y1="116.91" x2="228.91" y2="180.91" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="146.91" y1="146.91" x2="210.91" y2="210.91" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/><line x1="116.91" y1="164.91" x2="180.91" y2="228.91" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg><span>' + msg + '</span>';
+    d.innerHTML = '{{ template "icon-arrows-clockwise" "w-5 h-5" }}<span>' + msg + '</span>';
     var c = document.getElementById('alert-container'); if (c) c.appendChild(d);
   }
   function previewPattern(template) {

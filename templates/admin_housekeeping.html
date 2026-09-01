@@ -1,0 +1,154 @@
+      <!-- Housekeeping -->
+      <div id="section-housekeeping" class="admin-section hidden">
+        <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+          <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between">
+            <h3 class="font-semibold text-lg">Housekeeping</h3>
+          </div>
+          <table class="kumo-table">
+            <tbody>
+              <tr>
+                <td class="w-1/3 font-medium">Retention Days</td>
+                <td><code class="bg-kumo-tint border border-kumo-line text-xs font-mono px-2 py-0.5 rounded-sm">{{ .Context.Keys.env.cronRetentionDays }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td class="font-medium">Schedule Expression</td>
+                <td><code class="bg-kumo-tint border border-kumo-line text-xs font-mono px-2 py-0.5 rounded-sm">{{ .Context.Keys.env.cronRetentionExpression }}</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Cleanup Inactive Assets -->
+        <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden mt-6">
+          <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between">
+            <h3 class="font-semibold text-lg">Cleanup Inactive Assets</h3>
+            {{ if gt .inactiveAssetsCount 0 }}
+            <span class="bg-kumo-warning/10 text-kumo-warning text-xs font-bold px-3 py-1 rounded-lg">{{
+              .inactiveAssetsCount }} inactive</span>
+            {{ else }}
+            <span class="bg-kumo-success/10 text-kumo-success text-xs font-bold px-3 py-1 rounded-lg">All active</span>
+            {{ end }}
+          </div>
+          <div class="p-6">
+            <div class="flex gap-3 mb-4">
+              {{ template "icon-info" "w-5 h-5 text-kumo-brand flex-shrink-0 mt-0.5" }}
+              <p class="text-sm text-kumo-muted">Assets are considered <strong>inactive</strong> when they have not
+                sent any new data in the last <strong>15 days</strong>. This operation removes all data associated with
+                these servers (transactions, items, executions, and asset records).</p>
+            </div>
+            {{ if gt .inactiveAssetsCount 0 }}
+            <div class="bg-kumo-danger/5 border border-kumo-danger/20 rounded-2xl p-4 mb-4">
+              <div class="flex gap-3">
+                {{ template "icon-warning" "w-5 h-5 text-kumo-danger flex-shrink-0 mt-0.5" }}
+                <div>
+                  <h4 class="font-semibold text-sm mb-1">Destructive Action</h4>
+                  <p class="text-sm text-kumo-muted">This will permanently delete <strong>{{ .inactiveAssetsCount
+                      }} inactive asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }}</strong> and all their associated
+                    data. This action cannot be undone.</p>
+                </div>
+              </div>
+            </div>
+            <form action="/admin/cleanup/inactive-assets" method="post">
+              <button type="submit"
+                onclick="return confirm('WARNING: This will permanently delete all data for {{ .inactiveAssetsCount }} inactive asset{{ if ne .inactiveAssetsCount 1 }}s{{ end }} (transactions, items, executions, and asset records). This action cannot be undone. Proceed?')"
+                class="w-full text-kumo-danger font-medium py-2 rounded-lg border border-kumo-danger/30 hover:bg-kumo-danger/10 hover:border-kumo-danger transition-colors flex items-center justify-center gap-2 text-sm">
+                {{ template "icon-trash" "w-4 h-4" }} Cleanup {{ .inactiveAssetsCount }} Inactive Asset{{ if ne
+                .inactiveAssetsCount 1 }}s{{ end }}
+              </button>
+            </form>
+            {{ else }}
+            <div class="bg-kumo-success/5 border border-kumo-success/20 rounded-2xl p-4 flex gap-3">
+              {{ template "icon-arrows-clockwise" "w-5 h-5 text-kumo-success flex-shrink-0 mt-0.5" }}
+              <div>
+                <h4 class="font-semibold text-sm mb-1">No Inactive Assets</h4>
+                <p class="text-sm text-kumo-muted">All registered assets have reported data within the last 15
+                  days. No cleanup is needed.</p>
+              </div>
+            </div>
+            {{ end }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics -->
+      <div id="section-statistics" class="admin-section hidden">
+        <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+          <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between">
+            <h3 class="font-semibold text-lg">Statistics</h3>
+            <span class="bg-kumo-tint text-kumo-subtle text-xs font-bold px-3 py-1 rounded-lg">Read-only</span>
+          </div>
+          <table class="kumo-table">
+            <tbody>
+              <tr>
+                <td class="w-1/3 font-medium">Schedule Expression</td>
+                <td><code class="bg-kumo-tint border border-kumo-line text-xs font-mono px-2 py-0.5 rounded-sm">{{ .Context.Keys.env.cronStatisticsExpression }}</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vulnerabilities Updates (OSV) -->
+      <div id="section-osv" class="admin-section hidden">
+        <div class="bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+          <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between">
+            <h3 class="font-semibold text-lg">Vulnerabilities Updates (OSV)</h3>
+            {{ if .osvIsRunning }}
+            <span
+              class="bg-kumo-warning/10 text-kumo-warning text-xs font-bold px-2 py-0.5 rounded-md uppercase tracking-wider animate-pulse flex items-center gap-1.5"><span
+                class="w-1.5 h-1.5 rounded-full bg-kumo-warning"></span> Running Now</span>
+            {{ else }}
+            <span
+              class="bg-kumo-success/10 text-kumo-success text-xs font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Idle</span>
+            {{ end }}
+          </div>
+          <table class="kumo-table">
+            <tbody>
+              <tr>
+                <td class="w-1/3 font-medium">Schedule Expression</td>
+                <td><code class="bg-kumo-tint border border-kumo-line text-xs font-mono px-2 py-0.5 rounded-sm">{{ if .Context.Keys.env.cronOsvExpression }}{{ .Context.Keys.env.cronOsvExpression }}{{ else }}0 4 * * *{{ end }}</code>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <form action="/admin/migrations/run_osv_update" method="post" class="w-full">
+                    {{ if .osvIsRunning }}
+                    <button type="button" disabled
+                      class="w-full bg-kumo-line text-kumo-subtle font-medium py-1.5 rounded-lg border border-kumo-line/50 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
+                      {{ template "icon-spinner" "w-3.5 h-3.5 animate-spin" }} Update in Progress
+                    </button>
+                    {{ else }}
+                    <button type="submit"
+                      onclick="return confirm('This will start fetching and processing OSV vulnerabilities in the background. Note: this job may take a while. Proceed?')"
+                      class="w-full bg-white text-kumo-default font-medium py-1.5 rounded-lg border border-kumo-line hover:bg-kumo-tint hover:border-kumo-brand transition-colors flex items-center justify-center gap-2 text-xs">
+                      <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256"><rect width="256" height="256" fill="none"/><polyline points="96 48 176 128 96 208" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"/></svg> Run Manually Now
+                    </button>
+                    {{ end }}
+                  </form>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <form action="/admin/migrations/reset_osv" method="post" class="w-full">
+                    {{ if .osvIsRunning }}
+                    <button type="button" disabled
+                      class="w-full bg-kumo-danger/10 text-kumo-danger font-medium py-1.5 rounded-lg border border-kumo-danger/20 transition-colors flex items-center justify-center gap-2 cursor-not-allowed text-xs">
+                      {{ template "icon-spinner" "w-3.5 h-3.5 animate-spin" }} Update in Progress
+                    </button>
+                    {{ else }}
+                    <button type="submit"
+                      onclick="return confirm('WARNING: This will erase EVERY downloaded OSV vulnerability from the database, reset all transaction scoreboards to zero AND re-start the fetch job from scratch. It might take dozens of minutes to rebuild everything. Proceed?')"
+                      class="w-full text-kumo-danger font-medium py-1.5 rounded-lg border border-kumo-danger/30 hover:bg-kumo-danger/10 hover:border-kumo-danger transition-colors flex items-center justify-center gap-2 text-xs">
+                      {{ template "icon-trash" "w-3.5 h-3.5" }} Reset All Data &amp; Rebuild
+                    </button>
+                    {{ end }}
+                  </form>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>

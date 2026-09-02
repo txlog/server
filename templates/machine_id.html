@@ -563,7 +563,7 @@
 
   function deleteAsset(assetId) {
     var btn = document.getElementById('delete-asset-btn');
-    var btnSpinner = document.getElementById('delete-btn-spinner');
+    var btnSpinner = btn.querySelector('svg');
     var btnText = document.getElementById('delete-btn-text');
     btn.disabled = true;
     btnSpinner.classList.remove('hidden');

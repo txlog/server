@@ -38,6 +38,14 @@ the Swagger UI at `/swagger/index.html`.
 | `GET`  | `/transactions/ids` | Get transaction IDs.     | -                         |
 | `POST` | `/transactions`     | Upload transaction data. | JSON (Transaction object) |
 
+`POST /transactions` accepts an optional `replace` query parameter. Without it, a
+transaction the server already holds for that `machine_id` is left untouched and
+the response is `Transaction already exists`. With `replace=true` the stored
+transaction is updated and its item list is deleted and rewritten from the
+payload, in a single database transaction. The agent sends `replace=true` when
+run as `txlog build --force`, which repairs a host recorded by an older agent
+without deleting it through `DELETE /admin/assets/:machine_id`.
+
 ### Packages
 
 | Method | Path                                       | Description                        | Query Params |

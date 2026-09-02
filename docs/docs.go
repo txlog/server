@@ -588,6 +588,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/models.Transaction"
                         }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Overwrite the transaction and its items if they already exist",
+                        "name": "replace",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -630,6 +636,20 @@ const docTemplate = `{
                     "transactions"
                 ],
                 "summary": "Get saved transactions IDs for a host",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Machine ID",
+                        "name": "machine_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Hostname",
+                        "name": "hostname",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

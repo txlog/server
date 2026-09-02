@@ -499,3 +499,98 @@ func TestPostTransactions_WithMultipleItems(t *testing.T) {
 		t.Errorf("Expected 5 transaction items, got %d", count)
 	}
 }
+
+// TestPostTransactions_ReplaceOverwritesItems covers the replace=true path used
+// by 'txlog build --force': the transaction row is updated and its item list is
+// rewritten instead of appended to, so a re-send repairs rows an older agent
+// recorded with different parsing.
+func TestPostTransactions_ReplaceOverwritesItems(t *testing.T) {
+	db := setupTransactionsTestDB(t)
+	defer db.Close()
+	defer cleanupPostTransactionsTestData(t, db)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.POST("/v1/transactions", PostTransactions(db))
+
+	machineID := "post-tx-test-machine-004"
+	transactionID := "1004"
+
+	body := models.Transaction{
+		TransactionID:  transactionID,
+		MachineID:      machineID,
+		Hostname:       "post-tx-test-hostname-replace",
+		Actions:        "Install",
+		Altered:        "2",
+		User:           "root",
+		ReturnCode:     "0",
+		ReleaseVersion: "8.5",
+		CommandLine:    "dnf install grub2-common",
+		Items: []models.TransactionItem{
+			// The epoch glued to the version, as the pre-fix agent sent it.
+			{Action: "Install", Name: "grub2-common", Version: "1:2.12", Release: "1.el9", Epoch: "1", Arch: "noarch", Repo: "baseos"},
+		},
+	}
+	jsonBody, _ := json.Marshal(body)
+
+	req1, _ := http.NewRequest("POST", "/v1/transactions", bytes.NewBuffer(jsonBody))
+	req1.Header.Set("Content-Type", "application/json")
+	w1 := httptest.NewRecorder()
+	router.ServeHTTP(w1, req1)
+	if w1.Code != http.StatusOK {
+		t.Fatalf("First request failed with status %d: %s", w1.Code, w1.Body.String())
+	}
+
+	// Re-send with the epoch in its own field and one extra item.
+	body.Altered = "3"
+	body.Items = []models.TransactionItem{
+		{Action: "Install", Name: "grub2-common", Version: "2.12", Release: "1.el9", Epoch: "1", Arch: "noarch", Repo: "baseos"},
+		{Action: "Install", Name: "grub2-tools", Version: "2.12", Release: "1.el9", Epoch: "1", Arch: "x86_64", Repo: "baseos"},
+	}
+	jsonBody, _ = json.Marshal(body)
+
+	req2, _ := http.NewRequest("POST", "/v1/transactions?replace=true", bytes.NewBuffer(jsonBody))
+	req2.Header.Set("Content-Type", "application/json")
+	w2 := httptest.NewRecorder()
+	router.ServeHTTP(w2, req2)
+	if w2.Code != http.StatusOK {
+		t.Fatalf("Replace request failed with status %d: %s", w2.Code, w2.Body.String())
+	}
+
+	var response map[string]string
+	if err := json.Unmarshal(w2.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+	if response["message"] == "Transaction already exists" {
+		t.Fatal("replace=true was ignored: the server skipped the existing transaction")
+	}
+
+	// The old item list is gone, not merged with the new one.
+	var count int
+	err := db.QueryRow("SELECT COUNT(*) FROM transaction_items WHERE machine_id = $1 AND transaction_id = $2", machineID, transactionID).Scan(&count)
+	if err != nil {
+		t.Fatalf("Failed to query transaction_items: %v", err)
+	}
+	if count != 2 {
+		t.Errorf("Expected 2 transaction items after replace, got %d", count)
+	}
+
+	var version string
+	err = db.QueryRow("SELECT version FROM transaction_items WHERE machine_id = $1 AND transaction_id = $2 AND package = 'grub2-common'", machineID, transactionID).Scan(&version)
+	if err != nil {
+		t.Fatalf("Failed to query grub2-common: %v", err)
+	}
+	if version != "2.12" {
+		t.Errorf("Expected version %q, got %q", "2.12", version)
+	}
+
+	// The transaction row itself is updated too.
+	var altered string
+	err = db.QueryRow("SELECT altered FROM transactions WHERE machine_id = $1 AND transaction_id = $2", machineID, transactionID).Scan(&altered)
+	if err != nil {
+		t.Fatalf("Failed to query transaction: %v", err)
+	}
+	if altered != "3" {
+		t.Errorf("Expected altered %q, got %q", "3", altered)
+	}
+}

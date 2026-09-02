@@ -18,6 +18,24 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.38.0] - 2026-09-01
+
+### Added
+
+- **Transactions**: `POST /v1/transactions` accepts a `replace` query parameter.
+  Without it the endpoint behaves as before, ignoring a transaction the server
+  already holds for that `machine_id`. With `replace=true` the stored
+  transaction is updated and its item list is deleted and rewritten from the
+  payload, inside the same database transaction as the insert.
+
+  This exists because a host cannot otherwise be repaired in place. When an
+  agent upgrade changes how DNF output is parsed, the transaction IDs on the
+  server still match the local history, so the agent's diff finds nothing to
+  send, while the stored package data no longer matches what the agent would
+  send today. The only remedy was `DELETE /admin/assets/:machine_id`, which also
+  discards the host's execution history and asset row. Txlog Agent 1.21.0 sends
+  `replace=true` when run as `txlog build --force`.
+
 ## [1.37.0] - 2026-08-31
 
 ### Added

@@ -23,7 +23,7 @@ import (
 //	@Produce		json
 //	@Param			machine_id	query		string	false	"Machine ID"
 //	@Param			hostname	query		string	false	"Hostname"
-//	@Success		200	{object}	interface{}
+//	@Success		200			{object}	interface{}
 //	@Security		ApiKeyAuth
 //	@Router			/v1/transactions/ids [get]
 func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
@@ -191,6 +191,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 //	@Accept			json
 //	@Produce		json
 //	@Param			Transaction	body		models.Transaction	true	"Transaction data"
+//	@Param			replace		query		bool				false	"Overwrite the transaction and its items if they already exist"
 //	@Success		200			{string}	string				"Transaction created"
 //	@Failure		400			{string}	string				"Invalid transaction data"
 //	@Failure		400			{string}	string				"Invalid JSON input"
@@ -199,6 +200,7 @@ func GetTransactions(database *sql.DB) gin.HandlerFunc {
 //	@Router			/v1/transactions [post]
 func PostTransactions(database *sql.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		replace := c.Query("replace") == "true"
 		body := models.Transaction{}
 		data, err := c.GetRawData()
 		if err != nil {
@@ -233,6 +235,25 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			return
 		}
 
+		// A regular build never re-sends what the server already has, so ignoring
+		// the duplicate is enough. 'txlog build --force' sets replace=true to
+		// rewrite rows an older agent recorded with different parsing.
+		conflictAction := `DO NOTHING`
+		if replace {
+			conflictAction = `DO UPDATE SET
+        hostname = EXCLUDED.hostname,
+        begin_time = EXCLUDED.begin_time,
+        end_time = EXCLUDED.end_time,
+        actions = EXCLUDED.actions,
+        altered = EXCLUDED.altered,
+        "user" = EXCLUDED."user",
+        return_code = EXCLUDED.return_code,
+        release_version = EXCLUDED.release_version,
+        command_line = EXCLUDED.command_line,
+        comment = EXCLUDED.comment,
+        scriptlet_output = EXCLUDED.scriptlet_output`
+		}
+
 		// Insert the rpm transaction
 		result, err := tx.Exec(`
       INSERT INTO transactions (
@@ -241,7 +262,7 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
       )
-      ON CONFLICT (transaction_id, machine_id) DO NOTHING`,
+      ON CONFLICT (transaction_id, machine_id) `+conflictAction,
 			body.TransactionID,
 			body.MachineID,
 			body.Hostname,
@@ -275,6 +296,21 @@ func PostTransactions(database *sql.DB) gin.HandlerFunc {
 			tx.Rollback()
 			c.JSON(http.StatusOK, gin.H{"message": "Transaction already exists"})
 			return
+		}
+
+		// The replace path rewrites the item list rather than adding to it, so the
+		// old rows go first. Outside the len() guard below: a payload with no
+		// items still means the stored ones are gone.
+		if replace {
+			_, err = tx.Exec(
+				`DELETE FROM transaction_items WHERE transaction_id = $1 AND machine_id = $2`,
+				body.TransactionID, body.MachineID)
+			if err != nil {
+				tx.Rollback()
+				slog.Error("Error deleting transaction items: " + err.Error())
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+				return
+			}
 		}
 
 		// Batch insert rpm transaction items

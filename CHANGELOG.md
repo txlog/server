@@ -18,7 +18,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
-## [1.38.0] - 2026-09-01
+## [1.38.0] - 2026-09-02
 
 ### Added
 
@@ -35,6 +35,14 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   send today. The only remedy was `DELETE /admin/assets/:machine_id`, which also
   discards the host's execution history and asset row. Txlog Agent 1.21.0 sends
   `replace=true` when run as `txlog build --force`.
+
+### Fixed
+
+- **Assets**: the **Delete all** button on an asset page did nothing. The
+  confirmation dialog's spinner is rendered by a shared icon template that only
+  takes a CSS class, so it never carried the `id` the click handler looked for.
+  The resulting `null` threw before the `DELETE` request was ever sent, leaving
+  the dialog open with no visible error.
 
 ## [1.37.0] - 2026-08-31
 

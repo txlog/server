@@ -18,6 +18,40 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.38.2] - 2026-11-06
+
+### Changed
+
+- **Build**: Go toolchain bumped from 1.27.2 to 1.27.3 in `go.mod`, the CI
+  workflows and the README setup instructions.
+- **Dependencies**: `github.com/go-jose/go-jose/v4` (used by the OIDC token
+  verification in `go-oidc`) updated from 4.1.5 to 4.1.8, together with
+  indirect Go modules: `golang.org/x/net` 0.62.0, `quic-go` 0.65.0,
+  `gin-contrib/sse` 1.2.0, `go-playground/validator` 10.30.6, `bytedance/sonic`
+  1.15.5 and others.
+- **Frontend**: Tailwind CSS rebuilt with 4.3.4 (from 4.3.3); npm dev
+  dependencies refreshed in `package-lock.json`.
+
+### Security
+
+- **Frontend**: `source-map-js` bumped to 1.2.2, fixing GHSA-68fv-2mgg-jv7q
+  (CVE-2026-93749). It is a transitive dev dependency of `@tailwindcss/cli`,
+  used only at CSS build time and never shipped in the server binary.
+
+## [1.38.1] - 2026-10-15
+
+### Changed
+
+- **Build**: Go toolchain moved from 1.26.6 to 1.27.2 in `go.mod`, the CI
+  workflows and the README setup instructions. `golangci-lint` in CI bumped
+  from v2.13.2 to v2.14.0.
+- **Dependencies**: direct Go modules updated: `go-oidc/v3` 3.21.0,
+  `golang.org/x/oauth2` 0.37.0, `go-ldap/ldap/v3` 3.4.15, `golang-migrate`
+  4.20.1, `swaggo/swag/v2` 2.0.0-rc6 and `golang.org/x/sync` 0.24.0. Indirect
+  modules were refreshed as well (`golang.org/x/crypto` 0.58.0,
+  `golang.org/x/net` 0.61.0, `go-jose/v4` 4.1.5, among others), and the
+  Docker, OpenTelemetry and testify modules dropped out of `go.mod`.
+
 ## [1.38.0] - 2026-09-02
 
 ### Added

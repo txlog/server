@@ -18,6 +18,18 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.39.1] - 2026-11-10
+
+### Changed
+
+- **Dependencies**: direct Go modules `golang.org/x/oauth2` updated to 0.38.0
+  and `golang.org/x/sync` to 0.25.0. Indirect modules refreshed as well:
+  `go-jose/v4` 4.1.9, `golang.org/x/sys` 0.50.0, `golang.org/x/text` 0.44.0,
+  `golang.org/x/mod` 0.43.0, `golang.org/x/arch` 0.33.0, `mongo-driver/v2`
+  2.10.0 and `gin-contrib/sse` 1.2.1.
+- **Frontend**: Tailwind CSS rebuilt with 4.3.5 (from 4.3.4) and
+  `@cloudflare/kumo` updated to 2.18.0 (from 2.17.0).
+
 ## [1.39.0] - 2026-11-10
 
 ### Added

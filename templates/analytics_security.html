@@ -56,11 +56,137 @@
             </div>
         </div>
     </div>
+
+    <div class="mt-6 bg-kumo-control rounded-xl shadow-sm border border-kumo-line overflow-hidden">
+        <div class="border-b border-kumo-line px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+            <h3 class="font-semibold text-lg text-kumo-default">CVE Exposure</h3>
+            <form class="flex items-center gap-2" onsubmit="checkCVE(event)">
+                <input data-kumo-component="Input" id="cve-input" type="text" required autocomplete="off"
+                    aria-label="CVE identifier" placeholder="CVE-2024-2398"
+                    class="border-0 bg-kumo-control text-kumo-default ring ring-kumo-line outline-none focus:outline-none kumo-input-placeholder disabled:text-kumo-disabled h-9 gap-1.5 rounded-lg px-3 text-base focus:ring-kumo-focus/50 focus:ring-[1.5px] w-48 sm:w-72">
+                <button data-kumo-component="Button" id="cve-submit" type="submit"
+                    class="flex shrink-0 items-center justify-center font-medium select-none shadow-xs focus:outline-none focus-visible:ring-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 h-9 px-3 rounded-lg text-base bg-kumo-base text-kumo-default ring ring-kumo-line hover:bg-kumo-tint">Check</button>
+            </form>
+        </div>
+        <div class="p-6 space-y-4">
+            <p id="cve-message" role="status" class="text-sm text-kumo-subtle">Enter a CVE to see which assets are exposed to it.</p>
+            <div id="cve-result" class="hidden space-y-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div>
+                        <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">Vulnerable</div>
+                        <div class="font-bold text-2xl text-kumo-danger" id="cve-count-vulnerable">-</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">Not Vulnerable</div>
+                        <div class="font-bold text-2xl text-kumo-success" id="cve-count-fixed">-</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">Unknown</div>
+                        <div class="font-bold text-2xl text-kumo-warning" id="cve-count-unknown">-</div>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-kumo-subtle uppercase tracking-wider mb-1">Not Affected</div>
+                        <div class="font-bold text-2xl text-kumo-default" id="cve-count-not_affected">-</div>
+                    </div>
+                </div>
+                <div style="max-height:32rem;overflow:auto">
+                    <table class="kumo-table">
+                        <thead>
+                            <tr>
+                                <th>Hostname</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cve-rows"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 {{ template "apexcharts" }}
 <script>
     var securityChart;
+
+    var cveStatuses = {
+        vulnerable: { label: 'Vulnerable', badge: 'bg-kumo-danger/10 text-kumo-danger' },
+        fixed: { label: 'Not vulnerable', badge: 'bg-kumo-success/10 text-kumo-success' },
+        unknown: { label: 'Unknown', badge: 'bg-kumo-warning/10 text-kumo-warning' },
+        not_affected: { label: 'Not affected', badge: 'bg-kumo-tint text-kumo-subtle' }
+    };
+
+    function cveDetails(asset) {
+        switch (asset.status) {
+            case 'vulnerable': return (asset.packages || []).join(', ');
+            case 'fixed': return asset.since ? 'Since ' + new Date(asset.since).toLocaleString() : 'Removal date not recorded';
+            case 'unknown': return 'No OSV data for this operating system';
+            default: return 'No affected version recorded';
+        }
+    }
+
+    // Hostnames come from the agents, so rows are built with textContent.
+    function cveRow(asset) {
+        var row = document.createElement('tr');
+
+        var host = document.createElement('a');
+        host.href = '/assets/' + encodeURIComponent(asset.machine_id);
+        host.className = 'text-kumo-brand hover:underline';
+        host.textContent = asset.hostname;
+
+        var badge = document.createElement('span');
+        badge.className = 'text-xs font-bold px-2 py-0.5 rounded-md whitespace-nowrap ' + cveStatuses[asset.status].badge;
+        badge.textContent = cveStatuses[asset.status].label;
+
+        var details = document.createElement('td');
+        details.className = 'text-kumo-default break-all';
+        details.textContent = cveDetails(asset);
+
+        [host, badge].forEach(function (content) {
+            var cell = document.createElement('td');
+            cell.appendChild(content);
+            row.appendChild(cell);
+        });
+        row.appendChild(details);
+        return row;
+    }
+
+    function checkCVE(event) {
+        event.preventDefault();
+        var cve = document.getElementById('cve-input').value.trim();
+        var message = document.getElementById('cve-message');
+        var result = document.getElementById('cve-result');
+        var submit = document.getElementById('cve-submit');
+
+        submit.disabled = true;
+        result.classList.add('hidden');
+        message.textContent = 'Checking...';
+
+        fetch('/v1/vulnerabilities/' + encodeURIComponent(cve) + '/assets')
+            .then(function (response) {
+                return response.json().then(function (body) {
+                    if (!response.ok) { throw new Error(body.error || 'Request failed.'); }
+                    return body;
+                });
+            })
+            .then(function (data) {
+                Object.keys(cveStatuses).forEach(function (status) {
+                    document.getElementById('cve-count-' + status).textContent =
+                        data.assets.filter(function (a) { return a.status === status; }).length.toLocaleString();
+                });
+                document.getElementById('cve-rows').replaceChildren.apply(
+                    document.getElementById('cve-rows'), data.assets.map(cveRow));
+                message.textContent = data.cve + ' is covered by: ' + data.advisories.join(', ');
+                result.classList.remove('hidden');
+            })
+            .catch(function (error) {
+                message.textContent = error.message;
+            })
+            .finally(function () {
+                submit.disabled = false;
+            });
+    }
 
     function loadSecurity() {
         var theme = chartTheme();

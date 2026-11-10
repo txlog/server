@@ -67,6 +67,19 @@ func ConnectDatabase() {
 	db.SetConnMaxIdleTime(1 * time.Minute)
 	slog.Info("Database: connection pool configured (max_open=25, max_idle=10).")
 
+	// sql.Open does not connect, and PostgreSQL may still be starting. Without
+	// this wait the migrations below are skipped and the server keeps running
+	// on an outdated schema.
+	deadline := time.Now().Add(30 * time.Second)
+	for err := db.Ping(); err != nil; err = db.Ping() {
+		if time.Now().After(deadline) {
+			slog.Error("Database: not ready after 30s: " + err.Error())
+			break
+		}
+		slog.Warn("Database: waiting to be ready: " + err.Error())
+		time.Sleep(time.Second)
+	}
+
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		slog.Error("Failed to create database driver: " + err.Error())

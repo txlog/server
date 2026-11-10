@@ -268,6 +268,7 @@ func main() {
 		v1Group.GET("/items/ids", v1API.GetItemIDs(database.Db))
 		v1Group.GET("/items", v1API.GetItems(database.Db))
 		v1Group.GET("/vulnerabilities", v1API.GetTransactionVulnerabilities(database.Db))
+		v1Group.GET("/vulnerabilities/:cve/assets", v1API.GetCVEAssets(database.Db))
 	}
 
 	if err := r.Run(); err != nil {

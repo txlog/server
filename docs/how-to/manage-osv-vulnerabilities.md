@@ -92,3 +92,22 @@ On the asset details page, each transaction row has a split button. The main "De
 packages, while the dropdown arrow reveals a "Vulnerabilities" option that opens a dedicated modal listing every CVE
 associated with the transaction, including its severity, the affected package, and whether it was fixed or introduced.
 The "Vulnerabilities" option is disabled for transactions that have no associated vulnerability data.
+
+## Check a CVE Across the Fleet
+
+On **Analytics > Security & Mitigations**, enter a CVE in the **CVE Exposure** card. The same data is available from
+`GET /v1/vulnerabilities/{cve}/assets`. Every active asset is listed with one status:
+
+| Status         | Meaning                                                                                  |
+| -------------- | ---------------------------------------------------------------------------------------- |
+| Vulnerable     | An affected package build is still installed. The builds are listed.                     |
+| Not vulnerable | An affected build was installed and is gone. The date is when the last one was removed.  |
+| Unknown        | The operating system has no OSV ecosystem, so the asset cannot be evaluated.             |
+| Not affected   | No affected build was ever recorded for this asset.                                      |
+
+**Not affected** only reflects what reached the DNF history. A package that was installed outside of it, for example
+one baked into a machine image, is not visible to Txlog.
+
+The CVE is matched through the `upstream` field of the OSV advisories (`ALSA`, `RLSA`, `RHSA`), which the OSV update job
+stores. After upgrading to a version with this feature, run the OSV update once (Option 1 above). Until then, every
+lookup reports that no advisory covers the CVE.

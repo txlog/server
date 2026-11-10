@@ -53,6 +53,7 @@ type OSVVuln struct {
 	Details          string              `json:"details,omitempty"`
 	ModifiedAt       time.Time           `json:"modified,omitempty"`
 	Published        time.Time           `json:"published,omitempty"`
+	Upstream         []string            `json:"upstream,omitempty"` // e.g. the CVEs an ALSA/RLSA/RHSA advisory covers
 	Affected         []OSVAffected       `json:"affected,omitempty"`
 	Severity         []OSVSeverity       `json:"severity,omitempty"`
 	DatabaseSpecific OSVDatabaseSpecific `json:"database_specific,omitempty"`

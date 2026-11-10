@@ -24,6 +24,7 @@ type vulnRecord struct {
 	CVSSScore   float64
 	ModifiedAt  *time.Time
 	PublishedAt *time.Time
+	Upstream    []string
 }
 
 type pvRecord struct {
@@ -218,6 +219,7 @@ func updateVulnerabilities(db *sql.DB) {
 						CVSSScore:   cvssScore,
 						ModifiedAt:  modifiedAt,
 						PublishedAt: publishedAt,
+						Upstream:    vuln.Upstream,
 					}
 
 					if targetPkg.Ecosystem != "" {
@@ -272,21 +274,23 @@ func batchUpsertVulnerabilities(db *sql.DB, records map[string]vulnRecord) {
 		idx := 1
 
 		for _, r := range batch {
-			valueParts = append(valueParts, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d)",
-				idx, idx+1, idx+2, idx+3, idx+4, idx+5, idx+6))
-			args = append(args, r.ID, r.Summary, r.Details, r.Severity, r.CVSSScore, r.ModifiedAt, r.PublishedAt)
-			idx += 7
+			valueParts = append(valueParts, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d::text[])",
+				idx, idx+1, idx+2, idx+3, idx+4, idx+5, idx+6, idx+7))
+			args = append(args, r.ID, r.Summary, r.Details, r.Severity, r.CVSSScore, r.ModifiedAt, r.PublishedAt, pq.Array(r.Upstream))
+			idx += 8
 		}
 
+		// COALESCE: the batch fallback carries no upstream and must not erase it.
 		stmt := fmt.Sprintf(`
-			INSERT INTO vulnerabilities (id, summary, details, severity, cvss_score, modified_at, published_at)
+			INSERT INTO vulnerabilities (id, summary, details, severity, cvss_score, modified_at, published_at, upstream)
 			VALUES %s
 			ON CONFLICT (id) DO UPDATE SET
 				summary = EXCLUDED.summary,
 				details = EXCLUDED.details,
 				severity = EXCLUDED.severity,
 				cvss_score = EXCLUDED.cvss_score,
-				modified_at = EXCLUDED.modified_at
+				modified_at = EXCLUDED.modified_at,
+				upstream = COALESCE(EXCLUDED.upstream, vulnerabilities.upstream)
 		`, strings.Join(valueParts, ", "))
 
 		_, err := db.Exec(stmt, args...)

@@ -683,6 +683,67 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/vulnerabilities/{cve}/assets": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Lists active assets as vulnerable, fixed (with the date the last affected build was removed), not_affected (no affected build recorded) or unknown (operating system without OSV data)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "vulnerabilities"
+                ],
+                "summary": "Get the exposure of every active asset to a CVE",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "CVE identifier, e.g. CVE-2024-2398",
+                        "name": "cve",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/v1.CVEAssetsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid CVE identifier",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "CVE not found in the OSV data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -960,6 +1021,51 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.CVEAsset": {
+            "type": "object",
+            "properties": {
+                "hostname": {
+                    "type": "string"
+                },
+                "machine_id": {
+                    "type": "string"
+                },
+                "packages": {
+                    "description": "affected builds still installed",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "since": {
+                    "description": "when the last affected build was removed",
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "v1.CVEAssetsResponse": {
+            "type": "object",
+            "properties": {
+                "advisories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "assets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/v1.CVEAsset"
+                    }
+                },
+                "cve": {
                     "type": "string"
                 }
             }

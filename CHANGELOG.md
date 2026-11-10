@@ -18,6 +18,24 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.39.2] - 2026-11-10
+
+### Fixed
+
+- **Transactions**: `GET /v1/transactions/ids` no longer lists transactions
+  stored with the epoch as end time. An agent records a transaction that way
+  when dnf is still running it or interrupted it, and until now never sent it
+  again, so its package changes stayed missing and could leave an asset
+  reported with the wrong builds installed (for example, in the **CVE
+  Exposure** card). Leaving these transactions out makes the agent send them
+  again until dnf records their end. Agents released with this fix also parse
+  the items of these transactions correctly. A transaction that dnf aborted
+  never gets an end time, so it is sent again on every agent run.
+- **Vulnerabilities**: the list of vulnerabilities fixed or introduced by a
+  transaction counts only install and removal actions. Items such as
+  `Reason Change`, which only mark an installed build, are no longer counted
+  as introduced.
+
 ## [1.39.1] - 2026-11-10
 
 ### Changed

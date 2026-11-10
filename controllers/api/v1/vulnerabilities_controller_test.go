@@ -33,11 +33,18 @@ func cveTestRequest(db *sql.DB, cve string) *httptest.ResponseRecorder {
 	return w
 }
 
-func cveTestCleanup(db *sql.DB) {
-	db.Exec("DELETE FROM transaction_items WHERE machine_id LIKE 'cve-test-%'")
-	db.Exec("DELETE FROM transactions WHERE machine_id LIKE 'cve-test-%'")
-	db.Exec("DELETE FROM assets WHERE machine_id LIKE 'cve-test-%'")
-	db.Exec("DELETE FROM vulnerabilities WHERE id LIKE 'CVETEST-%'") // cascades to package_vulnerabilities
+func cveTestCleanup(t *testing.T, db *sql.DB) {
+	t.Helper()
+	for _, stmt := range []string{
+		"DELETE FROM transaction_items WHERE machine_id LIKE 'cve-test-%'",
+		"DELETE FROM transactions WHERE machine_id LIKE 'cve-test-%'",
+		"DELETE FROM assets WHERE machine_id LIKE 'cve-test-%'",
+		"DELETE FROM vulnerabilities WHERE id LIKE 'CVETEST-%'", // cascades to package_vulnerabilities
+	} {
+		if _, err := db.Exec(stmt); err != nil {
+			t.Errorf("cleanup %q: %v", stmt, err)
+		}
+	}
 }
 
 // cveTestAsset registers an asset whose items happen one day apart per
@@ -82,8 +89,8 @@ func TestGetCVEAssets_UnknownCVE(t *testing.T) {
 func TestGetCVEAssets_Status(t *testing.T) {
 	db := setupReportsTestDB(t)
 	defer db.Close()
-	cveTestCleanup(db)
-	defer cveTestCleanup(db)
+	cveTestCleanup(t, db)
+	defer cveTestCleanup(t, db)
 
 	if _, err := db.Exec(`INSERT INTO vulnerabilities (id, upstream) VALUES ('CVETEST-1', $1)`,
 		pq.Array([]string{cveTestID})); err != nil {

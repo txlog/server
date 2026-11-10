@@ -18,6 +18,32 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.39.0] - 2026-11-10
+
+### Added
+
+- **Vulnerabilities**: a CVE can be checked across the fleet. The new
+  `GET /v1/vulnerabilities/{cve}/assets` endpoint lists the advisories that
+  cover the CVE and every active asset with one status: `vulnerable` (with the
+  affected builds still installed), `fixed` (with the date the last affected
+  build was removed), `unknown` (operating system without OSV data) or
+  `not_affected`. Each build is evaluated on its own, so installonly packages
+  such as the kernel are handled correctly. The same data is shown in the new
+  **CVE Exposure** card on **Analytics > Security & Mitigations**.
+- **OSV**: the update job stores the `upstream` identifiers (usually CVEs) of
+  each distribution advisory (`ALSA`, `RLSA`, `RHSA`) in a new
+  `vulnerabilities.upstream` column, which is what makes the lookup by CVE
+  possible. A new index on `package_vulnerabilities (vulnerability_id)` speeds
+  up the lookup. Run the OSV update once after upgrading; until then every CVE
+  lookup reports that no advisory covers it.
+
+### Fixed
+
+- **Database**: the server now waits up to 30 seconds for PostgreSQL to accept
+  connections before running migrations. Previously, when the database was
+  still starting, the migrations were skipped and the server kept running on an
+  outdated schema.
+
 ## [1.38.2] - 2026-11-06
 
 ### Changed

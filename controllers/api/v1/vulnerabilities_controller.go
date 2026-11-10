@@ -183,6 +183,10 @@ func GetTransactionVulnerabilities(database *sql.DB) gin.HandlerFunc {
 			JOIN vulnerabilities v ON v.id = pv.vulnerability_id
 			WHERE ti.machine_id = $1
 			  AND ti.transaction_id = $2
+			  -- Only package changes count: an action such as "Reason Change"
+			  -- names an installed build without installing or removing it.
+			  AND ti.action IN ('Install', 'Upgrade', 'Downgrade', 'Reinstall', 'installed', 'upgrade',
+			                    'Removed', 'Upgraded', 'Downgraded', 'Obsoleted', 'removed')
 			ORDER BY v.cvss_score DESC, v.id ASC`,
 			machineID,
 			transactionID,

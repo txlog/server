@@ -625,7 +625,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get saved transactions IDs for a host",
+                "description": "Get saved transactions IDs for a host. Transactions stored without an end time (still running or interrupted when sent) are left out, so the agent sends them again.",
                 "consumes": [
                     "application/json"
                 ],

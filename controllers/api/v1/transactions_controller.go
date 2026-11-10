@@ -17,7 +17,7 @@ import (
 // GetTransactionIDs Get the saved transactions IDs for a host
 //
 //	@Summary		Get saved transactions IDs for a host
-//	@Description	Get saved transactions IDs for a host
+//	@Description	Get saved transactions IDs for a host. Transactions stored without an end time (still running or interrupted when sent) are left out, so the agent sends them again.
 //	@Tags			transactions
 //	@Accept			json
 //	@Produce		json
@@ -60,6 +60,13 @@ func GetTransactionIDs(database *sql.DB) gin.HandlerFunc {
       FROM public.transactions
       WHERE machine_id = $1
       AND hostname = $2
+      -- An agent records a transaction that was still running, or that dnf
+      -- interrupted, with the epoch as its end time. Leaving it out of the
+      -- list makes the agent send it again until dnf records its end.
+      -- ponytail: a transaction dnf aborted never gets an end time, so it is
+      -- re-sent on every run (one request each); dnf reports a running one the
+      -- same way ("Failure: 1"), so the two cannot be told apart here.
+      AND (end_time IS NULL OR end_time >= '1971-01-01')
       ORDER BY transaction_id ASC`,
 			machineID,
 			hostname,

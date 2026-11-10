@@ -168,6 +168,43 @@ func TestGetTransactionIDs_ReturnsIDs(t *testing.T) {
 	}
 }
 
+// TestGetTransactionIDs_SkipsIncomplete checks that a transaction stored with
+// the epoch as end time (sent while dnf was still running it) is left out, so
+// the agent sends it again.
+func TestGetTransactionIDs_SkipsIncomplete(t *testing.T) {
+	db := setupTransactionsTestDB(t)
+	defer db.Close()
+	defer cleanupTransactionsTestData(t, db)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.New()
+	router.GET("/v1/transactions/ids", GetTransactionIDs(db))
+
+	machineID := "tx-test-machine-incomplete"
+	hostname := "tx-test-hostname"
+	for id, end := range map[int]string{1: "2026-05-05T17:16:20Z", 2: "1970-01-01T00:00:00Z"} {
+		_, err := db.Exec(`
+			INSERT INTO transactions (transaction_id, machine_id, hostname, end_time, actions, altered, "user", return_code, release_version, command_line, comment, scriptlet_output)
+			VALUES ($1, $2, $3, $4, 'Install', '1', 'root', '0', '10', '-y upgrade', '', '')`,
+			id, machineID, hostname, end)
+		if err != nil {
+			t.Fatalf("Failed to insert test transaction %d: %v", id, err)
+		}
+	}
+
+	req, _ := http.NewRequest("GET", "/v1/transactions/ids?machine_id="+machineID+"&hostname="+hostname, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	var response []int
+	if err := json.Unmarshal(w.Body.Bytes(), &response); err != nil {
+		t.Fatalf("Failed to unmarshal response: %v. Body: %s", err, w.Body.String())
+	}
+	if len(response) != 1 || response[0] != 1 {
+		t.Errorf("Expected only the complete transaction [1], got %v", response)
+	}
+}
+
 func TestGetTransactionIDs_QueryParams(t *testing.T) {
 	db := setupTransactionsTestDB(t)
 	defer db.Close()

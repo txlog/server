@@ -24,6 +24,8 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 - **Build**: Go toolchain bumped from 1.27.3 to 1.27.4 in `go.mod`, the CI
   workflows and the README setup instructions.
+- **Dependencies**: `golang.org/x/crypto` updated from 0.58.0 to 0.59.0 and
+  `@cloudflare/kumo` from 2.18.0 to 2.18.1.
 
 ## [1.39.2] - 2026-11-10
 

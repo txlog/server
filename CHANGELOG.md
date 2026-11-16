@@ -18,6 +18,13 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 `Security` in case of vulnerabilities.
 -->
 
+## [1.39.3] - 2026-11-16
+
+### Changed
+
+- **Build**: Go toolchain bumped from 1.27.3 to 1.27.4 in `go.mod`, the CI
+  workflows and the README setup instructions.
+
 ## [1.39.2] - 2026-11-10
 
 ### Fixed
